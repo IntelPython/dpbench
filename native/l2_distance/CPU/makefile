@@ -7,7 +7,7 @@
 
 # ==============================================================================
 #  Content:
-#      dbscan formula example makefile
+#      Black-Scholes formula example makefile
 # ==============================================================================
 #
 #    Parameters of this makefile:
@@ -20,7 +20,9 @@
 #      ACC=ha, la, ep <default> : meaning math function accuracy level
 # ==============================================================================
 
-SRC:= main.cpp
+SRC:=                      \
+       data_gen.cpp          \
+       main.cpp
 
 
 # ==============================================================================
@@ -30,10 +32,12 @@ CC          := icc
 QOPT        :=
 FQOPT       :=f
 EQCOLON     :="="
-TARGET      := dbscan
+TARGET      := l2_distance
 
 CFLAGS      += -g -O3
 CFLAGS      += -qopt-report
+#CFLAGS      += -qopt-report-phase$(EQCOLON)vec
+#CFLAGS      += -$(QOPT)restrict
 CFLAGS      += -qopenmp
 CFLAGS      += -I./
 
@@ -75,18 +79,23 @@ ifeq ($(ACC),ep)
     CFLAGS += -$(FQOPT)imf-precision$(EQCOLON)low -$(FQOPT)imf-domain-exclusion$(EQCOLON)31 -D_VML_ACCURACY_EP_
 endif
 
+#TARGET := $(TARGET)_$(ACC)
+
 # ==============================================================================
 # ############## Define make rules #############################################
 # ==============================================================================
 
-all: dbscan
+all: l2-distance
 
-dbscan: $(TARGET)
+nomkl: l2_distance
+	./$(TARGET) 1024
 
-$(TARGET): $(SRC)
+l2-distance: $(TARGET)
+
+$(TARGET): $(SRC) l2_distance.cpp
 	$(CC) $(CPPFLAGS) $(CFLAGS) $^ -o $(TARGET)
 
 clean:
-	rm -rf *.o *.out *.optrpt *.yaml *~ $(foreach acc,ha la ep,dbscan)
+	rm -rf *.o *.out *.optrpt *.yaml *~ l2_distance
 
 .PHONY: all clean

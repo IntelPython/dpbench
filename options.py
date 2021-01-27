@@ -103,7 +103,7 @@ class workloads():
                     all_workloads.pairwise_distance.value:{'numba':"pairwise_distance.py",
                                                            'kernel':"pairwise_distance_kernel.py"},
                     all_workloads.pca.value:{'numba':"pca.py",
-                                             'kernel':"pca_kernel.py"},
+                                             'kernel':"pca.py"},
                     all_workloads.pygbm.value:{'numba':"pygbm.py",
                                                'kernel':"pygbm.py"},
                     all_workloads.rambo.value:{'numba':"rambo.py",

@@ -389,6 +389,29 @@ def run_native(opts):
 
             util.chdir(native_dir)
 
+def run_native_dpcpp(opts):
+    # cd to native dpcpp folder
+    # loop over list of applications
+    # if option is CPU or all
+    # run native CPU
+    # if option is GPU or all
+    # run native GPU
+    # cd back to root folder
+    util.chdir("native_dpcpp")
+
+    native_dir = os.getcwd()
+
+    for app, cmds in opts.wls.wl_list.items():
+        if cmds['execute'] and util.chdir(app):
+            app_dir = os.getcwd()
+            if opts.platform == options.platform.cpu or opts.platform == options.platform.all:
+                run_native_CPU(app, cmds, opts.analysis)
+                util.chdir(app_dir)
+
+            if opts.platform == options.platform.gpu or opts.platform == options.platform.all:
+                run_native_GPU(app, cmds, opts.analysis)
+
+            util.chdir(native_dir)            
 
 def run_numba(opts):
     # cd to numba folder
@@ -414,6 +437,30 @@ def run_numba(opts):
 
             util.chdir(numba_dir)
 
+def run_dpnp(opts):
+    # cd to dpnp folder
+    # loop over list of applications
+    # if option is CPU or all
+    # run native CPU
+    # if option is GPU or all
+    # run native GPU
+    # cd back to root folder
+    util.chdir("dpnp")
+
+    numba_dir = os.getcwd()
+
+    for app, cmds in opts.wls.wl_list.items():
+        if cmds['execute'] and util.chdir(app):
+            app_dir = os.getcwd()
+            if opts.platform == options.platform.cpu or opts.platform == options.platform.all:
+                run_numba_CPU(app, cmds, opts.analysis)
+                util.chdir(app_dir)
+
+            if opts.platform == options.platform.gpu or opts.platform == options.platform.all:
+                run_numba_GPU(app, cmds, opts.analysis)
+
+            util.chdir(numba_dir)
+            
 
 def run_scikit_learn(opts):
     # cd to scikit_learn folder
@@ -539,6 +586,14 @@ def run(opts):
         run_numba(opts)
         util.chdir(ref_cwd)
 
+    if opts.impl == options.implementation.dpnp or opts.impl == options.implementation.all:
+        run_dpnp(opts)
+        util.chdir(ref_cwd)
+
+    if opts.impl == options.implementation.native_dpcpp or opts.impl == options.implementation.all:
+        run_native_dpcpp(opts)
+        util.chdir(ref_cwd)
+        
     if opts.impl == options.implementation.scikit_learn or opts.impl == options.implementation.all:
         run_scikit_learn(opts)
         util.chdir(ref_cwd)
@@ -547,6 +602,6 @@ def run(opts):
         run_daal4py(opts)
         util.chdir(ref_cwd)
 
-    # if opts.impl == options.implementation.native_optimised or opts.impl == options.implementation.all:
-    #     run_native_optimised(opts)
-    #     util.chdir(ref_cwd)        
+    if opts.impl == options.implementation.native_optimised or opts.impl == options.implementation.all:
+        run_native_optimised(opts)
+        util.chdir(ref_cwd)        

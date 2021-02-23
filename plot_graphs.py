@@ -128,14 +128,16 @@ def check_envvars_tools(opts):
 def plot_efficiency_graph(all_plot_data):
     df = pd.DataFrame.from_dict(all_plot_data, orient='index')
 
-    df['cpu_efficiency'] = (df['numba_cpu']/df['native_cpu'])*100.00
-    df['gpu_efficiency'] = (df['numba_gpu']/df['native_gpu'])*100.00
+    df['CPU'] = (df['numba_cpu']/df['native_cpu'])*100.00
+    df['GPU'] = (df['numba_gpu']/df['native_gpu'])*100.00
 
     df.drop(columns=['native_cpu', 'native_gpu', 'numba_cpu', 'numba_gpu'], inplace=True)
 
     bar_chart = df.plot.bar(rot=45,fontsize=10)
+    #bar_chart.legend(loc='upper right')
     bar_chart.set_ylabel('Efficiency in percentage',fontsize=10)
     bar_chart.set_xlabel('Benchmark',fontsize=10)
+    bar_chart.set_title('Efficiency of Numba execution relative to OpenMP execution on CPU and GPU',fontsize=10)
     fig = bar_chart.get_figure()
     fig_filename = "Efficiency_graph.pdf"
     fig.savefig(fig_filename,bbox_inches="tight")
@@ -143,14 +145,16 @@ def plot_efficiency_graph(all_plot_data):
 def plot_speedup_graph(all_plot_data):
     df = pd.DataFrame.from_dict(all_plot_data, orient='index')
 
-    df['native_speedup'] = (df['native_cpu']/df['native_gpu'])*100.00
-    df['numba_speedup'] = (df['numba_cpu']/df['numba_gpu'])*100.00
+    df['OpenMP'] = (df['native_cpu']/df['native_gpu'])*100.00
+    df['Numba'] = (df['numba_cpu']/df['numba_gpu'])*100.00
 
     df.drop(columns=['native_cpu', 'native_gpu', 'numba_cpu', 'numba_gpu'], inplace=True)
 
     bar_chart = df.plot.bar(rot=45,fontsize=10)
+    #bar_chart.legend(loc='upper right')
     bar_chart.set_ylabel('Speedup in percentage',fontsize=10)
     bar_chart.set_xlabel('Benchmark',fontsize=10)
+    bar_chart.set_title('Speedup of GPU execution over CPU execution for Numba and OpenMP',fontsize=10)
     fig = bar_chart.get_figure()
     fig_filename = "Speedup_graph.pdf"
     fig.savefig(fig_filename,bbox_inches="tight")

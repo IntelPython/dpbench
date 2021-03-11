@@ -20,7 +20,7 @@ ADVISOR_GPU_FLOP_CMD = ["advixe-cl", "--collect=tripcounts", "--profile-gpu",
                         "--project-dir=roofline", "--search-dir src:r=.", "--flop", "--no-trip-counts"]
 ADVISOR_GPU_ROOFLINE_CMD = ["advixe-cl", "--report=roofline", "--gpu", "--project-dir=roofline",
                             "--report-output=roofline/roofline.html"]
-ADVISOR_GPU_METRICS_CMD = ["advixe-python", os.environ['ONEAPI_ROOT'] + "/advisor/latest" + "/pythonapi/examples/survey_gpu.py",
+ADVISOR_GPU_METRICS_CMD = ["advixe-python", os.environ['A21_SDK_ROOT'] + "/advisor/latest" + "/pythonapi/examples/survey_gpu.py",
                            "roofline"]
 
 # advixe-python /opt/intel/inteloneapi/advisor/latest/pythonapi/examples/survey_gpu.py roofline > GPU_Metrics.txt

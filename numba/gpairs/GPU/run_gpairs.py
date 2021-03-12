@@ -15,7 +15,6 @@ import dpctl
 
 def run_gpairs(d_x1, d_y1, d_z1, d_w1, d_x2, d_y2, d_z2, d_w2, d_rbins_squared):
     blocks = 512
-    threads = 512
 
     result = np.zeros_like(d_rbins_squared)[:-1]
     result = result.astype(np.float32)

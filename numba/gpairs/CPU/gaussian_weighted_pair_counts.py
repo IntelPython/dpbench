@@ -362,8 +362,6 @@ def count_weighted_pairs_3d_cpu(
                 if k <= 0:
                     break
 
-    return result
-
 
 # @njit()
 # def count_weighted_pairs_3d_cpu_noncuml_pairsonly(

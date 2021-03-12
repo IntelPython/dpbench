@@ -297,10 +297,47 @@ def count_weighted_pairs_3d_intel(
                 # - could reenable later when it's supported (~April 2020)
                 # - could work around this to avoid atomics, which would perform better anyway
                 #cuda.atomic.add(result, k-1, wprod)
+                numba_dppy.atomic.add(result, k-1, wprod)
                 k = k-1
                 if k <= 0:
                     break
 
+@numba_dppy.kernel
+def count_weighted_pairs_3d_intel_ver2(
+        x1, y1, z1, w1, x2, y2, z2, w2, rbins_squared, result):
+    """Naively count Npairs(<r), the total number of pairs that are separated
+    by a distance less than r, for each r**2 in the input rbins_squared.
+    """
+
+    i = numba_dppy.get_global_id(0)
+    nbins = rbins_squared.shape[0]
+
+    px = x1[i]
+    py = y1[i]
+    pz = z1[i]
+    pw = w1[i]
+    for j in range(n2):
+        qx = x2[j]
+        qy = y2[j]
+        qz = z2[j]
+        qw = w2[j]
+        dx = px-qx
+        dy = py-qy
+        dz = pz-qz
+        wprod = pw*qw
+        dsq = dx*dx + dy*dy + dz*dz
+
+        k = nbins-1
+        while dsq <= rbins_squared[k]:
+            # disabled for now since it's not supported currently
+            # - could reenable later when it's supported (~April 2020)
+            # - could work around this to avoid atomics, which would perform better anyway
+            #cuda.atomic.add(result, k-1, wprod)
+            numba_dppy.atomic.add(result, k-1, wprod)
+            k = k-1
+            if k <= 0:
+                break
+                
 # def count_weighted_pairs_3d_cpu_mp(
 #         x1, y1, z1, w1, x2, y2, z2, w2, rbins_squared, result):
 

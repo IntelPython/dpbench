@@ -6,7 +6,7 @@ This repository contains a set of benchmarks that are used for evaluating the pe
 * __native_dpcpp__ : Contains DPC++ implementations of the benchmarks.
 * __dpnp__ : Contains dpnp implementations for a subset of the benchmarks
 
-In addition to the implementations, this repository contains a set of Python scripts to exercise the implementations. These Python scripts provide mechanisms to the user to build and run benchmark programs. The Python scripts can plot bar graphs showing the performance throughput of the benchmarks for the executed implmentations.
+In addition to the implementations, this repository contains a set of Python scripts to exercise the implementations. These Python scripts provide mechanisms to the user to build and run benchmark programs. The Python scripts can plot bar graphs showing the performance throughput of the benchmarks for the executed implementations.
 
 The primary interface to running the benchmarks is `automate_run.py` script. It accepts the following options:
 * _-r, --run_ : "execute" the benchmark/s or "plot" performance data to generate graphs (Default: "all" if option unspecified. Runs both)
@@ -14,7 +14,7 @@ The primary interface to running the benchmarks is `automate_run.py` script. It 
 * _-i, --impl_ : execute "native" or "numba" or "dpnp" or "native_dpcpp" implementation (Default: "all" if option unspecified. Runs both implementations)
 * _-k_ : execute dppy.kernel implementation if available. This option can be used only if "-i" is set to "numba"
 * _-p, --platform_ : execute "cpu" or "gpu" implementation (Default: "all" if option unspecified. Runs both)
-* _-a, --analysis_ : selects the type of execution. Currently we support four analysis options. "test" runs the benchmark with the smallest input and is suitable for testing the functionality of the benchmark. "perf" runs the benchmark on varying inputs and generates performance data. "vtune" and "advisor" run the benchmark with Intel VTune and Intel Advisor profiling to tools
+* _-a, --analysis_ : selects the type of execution. Currently we support four analysis options. "test" runs the benchmark with the smallest input and is suitable for testing the functionality of the benchmark. "perf" runs the benchmark on varying inputs and generates performance data. "vtune" and "advisor" run the benchmark with Intel VTune and Intel Advisor profiling tools
 
 `python automate_run.py -h` specifies the list of options and the arguments that can be provided to them.
 

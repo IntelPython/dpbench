@@ -7,18 +7,18 @@ VTUNE_THREADING_CMD = ["vtune", "-run-pass-thru=--no-altstack", "-collect=thread
 VTUNE_GPU_OFFLOAD_CMD = ["vtune", "-run-pass-thru=--no-altstack", "-collect=gpu-offload", "-result-dir=vtune_dir"]
 VTUNE_GPU_HOTSPOTS_CMD = ["vtune", "-run-pass-thru=--no-altstack", "-collect=gpu-hotspots", "-result-dir=vtune_hotspots_dir"]
 
-ADVISOR_SURVEY_CMD = ["advixe-cl", "--collect=survey", "-run-pass-thru=--no-altstack", "-project-dir=roofline",
+ADVISOR_SURVEY_CMD = ["advisor", "--collect=survey", "-run-pass-thru=--no-altstack", "-project-dir=roofline",
                       "--search-dir", "src:r=."]
-ADVISOR_FLOP_CMD = ["advixe-cl", "--collect=tripcounts", "--project-dir=roofline", "--search-dir src:r=.", "--flop",
+ADVISOR_FLOP_CMD = ["advisor", "--collect=tripcounts", "--project-dir=roofline", "--search-dir src:r=.", "--flop",
                     "--no-trip-counts"]
-ADVISOR_ROOFLINE_CMD = ["advixe-cl", "--report=roofline", "--project-dir=roofline",
+ADVISOR_ROOFLINE_CMD = ["advisor", "--report=roofline", "--project-dir=roofline",
                         "--report-output=roofline/roofline.html"]
 
-ADVISOR_GPU_SURVEY_CMD = ["advixe-cl", "--collect=survey", "--profile-gpu", "-run-pass-thru=--no-altstack",
+ADVISOR_GPU_SURVEY_CMD = ["advisor", "--collect=survey", "--profile-gpu", "-run-pass-thru=--no-altstack",
                           "-project-dir=roofline", "--search-dir", "src:r=."]
-ADVISOR_GPU_FLOP_CMD = ["advixe-cl", "--collect=tripcounts", "--profile-gpu",
+ADVISOR_GPU_FLOP_CMD = ["advisor", "--collect=tripcounts", "--profile-gpu",
                         "--project-dir=roofline", "--search-dir src:r=.", "--flop", "--no-trip-counts"]
-ADVISOR_GPU_ROOFLINE_CMD = ["advixe-cl", "--report=roofline", "--gpu", "--project-dir=roofline",
+ADVISOR_GPU_ROOFLINE_CMD = ["advisor", "--report=roofline", "--gpu", "--project-dir=roofline",
                             "--report-output=roofline/roofline.html"]
 
 if 'A21_SDK_ROOT' in os.environ:

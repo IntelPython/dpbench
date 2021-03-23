@@ -20,8 +20,10 @@ ADVISOR_GPU_FLOP_CMD = ["advixe-cl", "--collect=tripcounts", "--profile-gpu",
                         "--project-dir=roofline", "--search-dir src:r=.", "--flop", "--no-trip-counts"]
 ADVISOR_GPU_ROOFLINE_CMD = ["advixe-cl", "--report=roofline", "--gpu", "--project-dir=roofline",
                             "--report-output=roofline/roofline.html"]
-ADVISOR_GPU_METRICS_CMD = ["advixe-python", os.environ['A21_SDK_ROOT'] + "/advisor/latest" + "/pythonapi/examples/survey_gpu.py",
-                           "roofline"]
+
+if 'A21_SDK_ROOT' in os.environ:
+    ADVISOR_GPU_METRICS_CMD = ["advixe-python", os.environ['A21_SDK_ROOT'] + "/advisor/latest" + "/pythonapi/examples/survey_gpu.py",
+                               "roofline"]
 
 # advixe-python /opt/intel/inteloneapi/advisor/latest/pythonapi/examples/survey_gpu.py roofline > GPU_Metrics.txt
 
@@ -111,7 +113,7 @@ class workloads():
                     all_workloads.rambo.value:{'numba':"rambo.py",
                                                'kernel':"rambo_kernel.py"},
                     all_workloads.gpairs.value:{'numba':"run_gpairs.py",
-                                                'kernel':"run_gpairs.py"},                    
+                                                'kernel':"run_gpairs.py"},
         }
 
         self.wl_list = {
@@ -141,7 +143,7 @@ class workloads():
                 'NUMBA_CPU_TEST_CMD': ["python", wl_names[all_workloads.dbscan.value]['numba'], "--steps", "1"],
                 'NUMBA_CPU_PERF_CMD': ["python", wl_names[all_workloads.dbscan.value]['numba']],
                 'NUMBA_CPU_VTUNE_CMD': ["python", wl_names[all_workloads.dbscan.value]['numba'], "--steps", "1", "--size", str(2 ** 13)],
-                'NUMBA_CPU_ADVISOR_CMD': ["python", wl_names[all_workloads.dbscan.value]['numba'], "--steps", "1", "--size", str(2 ** 13)],                
+                'NUMBA_CPU_ADVISOR_CMD': ["python", wl_names[all_workloads.dbscan.value]['numba'], "--steps", "1", "--size", str(2 ** 13)],
                 'SCIKIT_LEARN_TEST_CMD': ["python", "dbscan.py", "--steps", "1"],
                 'SCIKIT_LEARN_PERF_CMD': ["python", "dbscan.py"],
                 'SCIKIT_LEARN_VTUNE_CMD': ["python", "dbscan.py", "--steps", "1", "--size", str(2 ** 13)],
@@ -169,7 +171,7 @@ class workloads():
                 'NUMBA_CPU_TEST_CMD': ["python", wl_names[all_workloads.kmeans.value]['numba'], "--steps", "1"],
                 'NUMBA_CPU_PERF_CMD': ["python", wl_names[all_workloads.kmeans.value]['numba']],
                 'NUMBA_CPU_VTUNE_CMD': ["python", wl_names[all_workloads.kmeans.value]['numba'], "--steps", "1", "--size", str(2**20)],
-                'NUMBA_CPU_ADVISOR_CMD': ["python", wl_names[all_workloads.kmeans.value]['numba'], "--steps", "1", "--size", str(2**20)],                
+                'NUMBA_CPU_ADVISOR_CMD': ["python", wl_names[all_workloads.kmeans.value]['numba'], "--steps", "1", "--size", str(2**20)],
                 'SCIKIT_LEARN_TEST_CMD': ["python", "kmeans.py", "--steps", "1"],
                 'SCIKIT_LEARN_PERF_CMD': ["python", "kmeans.py"],
                 'SCIKIT_LEARN_VTUNE_CMD': ["python", "kmeans.py", "--steps", "1", "--size", str(2**20)],
@@ -197,7 +199,7 @@ class workloads():
                 'NUMBA_CPU_TEST_CMD': ["python", wl_names[all_workloads.knn.value]['numba'], "--steps", "1"],
                 'NUMBA_CPU_PERF_CMD': ["python", wl_names[all_workloads.knn.value]['numba']],
                 'NUMBA_CPU_VTUNE_CMD': ["python", wl_names[all_workloads.knn.value]['numba'], "--steps", "1", "--size", str(2 ** 10)],
-                'NUMBA_CPU_ADVISOR_CMD': ["python", wl_names[all_workloads.knn.value]['numba'], "--steps", "1", "--size", str(2 ** 10)],                
+                'NUMBA_CPU_ADVISOR_CMD': ["python", wl_names[all_workloads.knn.value]['numba'], "--steps", "1", "--size", str(2 ** 10)],
                 'SCIKIT_LEARN_TEST_CMD': ["python", "knn.py", "--steps", "1"],
                 'SCIKIT_LEARN_PERF_CMD': ["python", "knn.py"],
                 'SCIKIT_LEARN_VTUNE_CMD': ["python", "knn.py", "--steps", "1", "--size", str(2 ** 10)],
@@ -225,7 +227,7 @@ class workloads():
                 'NUMBA_CPU_TEST_CMD': ["python", wl_names[all_workloads.l2_distance.value]['numba'], "--steps", "1"],
                 'NUMBA_CPU_PERF_CMD': ["python", wl_names[all_workloads.l2_distance.value]['numba']],
                 'NUMBA_CPU_VTUNE_CMD': ["python", wl_names[all_workloads.l2_distance.value]['numba'], "--steps", "1", "--size", str(2**25)],
-                'NUMBA_CPU_ADVISOR_CMD': ["python", wl_names[all_workloads.l2_distance.value]['numba'], "--steps", "1", "--size", str(2**25)],                
+                'NUMBA_CPU_ADVISOR_CMD': ["python", wl_names[all_workloads.l2_distance.value]['numba'], "--steps", "1", "--size", str(2**25)],
                 'NATIVE_TEST_CMD': ["./l2_distance", "1"],
                 'NATIVE_PERF_CMD': ["./l2_distance"],
                 'NATIVE_VTUNE_CMD': ["./l2_distance", "1", str(2**25)],
@@ -245,7 +247,7 @@ class workloads():
                 'NUMBA_CPU_TEST_CMD': ["python", wl_names[all_workloads.pairwise_distance.value]['numba'], "--steps", "1"],
                 'NUMBA_CPU_PERF_CMD': ["python", wl_names[all_workloads.pairwise_distance.value]['numba']],
                 'NUMBA_CPU_VTUNE_CMD': ["python", wl_names[all_workloads.pairwise_distance.value]['numba'], "--steps", "1", "--size", str(2**13)],
-                'NUMBA_CPU_ADVISOR_CMD': ["python", wl_names[all_workloads.pairwise_distance.value]['numba'], "--steps", "1", "--size", str(2**13)],                
+                'NUMBA_CPU_ADVISOR_CMD': ["python", wl_names[all_workloads.pairwise_distance.value]['numba'], "--steps", "1", "--size", str(2**13)],
                 'NATIVE_TEST_CMD': ["./pairwise_distance", "1"],
                 'NATIVE_PERF_CMD': ["./pairwise_distance"],
                 'NATIVE_VTUNE_CMD': ["./pairwise_distance", "1", str(2**13)],
@@ -261,7 +263,7 @@ class workloads():
                 'NUMBA_CPU_TEST_CMD': ["python", wl_names[all_workloads.pca.value]['numba'], "--steps", "1"],
                 'NUMBA_CPU_PERF_CMD': ["python", wl_names[all_workloads.pca.value]['numba']],
                 'NUMBA_CPU_VTUNE_CMD': ["python", wl_names[all_workloads.pca.value]['numba'], "--steps", "1", "--size", str(2**15)],
-                'NUMBA_CPU_ADVISOR_CMD': ["python", wl_names[all_workloads.pca.value]['numba'], "--steps", "1", "--size", str(2**15)],                
+                'NUMBA_CPU_ADVISOR_CMD': ["python", wl_names[all_workloads.pca.value]['numba'], "--steps", "1", "--size", str(2**15)],
                 'SCIKIT_LEARN_TEST_CMD': ["python", "pca.py", "--steps", "1"],
                 'SCIKIT_LEARN_PERF_CMD': ["python", "pca.py"],
                 'SCIKIT_LEARN_VTUNE_CMD': ["python", "pca.py", "--steps", "1", "--size", str(2**15)],
@@ -289,7 +291,7 @@ class workloads():
                 'NUMBA_CPU_TEST_CMD': ["python", wl_names[all_workloads.pygbm.value]['numba'], "--steps", "1"],
                 'NUMBA_CPU_PERF_CMD': ["python", wl_names[all_workloads.pygbm.value]['numba']],
                 'NUMBA_CPU_VTUNE_CMD': ["python", wl_names[all_workloads.pygbm.value]['numba'], "--steps", "1", "--size", str(2 ** 10)],
-                'NUMBA_CPU_ADVISOR_CMD': ["python", wl_names[all_workloads.pygbm.value]['numba'], "--steps", "1", "--size", str(2 ** 10)],                
+                'NUMBA_CPU_ADVISOR_CMD': ["python", wl_names[all_workloads.pygbm.value]['numba'], "--steps", "1", "--size", str(2 ** 10)],
                 'SCIKIT_LEARN_TEST_CMD': ["python", "pygbm.py", "--steps", "1"],
                 'SCIKIT_LEARN_PERF_CMD': ["python", "pygbm.py"],
                 'SCIKIT_LEARN_VTUNE_CMD': ["python", "pygbm.py", "--steps", "1", "--size", str(2 ** 10)],
@@ -338,7 +340,7 @@ class workloads():
                 'NATIVE_PERF_CMD': ["./gpairs"],
                 'NATIVE_VTUNE_CMD': ["./gpairs", "1"],
                 'NATIVE_ADVISOR_CMD': ["./gpairs", "1"],
-            },            
+            },
             # all_workloads.random_forest.value: {
             #     'execute': False,
             #     'ref_input': 32768,

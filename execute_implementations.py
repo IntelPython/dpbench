@@ -95,8 +95,11 @@ def run_native_optimised_GPU(app_name, cmds, analysis):
         run_cmd = options.ADVISOR_GPU_ROOFLINE_CMD
         util.run_command(run_cmd, verbose=True)
 
-        run_cmd = options.ADVISOR_GPU_METRICS_CMD
-        util.run_command(run_cmd, verbose=True, filename="GPU_Metrics.txt")
+        try:
+            run_cmd = options.ADVISOR_GPU_METRICS_CMD
+            util.run_command(run_cmd, verbose=True, filename="GPU_Metrics.txt")
+        except:
+            print("Failed to generate Advisor GPU Metrics")
 
     if analysis == options.analysis.perf or analysis == options.analysis.all:
         run_cmd = cmds['NATIVE_OPTIMISED_PERF_CMD']
@@ -195,8 +198,11 @@ def run_native_GPU(app_name, cmds, analysis):
         run_cmd = options.ADVISOR_GPU_ROOFLINE_CMD
         util.run_command(run_cmd, verbose=True)
 
-        run_cmd = options.ADVISOR_GPU_METRICS_CMD
-        util.run_command(run_cmd, verbose=True, filename="GPU_Metrics.txt")
+        try:
+            run_cmd = options.ADVISOR_GPU_METRICS_CMD
+            util.run_command(run_cmd, verbose=True, filename="GPU_Metrics.txt")
+        except:
+            print("Failed to generate Advisor GPU Metrics")        
 
     if analysis == options.analysis.perf or analysis == options.analysis.all:
         run_cmd = cmds['NATIVE_PERF_CMD']
@@ -266,8 +272,11 @@ def run_numba_GPU(app_name, cmds, analysis):
         run_cmd = options.ADVISOR_GPU_ROOFLINE_CMD
         util.run_command(run_cmd, verbose=True)
 
-        run_cmd = options.ADVISOR_GPU_METRICS_CMD
-        util.run_command(run_cmd, verbose=True, filename="GPU_Metrics.txt")
+        try:
+            run_cmd = options.ADVISOR_GPU_METRICS_CMD
+            util.run_command(run_cmd, verbose=True, filename="GPU_Metrics.txt")
+        except:
+            print("Failed to generate Advisor GPU Metrics")            
 
     if analysis == options.analysis.perf or analysis == options.analysis.all:
         run_cmd = cmds['NUMBA_PERF_CMD']

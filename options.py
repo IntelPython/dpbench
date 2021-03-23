@@ -24,6 +24,9 @@ ADVISOR_GPU_ROOFLINE_CMD = ["advisor", "--report=roofline", "--gpu", "--project-
 if 'A21_SDK_ROOT' in os.environ:
     ADVISOR_GPU_METRICS_CMD = ["advixe-python", os.environ['A21_SDK_ROOT'] + "/advisor/latest" + "/pythonapi/examples/survey_gpu.py",
                                "roofline"]
+elif 'ONEAPI_ROOT' in os.environ:
+    ADVISOR_GPU_METRICS_CMD = ["advixe-python", os.environ['ONEAPI_ROOT'] + "/advisor/latest" + "/pythonapi/examples/survey_gpu.py",
+                               "roofline"]
 
 # advixe-python /opt/intel/inteloneapi/advisor/latest/pythonapi/examples/survey_gpu.py roofline > GPU_Metrics.txt
 

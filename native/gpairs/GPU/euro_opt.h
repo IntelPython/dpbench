@@ -18,6 +18,7 @@
 #define SEED 43
 
 #define TL      1.0f
+#define LBOX    500.0f
 #define DEFAULT_NBINS 20
 
 void InitData( int npoints, tfloat **x1, tfloat **y1, tfloat **z1, tfloat **w1,

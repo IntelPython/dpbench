@@ -72,14 +72,14 @@ void InitData(int npoints, tfloat **x1, tfloat **y1, tfloat **z1, tfloat **w1,
 #pragma omp for simd
     for ( i = 0; i < npoints; i++ )
       {
-	(*x1)[i] = RandRange( 0.0, TL, &seed );
-	(*y1)[i] = RandRange( 0.0, TL, &seed );
-	(*z1)[i] = RandRange( 0.0, TL, &seed );
+	(*x1)[i] = RandRange( 0.0, LBOX, &seed );
+	(*y1)[i] = RandRange( 0.0, LBOX, &seed );
+	(*z1)[i] = RandRange( 0.0, LBOX, &seed );
 	(*w1)[i] = RandRange( 0.0, TL, &seed );
 
-	(*x2)[i] = RandRange( 0.0, TL, &seed );
-	(*y2)[i] = RandRange( 0.0, TL, &seed );
-	(*z2)[i] = RandRange( 0.0, TL, &seed );
+	(*x2)[i] = RandRange( 0.0, LBOX, &seed );
+	(*y2)[i] = RandRange( 0.0, LBOX, &seed );
+	(*z2)[i] = RandRange( 0.0, LBOX, &seed );
 	(*w2)[i] = RandRange( 0.0, TL, &seed );
       }
   }

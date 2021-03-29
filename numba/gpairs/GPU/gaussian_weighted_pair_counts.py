@@ -311,7 +311,8 @@ def count_weighted_pairs_3d_intel_ver2(
 
     i = numba_dppy.get_global_id(0)
     nbins = rbins_squared.shape[0]
-
+    n2 = x2.shape[0]
+    
     px = x1[i]
     py = y1[i]
     pz = z1[i]

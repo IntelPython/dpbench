@@ -17,8 +17,8 @@ DEFAULT_NBINS = 20
 DEFAULT_RMIN, DEFAULT_RMAX = 0.1, 50
 DEFAULT_RBINS = np.logspace(
     np.log10(DEFAULT_RMIN), np.log10(DEFAULT_RMAX), DEFAULT_NBINS).astype(
-        np.float32)
-DEFAULT_RBINS_SQUARED = (DEFAULT_RBINS**2).astype(np.float32)
+        np.float64)
+DEFAULT_RBINS_SQUARED = (DEFAULT_RBINS**2).astype(np.float64)
 
 ######################################################
 # GLOBAL DECLARATIONS THAT WILL BE USED IN ALL FILES #
@@ -40,8 +40,8 @@ def random_weighted_points(n, Lbox, seed=DEFAULT_SEED):
     x, y, z, w = (
         data[:n]*Lbox, data[n:2*n]*Lbox, data[2*n:3*n]*Lbox, data[3*n:])
     return (
-        x.astype(np.float32), y.astype(np.float32), z.astype(np.float32),
-        w.astype(np.float32))
+        x.astype(np.float64), y.astype(np.float64), z.astype(np.float64),
+        w.astype(np.float64))
 
 def gen_data(npoints):
     Lbox = 500.
@@ -56,18 +56,18 @@ def gen_data(npoints):
 
 def copy_h2d(x1, y1, z1, w1, x2, y2, z2, w2):
     device_env = ocldrv.runtime.get_gpu_device()
-    d_x1 = device_env.copy_array_to_device(x1.astype(np.float32))
-    d_y1 = device_env.copy_array_to_device(y1.astype(np.float32))
-    d_z1 = device_env.copy_array_to_device(z1.astype(np.float32))
-    d_w1 = device_env.copy_array_to_device(w1.astype(np.float32))
+    d_x1 = device_env.copy_array_to_device(x1.astype(np.float64))
+    d_y1 = device_env.copy_array_to_device(y1.astype(np.float64))
+    d_z1 = device_env.copy_array_to_device(z1.astype(np.float64))
+    d_w1 = device_env.copy_array_to_device(w1.astype(np.float64))
 
-    d_x2 = device_env.copy_array_to_device(x2.astype(np.float32))
-    d_y2 = device_env.copy_array_to_device(y2.astype(np.float32))
-    d_z2 = device_env.copy_array_to_device(z2.astype(np.float32))
-    d_w2 = device_env.copy_array_to_device(w2.astype(np.float32))
+    d_x2 = device_env.copy_array_to_device(x2.astype(np.float64))
+    d_y2 = device_env.copy_array_to_device(y2.astype(np.float64))
+    d_z2 = device_env.copy_array_to_device(z2.astype(np.float64))
+    d_w2 = device_env.copy_array_to_device(w2.astype(np.float64))
 
     d_rbins_squared = device_env.copy_array_to_device(
-        DEFAULT_RBINS_SQUARED.astype(np.float32))
+        DEFAULT_RBINS_SQUARED.astype(np.float64))
 
     return (
         d_x1, d_y1, d_z1, d_w1, d_x2, d_y2, d_z2, d_w2, d_rbins_squared

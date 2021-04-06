@@ -100,20 +100,16 @@ def run(name, alg, sizes=10, step=2, nopt=2**10):
         x1, y1, z1, w1, x2, y2, z2, w2 = gen_data(nopt)
         #d_x1, d_y1, d_z1, d_w1, d_x2, d_y2, d_z2, d_w2, d_rbins_squared = copy_h2d(x1, y1, z1, w1, x2, y2, z2, w2)
         iterations = xrange(repeat)
-        #print("ERF: {}: Size: {}".format(name, nopt), end=' ', flush=True)
-        #sys.stdout.flush()
 
         alg(x1, y1, z1, w1, x2, y2, z2, w2, DEFAULT_RBINS_SQUARED) #warmup
         t0 = now()
         for _ in iterations:
-            #t1 = now()
             alg(x1, y1, z1, w1, x2, y2, z2, w2, DEFAULT_RBINS_SQUARED)
-            #print("Time:", now()-t1)
 
         mops,time = get_mops(t0, now(), nopt)
         f.write(str(nopt) + "," + str(mops*2*repeat) + "\n")
         f2.write(str(nopt) + "," + str(time) + "\n")
-        #print("MOPS:", mops*2*repeat, args.text)
+        print(str(nopt) + "," + str(time) + "\n")
         nopt *= step
         repeat -= step
         if repeat < 1:

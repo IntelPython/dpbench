@@ -58,6 +58,8 @@ int main(int argc, char * argv[])
 	call_gpairs( nopt, x1, y1, z1, w1, x2, y2, z2, w2, rbins, results_test);
       }
 
+      if (repeat < 1) repeat = 1;
+
       t1 = timer_rdtsc();
       for(j = 0; j < repeat; j++) {
 	call_gpairs( nopt, x1, y1, z1, w1, x2, y2, z2, w2, rbins, results_test );

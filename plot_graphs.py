@@ -76,17 +76,12 @@ except:
 def get_runtime_data(app_name, cmds, platform):
     util.chdir(platform)
 
-    df = pd.read_csv('runtimes.csv',names=['input_size','runtime'], index_col='input_size')
-    
-    # bar_chart = df.plot.bar(legend=False,rot=45,fontsize=10)
-    # bar_chart.set_ylabel('Thoughput in input elements processed per second',fontsize=10)
-    # bar_chart.set_xlabel('Input size',fontsize=10)
-    # fig = bar_chart.get_figure()
-    # fig_filename = str(app_name) + "_native_CPU_performance.pdf"
-    # fig.savefig(fig_filename,bbox_inches="tight")
-
-    #print(df)
-    return df.loc[cmds['ref_input'],'runtime']
+    try:
+        df = pd.read_csv('runtimes.csv',names=['input_size','runtime'], index_col='input_size')
+        return df.loc[cmds['ref_input'],'runtime']        
+    except:
+        print("Runtimes not available for " + app_name + "\n")
+        return 0
 
 def get_runtimes(opts, all_plot_data, impl):
     util.chdir(impl)
@@ -104,12 +99,14 @@ def get_runtimes(opts, all_plot_data, impl):
             app_dir = os.getcwd();
             if opts.platform == options.platform.cpu or opts.platform == options.platform.all:
                 cpu_perf = get_runtime_data(app, cmds, "CPU")
-                plot_data_entry[impl + '_cpu'] = cpu_perf
+                if cpu_perf is not 0:
+                    plot_data_entry[impl + '_cpu'] = cpu_perf
                 util.chdir(app_dir)
                 
             if opts.platform == options.platform.gpu or opts.platform == options.platform.all:
                 gpu_perf = get_runtime_data(app, cmds, "GPU")
-                plot_data_entry[impl + '_gpu'] = gpu_perf
+                if gpu_perf is not 0:
+                    plot_data_entry[impl + '_gpu'] = gpu_perf
                 
             util.chdir(numba_dir)
             all_plot_data[app] = plot_data_entry
@@ -127,37 +124,67 @@ def check_envvars_tools(opts):
 
 def plot_efficiency_graph(all_plot_data):
     df = pd.DataFrame.from_dict(all_plot_data, orient='index')
+    plot = False
 
-    df['CPU'] = (df['numba_cpu']/df['native_cpu'])*100.00
-    df['GPU'] = (df['numba_gpu']/df['native_gpu'])*100.00
+    try:
+        df['CPU'] = (df['numba_cpu']/df['native_cpu'])*100.00
+        plot = True
+        df.drop(columns=['native_cpu', 'numba_cpu'], inplace=True)
+    except:
+        print("CPU Efficiency data not available\n")
 
-    df.drop(columns=['native_cpu', 'native_gpu', 'numba_cpu', 'numba_gpu'], inplace=True)
+    try:
+        df['GPU'] = (df['numba_gpu']/df['native_gpu'])*100.00
+        plot = True
+        df.drop(columns=['native_gpu', 'numba_gpu'], inplace=True)
+    except:
+        print("GPU Efficiency data not available\n")
 
-    bar_chart = df.plot.bar(rot=45,fontsize=10)
-    #bar_chart.legend(loc='upper right')
-    bar_chart.set_ylabel('Efficiency in percentage',fontsize=10)
-    bar_chart.set_xlabel('Benchmark',fontsize=10)
-    bar_chart.set_title('Efficiency of Numba execution relative to OpenMP execution on CPU and GPU',fontsize=10)
-    fig = bar_chart.get_figure()
-    fig_filename = "Efficiency_graph.pdf"
-    fig.savefig(fig_filename,bbox_inches="tight")
+    if plot:
+        #df.drop(columns=['native_cpu', 'native_gpu', 'numba_cpu', 'numba_gpu'], inplace=True)
+
+        bar_chart = df.plot.bar(rot=45,fontsize=10)
+        #bar_chart.legend(loc='upper right')
+        bar_chart.set_ylabel('Efficiency in percentage',fontsize=10)
+        bar_chart.set_xlabel('Benchmark',fontsize=10)
+        bar_chart.set_title('Efficiency of Numba execution relative to OpenMP execution on CPU and GPU',fontsize=10)
+        fig = bar_chart.get_figure()
+        fig_filename = "Efficiency_graph.pdf"
+        fig.savefig(fig_filename,bbox_inches="tight")
+    else:
+        print("Insufficient data to generate Efficiency graph. Verify execution times in runtimes.csv\n")
 
 def plot_speedup_graph(all_plot_data):
     df = pd.DataFrame.from_dict(all_plot_data, orient='index')
+    plot = False
+    
+    try:
+        df['OpenMP'] = (df['native_cpu']/df['native_gpu'])*100.00
+        plot = True
+        df.drop(columns=['native_cpu', 'native_gpu'], inplace=True)
+    except:
+        print("CPU Speedup data not available\n")
 
-    df['OpenMP'] = (df['native_cpu']/df['native_gpu'])*100.00
-    df['Numba'] = (df['numba_cpu']/df['numba_gpu'])*100.00
+    try:
+        df['Numba'] = (df['numba_cpu']/df['numba_gpu'])*100.00
+        plot = True
+        df.drop(columns=['numba_cpu', 'numba_gpu'], inplace=True)
+    except:
+        print("GPU Speedup data not available\n")        
 
-    df.drop(columns=['native_cpu', 'native_gpu', 'numba_cpu', 'numba_gpu'], inplace=True)
-
-    bar_chart = df.plot.bar(rot=45,fontsize=10)
-    #bar_chart.legend(loc='upper right')
-    bar_chart.set_ylabel('Speedup in percentage',fontsize=10)
-    bar_chart.set_xlabel('Benchmark',fontsize=10)
-    bar_chart.set_title('Speedup of GPU execution over CPU execution for Numba and OpenMP',fontsize=10)
-    fig = bar_chart.get_figure()
-    fig_filename = "Speedup_graph.pdf"
-    fig.savefig(fig_filename,bbox_inches="tight")
+    if plot:
+        #df.drop(columns=['native_cpu', 'native_gpu', 'numba_cpu', 'numba_gpu'], inplace=True)
+        
+        bar_chart = df.plot.bar(rot=45,fontsize=10)
+        #bar_chart.legend(loc='upper right')
+        bar_chart.set_ylabel('Speedup in percentage',fontsize=10)
+        bar_chart.set_xlabel('Benchmark',fontsize=10)
+        bar_chart.set_title('Speedup of GPU execution over CPU execution for Numba and OpenMP',fontsize=10)
+        fig = bar_chart.get_figure()
+        fig_filename = "Speedup_graph.pdf"
+        fig.savefig(fig_filename,bbox_inches="tight")
+    else:
+        print("Insufficient data to generate Speedup graph. Verify execution times in runtimes.csv\n")    
     
 def run(opts):
     check_envvars_tools(opts)

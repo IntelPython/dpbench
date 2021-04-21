@@ -78,6 +78,7 @@ def gen_data(nopt):
 
 ##############################################	
 
+# create input data, call blackscholes computation function (alg)
 def run(name, alg, sizes=14, step=2, nopt=2**15, nparr=True, dask=False, pass_args=False):
     import argparse
     parser = argparse.ArgumentParser()
@@ -114,6 +115,7 @@ def run(name, alg, sizes=14, step=2, nopt=2**15, nparr=True, dask=False, pass_ar
     f2 = open("runtimes.csv",'w',1)
     
     for i in xrange(sizes):
+        # generate input data
         price, strike, t = gen_data(nopt)
         if not nparr:
             call = [0.0 for i in range(nopt)]
@@ -134,6 +136,7 @@ def run(name, alg, sizes=14, step=2, nopt=2**15, nparr=True, dask=False, pass_ar
         print("ERF: {}: Size: {}".format(name, nopt), end=' ', flush=True)
         sys.stdout.flush()
 
+        # call algorithm
         if pass_args:
             alg(nopt, price, strike, t, RISK_FREE, VOLATILITY, call, put) #warmup
             
@@ -148,6 +151,7 @@ def run(name, alg, sizes=14, step=2, nopt=2**15, nparr=True, dask=False, pass_ar
                 alg(nopt, price, strike, t, RISK_FREE, VOLATILITY, **kwargs)
         mops,time = get_mops(t0, now(), nopt)
 
+        # record performance data - mops, time
         print("MOPS:", mops*2*repeat, "Time:", time, "Iters:", iterations)
         f1.write(str(nopt) + "," + str(mops*2*repeat) + "\n")
         f2.write(str(nopt) + "," + str(time) + "\n")

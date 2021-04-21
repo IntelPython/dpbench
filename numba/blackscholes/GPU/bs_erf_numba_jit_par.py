@@ -7,6 +7,7 @@ import base_bs_erf
 import numba as nb
 from math import log, sqrt, exp, erf
 
+#blackscholes implemented as a parallel loop using numba.prange
 @nb.njit(parallel=True,fastmath=True)
 def black_scholes_kernel( nopt, price, strike, t, rate, vol, call, put):
     mr = -rate
@@ -37,7 +38,9 @@ def black_scholes_kernel( nopt, price, strike, t, rate, vol, call, put):
         put [i] = r - P + Se
 
 def black_scholes(nopt, price, strike, t, rate, vol, call, put):
+    # offload blackscholes computation to GPU (toggle level0 or opencl driver).
     with dpctl.device_context("opencl:gpu"):
         black_scholes_kernel( nopt, price, strike, t, rate, vol, call, put )
 
+# call the run function to setup input data and performance data infrastructure
 base_bs_erf.run("Numba@jit-loop-par", black_scholes, nparr=True, pass_args=True)

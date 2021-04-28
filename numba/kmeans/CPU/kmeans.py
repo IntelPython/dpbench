@@ -6,7 +6,7 @@ REPEAT = 1
 
 ITERATIONS = 30
 
-@numba.jit(nopython=True,parallel=True)
+@numba.jit(nopython=True,parallel=True,fastmath=True)
 def groupByCluster(arrayP, arrayPcluster,
                    arrayC,
                    num_points, num_centroids):
@@ -22,7 +22,7 @@ def groupByCluster(arrayP, arrayPcluster,
     return arrayPcluster
 
 
-@numba.jit(nopython=True,parallel=True)
+@numba.jit(nopython=True,parallel=True,fastmath=True)
 def calCentroidsSum(arrayP, arrayPcluster,
                     arrayCsum, arrayCnumpoint,
                     num_points, num_centroids):
@@ -40,7 +40,7 @@ def calCentroidsSum(arrayP, arrayPcluster,
     return arrayCsum, arrayCnumpoint
 
 
-@numba.jit(nopython=True,parallel=True)
+@numba.jit(nopython=True,parallel=True,fastmath=True)
 def updateCentroids(arrayC, arrayCsum, arrayCnumpoint,
                     num_centroids):
     for i in numba.prange(num_centroids):

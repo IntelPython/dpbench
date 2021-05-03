@@ -113,7 +113,7 @@ def dbscan(n, dim, data, eps, min_pts, assignments):
     distances_list = np.empty(n*n)
     sizes = np.zeros(n, dtype=np.int64)
 
-    with dpctl.device_context("opencl:gpu"):
+    with dpctl.device_context(base_dbscan.get_device_selector()):
         get_neighborhood(n, dim, data, eps, indices_list, distances_list, sizes, assignments)
 
     return compute_clusters(n, min_pts, assignments, sizes, indices_list)

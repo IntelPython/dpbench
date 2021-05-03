@@ -39,7 +39,7 @@ def black_scholes_kernel( nopt, price, strike, t, rate, vol, call, put):
 
 def black_scholes(nopt, price, strike, t, rate, vol, call, put):
     # offload blackscholes computation to GPU (toggle level0 or opencl driver).
-    with dpctl.device_context("opencl:gpu"):
+    with dpctl.device_context(base_bs_erf.get_device_selector()):
         black_scholes_kernel( nopt, price, strike, t, rate, vol, call, put )
 
 # call the run function to setup input data and performance data infrastructure

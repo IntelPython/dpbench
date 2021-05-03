@@ -28,7 +28,7 @@ def compute_mean_axis_0(data):
     return m
 
 def covariance(M):
-    with dpctl.device_context("opencl:gpu"):
+    with dpctl.device_context(base_pca.get_device_selector()):
         mean = compute_mean_axis_0(M.T)
         X = M-mean[:, None]
         Y = (M-mean[:, None]).T
@@ -36,7 +36,7 @@ def covariance(M):
         return res/(M.shape[1]-1)
 
 def pca_impl(data):
-    with dpctl.device_context("opencl:gpu"):
+    with dpctl.device_context(base_pca.get_device_selector()):
         m = compute_mean_axis_0(data)
         c = data - m
         v = covariance(c.T)

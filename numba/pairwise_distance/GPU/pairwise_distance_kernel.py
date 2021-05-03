@@ -21,7 +21,7 @@ def pairwise_python(X1, X2, D):
         D[i, j] = np.sqrt(d)
 
 def pw_distance(X1,X2,D):
-    with dpctl.device_context("opencl:gpu"):
+    with dpctl.device_context(base_pair_wise.get_device_selector()):
         #pairwise_python[X1.shape[0],numba_dppy.DEFAULT_LOCAL_SIZE](X1, X2, D)
         pairwise_python[X1.shape[0],8](X1, X2, D)
 

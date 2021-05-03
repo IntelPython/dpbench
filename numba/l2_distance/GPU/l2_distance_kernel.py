@@ -18,7 +18,7 @@ def l2_distance_kernel(a, b, c):
 
 def l2_distance(a, b):
     distance = np.asarray([0])
-    with dpctl.device_context("opencl:gpu"):
+    with dpctl.device_context(base_l2_distance.get_device_selector()):
         l2_distance_kernel[(a.shape[0],a.shape[1]),numba_dppy.DEFAULT_LOCAL_SIZE](a, b, distance)
     return math.sqrt(distance)
 

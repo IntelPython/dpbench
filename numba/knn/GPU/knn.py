@@ -174,7 +174,7 @@ def run_knn_kernel(train, train_labels, test, k, classes_num):
     return predictions
 
 def run_knn(train, train_labels, test, k=5, classes_num=3):
-    with dpctl.device_context("opencl:gpu"):
+    with dpctl.device_context(base_knn.get_device_selector()):
         run_knn_kernel(train, train_labels, test, k, classes_num)
 
 base_knn.run("K-Nearest-Neighbors Numba", run_knn)

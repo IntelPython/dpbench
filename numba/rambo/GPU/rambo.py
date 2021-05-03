@@ -108,7 +108,7 @@ def generate_points(ecms, nevts, nout):
     input_mass = get_combined_mass(input_particles)
 
     C1, F1, Q1 = gen_rand_data(nevts, nout)
-    with dpctl.device_context("opencl:gpu"):
+    with dpctl.device_context(base_rambo.get_device_selector()):
         output_particles = get_output_mom2(C1, F1, Q1, nevts, nout)
 
     output_mom_sum = get_momentum_sum(output_particles)

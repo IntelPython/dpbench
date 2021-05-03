@@ -68,7 +68,7 @@ def call_ocl(nevts, nout):
     C1, F1, Q1 = gen_rand_data(nevts, nout)
     output = numpy.empty((nevts, nout, 4))
     
-    with dpctl.device_context("opencl:gpu"):
+    with dpctl.device_context(base_rambo.get_device_selector()):
         get_output_mom2[nevts,numba_dppy.DEFAULT_LOCAL_SIZE](C1, F1, Q1, output, nout)
 
     return output

@@ -27,7 +27,7 @@ def pca_impl(data):
     return arr.T
 
 def call_pca(data):
-    with dpctl.device_context("opencl:gpu"):
+    with dpctl.device_context(base_pca.get_device_selector()):
         pca_impl(data)
         
 base_pca.run("Numba", pca_impl)

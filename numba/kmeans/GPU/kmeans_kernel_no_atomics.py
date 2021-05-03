@@ -45,7 +45,7 @@ def kmeans(arrayP, arrayPcluster,
            num_points, num_centroids):
 
     for i in range(ITERATIONS):
-        with dpctl.device_context("opencl:gpu"):
+        with dpctl.device_context(base_kmeans.get_device_selector()):
             groupByCluster[num_points,numba_dppy.DEFAULT_LOCAL_SIZE](
             arrayP, arrayPcluster,
                 arrayC,

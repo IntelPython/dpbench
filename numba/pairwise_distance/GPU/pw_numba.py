@@ -27,7 +27,7 @@ def pw_distance_kernel(X1,X2,D):
     D = np.sqrt(D)
 
 def pw_distance(X1,X2,D):
-    with dpctl.device_context("opencl:gpu"):
+    with dpctl.device_context(base_pair_wise.get_device_selector()):
         pw_distance_kernel(X1,X2,D)
 
 base_pair_wise.run("Numba Numpy", pw_distance)

@@ -1,6 +1,6 @@
 import numpy as np
 from random import seed, uniform
-import sys
+import sys,os
 import numpy.random as rnd
 from timeit import default_timer as now
 

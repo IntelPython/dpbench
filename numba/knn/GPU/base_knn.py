@@ -25,7 +25,7 @@
 # *****************************************************************************
 
 import argparse
-import sys
+import sys,os
 import numpy as np
 
 DATA_DIM = 16

@@ -4,7 +4,7 @@
 
 
 import numpy as np
-import sys
+import sys,os
 import numpy.random as rnd
 
 try:

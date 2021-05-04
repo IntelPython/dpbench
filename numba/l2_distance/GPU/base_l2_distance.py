@@ -3,7 +3,7 @@
 # SPDX-License-Identifier: MIT
 
 import numpy as np
-#import sys
+import sys,os
 
 #import numpy.random_intel as rnd
 import numpy.random as rnd
@@ -75,7 +75,7 @@ def run(name, alg, sizes=10, step=2, nopt=2**16):
         X,Y = gen_data(nopt,dims)
         iterations = xrange(repeat)
         #print("ERF: {}: Size: {}".format(name, nopt), end=' ', flush=True)
-        #sys.stdout.flush()
+        sys.stdout.flush()
 
         alg(X,Y) #warmup
         t0 = now()

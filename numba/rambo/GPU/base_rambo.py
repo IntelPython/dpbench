@@ -3,6 +3,7 @@
 # SPDX-License-Identifier: MIT
 
 import numpy.random as rnd
+import os
 
 try:
     import itimer as it

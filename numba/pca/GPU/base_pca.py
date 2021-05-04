@@ -3,7 +3,7 @@
 # SPDX-License-Identifier: MIT
 
 from sklearn.datasets import make_classification, make_regression
-
+import os
 
 try:
     import itimer as it

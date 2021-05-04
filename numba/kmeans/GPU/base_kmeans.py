@@ -4,7 +4,7 @@
 
 import numpy as np
 import numpy.random as rnd
-import sys
+import sys,os
 
 try:
     import itimer as it

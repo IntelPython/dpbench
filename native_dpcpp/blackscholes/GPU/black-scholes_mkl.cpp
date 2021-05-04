@@ -65,7 +65,7 @@
 //
 // Note: the implementation assumes nopt is a multiple of NBUF
 */
-void BlackScholesFormula_MKL( int nopt,
+void BlackScholesFormula_MKL( size_t nopt,
     tfloat r, tfloat sig, tfloat * restrict s0, tfloat * restrict x,
     tfloat * restrict t, tfloat * restrict vcall, tfloat * restrict vput )
 {

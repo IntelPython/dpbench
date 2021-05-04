@@ -40,7 +40,7 @@ void InitData( queue *q, size_t nopt, tfloat* *s0, tfloat* *x, tfloat* *t,
              )
 {
     tfloat *ts0, *tx, *tt, *tvcall_compiler, *tvput_compiler, *tvcall_mkl, *tvput_mkl;
-    int i;
+    size_t i;
 
     /* Allocate aligned memory */
     ts0             = (tfloat*)malloc_shared( nopt * sizeof(tfloat), *q);

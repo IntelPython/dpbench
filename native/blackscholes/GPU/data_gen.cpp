@@ -31,13 +31,13 @@ tfloat RandRange( tfloat a, tfloat b, struct drand48_data *seed ) {
 //     vcall_compiler, vcall_mkl
 //     vput_compiler, vput_mkl
 */
-void InitData( int nopt, tfloat* *s0, tfloat* *x, tfloat* *t,
+void InitData( size_t nopt, tfloat* *s0, tfloat* *x, tfloat* *t,
                    tfloat* *vcall_compiler, tfloat* *vput_compiler,
                    tfloat* *vcall_mkl, tfloat* *vput_mkl
              )
 {
     tfloat *ts0, *tx, *tt, *tvcall_compiler, *tvput_compiler, *tvcall_mkl, *tvput_mkl;
-    int i;
+    size_t i;
 
     /* Allocate aligned memory */
     ts0             = (tfloat*)_mm_malloc( nopt * sizeof(tfloat), ALIGN_FACTOR);

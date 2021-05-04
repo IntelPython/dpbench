@@ -14,7 +14,7 @@
 
 int main(int argc, char * argv[])
 {
-    int nopt = 32768;
+    size_t nopt = 32768;
     int repeat = 100;
     tfloat *s0, *x, *t, *vcall_mkl, *vput_mkl, *vcall_compiler, *vput_compiler;
 
@@ -31,7 +31,7 @@ int main(int argc, char * argv[])
     {
         sscanf(argv[1], "%d", &STEPS);
 	if (argc == 3) {
-	  sscanf(argv[2], "%d", &nopt);
+	  sscanf(argv[2], "%lu", &nopt);
 	}
     }
 
@@ -84,10 +84,10 @@ int main(int argc, char * argv[])
 	  t2 = timer_rdtsc();
 	}
         printf("%.6lf\n", (2.0 * nopt * repeat / 1e6)/((double) (t2 - t1) / getHz()));
-	printf("%d,%.6lf\n",nopt,((double) (t2 - t1) / getHz()));
+	printf("%lu,%.6lf\n",nopt,((double) (t2 - t1) / getHz()));
         fflush(stdout);
-	fprintf(fptr, "%d,%.6lf\n",nopt,(2.0 * nopt * repeat )/((double) (t2 - t1) / getHz()));
-	fprintf(fptr1, "%d,%.6lf\n",nopt,((double) (t2 - t1) / getHz()));
+	fprintf(fptr, "%lu,%.6lf\n",nopt,(2.0 * nopt * repeat )/((double) (t2 - t1) / getHz()));
+	fprintf(fptr1, "%lu,%.6lf\n",nopt,((double) (t2 - t1) / getHz()));
 
         /* Deallocate arrays */
         FreeData( s0, x, t, vcall_compiler, vput_compiler, vcall_mkl, vput_mkl );

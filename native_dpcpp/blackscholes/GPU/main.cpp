@@ -16,7 +16,7 @@ using namespace cl::sycl;
 
 int main(int argc, char * argv[])
 {
-    int nopt = 32768;
+    size_t nopt = 32768;
     int repeat = 100;
     tfloat *s0, *x, *t, *vcall_mkl, *vput_mkl, *vcall_compiler, *vput_compiler;
 
@@ -33,7 +33,7 @@ int main(int argc, char * argv[])
     {
         sscanf(argv[1], "%d", &STEPS);
 	if (argc == 3) {
-	  sscanf(argv[2], "%d", &nopt);
+	  sscanf(argv[2], "%lu", &nopt);
 	}
     }
 
@@ -77,10 +77,10 @@ int main(int argc, char * argv[])
 
 #ifdef BLACK_SCHOLES_MKL
       /* Compute call and put prices using MKL VML functions */
-      printf("ERF: Native-C-VML: Size: %d MOPS: ", nopt);
+      printf("ERF: Native-C-VML: Size: %lu MOPS: ", nopt);
 #else
       /* Compute call and put prices using compiler math libraries */
-      printf("ERF: Native-C-SVML: Size: %d MOPS: ", nopt);
+      printf("ERF: Native-C-SVML: Size: %lu MOPS: ", nopt);
 #endif
 
       t1 = timer_rdtsc();
@@ -95,13 +95,13 @@ int main(int argc, char * argv[])
       t2 = timer_rdtsc();
 
       printf("%.6lf\n", (2.0 * nopt * repeat / 1e6)/((double) (t2 - t1) / getHz()));
-      printf("%d,%.6lf\n",nopt,((double) (t2 - t1) / getHz()));
+      printf("%lu,%.6lf\n",nopt,((double) (t2 - t1) / getHz()));
       fflush(stdout);
-      fprintf(fptr, "%d,%.6lf\n",nopt,(2.0 * nopt * repeat )/((double) (t2 - t1) / getHz()));
-      fprintf(fptr1, "%d,%.6lf\n",nopt,((double) (t2 - t1) / getHz()));
+      fprintf(fptr, "%lu,%.6lf\n",nopt,(2.0 * nopt * repeat )/((double) (t2 - t1) / getHz()));
+      fprintf(fptr1, "%lu,%.6lf\n",nopt,((double) (t2 - t1) / getHz()));
 
-      printf("call_compiler[0/%d]= %g\n", nopt, (double)(vcall_compiler[10]) );
-      printf("put_compiler[0/%d]= %g\n", nopt, (double)(vput_compiler[10]) );	
+      printf("call_compiler[0/%lu]= %g\n", nopt, (double)(vcall_compiler[10]) );
+      printf("put_compiler[0/%lu]= %g\n", nopt, (double)(vput_compiler[10]) );	
 
       /* Deallocate arrays */
       FreeData(q, s0, x, t, vcall_compiler, vput_compiler, vcall_mkl, vput_mkl );

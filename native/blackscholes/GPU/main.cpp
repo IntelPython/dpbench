@@ -68,10 +68,10 @@ int main(int argc, char * argv[])
 
 #ifdef BLACK_SCHOLES_MKL
 	  /* Compute call and put prices using MKL VML functions */
-	  printf("ERF: Native-C-VML: Size: %d MOPS: ", nopt);
+	  printf("ERF: Native-C-VML: Size: %lu MOPS: ", nopt);
 #else
 	  /* Compute call and put prices using compiler math libraries */
-	  printf("ERF: Native-C-SVML: Size: %d MOPS: ", nopt);
+	  printf("ERF: Native-C-SVML: Size: %lu MOPS: ", nopt);
 #endif
 	  t1 = timer_rdtsc();
 	  for(j = 0; j < repeat; j++) {
@@ -88,6 +88,10 @@ int main(int argc, char * argv[])
         fflush(stdout);
 	fprintf(fptr, "%lu,%.6lf\n",nopt,(2.0 * nopt * repeat )/((double) (t2 - t1) / getHz()));
 	fprintf(fptr1, "%lu,%.6lf\n",nopt,((double) (t2 - t1) / getHz()));
+
+	printf("call_compiler[0/%lu]= %g\n", nopt, (double)(vcall_compiler[10]) );
+	printf("put_compiler[0/%lu]= %g\n", nopt, (double)(vput_compiler[10]) );
+
 
         /* Deallocate arrays */
         FreeData( s0, x, t, vcall_compiler, vput_compiler, vcall_mkl, vput_mkl );

@@ -64,7 +64,7 @@ int main(int argc, char * argv[])
     for(i = 0; i < STEPS; i++) {
     
       /* Allocate arrays, generate input data */
-      InitData( q, nopt, &s0, &x, &t, &vcall_compiler, &vput_compiler, &vcall_mkl, &vput_mkl );
+      InitData(nopt, &s0, &x, &t, &vcall_compiler, &vput_compiler, &vcall_mkl, &vput_mkl );
 
       /* Warm up cycle */
       for(j = 0; j < 1; j++) {
@@ -90,7 +90,7 @@ int main(int argc, char * argv[])
 #else
 	BlackScholesFormula_Compiler( nopt, q, RISK_FREE, VOLATILITY, s0, x, t, vcall_compiler, vput_compiler );
 #endif
-	q->wait();
+	//q->wait();
       }
       t2 = timer_rdtsc();
 
@@ -104,7 +104,7 @@ int main(int argc, char * argv[])
       printf("put_compiler[0/%lu]= %g\n", nopt, (double)(vput_compiler[10]) );	
 
       /* Deallocate arrays */
-      FreeData(q, s0, x, t, vcall_compiler, vput_compiler, vcall_mkl, vput_mkl );
+      FreeData( s0, x, t, vcall_compiler, vput_compiler, vcall_mkl, vput_mkl );
 
       nopt = nopt * 2;
       repeat -= 2;

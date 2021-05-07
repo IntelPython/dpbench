@@ -32,7 +32,7 @@ CC          := icpx
 QOPT        :=
 FQOPT       :=f
 EQCOLON     :="="
-TARGET      := kmeans
+TARGET      := pairwise_distance
 
 CFLAGS      += -g -O3
 CFLAGS      += -fsycl -qopenmp
@@ -48,14 +48,17 @@ endif
 # ############## Define make rules #############################################
 # ==============================================================================
 
-all: kmeans-gpu
+all: pairwise-distance
 
-kmeans-gpu: $(TARGET)
+nomkl: pairwise_distance
+	./$(TARGET) 1024
 
-$(TARGET): $(SRC) kmeans.cpp
+pairwise-distance: $(TARGET)
+
+$(TARGET): $(SRC) pairwise_distance.cpp
 	$(CC) $(CPPFLAGS) $(CFLAGS) $^ -o $(TARGET)
 
 clean:
-	rm -rf *.o *.out *.optrpt *.yaml *~ kmeans
+	rm -rf *.o *.out *.optrpt *.yaml *~ pairwise_distance
 
 .PHONY: all clean

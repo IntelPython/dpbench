@@ -7,6 +7,10 @@
 #ifndef __CONSTANTS_HEADER_H
 #define __CONSTANTS_HEADER_H
 
+#include <CL/sycl.hpp>
+
+using namespace cl::sycl;
+
 #ifdef __DO_FLOAT__
     typedef float tfloat; 
 #else
@@ -26,8 +30,8 @@ struct point {
   tfloat z;
 };
 
-void InitData( int nopt, struct point* *x1, struct point* *x2, tfloat** distance_op );
+void InitData( size_t nopt, struct point* *x1, struct point* *x2, tfloat** distance_op );
 void FreeData( struct point *x1, struct point *x2 );
-void pairwise_distance( int nopt, struct point* x1, struct point* x2, tfloat* distance_op );
+void pairwise_distance(queue* q, size_t nopt, struct point* x1, struct point* x2, tfloat* distance_op );
 
 #endif // #ifndef __CONSTANTS_HEADER_H

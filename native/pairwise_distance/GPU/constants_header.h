@@ -21,9 +21,9 @@
 #define XH      100.0f
 
 struct point {
-  float x;
-  float y;
-  float z;
+  tfloat x;
+  tfloat y;
+  tfloat z;
 };
 
 void InitData( int nopt, struct point* *x1, struct point* *x2, tfloat** distance_op );

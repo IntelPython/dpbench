@@ -37,7 +37,7 @@ def get_device_selector (is_gpu = True):
     if os.environ.get('SYCL_DEVICE_FILTER') is None or os.environ.get('SYCL_DEVICE_FILTER') == "opencl":
         return "opencl:" + device_selector
 
-    if os.environ.get('SYCL_DEVICE_FILTER') is "level_zero":
+    if os.environ.get('SYCL_DEVICE_FILTER') == "level_zero":
         return "level0:" + device_selector
 
     return os.environ.get('SYCL_DEVICE_FILTER')

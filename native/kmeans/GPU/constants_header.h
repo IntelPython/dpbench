@@ -20,9 +20,4 @@
 #define XL      0.0f
 #define XH      4.0f
 
-#include "point.h"
-
-void InitData( int nopt, int ncentroids, Point** points, Centroid** centroids );
-void FreeData( Point *pts, Centroid * cents );
-
 #endif // #ifndef __CONSTANTS_HEADER_H

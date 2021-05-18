@@ -1,6 +1,8 @@
 #ifndef POINT_H_INCLUDED
 #define POINT_H_INCLUDED
 
+#include "constants_header.h"
+
 typedef struct {
   tfloat x;
   tfloat y;

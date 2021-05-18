@@ -11,7 +11,7 @@
 
 using namespace cl::sycl;
 
-#include "constants_header.h"
+#include "data_gen.h"
 #include "rdtsc.h"
 
 #include "point.h"

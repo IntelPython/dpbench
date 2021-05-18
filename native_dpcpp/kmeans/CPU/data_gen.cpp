@@ -11,7 +11,7 @@
 #include <omp.h>
 #include <ia32intrin.h>
 
-#include "constants_header.h"
+#include "data_gen.h"
 
 tfloat RandRange( tfloat a, tfloat b, struct drand48_data *seed ) {
     double r;

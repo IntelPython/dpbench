@@ -7,7 +7,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <time.h>
-#include "constants_header.h"
+#include "data_gen.h"
 #include "rdtsc.h"
 
 #include "point.h"
@@ -17,7 +17,7 @@
 
 int main(int argc, char * argv[])
 {
-    int nopt = 1 << 13;
+    size_t nopt = 1 << 13;
     int repeat = 100;
     Point* points;
     Centroid* centroids;
@@ -35,7 +35,7 @@ int main(int argc, char * argv[])
     {
         sscanf(argv[1], "%d", &STEPS);
 	if (argc == 3) {
-	  sscanf(argv[2], "%d", &nopt);
+	  sscanf(argv[2], "%lu", &nopt);
 	}
     }
 
@@ -65,7 +65,7 @@ int main(int argc, char * argv[])
       }
 
       /* Compute call and put prices using compiler math libraries */
-      printf("Kmeans: Native-C-SVML: Size: %d MOPS: ", nopt);
+      printf("Kmeans: Native-C-SVML: Size: %lu MOPS: ", nopt);
 	
       t1 = timer_rdtsc();
       for(j = 0; j < repeat; j++) {
@@ -74,8 +74,8 @@ int main(int argc, char * argv[])
       t2 = timer_rdtsc();
       printf("%.6lf\n", (2.0 * nopt * repeat / 1e6)/((double) (t2 - t1) / getHz()));
       fflush(stdout);
-      fprintf(fptr, "%d,%.6lf\n",nopt,(2.0 * nopt * 100 )/((double) (t2 - t1) / getHz()));
-      fprintf(fptr1, "%d,%.6lf\n",nopt,((double) (t2 - t1) / getHz()));
+      fprintf(fptr, "%lu,%.6lf\n",nopt,(2.0 * nopt * 100 )/((double) (t2 - t1) / getHz()));
+      fprintf(fptr1, "%lu,%.6lf\n",nopt,((double) (t2 - t1) / getHz()));
 
       /**************************/
       printCentroids (centroids, NUMBER_OF_CENTROIDS);

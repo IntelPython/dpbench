@@ -11,7 +11,7 @@
 #include <omp.h>
 #include <ia32intrin.h>
 
-#include "constants_header.h"
+#include "data_gen.h"
 
 tfloat RandRange( tfloat a, tfloat b, struct drand48_data *seed ) {
     double r;
@@ -19,11 +19,11 @@ tfloat RandRange( tfloat a, tfloat b, struct drand48_data *seed ) {
     return r*(b-a) + a;
 }
 
-void InitData( int nopt, int ncentroids, Point** points, Centroid** centroids )
+void InitData( size_t nopt, int ncentroids, Point** points, Centroid** centroids )
 {
   Point *pts;
   Centroid *cents;
-  int i;
+  size_t i;
   
   /* Allocate aligned memory */
   pts = (Point*)_mm_malloc( nopt * sizeof(Point), ALIGN_FACTOR);

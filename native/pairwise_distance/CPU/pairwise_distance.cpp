@@ -16,15 +16,13 @@
 
 void pairwise_distance( int nopt, struct point * p1, struct point * p2, tfloat* distance_op ) {
   int i, j;
-  tfloat tmp, d = 0.0;
+  tfloat tmp;
 
-#pragma omp parallel for simd shared(p1, p2, distance_op) private(tmp,d,j)
+#pragma omp parallel for simd shared(p1, p2, distance_op) private(tmp,j)
   for (i = 0; i < nopt; i++) {
     for (j = 0; j < nopt; j++) {
-      //tfloat d = 0.0;
-
       tmp = p1[i].x - p2[j].x;
-      d += tmp * tmp;
+      tfloat d = tmp * tmp;
 
       tmp = p1[i].y - p2[j].y;
       d += tmp * tmp;

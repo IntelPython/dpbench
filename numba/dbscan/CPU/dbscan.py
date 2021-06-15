@@ -35,7 +35,7 @@ DEFAULT_QUEUE_CAPACITY = 10
 
 
 @jit(nopython=True, parallel=True, fastmath=True)
-def get_neighborhood(n, dim, data, eps, ind_lst, dist_lst, sz_lst, assignments):
+def get_neighborhood(n, dim, data, eps, ind_lst, sz_lst, assignments):
     block_size = 1
     nblocks = n // block_size + int(n % block_size > 0)
     for i in prange(nblocks):
@@ -59,7 +59,7 @@ def get_neighborhood(n, dim, data, eps, ind_lst, dist_lst, sz_lst, assignments):
                     if dist <= eps2:
                         size = sz_lst[j]
                         ind_lst[j * n + size] = k
-                        dist_lst[j * n + size] = dist
+                        #dist_lst[j * n + size] = dist
                         sz_lst[j] = size + 1
 
 
@@ -109,10 +109,10 @@ def compute_clusters(n, min_pts, assignments, sizes, indices_list):
 
 def dbscan(n, dim, data, eps, min_pts, assignments):
     indices_list = np.empty(n*n, dtype=np.int64)
-    distances_list = np.empty(n*n)
+    #distances_list = np.empty(n*n)
     sizes = np.zeros(n, dtype=np.int64)
 
-    get_neighborhood(n, dim, data, eps, indices_list, distances_list, sizes, assignments)
+    get_neighborhood(n, dim, data, eps, indices_list, sizes, assignments)
 
     return compute_clusters(n, min_pts, assignments, sizes, indices_list)
 

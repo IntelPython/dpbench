@@ -32,8 +32,11 @@ int main(int argc, char * argv[])
     else
     {
         sscanf(argv[1], "%d", &STEPS);
-	if (argc == 3) {
+	if (argc >= 3) {
 	  sscanf(argv[2], "%lu", &nopt);
+	}
+	if (argc >= 4) {
+	  sscanf(argv[3], "%d", &repeat);
 	}
     }
 

@@ -34,7 +34,7 @@ int main(int argc, char * argv[])
 	  sscanf(argv[2], "%lu", &nopt);
 	}
 	if (argc >= 4) {
-	  sscanf(argv[3], "%lu", &repeat);
+	  sscanf(argv[3], "%d", &repeat);
 	}	
     }
 

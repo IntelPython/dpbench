@@ -20,11 +20,6 @@
 #      ACC=ha, la, ep <default> : meaning math function accuracy level
 # ==============================================================================
 
-SRC:=                      \
-       data_gen.cpp          \
-       main.cpp
-
-
 # ==============================================================================
 # ############## Configure CFLAGS  #############################################
 # ==============================================================================
@@ -36,8 +31,6 @@ TARGET      := black_scholes
 
 CFLAGS      += -g -O3
 CFLAGS      += -qopt-report
-#CFLAGS      += -qopt-report-phase$(EQCOLON)vec
-#CFLAGS      += -$(QOPT)restrict
 CFLAGS      += -fiopenmp -fopenmp-targets=spir64
 CFLAGS      += -I./
 
@@ -79,32 +72,23 @@ ifeq ($(ACC),ep)
     CFLAGS += -$(FQOPT)imf-precision$(EQCOLON)low -$(FQOPT)imf-domain-exclusion$(EQCOLON)31 -D_VML_ACCURACY_EP_
 endif
 
-#TARGET := $(TARGET)_$(ACC)
-
 # ==============================================================================
 # ############## Define make rules #############################################
 # ==============================================================================
 
 all: black_scholes
 
-# build and run (test size only)
-mkl: black_scholes_mkl
-	./$(TARGET)_mkl 1024
-
-nomkl: black_scholes
-	./$(TARGET) 1024
-
 black_scholes: $(TARGET)
 
-black_scholes_mkl: $(TARGET)_mkl
+comp: $(TARGET)_comp
 
-$(TARGET): $(SRC) black-scholes.cpp
+$(TARGET): data_gen.cpp main.cpp black-scholes.cpp
 	$(CC) $(CPPFLAGS) $(CFLAGS) $^ -o $(TARGET)
 
-$(TARGET)_mkl: $(SRC) black-scholes_mkl.cpp
-	$(CC) $(CPPFLAGS) $(CFLAGS) -mkl -DBLACK_SCHOLES_MKL $^ -o $(TARGET)_mkl
+$(TARGET)_comp: main_comp.cpp data_gen.cpp black-scholes_comp.cpp
+	$(CC) $(CPPFLAGS) $(CFLAGS) $^ -o $(TARGET)_comp
 
 clean:
-	rm -rf *.o *.out *.optrpt *.yaml *~ $(foreach acc,ha la ep,black_scholes black_scholes_mkl)
+	rm -rf *.o *.out *.optrpt *.yaml *~ $(foreach acc,ha la ep,black_scholes black_scholes_comp)
 
-.PHONY: all clean mkl nomkl
+.PHONY: all clean comp black_scholes

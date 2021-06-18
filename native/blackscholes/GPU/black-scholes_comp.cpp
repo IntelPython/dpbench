@@ -59,7 +59,7 @@ void BlackScholesFormula_Compiler( size_t nopt,
     tfloat sig_sig_two = sig * sig * TWO;
 
 #pragma omp target teams distribute \
-  parallel for simd shared(s0, x, t, vcall, vput) map(to: s0[0:nopt], x[0:nopt] ,t[0:nopt]) map(from: vcall[0:nopt], vput[0:nopt]) private(a, b, z, c, e, y, d1, d2, w1, w2)
+  parallel for simd shared(s0, x, t, vcall, vput) private(a, b, z, c, e, y, d1, d2, w1, w2)
 #pragma vector
     for ( i = 0; i < nopt; i++ )
     {

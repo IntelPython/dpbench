@@ -37,7 +37,7 @@ int main(int argc, char * argv[])
 	}
 	if (argc >= 4) {
 	  sscanf(argv[3], "%d", &repeat);
-	}
+	}	
     }
 
     FILE *fptr;

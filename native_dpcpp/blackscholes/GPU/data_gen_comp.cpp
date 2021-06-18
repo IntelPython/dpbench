@@ -8,8 +8,8 @@
 #define _DEFAULT_SOURCE 
 #include <stdlib.h>
 #include <stdio.h>
-#include <omp.h>
 #include <ia32intrin.h>
+#include <omp.h>
 
 #include "euro_opt.h"
 
@@ -39,16 +39,16 @@ void InitData( queue *q, size_t nopt, tfloat* *s0, tfloat* *x, tfloat* *t,
              )
 {
     tfloat *ts0, *tx, *tt, *tvcall_compiler, *tvput_compiler, *tvcall_mkl, *tvput_mkl;
-    size_t i;
+    int i;
 
     /* Allocate aligned memory */
-    ts0             = (tfloat*)_mm_malloc( nopt * sizeof(tfloat), ALIGN_FACTOR);
-    tx              = (tfloat*)_mm_malloc( nopt * sizeof(tfloat), ALIGN_FACTOR);
-    tt              = (tfloat*)_mm_malloc( nopt * sizeof(tfloat), ALIGN_FACTOR);
-    tvcall_compiler = (tfloat*)_mm_malloc( nopt * sizeof(tfloat), ALIGN_FACTOR);
-    tvput_compiler  = (tfloat*)_mm_malloc( nopt * sizeof(tfloat), ALIGN_FACTOR);
-    tvcall_mkl      = (tfloat*)_mm_malloc( nopt * sizeof(tfloat), ALIGN_FACTOR);
-    tvput_mkl       = (tfloat*)_mm_malloc( nopt * sizeof(tfloat), ALIGN_FACTOR);
+    ts0             = (tfloat*)malloc_shared( nopt * sizeof(tfloat), *q);
+    tx              = (tfloat*)malloc_shared( nopt * sizeof(tfloat), *q);
+    tt              = (tfloat*)malloc_shared( nopt * sizeof(tfloat), *q);
+    tvcall_compiler = (tfloat*)malloc_shared( nopt * sizeof(tfloat), *q);
+    tvput_compiler  = (tfloat*)malloc_shared( nopt * sizeof(tfloat), *q);
+    tvcall_mkl      = (tfloat*)malloc_shared( nopt * sizeof(tfloat), *q);
+    tvput_mkl       = (tfloat*)malloc_shared( nopt * sizeof(tfloat), *q);
 
     if ( (ts0 == NULL) || (tx == NULL) || (tt == NULL) ||
          (tvcall_compiler == NULL) || (tvput_compiler == NULL) ||
@@ -63,6 +63,7 @@ void InitData( queue *q, size_t nopt, tfloat* *s0, tfloat* *x, tfloat* *t,
     {
         struct drand48_data seed;
         srand48_r(omp_get_thread_num()+SEED, &seed);
+        #pragma omp for simd
         for ( i = 0; i < nopt; i++ )
         {
             ts0[i] = RandRange( S0L, S0H, &seed );
@@ -86,17 +87,17 @@ void InitData( queue *q, size_t nopt, tfloat* *s0, tfloat* *x, tfloat* *t,
 }
 
 /* Deallocate arrays */
-void FreeData( queue *q, tfloat *s0, tfloat *x, tfloat *t,
+void FreeData( queue* q, tfloat *s0, tfloat *x, tfloat *t,
                    tfloat *vcall_compiler, tfloat *vput_compiler,
                    tfloat *vcall_mkl, tfloat *vput_mkl
              )
 {
     /* Free memory */
-    _mm_free(s0);
-    _mm_free(x);
-    _mm_free(t);
-    _mm_free(vcall_compiler);
-    _mm_free(vput_compiler);
-    _mm_free(vcall_mkl);
-    _mm_free(vput_mkl);
+  free(s0, q->get_context());
+  free(x, q->get_context());
+  free(t, q->get_context());
+  free(vcall_compiler, q->get_context());
+  free(vput_compiler, q->get_context());
+  free(vcall_mkl, q->get_context());
+  free(vput_mkl, q->get_context());
 }

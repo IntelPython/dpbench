@@ -30,12 +30,12 @@
 #define RISK_FREE  0.1f
 #define VOLATILITY 0.2f
 
-void InitData( size_t nopt, tfloat* *s0, tfloat* *x, tfloat* *t,
+void InitData( cl::sycl::queue* q, size_t nopt, tfloat* *s0, tfloat* *x, tfloat* *t,
                    tfloat* *vcall_compiler, tfloat* *vput_compiler,
                    tfloat* *vcall_mkl, tfloat* *vput_mkl
              );
 
-void FreeData( tfloat *s0, tfloat *x, tfloat *t,
+void FreeData( cl::sycl::queue* q, tfloat *s0, tfloat *x, tfloat *t,
                    tfloat *vcall_compiler, tfloat *vput_compiler,
                    tfloat *vcall_mkl, tfloat *vput_mkl
              );

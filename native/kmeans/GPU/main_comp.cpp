@@ -59,20 +59,24 @@ int main(int argc, char * argv[])
       /* Allocate arrays, generate input data */
       InitData( nopt, NUMBER_OF_CENTROIDS, &points, &centroids );
 
-      /* Warm up cycle */
-      for(j = 0; j < 1; j++) {
-	runKmeans(points, centroids, nopt, NUMBER_OF_CENTROIDS);
-      }
+#pragma omp target data map(to: points[0:nopt]) map(tofrom: centroids[0:NUMBER_OF_CENTROIDS])
+      {
+	/* Warm up cycle */
+	for(j = 0; j < 1; j++) {
+	  runKmeans(points, centroids, nopt, NUMBER_OF_CENTROIDS);
+	}
 
-      /* Compute call and put prices using compiler math libraries */
-      printf("Kmeans: Native-C-SVML: Size: %lu MOPS: ", nopt);
+	/* Compute call and put prices using compiler math libraries */
+	printf("Kmeans: Native-C-SVML: Size: %lu MOPS: ", nopt);
 	
-      t1 = timer_rdtsc();
-      for(j = 0; j < repeat; j++) {
-	runKmeans(points, centroids, nopt, NUMBER_OF_CENTROIDS);
+	t1 = timer_rdtsc();
+	for(j = 0; j < repeat; j++) {
+	  runKmeans(points, centroids, nopt, NUMBER_OF_CENTROIDS);
+	}
+	t2 = timer_rdtsc();
       }
-      t2 = timer_rdtsc();
       printf("%.6lf\n", (2.0 * nopt * repeat / 1e6)/((double) (t2 - t1) / getHz()));
+      printf("%lu,%.6lf\n",nopt,((double) (t2 - t1) / getHz()));
       fflush(stdout);
       fprintf(fptr, "%lu,%.6lf\n",nopt,(2.0 * nopt * 100 )/((double) (t2 - t1) / getHz()));
       fprintf(fptr1, "%lu,%.6lf\n",nopt,((double) (t2 - t1) / getHz()));
@@ -84,7 +88,7 @@ int main(int argc, char * argv[])
       FreeData( points, centroids );
 
       nopt = nopt * 2;
-      if (repeat > 2)repeat -= 2;
+      if (repeat > 2) repeat -= 2;
     }
     fclose(fptr);
     fclose(fptr1);

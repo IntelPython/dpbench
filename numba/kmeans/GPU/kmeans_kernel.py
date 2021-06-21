@@ -1,7 +1,7 @@
 import dpctl
 import base_kmeans
 import numpy
-import numba,numba_dppy
+import numba_dppy
 
 REPEAT = 1
 
@@ -20,51 +20,57 @@ def groupByCluster(arrayP,arrayPcluster,arrayC,num_points,num_centroids):
                 minor_distance = my_distance
                 arrayPcluster[idx] = i
 
-@numba.jit(nopython=True,parallel=True,fastmath=True)
-def calCentroidsSum(arrayP, arrayPcluster,
-                    arrayCsum, arrayCnumpoint,
-                    num_points, num_centroids):
-    for i in numba.prange(num_centroids):
-        arrayCsum[i, 0] = 0
-        arrayCsum[i, 1] = 0
-        arrayCnumpoint[i] = 0
+@numba_dppy.kernel
+def calCentroidsSum1(arrayCsum, arrayCnumpoint):
+    i = numba_dppy.get_global_id(0)
+    arrayCsum[i, 0] = 0
+    arrayCsum[i, 1] = 0
+    arrayCnumpoint[i] = 0
 
-    for i in range(num_points):
-        ci = arrayPcluster[i]
-        arrayCsum[ci, 0] += arrayP[i, 0]
-        arrayCsum[ci, 1] += arrayP[i, 1]
-        arrayCnumpoint[ci] += 1
+@numba_dppy.kernel
+def calCentroidsSum2(arrayP, arrayPcluster,arrayCsum, arrayCnumpoint):
+    i = numba_dppy.get_global_id(0)
+    ci = arrayPcluster[i]
+    numba_dppy.atomic.add(arrayCsum,(ci,0),arrayP[i, 0])
+    numba_dppy.atomic.add(arrayCsum,(ci,1),arrayP[i, 1])
+    numba_dppy.atomic.add(arrayCnumpoint,ci,1)
 
+@numba_dppy.kernel
+def updateCentroids(arrayC, arrayCsum, arrayCnumpoint,num_centroids):
+    i = numba_dppy.get_global_id(0)
+    arrayC[i, 0] = arrayCsum[i, 0] / arrayCnumpoint[i]
+    arrayC[i, 1] = arrayCsum[i, 1] / arrayCnumpoint[i]
 
-@numba.jit(nopython=True,parallel=True,fastmath=True)
-def updateCentroids(arrayC, arrayCsum, arrayCnumpoint,
-                    num_centroids):
-    for i in numba.prange(num_centroids):
-        arrayC[i, 0] = arrayCsum[i, 0] / arrayCnumpoint[i]
-        arrayC[i, 1] = arrayCsum[i, 1] / arrayCnumpoint[i]
+@numba_dppy.kernel
+def copy_arrayC(arrayC, arrayP):
+    i = numba_dppy.get_global_id(0)
+    arrayC[i, 0] = arrayP[i, 0]
+    arrayC[i, 1] = arrayP[i, 1]
     
 def kmeans(arrayP, arrayPcluster,
            arrayC, arrayCsum, arrayCnumpoint,
            num_points, num_centroids):
 
+    copy_arrayC[num_centroids,numba_dppy.DEFAULT_LOCAL_SIZE](arrayC, arrayP)
+
     for i in range(ITERATIONS):
-        with dpctl.device_context(base_kmeans.get_device_selector()):
-            groupByCluster[num_points,numba_dppy.DEFAULT_LOCAL_SIZE](
+        groupByCluster[num_points,numba_dppy.DEFAULT_LOCAL_SIZE](
             arrayP, arrayPcluster,
-                arrayC,
-                num_points, num_centroids
-            )
-        
-        calCentroidsSum(
-            arrayP, arrayPcluster,
-            arrayCsum, arrayCnumpoint,
+            arrayC,
             num_points, num_centroids
         )
-
-        updateCentroids(
-            arrayC, arrayCsum, arrayCnumpoint,
-            num_centroids
+        
+        calCentroidsSum1[num_centroids,numba_dppy.DEFAULT_LOCAL_SIZE](
+            arrayCsum, arrayCnumpoint,
         )
+
+        calCentroidsSum2[num_points,numba_dppy.DEFAULT_LOCAL_SIZE](
+            arrayP, arrayPcluster,
+            arrayCsum, arrayCnumpoint,
+        )
+
+        updateCentroids[num_centroids,numba_dppy.DEFAULT_LOCAL_SIZE](
+            arrayC, arrayCsum, arrayCnumpoint,num_centroids)        
 
     return arrayC, arrayCsum, arrayCnumpoint
 
@@ -78,20 +84,12 @@ def printCentroid(arrayC, arrayCsum, arrayCnumpoint, NUMBER_OF_CENTROIDS):
 
 def run_kmeans(arrayP, arrayPclusters,arrayC,arrayCsum,arrayCnumpoint, NUMBER_OF_POINTS, NUMBER_OF_CENTROIDS):
 
-    for i in range(REPEAT):
-        for i1 in range(NUMBER_OF_CENTROIDS):
-            arrayC[i1, 0] = arrayP[i1, 0]
-            arrayC[i1, 1] = arrayP[i1, 1]
-
-        arrayC, arrayCsum, arrayCnumpoint = kmeans(
-            arrayP, arrayPclusters,
-            arrayC, arrayCsum, arrayCnumpoint,
-            NUMBER_OF_POINTS, NUMBER_OF_CENTROIDS
-        )
-
-    #     if i + 1 == REPEAT:
-    #         printCentroid(arrayC, arrayCsum, arrayCnumpoint, NUMBER_OF_CENTROIDS)
-
-    # print("Iterations: {:d}".format(ITERATIONS))
+    with dpctl.device_context(base_kmeans.get_device_selector()):    
+        for i in range(REPEAT):
+            arrayC, arrayCsum, arrayCnumpoint = kmeans(
+                arrayP, arrayPclusters,
+                arrayC, arrayCsum, arrayCnumpoint,
+                NUMBER_OF_POINTS, NUMBER_OF_CENTROIDS
+            )
 
 base_kmeans.run("Kmeans Numba", run_kmeans)

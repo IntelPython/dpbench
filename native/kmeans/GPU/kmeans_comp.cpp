@@ -117,9 +117,6 @@ void runKmeans(
     int NUMBER_OF_POINTS,
     int NUMBER_OF_CENTROIDS
 ) {
-
-#pragma omp target data map(to: points[0:NUMBER_OF_POINTS]) map(tofrom: centroids[0:NUMBER_OF_CENTROIDS])
-  {
     for (int i = 0; i < REPEAT; i++) {
 #pragma omp target teams distribute		\
   parallel for simd      
@@ -130,5 +127,4 @@ void runKmeans(
 
         kmeans(points, centroids, NUMBER_OF_POINTS, NUMBER_OF_CENTROIDS);
     }
-  }
 }

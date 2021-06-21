@@ -138,7 +138,6 @@ def run(name, alg, sizes=14, step=2, nopt=2**15):
     step = int(args.step)
     nopt = int(args.size)
     repeat=int(args.repeat)
-    print(args.usm)
 
     rnd.seed(SEED)
     f1 = open("perf_output.csv",'w',1)

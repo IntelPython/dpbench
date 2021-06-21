@@ -18,7 +18,7 @@
 int main(int argc, char * argv[])
 {
     size_t nopt = 1 << 13;
-    int repeat = 100;
+    int repeat = 1;
     Point* points;
     Centroid* centroids;
 
@@ -85,7 +85,7 @@ int main(int argc, char * argv[])
       FreeData( points, centroids );
 
       nopt = nopt * 2;
-      repeat -= 2;
+      if (repeat > 2) repeat -= 2;
     }
     fclose(fptr);
     fclose(fptr1);

@@ -36,8 +36,6 @@ TARGET      := kmeans
 
 CFLAGS      += -g -O3
 CFLAGS      += -qopt-report
-#CFLAGS      += -qopt-report-phase$(EQCOLON)vec
-#CFLAGS      += -$(QOPT)restrict
 CFLAGS      += -fiopenmp -fopenmp-targets=spir64
 CFLAGS      += -I./
 
@@ -79,8 +77,6 @@ ifeq ($(ACC),ep)
     CFLAGS += -$(FQOPT)imf-precision$(EQCOLON)low -$(FQOPT)imf-domain-exclusion$(EQCOLON)31 -D_VML_ACCURACY_EP_
 endif
 
-#TARGET := $(TARGET)_$(ACC)
-
 # ==============================================================================
 # ############## Define make rules #############################################
 # ==============================================================================
@@ -89,10 +85,15 @@ all: kmeans-gpu
 
 kmeans-gpu: $(TARGET)
 
-$(TARGET): $(SRC) kmeans.cpp
+comp: $(TARGET)_comp
+
+$(TARGET): data_gen.cpp main.cpp kmeans.cpp
 	$(CC) $(CPPFLAGS) $(CFLAGS) $^ -o $(TARGET)
 
+$(TARGET)_comp: data_gen.cpp main_comp.cpp kmeans_comp.cpp
+	$(CC) $(CPPFLAGS) $(CFLAGS) $^ -o $(TARGET)_comp
+
 clean:
-	rm -rf *.o *.out *.optrpt *.yaml *~ kmeans
+	rm -rf *.o *.out *.optrpt *.yaml *~ kmeans kmeans_comp
 
 .PHONY: all clean

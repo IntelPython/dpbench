@@ -21,7 +21,7 @@ using namespace cl::sycl;
 int main(int argc, char * argv[])
 {
   size_t nopt = 1 << 13;
-    int repeat = 100;
+    int repeat = 1;
     Point* points;
     Centroid* centroids;
 
@@ -69,7 +69,7 @@ int main(int argc, char * argv[])
     for(i = 0; i < STEPS; i++) {
     
       /* Allocate arrays, generate input data */
-      InitData( nopt, NUMBER_OF_CENTROIDS, &points, &centroids );
+      InitData( q, nopt, NUMBER_OF_CENTROIDS, &points, &centroids );
 
       /* Warm up cycle */
       for(j = 0; j < 1; j++) {
@@ -95,10 +95,10 @@ int main(int argc, char * argv[])
       printCentroids (centroids, NUMBER_OF_CENTROIDS);
 
       /* Deallocate arrays */
-      FreeData( points, centroids );
+      FreeData( q, points, centroids );
 
       nopt = nopt * 2;
-      repeat -= 2;
+      if(repeat > 2) repeat -= 2;
     }
     fclose(fptr);
     fclose(fptr1);

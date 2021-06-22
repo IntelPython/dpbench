@@ -28,8 +28,8 @@ void InitData( queue *q, size_t nopt, int ncentroids, Point** points, Centroid**
   int i;
   
   /* Allocate aligned memory */
-  pts = (Point*)_mm_malloc( nopt * sizeof(Point), ALIGN_FACTOR);
-  cents = (Centroid*)_mm_malloc( ncentroids * sizeof(Centroid), ALIGN_FACTOR);
+  pts = (Point*)malloc_shared( nopt * sizeof(Point), *q);
+  cents = (Centroid*)malloc_shared( ncentroids * sizeof(Centroid), *q);
 
   if ( (pts == NULL) || (cents == NULL) )
     {
@@ -57,7 +57,6 @@ void InitData( queue *q, size_t nopt, int ncentroids, Point** points, Centroid**
 /* Deallocate arrays */
 void FreeData( queue *q, Point *pts, Centroid * cents)
 {
-    /* Free memory */
-    _mm_free(pts);
-    _mm_free(cents);
+  free(pts, q->get_context());
+  free(cents, q->get_context());
 }

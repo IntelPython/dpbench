@@ -82,7 +82,7 @@ using namespace cl::sycl;
 	    vcall[i] = s0[i]*d1 - x[i]*e*d2;
 	    vput[i]  = vcall[i] - s0[i] + x[i]*e;	    
 	  });
-      });
+      }).wait();
 }
 
 void BlackScholesNaive(

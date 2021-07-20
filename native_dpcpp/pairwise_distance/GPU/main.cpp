@@ -63,7 +63,7 @@ int main(int argc, char * argv[])
     for(i = 0; i < STEPS; i++) {
     
       /* Allocate arrays, generate input data */
-      InitData( nopt, &x1, &x2, &distance_op );
+      InitData( q, nopt, &x1, &x2, &distance_op );
         
       /* Warm up cycle */
       for(j = 0; j < 1; j++) {
@@ -96,7 +96,7 @@ int main(int argc, char * argv[])
       /**************************/
 
       /* Deallocate arrays */
-      FreeData( x1, x2 );
+      FreeData( q, x1, x2 );
 
       nopt = nopt * 2;
       repeat -= 2;

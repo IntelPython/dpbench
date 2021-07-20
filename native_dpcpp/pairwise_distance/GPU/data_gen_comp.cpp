@@ -27,8 +27,8 @@ void InitData( queue* q, size_t nopt, struct point* *x1, struct point* *x2, tflo
   size_t i;
   
   /* Allocate aligned memory */
-  tx1 = (struct point*)_mm_malloc( nopt * sizeof(struct point), ALIGN_FACTOR);
-  tx2 = (struct point*)_mm_malloc( nopt * sizeof(struct point), ALIGN_FACTOR);
+  tx1 = (struct point*)malloc_shared( nopt * sizeof(struct point), *q);
+  tx2 = (struct point*)malloc_shared( nopt * sizeof(struct point), *q);
 
   if ( (tx1 == NULL) || (tx2 == NULL) )
     {
@@ -55,7 +55,7 @@ void InitData( queue* q, size_t nopt, struct point* *x1, struct point* *x2, tflo
   *x1 = tx1;
   *x2 = tx2;
 
-  tfloat* distance = (tfloat*)_mm_malloc( nopt * nopt * sizeof(tfloat), ALIGN_FACTOR);
+  tfloat* distance = (tfloat*)malloc_shared( nopt * nopt * sizeof(tfloat), *q);
   *distance_op = distance;
 
 }
@@ -64,6 +64,6 @@ void InitData( queue* q, size_t nopt, struct point* *x1, struct point* *x2, tflo
 void FreeData( queue* q, struct point *x1, struct point *x2 )
 {
     /* Free memory */
-    _mm_free(x1);
-    _mm_free(x2);
+  free(x1, q->get_context());
+  free(x2, q->get_context());
 }

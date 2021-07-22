@@ -19,12 +19,8 @@ void l2_distance( int nopt, tfloat * x1, tfloat * x2, tfloat* distance_op ) {
   tfloat sum = 0;
 
 #pragma omp target teams distribute \
-<<<<<<< Updated upstream
-  parallel for simd shared(x1, x2, nopt) map(from:sum) reduction(+: sum)
-=======
   parallel for simd shared(x1, x2, nopt) \
   map(from:sum) reduction(+: sum)
->>>>>>> Stashed changes
   for ( i = 0; i < nopt; i++ ) {
     tfloat a = x1[i] - x2[i];
     tfloat b = a * a;

@@ -69,10 +69,7 @@ int main(int argc, char * argv[])
 	}
 	t2 = timer_rdtsc();
       }
-<<<<<<< Updated upstream
-=======
-      
->>>>>>> Stashed changes
+
       printf("%.6lf\n", (2.0 * nopt * 100 / 1e6)/((double) (t2 - t1) / getHz()));
       fflush(stdout);
       fprintf(fptr, "%d,%.6lf\n",nopt,(2.0 * nopt * 100 )/((double) (t2 - t1) / getHz()));

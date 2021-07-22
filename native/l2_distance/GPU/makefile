@@ -94,11 +94,7 @@ comp: $(TARGET)_comp
 $(TARGET): data_gen.cpp main.cpp l2_distance.cpp
 	$(CC) $(CPPFLAGS) $(CFLAGS) $^ -o $(TARGET)
 
-<<<<<<< Updated upstream
-$(TARGET)_comp: data_gen.cpp main_comp.cpp l2_distance.cpp
-=======
 $(TARGET)_comp: data_gen.cpp main_comp.cpp l2_distance_comp.cpp
->>>>>>> Stashed changes
 	$(CC) $(CPPFLAGS) $(CFLAGS) $^ -o $(TARGET)_comp
 
 clean:

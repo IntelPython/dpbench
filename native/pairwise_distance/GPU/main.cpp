@@ -12,7 +12,7 @@
 
 int main(int argc, char * argv[])
 {
-    int nopt = 1 << 10;
+    size_t nopt = 1 << 10;
     int repeat = 100;
     struct point *x1, *x2;
     tfloat* distance_op;
@@ -33,7 +33,7 @@ int main(int argc, char * argv[])
 	  sscanf(argv[2], "%lu", &nopt);
 	}
 	if (argc >= 4) {
-	  sscanf(argv[3], "%lu", &repeat);
+	  sscanf(argv[3], "%d", &repeat);
 	}
     }
 
@@ -63,7 +63,7 @@ int main(int argc, char * argv[])
       }
 
       /* Compute call and put prices using compiler math libraries */
-      printf("Pairwise Distance: Native-C-SVML: Size: %d MOPS: ", nopt);
+      printf("Pairwise Distance: Native-C-SVML: Size: %lu MOPS: ", nopt);
 	
       t1 = timer_rdtsc();
       for(j = 0; j < repeat; j++) {
@@ -72,14 +72,14 @@ int main(int argc, char * argv[])
       t2 = timer_rdtsc();
       printf("%.6lf\n", (2.0 * nopt * 100 / 1e6)/((double) (t2 - t1) / getHz()));
       fflush(stdout);
-      fprintf(fptr, "%d,%.6lf\n",nopt,(2.0 * nopt * 100 )/((double) (t2 - t1) / getHz()));
-      fprintf(fptr1, "%d,%.6lf\n",nopt,((double) (t2 - t1) / getHz()));
+      fprintf(fptr, "%lu,%.6lf\n",nopt,(2.0 * nopt * 100 )/((double) (t2 - t1) / getHz()));
+      fprintf(fptr1, "%lu,%.6lf\n",nopt,((double) (t2 - t1) / getHz()));
       /**************************/
 
 #if 1//PRINT_RESULT
       tfloat total_distances = 0.0;
-      for (unsigned int i = 0; i < nopt; i++) {
-	for (unsigned int j = 0; j < nopt; j++) {
+      for (size_t i = 0; i < nopt; i++) {
+	for (size_t j = 0; j < nopt; j++) {
 	  total_distances += distance_op[i*nopt + j];
 	}
       }

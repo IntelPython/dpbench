@@ -13,7 +13,8 @@ except:
     now = default_timer
     get_mops = lambda t0, t1, n: (n / (t1 - t0),t1-t0)
 
-DEFAULT_SEED = 43    
+SEED = 7777777
+DEFAULT_SEED=SEED     
 DEFAULT_NBINS = 20
 DEFAULT_RMIN, DEFAULT_RMAX = 0.1, 50
 DEFAULT_RBINS = np.logspace(

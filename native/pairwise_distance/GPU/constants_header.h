@@ -26,8 +26,8 @@ struct point {
   tfloat z;
 };
 
-void InitData( int nopt, struct point* *x1, struct point* *x2, tfloat** distance_op );
+void InitData( size_t nopt, struct point* *x1, struct point* *x2, tfloat** distance_op );
 void FreeData( struct point *x1, struct point *x2 );
-void pairwise_distance( int nopt, struct point* x1, struct point* x2, tfloat* distance_op );
+void pairwise_distance( size_t nopt, struct point* x1, struct point* x2, tfloat* distance_op );
 
 #endif // #ifndef __CONSTANTS_HEADER_H

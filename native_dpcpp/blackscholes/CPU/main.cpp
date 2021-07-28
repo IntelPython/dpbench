@@ -90,7 +90,6 @@ int main(int argc, char * argv[])
 #else
 	BlackScholesFormula_Compiler( nopt, q, RISK_FREE, VOLATILITY, s0, x, t, vcall_compiler, vput_compiler );
 #endif
-	q->wait();
       }	  
       t2 = timer_rdtsc();
 

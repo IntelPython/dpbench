@@ -97,7 +97,7 @@ using namespace cl::sycl;
 	  d_vcall[i] = d_s0[i]*d1 - d_x[i]*e*d2;
 	  d_vput[i]  = d_vcall[i] - d_s0[i] + d_x[i]*e;	    
 	});
-    });
+    }).wait();
 
   // copy data host to device
   q->memcpy(vcall, d_vcall, nopt * sizeof(tfloat));

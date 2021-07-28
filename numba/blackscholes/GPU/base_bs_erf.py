@@ -7,6 +7,7 @@ from __future__ import print_function
 import numpy as np
 import numpy.random as rnd
 import sys,json,os
+import dpctl, dpctl.memory as dpmem
 
 try:
     import numpy.random_intel as rnd
@@ -79,39 +80,66 @@ def get_device_selector (is_gpu = True):
         return "opencl:" + device_selector
 
     if os.environ.get('SYCL_DEVICE_FILTER') == "level_zero":
-        return "level0:" + device_selector
+        return "level_zero:" + device_selector
 
     return os.environ.get('SYCL_DEVICE_FILTER')
 
-def gen_data(nopt):
-    return (
-        rnd.uniform(S0L, S0H, nopt),
-        rnd.uniform(XL, XH, nopt),
-        rnd.uniform(TL, TH, nopt),
-    )
+def gen_data_np(nopt):
+    return (rnd.uniform(S0L, S0H, nopt),
+            rnd.uniform(XL, XH, nopt),
+            rnd.uniform(TL, TH, nopt),
+            np.zeros(nopt, dtype=np.float64),
+            -np.ones(nopt, dtype=np.float64))
+
+def gen_data_usm(nopt):
+    # init numpy obj
+    price_buf = rnd.uniform(S0L, S0H, nopt)
+    strike_buf = rnd.uniform(XL, XH, nopt)
+    t_buf = rnd.uniform(TL, TH, nopt)
+    call_buf = np.zeros(nopt, dtype=np.float64)
+    put_buf  = -np.ones(nopt, dtype=np.float64)    
+
+    with dpctl.device_context(get_device_selector()):    
+        #copy numpy to usmshared
+        price_usm = dpmem.MemoryUSMShared(nopt*np.dtype('f8').itemsize)
+        strike_usm = dpmem.MemoryUSMShared(nopt*np.dtype('f8').itemsize)
+        t_usm = dpmem.MemoryUSMShared(nopt*np.dtype('f8').itemsize)
+        call_usm = dpmem.MemoryUSMShared(nopt*np.dtype('f8').itemsize)
+        put_usm = dpmem.MemoryUSMShared(nopt*np.dtype('f8').itemsize)
+
+        #return numpy obj with usmshared obj set to buffer
+        price_usm.copy_from_host(price_buf.view("u1"))
+        strike_usm.copy_from_host(strike_buf.view("u1"))
+        t_usm.copy_from_host(t_buf.view("u1"))
+        call_usm.copy_from_host(call_buf.view("u1"))
+        put_usm.copy_from_host(put_buf.view("u1"))        
+
+    return(np.ndarray((nopt,), buffer=price_usm, dtype='f8'),
+           np.ndarray((nopt,), buffer=strike_usm, dtype='f8'),
+           np.ndarray((nopt,), buffer=t_usm, dtype='f8'),
+           np.ndarray((nopt,), buffer=call_usm, dtype='f8'),
+           np.ndarray((nopt,), buffer=put_usm, dtype='f8'))
 
 ##############################################	
 
 # create input data, call blackscholes computation function (alg)
-def run(name, alg, sizes=14, step=2, nopt=2**15, nparr=True, dask=False, pass_args=False):
+def run(name, alg, sizes=14, step=2, nopt=2**15):
     import argparse
     parser = argparse.ArgumentParser()
     parser.add_argument('--steps', required=False, default=sizes,  help="Number of steps")
     parser.add_argument('--step',  required=False, default=step,   help="Factor for each step")
-    parser.add_argument('--chunk', required=False, default=2000000,help="Chunk size for Dask")
     parser.add_argument('--size',  required=False, default=nopt,   help="Initial data size")
     parser.add_argument('--repeat',required=False, default=100,    help="Iterations inside measured region")
-    parser.add_argument('--dask',  required=False, default="sq",   help="Dask scheduler: sq, mt, mp")
     parser.add_argument('--text',  required=False, default="",     help="Print with each result")
     parser.add_argument('--json',  required=False, default=__file__.replace('py','json'), help="output json data filename")
+    parser.add_argument('--usm',   required=False, action='store_true',  help="Use USM Shared or pure numpy")
 	
     args = parser.parse_args()
     sizes= int(args.steps)
     step = int(args.step)
     nopt = int(args.size)
-    chunk= int(args.chunk)
     repeat=int(args.repeat)
- 
+
     output = {}
     output['name']      = name
     output['sizes']     = sizes
@@ -120,20 +148,6 @@ def run(name, alg, sizes=14, step=2, nopt=2**15, nparr=True, dask=False, pass_ar
     output['randseed']  = SEED
     output['metrics']   = []
     kwargs={}
-    
-    rnd.seed(SEED)
-
-    if(dask):
-        import dask
-        import dask.multiprocessing
-        import dask.array as da
-        dask_modes = {
-	    "sq": 'single-threaded',
-	    "mt": 'threads',
-	    "mp": 'processes'
-	}
-        kwargs = {"schd": dask_modes[args.dask]}
-        name += "-"+args.dask
 
     rnd.seed(SEED)
     f1 = open("perf_output.csv",'w',1)
@@ -141,39 +155,22 @@ def run(name, alg, sizes=14, step=2, nopt=2**15, nparr=True, dask=False, pass_ar
     
     for i in xrange(sizes):
         # generate input data
-        price, strike, t = gen_data(nopt)
-        if not nparr:
-            call = [0.0 for i in range(nopt)]
-            put = [-1.0 for i in range(nopt)]
-            price=list(price)
-            strike=list(strike)
-            t=list(t)
-            repeat=1 # !!!!! ignore repeat count
-        if dask:
-            assert(not pass_args)
-            price = da.from_array(price, chunks=(chunk,), name=False)
-            strike = da.from_array(strike, chunks=(chunk,), name=False)
-            t = da.from_array(t, chunks=(chunk,), name=False)
-        if pass_args:
-            call = np.zeros(nopt, dtype=np.float64)
-            put  = -np.ones(nopt, dtype=np.float64)
+        if args.usm is True:
+            price, strike, t, call, put = gen_data_usm(nopt)
+        else:
+            price, strike, t, call, put = gen_data_np(nopt)
+            
         iterations = xrange(repeat)
         print("ERF: {}: Size: {}".format(name, nopt), end=' ', flush=True)
         sys.stdout.flush()
 
         # call algorithm
-        if pass_args:
-            alg(nopt, price, strike, t, RISK_FREE, VOLATILITY, call, put) #warmup
+        alg(nopt, price, strike, t, RISK_FREE, VOLATILITY, call, put) #warmup
             
-            t0 = now()
-            for _ in iterations:
-                alg(nopt, price, strike, t, RISK_FREE, VOLATILITY, call, put, **kwargs)
-        else:
-            alg(nopt, price, strike, t, RISK_FREE, VOLATILITY) #warmup
+        t0 = now()
+        for _ in iterations:
+            alg(nopt, price, strike, t, RISK_FREE, VOLATILITY, call, put)
             
-            t0 = now()
-            for _ in iterations:
-                alg(nopt, price, strike, t, RISK_FREE, VOLATILITY, **kwargs)
         mops,time = get_mops(t0, now(), nopt)
 
         # record performance data - mops, time

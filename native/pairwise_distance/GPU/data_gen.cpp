@@ -19,10 +19,10 @@ tfloat RandRange( tfloat a, tfloat b, struct drand48_data *seed ) {
     return r*(b-a) + a;
 }
 
-void InitData( int nopt, struct point* *x1, struct point* *x2, tfloat** distance_op )
+void InitData( size_t nopt, struct point* *x1, struct point* *x2, tfloat** distance_op )
 {
   struct point *tx1, *tx2;
-  int i;
+  size_t i;
   
   /* Allocate aligned memory */
   tx1 = (struct point*)_mm_malloc( nopt * sizeof(struct point), ALIGN_FACTOR);

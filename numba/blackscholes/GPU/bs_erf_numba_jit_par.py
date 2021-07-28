@@ -43,4 +43,4 @@ def black_scholes(nopt, price, strike, t, rate, vol, call, put):
         black_scholes_kernel( nopt, price, strike, t, rate, vol, call, put )
 
 # call the run function to setup input data and performance data infrastructure
-base_bs_erf.run("Numba@jit-loop-par", black_scholes, nparr=True, pass_args=True)
+base_bs_erf.run("Numba@jit-loop-par", black_scholes)

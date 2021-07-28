@@ -48,7 +48,7 @@ void pairwise_distance( queue* q, size_t nopt, struct point * p1, struct point *
 	    }
 	  }
 	});
-    });
+    }).wait();
 
   q->memcpy(distance_op, d_distance_op, nopt * nopt * sizeof(tfloat));
 

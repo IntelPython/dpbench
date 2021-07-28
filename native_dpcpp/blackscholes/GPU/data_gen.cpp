@@ -13,6 +13,8 @@
 
 #include "euro_opt.h"
 
+using namespace cl::sycl;
+
 tfloat RandRange( tfloat a, tfloat b, struct drand48_data *seed ) {
     double r;
     drand48_r(seed, &r);
@@ -31,7 +33,7 @@ tfloat RandRange( tfloat a, tfloat b, struct drand48_data *seed ) {
 //     vcall_compiler, vcall_mkl
 //     vput_compiler, vput_mkl
 */
-void InitData( size_t nopt, tfloat* *s0, tfloat* *x, tfloat* *t,
+void InitData( queue *q, size_t nopt, tfloat* *s0, tfloat* *x, tfloat* *t,
                    tfloat* *vcall_compiler, tfloat* *vput_compiler,
                    tfloat* *vcall_mkl, tfloat* *vput_mkl
              )
@@ -61,7 +63,6 @@ void InitData( size_t nopt, tfloat* *s0, tfloat* *x, tfloat* *t,
     {
         struct drand48_data seed;
         srand48_r(omp_get_thread_num()+SEED, &seed);
-        #pragma omp for simd
         for ( i = 0; i < nopt; i++ )
         {
             ts0[i] = RandRange( S0L, S0H, &seed );
@@ -85,7 +86,7 @@ void InitData( size_t nopt, tfloat* *s0, tfloat* *x, tfloat* *t,
 }
 
 /* Deallocate arrays */
-void FreeData( tfloat *s0, tfloat *x, tfloat *t,
+void FreeData( queue *q, tfloat *s0, tfloat *x, tfloat *t,
                    tfloat *vcall_compiler, tfloat *vput_compiler,
                    tfloat *vcall_mkl, tfloat *vput_mkl
              )

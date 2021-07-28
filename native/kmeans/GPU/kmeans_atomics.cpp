@@ -74,9 +74,6 @@ void kmeans(
     int num_points,
     int num_centroids
 	    ) {
-
-#pragma omp target data map(to: h_points[0:num_points]) map(tofrom: h_centroids[0:num_centroids])
-  {
   
     for(int i = 0; i < ITERATIONS; i++) {
       groupByCluster(
@@ -98,8 +95,6 @@ void kmeans(
 		      num_centroids
 		      );
     }
-
-  }
 }
 
 void printCentroids(
@@ -123,16 +118,17 @@ void runKmeans(
     int NUMBER_OF_CENTROIDS
 ) {
 
+#pragma omp target data map(to: points[0:NUMBER_OF_POINTS]) map(tofrom: centroids[0:NUMBER_OF_CENTROIDS])
+  {
     for (int i = 0; i < REPEAT; i++) {
+#pragma omp target teams distribute		\
+  parallel for simd      
         for (int ci = 0; ci < NUMBER_OF_CENTROIDS; ci++) {
             centroids[ci].x = points[ci].x;
             centroids[ci].y = points[ci].y;
         }
 
         kmeans(points, centroids, NUMBER_OF_POINTS, NUMBER_OF_CENTROIDS);
-        
-        //if (i + 1 == REPEAT) {
-	//   printCentroids(centroids);
-        //}
     }
+  }
 }

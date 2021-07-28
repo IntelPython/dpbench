@@ -14,8 +14,8 @@
 #   define SQRT(x)     sqrt(x)
 #endif
 
-void pairwise_distance( int nopt, struct point * p1, struct point * p2, tfloat* distance_op ) {
-  int i, j;
+void pairwise_distance( size_t nopt, struct point * p1, struct point * p2, tfloat* distance_op ) {
+  size_t i, j;
   tfloat tmp;
 #pragma omp target teams distribute					\
   parallel for simd shared(p1, p2, distance_op) map(to:p1[0:nopt],p2[0:nopt]) map(from:distance_op[0:nopt*nopt]) private(tmp,j)

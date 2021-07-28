@@ -20,11 +20,6 @@
 #      ACC=ha, la, ep <default> : meaning math function accuracy level
 # ==============================================================================
 
-SRC:=                      \
-       data_gen.cpp          \
-       main.cpp
-
-
 # ==============================================================================
 # ############## Configure CFLAGS  #############################################
 # ==============================================================================
@@ -50,15 +45,17 @@ endif
 
 all: pairwise-distance
 
-nomkl: pairwise_distance
-	./$(TARGET) 1024
-
 pairwise-distance: $(TARGET)
 
-$(TARGET): $(SRC) pairwise_distance.cpp
+comp: $(TARGET)_comp
+
+$(TARGET): data_gen.cpp main.cpp pairwise_distance.cpp
 	$(CC) $(CPPFLAGS) $(CFLAGS) $^ -o $(TARGET)
 
+$(TARGET)_comp: data_gen_comp.cpp main.cpp pairwise_distance_comp.cpp
+	$(CC) $(CPPFLAGS) $(CFLAGS) $^ -o $(TARGET)_comp
+
 clean:
-	rm -rf *.o *.out *.optrpt *.yaml *~ pairwise_distance
+	rm -rf *.o *.out *.optrpt *.yaml *~ pairwise_distance pairwise_distance_comp
 
 .PHONY: all clean

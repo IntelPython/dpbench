@@ -13,13 +13,15 @@
 
 #include "data_gen.h"
 
+using namespace cl::sycl;
+
 tfloat RandRange( tfloat a, tfloat b, struct drand48_data *seed ) {
     double r;
     drand48_r(seed, &r);
     return r*(b-a) + a;
 }
 
-void InitData( size_t nopt, int ncentroids, Point** points, Centroid** centroids )
+void InitData( queue *q, size_t nopt, int ncentroids, Point** points, Centroid** centroids )
 {
   Point *pts;
   Centroid *cents;
@@ -53,7 +55,7 @@ void InitData( size_t nopt, int ncentroids, Point** points, Centroid** centroids
 }
 
 /* Deallocate arrays */
-void FreeData( Point *pts, Centroid * cents)
+void FreeData( queue *q, Point *pts, Centroid * cents)
 {
     /* Free memory */
     _mm_free(pts);

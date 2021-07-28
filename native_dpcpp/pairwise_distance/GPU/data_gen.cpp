@@ -13,13 +13,15 @@
 
 #include "constants_header.h"
 
+using namespace cl::sycl;
+
 tfloat RandRange( tfloat a, tfloat b, struct drand48_data *seed ) {
     double r;
     drand48_r(seed, &r);
     return r*(b-a) + a;
 }
 
-void InitData( size_t nopt, struct point* *x1, struct point* *x2, tfloat** distance_op )
+void InitData( queue* q, size_t nopt, struct point* *x1, struct point* *x2, tfloat** distance_op )
 {
   struct point *tx1, *tx2;
   size_t i;
@@ -35,11 +37,10 @@ void InitData( size_t nopt, struct point* *x1, struct point* *x2, tfloat** dista
     }
 
   /* NUMA-friendly data init */
-  //#pragma omp parallel
+#pragma omp parallel
   {
     struct drand48_data seed;
     srand48_r(omp_get_thread_num()+SEED, &seed);
-    //#pragma omp for simd
     for ( i = 0; i < nopt; i++ )
       {
 	tx1[i].x = RandRange( XL, XH, &seed );
@@ -60,7 +61,7 @@ void InitData( size_t nopt, struct point* *x1, struct point* *x2, tfloat** dista
 }
 
 /* Deallocate arrays */
-void FreeData( struct point *x1, struct point *x2 )
+void FreeData( queue* q, struct point *x1, struct point *x2 )
 {
     /* Free memory */
     _mm_free(x1);

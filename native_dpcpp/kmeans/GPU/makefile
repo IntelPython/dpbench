@@ -52,10 +52,15 @@ all: kmeans-gpu
 
 kmeans-gpu: $(TARGET)
 
-$(TARGET): $(SRC) kmeans.cpp
+comp:$(TARGET)_comp
+
+$(TARGET): data_gen.cpp main.cpp kmeans.cpp
 	$(CC) $(CPPFLAGS) $(CFLAGS) $^ -o $(TARGET)
 
+$(TARGET)_comp: data_gen_comp.cpp main.cpp kmeans_comp.cpp
+	$(CC) $(CPPFLAGS) $(CFLAGS) $^ -o $(TARGET)_comp
+
 clean:
-	rm -rf *.o *.out *.optrpt *.yaml *~ kmeans
+	rm -rf *.o *.out *.optrpt *.yaml *~ kmeans kmeans_comp
 
 .PHONY: all clean

@@ -13,13 +13,13 @@
 
 void runKmeans(Point* points, 
 	       Centroid* centroids,
-	       int NUMBER_OF_POINTS,
-	       int NUMBER_OF_CENTROIDS
+	       size_t NUMBER_OF_POINTS,
+	       size_t NUMBER_OF_CENTROIDS
 	       );
 
 void printCentroids(
 		    Centroid* centroids,
-		    int NUMBER_OF_CENTROIDS
+		    size_t NUMBER_OF_CENTROIDS
 		    );
 
 #endif

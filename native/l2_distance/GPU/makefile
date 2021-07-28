@@ -87,15 +87,17 @@ endif
 
 all: l2-distance
 
-nomkl: l2_distance
-	./$(TARGET) 1024
-
 l2-distance: $(TARGET)
 
-$(TARGET): $(SRC) l2_distance.cpp
+comp: $(TARGET)_comp
+
+$(TARGET): data_gen.cpp main.cpp l2_distance.cpp
 	$(CC) $(CPPFLAGS) $(CFLAGS) $^ -o $(TARGET)
 
+$(TARGET)_comp: data_gen.cpp main_comp.cpp l2_distance_comp.cpp
+	$(CC) $(CPPFLAGS) $(CFLAGS) $^ -o $(TARGET)_comp
+
 clean:
-	rm -rf *.o *.out *.optrpt *.yaml *~ l2_distance
+	rm -rf *.o *.out *.optrpt *.yaml *~ l2_distance l2_distance_comp
 
 .PHONY: all clean

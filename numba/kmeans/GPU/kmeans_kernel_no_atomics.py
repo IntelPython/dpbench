@@ -27,7 +27,7 @@ def calCentroidsSum1(arrayCsum, arrayCnumpoint):
     arrayCsum[i, 1] = 0
     arrayCnumpoint[i] = 0
 
-def calCentroidsSum2(arrayP, arrayPcluster,arrayCsum, arrayCnumpoint):
+def calCentroidsSum2(arrayP, arrayPcluster,arrayCsum, arrayCnumpoint, num_points):
     for i in range(num_points):
         ci = arrayPcluster[i]
         arrayCsum[ci, 0] += arrayP[i, 0]
@@ -56,13 +56,10 @@ def kmeans(arrayP, arrayPcluster,
                 arrayCsum, arrayCnumpoint,
             )
 
-        calCentroidsSum2[num_points,numba_dppy.DEFAULT_LOCAL_SIZE](
-            arrayP, arrayPcluster,
-            arrayCsum, arrayCnumpoint,
-        )
+        calCentroidsSum2(arrayP, arrayPcluster, arrayCsum, arrayCnumpoint, num_points)
 
         with dpctl.device_context("opencl:gpu"):
-            updateCentroids[num_num_centroids,numba_dppy.DEFAULT_LOCAL_SIZE](
+            updateCentroids[num_centroids,numba_dppy.DEFAULT_LOCAL_SIZE](
                 arrayC, arrayCsum, arrayCnumpoint,num_centroids)        
 
     return arrayC, arrayCsum, arrayCnumpoint

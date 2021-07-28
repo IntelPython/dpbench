@@ -5,7 +5,6 @@
 
 from __future__ import print_function
 import numpy as np
-import numpy.random as rnd
 import sys,json,os
 import dpctl, dpctl.memory as dpmem
 

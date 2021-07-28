@@ -55,7 +55,6 @@ def run(name, alg, sizes=10, step=2, nopt=2**16):
     repeat=int(args.repeat)
     dims = int(args.d)
 
-    rnd.seed(SEED)
     f=open("perf_output.csv",'w',1)
     f2 = open("runtimes.csv",'w',1)
 
@@ -67,6 +66,8 @@ def run(name, alg, sizes=10, step=2, nopt=2**16):
     output['dims']      = dims
     output['randseed']  = SEED
     output['metrics']   = []
+
+    rnd.seed(SEED)
 
     for i in xrange(sizes):
         X,Y = gen_data(nopt,dims)
@@ -81,7 +82,7 @@ def run(name, alg, sizes=10, step=2, nopt=2**16):
 
         mops,time = get_mops(t0, now(), nopt)
         out_msg_tmpl = 'ERF: {}: Size: {} Dim: {} MOPS: {} Time: {}'
-        print(out_msg_tmpl.format(name, nopt, dims, mops, time))
+        print("ERF: {:15s} | Size: {:10d} | MOPS: {:15.2f} | TIME: {:10.6f}".format(name, nopt, mops,time),flush=True)
         output['metrics'].append((nopt,mops,time))
         f.write(str(nopt) + "," + str(mops*2*repeat) + "\n")
         f2.write(str(nopt) + "," + str(time) + "\n")

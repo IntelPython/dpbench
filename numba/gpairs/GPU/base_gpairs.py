@@ -2,8 +2,9 @@
 #
 # SPDX-License-Identifier: MIT
 
-import os
+import os,json
 import numpy as np
+import numpy.random as rnd
 try:
     import itimer as it
     now = it.itime
@@ -49,7 +50,7 @@ def get_device_selector (is_gpu = True):
 def random_weighted_points(n, Lbox, seed=DEFAULT_SEED):
     """
     """
-    rng = np.random.RandomState(seed)
+    rng = rnd.RandomState(seed)
     data = rng.uniform(0, 1, n*4)
     x, y, z, w = (
         data[:n]*Lbox, data[n:2*n]*Lbox, data[2*n:3*n]*Lbox, data[3*n:])
@@ -100,12 +101,23 @@ def run(name, alg, sizes=10, step=2, nopt=2**10):
     parser.add_argument('--size',  required=False, default=nopt,   help="Initial data size")
     parser.add_argument('--repeat',required=False, default=100,    help="Iterations inside measured region")
     parser.add_argument('--text',  required=False, default="",     help="Print with each result")
+    parser.add_argument('--json',  required=False, default=__file__.replace('py','json'), help="output json data filename")
     
     args = parser.parse_args()
     sizes= int(args.steps)
     step = int(args.step)
     nopt = int(args.size)
     repeat=int(args.repeat)
+ 
+    output = {}
+    output['name']      = name
+    output['sizes']     = sizes
+    output['step']      = step
+    output['repeat']    = repeat
+    output['randseed']  = SEED
+    output['metrics']   = []
+
+    rnd.seed(SEED)
 
     f=open("perf_output.csv",'w')
     f2 = open("runtimes.csv",'w',1)
@@ -123,10 +135,12 @@ def run(name, alg, sizes=10, step=2, nopt=2**10):
         mops,time = get_mops(t0, now(), nopt)
         f.write(str(nopt) + "," + str(mops*2*repeat) + "\n")
         f2.write(str(nopt) + "," + str(time) + "\n")
-        print(str(nopt) + "," + str(time) + "\n")
+        print("ERF: {:15s} | Size: {:10d} | MOPS: {:15.2f} | TIME: {:10.6f}".format(name, nopt, mops*2*repeat,time),flush=True)
+        output['metrics'].append((nopt,mops,time))
         nopt *= step
         repeat -= step
         if repeat < 1:
             repeat = 1
+    json.dump(output,open(args.json,'w'),indent=2, sort_keys=True)
     f.close()
     f2.close()

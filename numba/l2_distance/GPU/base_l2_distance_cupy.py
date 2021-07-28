@@ -52,6 +52,8 @@ def run(name, alg, sizes=15, step=2, nopt=c**16):
     repeat=int(args.repeat)
     dims = int(args.d)
 
+    rnd.seed(SEED)
+
     f=open("perf_output.csv",'w')
     for i in xrange(sizes):
         X,Y = gen_data(nopt,dims)

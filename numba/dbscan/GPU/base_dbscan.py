@@ -183,4 +183,4 @@ def run(name, alg, sizes=5, step=2, nopt=2**10):
 
             nopt *= args.step
             repeat = max(repeat - args.step, 1)
-   json.dump(output,open(args.json,'w'),indent=2, sort_keys=True)
+    json.dump(output,open(args.json,'w'),indent=2, sort_keys=True)

@@ -1,7 +1,10 @@
 import numpy as np
 #from numba import njit
 from numba import njit
-import numba_dppy
+try:
+   import numba_dppy
+except:
+   numba_dppy = None
 #from numba.dppy.dppy_driver import driver as drv
 #import joblib
 #import multiprocessing

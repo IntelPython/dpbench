@@ -53,7 +53,7 @@ def run(name, alg, sizes=10, step=2, nopt=2**10):
     parser.add_argument('--steps', required=False, default=sizes, help="Number of steps")
     parser.add_argument('--step', required=False, default=step, help="Factor for each step")
     parser.add_argument('--size', required=False, default=nopt, help="Initial data size")
-    parser.add_argument('--repeat', required=False, default=100, help="Iterations inside measured region")
+    parser.add_argument('--repeat', required=False, default=1, help="Iterations inside measured region")
     parser.add_argument('--text', required=False, default="", help="Print with each result")
     parser.add_argument('--dims', required=False, type=int, default=2**7, help='Dimensions')
     parser.add_argument('--rand', required=False, type=bool, default=True, help='Rand?')

@@ -73,6 +73,9 @@ def run(name, alg, sizes=6, step=2, nopt=2**13):
         f2.write(str(nopt) + "," + str(time) + "\n")
 
         nopt *= step
+        repeat -= step
+        if repeat < 1:
+            repeat = 1        
 
     f.close()
     f2.close()

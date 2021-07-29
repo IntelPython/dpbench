@@ -84,7 +84,7 @@ int main(int argc, char * argv[]) {
     int nFeatures = 2;
     int minPts = 3;
     double eps = 1.0;
-    int repeat = 100;
+    int repeat = 1;
 
     if (argc < 2) {
         printf("Usage: expect STEPS input integer parameter, defaulting to %d\n", STEPS);

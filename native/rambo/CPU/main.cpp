@@ -46,7 +46,7 @@ static double stof (char *h) {
 }
 
 int main(int argc, char * argv[]) {
-    constexpr int repeat = 100;
+    int repeat = 1;
     int STEPS = 7;
     size_t nPoints = pow(2, 13);
 
@@ -95,6 +95,7 @@ int main(int argc, char * argv[]) {
         fprintf(fptr1, "%zu,%.6lf\n", nPoints, time);
 
         nPoints = nPoints * 2;
+	if (repeat > 2) repeat -= 2;
     }
     fclose(fptr);
     fclose(fptr1);

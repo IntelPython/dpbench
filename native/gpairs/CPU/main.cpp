@@ -13,7 +13,7 @@
 int main(int argc, char * argv[])
 {
     int nopt = 1024;
-    int repeat = 100;
+    int repeat = 1;
     int STEPS = 10;
 
     clock_t t1 = 0, t2 = 0;
@@ -72,7 +72,7 @@ int main(int argc, char * argv[])
       FreeData( x1, y1, z1, w1, x2, y2, z2, w2, rbins, results_test );
 
       nopt = nopt * 2;
-      repeat -= 2;
+      if (repeat > 2) repeat -= 2;
     }
     
     fclose(fptr);

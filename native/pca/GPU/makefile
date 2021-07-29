@@ -1,3 +1,8 @@
+# clang++ -Wall -w -I./source/utils -fsycl ./source/gradient_boosted_trees/gbt_reg_dense_batch.cpp -o _results/clang_intel64_parallel_so/gbt_reg_dense_batch.exe -Wl,--start-group -Wl,-L"/localdisk/work/adarshyoga/software/daal/latest/lib/intel64",-Bdynamic,-ldaal_core,-Bdynamic -Wl,-Bdynamic,-ldaal_thread,-Bdynamic -lpthread -ldl -lOpenCL -L"/opt/intel/inteloneapi/tbb/2021.1-beta06/env/../lib/intel64/gcc4.8" -ltbb -ltbbmalloc "/localdisk/work/adarshyoga/software/daal/latest/lib/intel64"/libdaal_sycl.a  -Wl,--end-group
+
+#_results/clang_intel64_parallel_so/gbt_reg_dense_batch.exe > _results/clang_intel64_parallel_so/gbt_reg_dense_batch.res
+
+
 # Copyright (C) 2014-2015, 2018 Intel Corporation
 #
 # SPDX-License-Identifier: MIT
@@ -20,82 +25,50 @@
 #      ACC=ha, la, ep <default> : meaning math function accuracy level
 # ==============================================================================
 
-SRC:=                      \
-       data_gen.cpp          \
-       main.cpp
+SRC:= main.cpp
 
 
 # ==============================================================================
 # ############## Configure CFLAGS  #############################################
 # ==============================================================================
-CC          := icc
+CC          := clang++
 QOPT        :=
 FQOPT       :=f
 EQCOLON     :="="
-TARGET      := l2_distance
+TARGET      := pca
 
 CFLAGS      += -g -O3
-CFLAGS      += -qopt-report
-#CFLAGS      += -qopt-report-phase$(EQCOLON)vec
-#CFLAGS      += -$(QOPT)restrict
-CFLAGS      += -qopenmp
+CFLAGS      += -Wall -w -fsycl
 CFLAGS      += -I./
 
-PREC ?= f
+DAAL_PATH = $(DAALROOT)/lib/intel64
+override threading = parallel
+DAAL_LIB_T := -ldaal_thread
+DAAL_LIB := -L$(DAAL_PATH),-Bdynamic,-ldaal_core,-Bdynamic -Wl,$(DAAL_LIB_T)
+
+TBB_PATH = $(TBBROOT)/lib/intel64/gcc4.8
+EXT_LIB += -lpthread -ldl -lOpenCL $(addprefix -L,$(TBB_PATH)) -ltbb -ltbbmalloc
+
+LFLAGS := -Wl,--start-group -Wl,$(DAAL_LIB),$(EXT_LIB) $(DAAL_PATH)/libonedal_sycl.a -Wl,--end-group
+
+PREC ?= d
 ifeq ($(PREC),d)
 else
     CFLAGS += -D__DO_FLOAT__
 endif
 
-TARGET_ARCH ?= auto
-
-ifeq ($(TARGET_ARCH),SSE)
-    CFLAGS += -$(QOPT)xSSE4.2
-endif
-ifeq ($(TARGET_ARCH),AVX)
-    CFLAGS += -$(QOPT)xAVX
-endif
-ifeq ($(TARGET_ARCH),AVX2)
-    CFLAGS += -$(QOPT)xCORE_AVX2
-endif
-ifeq ($(TARGET_ARCH),MIC)
-    CFLAGS += -mmic -opt-streaming-stores always
-endif
-ifeq ($(TARGET_ARCH),host)
-    CFLAGS += -xhost
-endif
-ifeq ($(TARGET_ARCH),auto)
-    CFLAGS += -xCORE-AVX2 -axCOMMON-AVX512
-endif
-
-ACC ?= ha
-ifeq ($(ACC),ha)
-    CFLAGS += -$(FQOPT)imf-precision$(EQCOLON)high -D_VML_ACCURACY_HA_
-endif
-ifeq ($(ACC),la)
-    CFLAGS += -$(FQOPT)imf-precision$(EQCOLON)medium -D_VML_ACCURACY_LA_
-endif
-ifeq ($(ACC),ep)
-    CFLAGS += -$(FQOPT)imf-precision$(EQCOLON)low -$(FQOPT)imf-domain-exclusion$(EQCOLON)31 -D_VML_ACCURACY_EP_
-endif
-
-#TARGET := $(TARGET)_$(ACC)
-
 # ==============================================================================
 # ############## Define make rules #############################################
 # ==============================================================================
 
-all: l2-distance
+all: pca-gpu
 
-nomkl: l2_distance
-	./$(TARGET) 1024
+pca-gpu: $(TARGET)
 
-l2-distance: $(TARGET)
-
-$(TARGET): $(SRC) l2_distance.cpp
-	$(CC) $(CPPFLAGS) $(CFLAGS) $^ -o $(TARGET)
+$(TARGET): $(SRC)
+	$(CC) $^ -o $(TARGET) $(CPPFLAGS) $(CFLAGS) $(LFLAGS)
 
 clean:
-	rm -rf *.o *.out *.optrpt *.yaml *~ l2_distance
+	rm -rf *.o *.out *.optrpt *.yaml *~ pca
 
 .PHONY: all clean

@@ -1,8 +1,9 @@
-#!/usr/bin/env python
+#/usr/bin/env python
 import base_rambo
-import numpy
+import numpy,math
 from numba import jit
 import numba_dppy
+import dpctl
 
 @jit(nopython=True, fastmath=True)
 def vectmultiply(a, b):
@@ -51,16 +52,16 @@ def gen_rand_data(nevts, nout):
 
 @numba_dppy.kernel
 def get_output_mom2(C1, F1, Q1, output, nout):
-    i = dppl.get_global_id(0)
+    i = numba_dppy.get_global_id(0)
     for j in range(nout):
         C = 2.*C1[i, j]-1.
-        S = numpy.sqrt(1 - C**2)
-        F = 2.*numpy.pi*F1[i, j]
-        Q = -numpy.log(Q1[i, j])
+        S = math.sqrt(1 - C*C)
+        F = 2.*math.pi*F1[i, j]
+        Q = -math.log(Q1[i, j])
 
         output[i, j, 0] = Q
-        output[i, j, 1] = Q*S*numpy.sin(F)
-        output[i, j, 2] = Q*S*numpy.cos(F)
+        output[i, j, 1] = Q*S*math.sin(F)
+        output[i, j, 2] = Q*S*math.cos(F)
         output[i, j, 3] = Q*C
 
 

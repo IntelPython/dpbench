@@ -128,7 +128,7 @@ def run(name, alg, sizes=14, step=2, nopt=2**15):
     parser.add_argument('--steps', required=False, default=sizes,  help="Number of steps")
     parser.add_argument('--step',  required=False, default=step,   help="Factor for each step")
     parser.add_argument('--size',  required=False, default=nopt,   help="Initial data size")
-    parser.add_argument('--repeat',required=False, default=100,    help="Iterations inside measured region")
+    parser.add_argument('--repeat',required=False, default=1,    help="Iterations inside measured region")
     parser.add_argument('--text',  required=False, default="",     help="Print with each result")
     parser.add_argument('--json',  required=False, default=__file__.replace('py','json'), help="output json data filename")
     parser.add_argument('--usm',   required=False, action='store_true',  help="Use USM Shared or pure numpy")

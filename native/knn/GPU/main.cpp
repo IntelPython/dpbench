@@ -107,7 +107,7 @@ int main(int argc, char* argv[]) {
     double lBound = 0.0;
     double rBound = 10.0;
 
-    int repeat = 100;
+    int repeat = 1;
     double t1 = 0, t2 = 0;
 
     FILE* fptr;
@@ -152,7 +152,7 @@ int main(int argc, char* argv[]) {
         fprintf(fptr1, "%ld,%.6lf\n", nPoints, time);
 
         nPoints = nPoints * 2;
-        repeat -= 2;
+        if (repeat > 2) repeat -= 2;
     }
     fclose(fptr);
     fclose(fptr1);

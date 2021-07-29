@@ -118,7 +118,7 @@ def run(name, alg, sizes=5, step=2, nopt=2**10):
                         help='Factor for each step')
     parser.add_argument('--size', type=int, default=nopt,
                         help='Initial data size')
-    parser.add_argument('--repeat', type=int, default=100,
+    parser.add_argument('--repeat', type=int, default=1,
                         help='Iterations inside measured region')
     parser.add_argument('--dims', type=int, default=10, help='Dimensions')
     parser.add_argument('--eps', type=float, default=0.6, help='Neighborhood value')

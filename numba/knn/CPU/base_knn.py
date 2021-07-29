@@ -76,7 +76,7 @@ def run(name, alg, sizes=10, step=2, nopt=2**10):
                         help='Factor for each step')
     parser.add_argument('--size', type=int, default=nopt,
                         help='Initial data size')
-    parser.add_argument('--repeat', type=int, default=100,
+    parser.add_argument('--repeat', type=int, default=1,
                         help='Iterations inside measured region')
     parser.add_argument('--text', default='', help='Print with each result')
     parser.add_argument('--json',  required=False, default=__file__.replace('py','json'), help="output json data filename")

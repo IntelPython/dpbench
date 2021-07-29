@@ -41,7 +41,7 @@ CFLAGS      += -qopt-report
 CFLAGS      += -fiopenmp -fopenmp-targets=spir64
 CFLAGS      += -I./
 
-PREC ?= d
+PREC ?= f
 ifeq ($(PREC),d)
 else
     CFLAGS += -D__DO_FLOAT__

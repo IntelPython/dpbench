@@ -13,7 +13,7 @@
 int main(int argc, char * argv[])
 {
     int nopt = 32768;
-    int repeat = 100;
+    int repeat = 1;
     tfloat *s0, *x, *t, *vcall_mkl, *vput_mkl, *vcall_compiler, *vput_compiler;
 
     clock_t t1 = 0, t2 = 0;
@@ -87,7 +87,7 @@ int main(int argc, char * argv[])
         FreeData( s0, x, t, vcall_compiler, vput_compiler, vcall_mkl, vput_mkl );
 
         nopt = nopt * 2;
-	repeat -= 2;
+	if (repeat > 2) repeat -= 2;
     }
     fclose(fptr);
     fclose(fptr1);

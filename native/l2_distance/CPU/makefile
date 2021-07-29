@@ -41,7 +41,7 @@ CFLAGS      += -qopt-report
 CFLAGS      += -qopenmp
 CFLAGS      += -I./
 
-PREC ?= d
+PREC ?= f
 ifeq ($(PREC),d)
 else
     CFLAGS += -D__DO_FLOAT__

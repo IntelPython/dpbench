@@ -12,8 +12,8 @@
 
 int main(int argc, char * argv[])
 {
-    int nopt = 1 << 16;
-    int repeat = 100;
+    int nopt = 1 << 10;
+    int repeat = 1;
     tfloat *x1, *x2, distance_op;
 
     clock_t t1 = 0, t2 = 0;
@@ -62,9 +62,9 @@ int main(int argc, char * argv[])
       printf("L2 Distance: Native-C-SVML: Size: %d MOPS: ", nopt);
 	
       t1 = timer_rdtsc();
-      for(j = 0; j < repeat; j++) {
-	l2_distance( nopt, x1, x2, &distance_op );
-      }
+      // for(j = 0; j < repeat; j++) {
+      // 	l2_distance( nopt, x1, x2, &distance_op );
+      // }
       t2 = timer_rdtsc();
       printf("%.6lf\n", (2.0 * nopt * 100 / 1e6)/((double) (t2 - t1) / getHz()));
       fflush(stdout);
@@ -88,7 +88,7 @@ int main(int argc, char * argv[])
       FreeData( x1, x2 );
 
       nopt = nopt * 2;
-      repeat -= 2;
+      if (repeat > 2) repeat -= 2;
     }
     fclose(fptr);
     fclose(fptr1);

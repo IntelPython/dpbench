@@ -595,22 +595,22 @@ def run(opts):
         run_numba(opts)
         util.chdir(ref_cwd)
 
-    if opts.impl == options.implementation.dpnp or opts.impl == options.implementation.all:
-        run_dpnp(opts)
-        util.chdir(ref_cwd)
-
-    if opts.impl == options.implementation.native_dpcpp or opts.impl == options.implementation.all:
+    if opts.impl == options.implementation.native_dpcpp:
         run_native_dpcpp(opts)
         util.chdir(ref_cwd)
+
+    if opts.impl == options.implementation.dpnp:
+        run_dpnp(opts)
+        util.chdir(ref_cwd)        
         
-    if opts.impl == options.implementation.scikit_learn or opts.impl == options.implementation.all:
+    if opts.impl == options.implementation.scikit_learn:
         run_scikit_learn(opts)
         util.chdir(ref_cwd)
 
-    if opts.impl == options.implementation.daal4py or opts.impl == options.implementation.all:
+    if opts.impl == options.implementation.daal4py:
         run_daal4py(opts)
         util.chdir(ref_cwd)
 
-    if opts.impl == options.implementation.native_optimised or opts.impl == options.implementation.all:
+    if opts.impl == options.implementation.native_optimised:
         run_native_optimised(opts)
         util.chdir(ref_cwd)        

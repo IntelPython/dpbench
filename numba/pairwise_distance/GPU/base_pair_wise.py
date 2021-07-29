@@ -37,7 +37,7 @@ def get_device_selector (is_gpu = True):
         return "opencl:" + device_selector
 
     if os.environ.get('SYCL_DEVICE_FILTER') == "level_zero":
-        return "level0:" + device_selector
+        return "level_zero:" + device_selector
 
     return os.environ.get('SYCL_DEVICE_FILTER')
 
@@ -56,7 +56,7 @@ def run(name, alg, sizes=5, step=2, nopt=2**10):
     parser.add_argument('--steps', required=False, default=sizes,  help="Number of steps")
     parser.add_argument('--step',  required=False, default=step,   help="Factor for each step")
     parser.add_argument('--size',  required=False, default=nopt,   help="Initial data size")
-    parser.add_argument('--repeat',required=False, default=100,    help="Iterations inside measured region")
+    parser.add_argument('--repeat',required=False, default=1,    help="Iterations inside measured region")
     parser.add_argument('--text',  required=False, default="",     help="Print with each result")
     parser.add_argument('-d', type=int, default=3, help='Dimensions')
     

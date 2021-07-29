@@ -85,7 +85,7 @@ def run(name, alg, sizes=14, step=2, nopt=2**15, nparr=True, dask=False, pass_ar
     parser.add_argument('--step',  required=False, default=step,   help="Factor for each step")
     parser.add_argument('--chunk', required=False, default=2000000,help="Chunk size for Dask")
     parser.add_argument('--size',  required=False, default=nopt,   help="Initial data size")
-    parser.add_argument('--repeat',required=False, default=100,    help="Iterations inside measured region")
+    parser.add_argument('--repeat',required=False, default=1,    help="Iterations inside measured region")
     parser.add_argument('--dask',  required=False, default="sq",   help="Dask scheduler: sq, mt, mp")
     parser.add_argument('--text',  required=False, default="",     help="Print with each result")
 	

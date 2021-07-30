@@ -3,6 +3,7 @@
 # SPDX-License-Identifier: MIT
 
 import numpy.random as rnd
+import json
 
 try:
     import itimer as it
@@ -23,6 +24,8 @@ try:
 except NameError:
     xrange = range
 
+SEED = 7777777
+
 ###############################################
 
 def run(name, alg, sizes=6, step=2, nopt=2**13):
@@ -33,12 +36,23 @@ def run(name, alg, sizes=6, step=2, nopt=2**13):
     parser.add_argument('--size',  required=False, default=nopt,   help="Initial data size")
     parser.add_argument('--repeat',required=False, default=1,    help="Iterations inside measured region")
     parser.add_argument('--text',  required=False, default="",     help="Print with each result")
+    parser.add_argument('--json',  required=False, default=__file__.replace('py','json'), help="output json data filename")
     
     args = parser.parse_args()
     sizes= int(args.steps)
     step = int(args.step)
     nopt = int(args.size)
     repeat=int(args.repeat)
+ 
+    output = {}
+    output['name']      = name
+    output['sizes']     = sizes
+    output['step']      = step
+    output['repeat']    = repeat
+    output['randseed']  = SEED
+    output['metrics']   = []
+
+    rnd.seed(SEED)
 
     f=open("perf_output.csv",'w',1)
     f2 = open("runtimes.csv",'w',1)
@@ -52,11 +66,13 @@ def run(name, alg, sizes=6, step=2, nopt=2**13):
             alg(nopt)
 
         mops, time = get_mops(t0, now(), nopt)
-        print("MOPS:", time, args.text)
         f.write(str(nopt) + "," + str(mops*repeat/1e6) + "\n")
         f2.write(str(nopt) + "," + str(time) + "\n")
+        print("ERF: {:15s} | Size: {:10d} | MOPS: {:15.2f} | TIME: {:10.6f}".format(name, nopt, mops*repeat,time),flush=True)
+        output['metrics'].append((nopt,mops,time))
 
         nopt *= step
 
+    json.dump(output,open(args.json,'w'),indent=2, sort_keys=True)
     f.close()
     f2.close()

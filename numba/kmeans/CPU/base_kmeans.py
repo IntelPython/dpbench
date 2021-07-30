@@ -4,7 +4,7 @@
 
 import numpy as np
 import numpy.random as rnd
-import sys
+import sys,json
 
 try:
     import itimer as it
@@ -53,12 +53,21 @@ def run(name, alg, sizes=10, step=2, nopt=2**13):
     parser.add_argument('--size',  required=False, default=nopt,   help="Initial data size")
     parser.add_argument('--repeat',required=False, default=1,    help="Iterations inside measured region")
     parser.add_argument('--text',  required=False, default="",     help="Print with each result")
+    parser.add_argument('--json',  required=False, default=__file__.replace('py','json'), help="output json data filename")
     
     args = parser.parse_args()
     sizes= int(args.steps)
     step = int(args.step)
     nopt = int(args.size)
     repeat=int(args.repeat)
+ 
+    output = {}
+    output['name']      = name
+    output['sizes']     = sizes
+    output['step']      = step
+    output['repeat']    = repeat
+    output['randseed']  = SEED
+    output['metrics']   = []
 
     rnd.seed(SEED)
     f=open("perf_output.csv",'w')
@@ -67,9 +76,7 @@ def run(name, alg, sizes=10, step=2, nopt=2**13):
     for i in xrange(sizes):
         X,arrayPclusters,arrayC,arrayCsum,arrayCnumpoint = gen_data(nopt)
         iterations = xrange(repeat)
-        print("ERF: {}: Size: {}".format(name, nopt), end=' ', flush=True)
-        sys.stdout.flush()
-
+        
         alg(X, arrayPclusters,arrayC,arrayCsum,arrayCnumpoint, nopt, NUMBER_OF_CENTROIDS) #warmup
         t0 = now()
         for _ in iterations:
@@ -78,10 +85,12 @@ def run(name, alg, sizes=10, step=2, nopt=2**13):
         mops,time = get_mops(t0, now(), nopt)
         f.write(str(nopt) + "," + str(mops*2*repeat) + "\n")
         f2.write(str(nopt) + "," + str(time) + "\n")
-        print("MOPS:", mops*2*repeat, args.text)
+        print("ERF: {:15s} | Size: {:10d} | MOPS: {:15.2f} | TIME: {:10.6f}".format(name, nopt, mops*2*repeat,time),flush=True)
+        output['metrics'].append((nopt,mops,time))
         nopt *= step
         repeat -= step
         if repeat < 1:
             repeat = 1
+    json.dump(output,open(args.json,'w'),indent=2, sort_keys=True)
     f.close()
     f2.close()

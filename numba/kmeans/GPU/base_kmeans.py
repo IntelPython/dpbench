@@ -4,7 +4,7 @@
 
 import numpy as np
 import numpy.random as rnd
-import sys,os
+import sys,json,os
 import dpctl, dpctl.memory as dpmem
 
 try:
@@ -92,6 +92,7 @@ def run(name, alg, sizes=10, step=2, nopt=2**13):
     parser.add_argument('--size',  required=False, default=nopt,   help="Initial data size")
     parser.add_argument('--repeat',required=False, default=1,    help="Iterations inside measured region")
     parser.add_argument('--text',  required=False, default="",     help="Print with each result")
+    parser.add_argument('--json',  required=False, default=__file__.replace('py','json'), help="output json data filename")
     parser.add_argument('--usm',   required=False, action='store_true',  help="Use USM Shared or pure numpy")
     
     args = parser.parse_args()
@@ -100,10 +101,19 @@ def run(name, alg, sizes=10, step=2, nopt=2**13):
     nopt = int(args.size)
     repeat=int(args.repeat)
 
-    rnd.seed(SEED)
     f=open("perf_output.csv",'w')
     f2 = open("runtimes.csv",'w',1)
-    
+     
+    output = {}
+    output['name']      = name
+    output['sizes']     = sizes
+    output['step']      = step
+    output['repeat']    = repeat
+    output['randseed']  = SEED
+    output['metrics']   = []
+
+    rnd.seed(SEED)
+
     for i in xrange(sizes):
         if args.usm is True:
             X,arrayPclusters,arrayC,arrayCsum,arrayCnumpoint = gen_data_usm(nopt)
@@ -111,7 +121,6 @@ def run(name, alg, sizes=10, step=2, nopt=2**13):
             X,arrayPclusters,arrayC,arrayCsum,arrayCnumpoint = gen_data_np(nopt)
             
         iterations = xrange(repeat)
-        print("ERF: {}: Size: {}".format(name, nopt), end=' ', flush=True)
         sys.stdout.flush()
 
         alg(X, arrayPclusters,arrayC,arrayCsum,arrayCnumpoint, nopt, NUMBER_OF_CENTROIDS) #warmup
@@ -122,10 +131,12 @@ def run(name, alg, sizes=10, step=2, nopt=2**13):
         mops,time = get_mops(t0, now(), nopt)
         f.write(str(nopt) + "," + str(mops*2*repeat) + "\n")
         f2.write(str(nopt) + "," + str(time) + "\n")
-        print("Time:", str(time))
+        print("ERF: {:15s} | Size: {:10d} | MOPS: {:15.2f} | TIME: {:10.6f}".format(name, nopt, mops*2*repeat,time),flush=True)
+        output['metrics'].append((nopt,mops,time))
         nopt *= step
         repeat -= step
         if repeat < 1:
             repeat = 1
+    json.dump(output,open(args.json,'w'),indent=2, sort_keys=True)
     f.close()
     f2.close()

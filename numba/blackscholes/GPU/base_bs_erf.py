@@ -5,8 +5,7 @@
 
 from __future__ import print_function
 import numpy as np
-from random import seed, uniform
-import sys, os
+import sys,json,os
 import dpctl, dpctl.memory as dpmem
 
 try:
@@ -131,6 +130,7 @@ def run(name, alg, sizes=14, step=2, nopt=2**15):
     parser.add_argument('--size',  required=False, default=nopt,   help="Initial data size")
     parser.add_argument('--repeat',required=False, default=1,    help="Iterations inside measured region")
     parser.add_argument('--text',  required=False, default="",     help="Print with each result")
+    parser.add_argument('--json',  required=False, default=__file__.replace('py','json'), help="output json data filename")
     parser.add_argument('--usm',   required=False, action='store_true',  help="Use USM Shared or pure numpy")
 	
     args = parser.parse_args()
@@ -138,6 +138,15 @@ def run(name, alg, sizes=14, step=2, nopt=2**15):
     step = int(args.step)
     nopt = int(args.size)
     repeat=int(args.repeat)
+
+    output = {}
+    output['name']      = name
+    output['sizes']     = sizes
+    output['step']      = step
+    output['repeat']    = repeat
+    output['randseed']  = SEED
+    output['metrics']   = []
+    kwargs={}
 
     rnd.seed(SEED)
     f1 = open("perf_output.csv",'w',1)
@@ -164,13 +173,15 @@ def run(name, alg, sizes=14, step=2, nopt=2**15):
         mops,time = get_mops(t0, now(), nopt)
 
         # record performance data - mops, time
-        print("MOPS:", mops*2*repeat, "Time:", time, "Iters:", iterations)
+        print("ERF: {:15s} | Size: {:10d} | MOPS: {:15.2f} | TIME: {:10.6f}".format(name, nopt, mops*2*repeat,time),flush=True)
+        output['metrics'].append((nopt,mops,time))
         f1.write(str(nopt) + "," + str(mops*2*repeat) + "\n")
         f2.write(str(nopt) + "," + str(time) + "\n")
         nopt *= step
         repeat -= step
         if repeat < 1:
             repeat = 1
+    json.dump(output,open(args.json,'w'),indent=2, sort_keys=True)
 
     f1.close()
     f2.close()

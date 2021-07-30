@@ -1,6 +1,5 @@
 import numpy as np
-from random import seed, uniform
-import sys,os
+import sys,json,os
 import numpy.random as rnd
 from timeit import default_timer as now
 
@@ -57,6 +56,7 @@ def run(name, alg, sizes=10, step=2, rows=2**10, cols=2**6, pyramid_height=20):
     parser.add_argument('--cols',  required=False, default=cols,   help="Initial column size")
     parser.add_argument('--pyht',  required=False, default=pyramid_height,   help="Initial pyramid height")
     parser.add_argument('--repeat',required=False, default=1,    help="Iterations inside measured region")
+    parser.add_argument('--json',  required=False, default=__file__.replace('py','json'), help="output json data filename")
 	
     args = parser.parse_args()
     sizes= int(args.steps)
@@ -66,6 +66,14 @@ def run(name, alg, sizes=10, step=2, rows=2**10, cols=2**6, pyramid_height=20):
     pyramid_height = int(args.pyht)
     repeat=int(args.repeat)
     kwargs={}
+ 
+    output = {}
+    output['name']      = name
+    output['sizes']     = sizes
+    output['step']      = step
+    output['repeat']    = repeat
+    output['randseed']  = SEED
+    output['metrics']   = []
 
     rnd.seed(SEED)
     f2 = open("runtimes.csv",'w',1)
@@ -78,12 +86,15 @@ def run(name, alg, sizes=10, step=2, rows=2**10, cols=2**6, pyramid_height=20):
             alg(data, rows, cols, pyramid_height, result)
         time = now() - t0
         
-        if PRINT_DATA: print("AFTER KERNEL:\n **** data *******\n", data, "\n******* result *******\n",result)
-        print("\nInput size:", rows, cols, pyramid_height, "Time:", time)
         f2.write(str(rows) + "," + str(time) + "\n")
         rows *= step
+        mops = 0.
+        nopt = 0
+        print("ERF: {:15s} | Size: {:10d} | MOPS: {:15.2f} | TIME: {:10.6f}".format(name, nopt, mops,time),flush=True)
+        output['metrics'].append((nopt,mops,time))
         repeat -= step
         if repeat < 1:
             repeat = 1
+    json.dump(output,open(args.json,'w'),indent=2, sort_keys=True)
 
     f2.close()

@@ -3,7 +3,7 @@
 # SPDX-License-Identifier: MIT
 
 import numpy as np
-import sys,os
+import sys,os,json
 
 #import numpy.random_intel as rnd
 import numpy.random as rnd
@@ -58,6 +58,7 @@ def run(name, alg, sizes=10, step=2, nopt=2**16):
     parser.add_argument('--size',  required=False, default=nopt,   help="Initial data size")
     parser.add_argument('--repeat',required=False, default=1,    help="Iterations inside measured region")
     parser.add_argument('--text',  required=False, default="",     help="Print with each result")
+    parser.add_argument('--json',  required=False, default=__file__.replace('py','json'), help="output json data filename") 
     parser.add_argument('-d', type=int, default=1, help='Dimensions')
     
     args = parser.parse_args()
@@ -67,10 +68,20 @@ def run(name, alg, sizes=10, step=2, nopt=2**16):
     repeat=int(args.repeat)
     dims = int(args.d)
 
-    rnd.seed(SEED)
     f=open("perf_output.csv",'w',1)
     f2 = open("runtimes.csv",'w',1)
     
+    output = {}
+    output['name']      = name
+    output['sizes']     = sizes
+    output['step']      = step
+    output['repeat']    = repeat
+    output['dims']      = dims
+    output['randseed']  = SEED
+    output['metrics']   = []
+
+    rnd.seed(SEED)
+
     for i in xrange(sizes):
         X,Y = gen_data(nopt,dims)
         iterations = xrange(repeat)
@@ -85,14 +96,16 @@ def run(name, alg, sizes=10, step=2, nopt=2**16):
             #print("Time:", now()-t1)
 
         mops,time = get_mops(t0, now(), nopt)
+        out_msg_tmpl = 'ERF: {}: Size: {} Dim: {} MOPS: {} Time: {}'
+        print("ERF: {:15s} | Size: {:10d} | MOPS: {:15.2f} | TIME: {:10.6f}".format(name, nopt, mops,time),flush=True)
+        output['metrics'].append((nopt,mops,time))
         f.write(str(nopt) + "," + str(mops*2*repeat) + "\n")
         f2.write(str(nopt) + "," + str(time) + "\n")
-        print("TIME:", str(time))
         
         nopt *= step
         repeat -= step
         if repeat < 1:
             repeat = 1
-
+    json.dump(output,open(args.json,'w'),indent=2, sort_keys=True)
     f.close()
     f2.close()

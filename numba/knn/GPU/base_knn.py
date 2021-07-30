@@ -25,10 +25,12 @@
 # *****************************************************************************
 
 import argparse
-import sys,os
+import sys,os,json
 import numpy as np
+import numpy.random as rnd
 
 DATA_DIM = 16
+SEED = 7777777
 
 
 try:
@@ -69,12 +71,12 @@ def get_device_selector (is_gpu = True):
     return os.environ.get('SYCL_DEVICE_FILTER')
 
 def gen_data_x(nopt, data_dim=DATA_DIM):
-    data = np.random.rand(nopt, data_dim)
+    data = rnd.rand(nopt, data_dim)
     return data
 
 
 def gen_data_y(nopt, classes_num=3):
-    data = np.random.randint(classes_num, size=nopt)
+    data = rnd.randint(classes_num, size=nopt)
     return data
 
 
@@ -91,24 +93,31 @@ def run(name, alg, sizes=10, step=2, nopt=2**10):
     parser.add_argument('--repeat', type=int, default=1,
                         help='Iterations inside measured region')
     parser.add_argument('--text', default='', help='Print with each result')
+    parser.add_argument('--json',  required=False, default=__file__.replace('py','json'), help="output json data filename")
 
     args = parser.parse_args()
     nopt = args.size
     repeat = args.repeat
     train_data_size = 2**10
+ 
+    output = {}
+    output['name']      = name
+    output['sizes']     = sizes
+    output['step']      = step
+    output['repeat']    = repeat
+    output['randseed']  = SEED
+    output['metrics']   = []
 
+    rnd.seed(SEED)
+    
     with open('perf_output.csv', 'w', 1) as fd,  open("runtimes.csv", 'w', 1) as fd2:
         for _ in xrange(args.steps):
-
-            print("TRAIN_DATA_SIZE: ", train_data_size)
-            print("TEST_DATA_SIZE: ", nopt)
 
             x_train, y_train = gen_data_x(train_data_size), gen_data_y(train_data_size)
             x_test = gen_data_x(nopt)
 
             n_neighbors = 5
 
-            print('ERF: {}: Size: {}'.format(name, nopt), end=' ', flush=True)
             sys.stdout.flush()
 
             predictions = alg(x_train, y_train, x_test, k=n_neighbors)  # warmup
@@ -119,10 +128,12 @@ def run(name, alg, sizes=10, step=2, nopt=2**10):
             mops, time = get_mops(t0, now(), nopt)
 
             result_mops = mops * repeat
-            print('MOPS:', result_mops, args.text)
             fd.write('{},{}\n'.format(nopt, result_mops))
             fd2.write('{},{}\n'.format(nopt, time))
-            print("TIME: ", time)
+            
+            print("ERF: {:15s} | Size: {:10d} | MOPS: {:15.2f} | TIME: {:10.6f}".format(name, nopt, mops*repeat,time),flush=True)
+            output['metrics'].append((nopt,mops,time))
 
             nopt *= args.step
             repeat = max(repeat - args.step, 1)
+    json.dump(output,open(args.json,'w'),indent=2, sort_keys=True)

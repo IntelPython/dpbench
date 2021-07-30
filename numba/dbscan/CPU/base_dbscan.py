@@ -28,7 +28,7 @@ import argparse
 import sys
 import numpy as np
 import numpy.random as rnd
-
+import sys,json
 from typing import NamedTuple
 from sklearn.datasets import make_blobs
 from sklearn.preprocessing import StandardScaler
@@ -123,10 +123,21 @@ def run(name, alg, sizes=5, step=2, nopt=2**10):
     parser.add_argument('--dims', type=int, default=10, help='Dimensions')
     parser.add_argument('--eps', type=float, default=0.6, help='Neighborhood value')
     parser.add_argument('--minpts', type=int, default=20, help='minPts')
+    parser.add_argument('--json',  required=False, default=__file__.replace('py','json'), help="output json data filename")
 
     args = parser.parse_args()
     nopt = args.size
     repeat = args.repeat
+ 
+    output = {}
+    output['name']      = name
+    output['sizes']     = sizes
+    output['step']      = step
+    output['repeat']    = repeat
+    output['randseed']  = SEED
+    output['metrics']   = []
+
+    rnd.seed(SEED)
 
     with open('perf_output.csv', 'w', 1) as mops_fd, open('runtimes.csv', 'w', 1) as runtimes_fd:
         for _ in xrange(args.steps):
@@ -150,11 +161,12 @@ def run(name, alg, sizes=5, step=2, nopt=2**10):
             mops, time = get_mops(t0, now(), nopt)
             result_mops = mops * repeat / 1e6
 
-            out_msg_tmpl = 'ERF: {}: Size: {} Dim: {} Eps: {} minPts: {} NClusters: {} Time: {}'
-            print(out_msg_tmpl.format(name, nopt, args.dims, eps, minpts, nclusters, time))
+            print("ERF: {:15s} | Size: {:10d} | MOPS: {:15.2f} | TIME: {:10.6f}".format(name, nopt, result_mops,time),flush=True)
+            output['metrics'].append((nopt,mops,time))
 
             mops_fd.write('{},{},{},{},{},{}\n'.format(nopt, args.dims, eps, minpts, nclusters, result_mops))
             runtimes_fd.write('{},{},{},{},{},{}\n'.format(nopt, args.dims, eps, minpts, nclusters, time))
 
             nopt *= args.step
             repeat = max(repeat - args.step, 1)
+    json.dump(output,open(args.json,'w'),indent=2, sort_keys=True)

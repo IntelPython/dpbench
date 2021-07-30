@@ -4,7 +4,7 @@
 
 
 import numpy as np
-import sys,os
+import sys,json,os
 import numpy.random as rnd
 
 try:
@@ -59,6 +59,7 @@ def run(name, alg, sizes=5, step=2, nopt=2**10):
     parser.add_argument('--repeat',required=False, default=1,    help="Iterations inside measured region")
     parser.add_argument('--text',  required=False, default="",     help="Print with each result")
     parser.add_argument('-d', type=int, default=3, help='Dimensions')
+    parser.add_argument('--json',  required=False, default=__file__.replace('py','json'), help="output json data filename")
     
     args = parser.parse_args()
     sizes= int(args.steps)
@@ -66,6 +67,14 @@ def run(name, alg, sizes=5, step=2, nopt=2**10):
     nopt = int(args.size)
     repeat=int(args.repeat)
     dims = int(args.d)
+ 
+    output = {}
+    output['name']      = name
+    output['sizes']     = sizes
+    output['step']      = step
+    output['repeat']    = repeat
+    output['randseed']  = SEED
+    output['metrics']   = []
     
     rnd.seed(SEED)
     f=open("perf_output.csv",'w',1)
@@ -74,9 +83,7 @@ def run(name, alg, sizes=5, step=2, nopt=2**10):
     for i in xrange(sizes):
         X,Y,D = gen_data(nopt,dims)
         iterations = xrange(repeat)
-        print("ERF: {}: Size: {}".format(name, nopt), end=' ', flush=True)
-        sys.stdout.flush()
-
+        
         alg(X,Y,D) #warmup
         t0 = now()
         for _ in iterations:
@@ -85,10 +92,12 @@ def run(name, alg, sizes=5, step=2, nopt=2**10):
         mops,time = get_mops(t0, now(), nopt)
         f.write(str(nopt) + "," + str(mops*2*repeat) + "\n")
         f2.write(str(nopt) + "," + str(time) + "\n")
-        print(str(nopt) + "," + str(time) + "\n")
+        print("ERF: {:15s} | Size: {:10d} | MOPS: {:15.2f} | TIME: {:10.6f}".format(name, nopt, mops*repeat,time),flush=True)
+        output['metrics'].append((nopt,mops,time))
         nopt *= step
         repeat -= step
         if repeat < 1:
             repeat = 1
+    json.dump(output,open(args.json,'w'),indent=2, sort_keys=True)
     f.close()
     f2.close()

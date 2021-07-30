@@ -5,8 +5,7 @@
 
 from __future__ import print_function
 import numpy as np
-from random import seed, uniform
-import sys
+import sys,json
 
 try:
     import numpy.random_intel as rnd
@@ -88,6 +87,7 @@ def run(name, alg, sizes=14, step=2, nopt=2**15, nparr=True, dask=False, pass_ar
     parser.add_argument('--repeat',required=False, default=1,    help="Iterations inside measured region")
     parser.add_argument('--dask',  required=False, default="sq",   help="Dask scheduler: sq, mt, mp")
     parser.add_argument('--text',  required=False, default="",     help="Print with each result")
+    parser.add_argument('--json',  required=False, default=__file__.replace('py','json'), help="output json data filename")
 	
     args = parser.parse_args()
     sizes= int(args.steps)
@@ -95,6 +95,14 @@ def run(name, alg, sizes=14, step=2, nopt=2**15, nparr=True, dask=False, pass_ar
     nopt = int(args.size)
     chunk= int(args.chunk)
     repeat=int(args.repeat)
+ 
+    output = {}
+    output['name']      = name
+    output['sizes']     = sizes
+    output['step']      = step
+    output['repeat']    = repeat
+    output['randseed']  = SEED
+    output['metrics']   = []
     kwargs={}
 
     if(dask):
@@ -131,7 +139,6 @@ def run(name, alg, sizes=14, step=2, nopt=2**15, nparr=True, dask=False, pass_ar
             call = np.zeros(nopt, dtype=np.float64)
             put  = -np.ones(nopt, dtype=np.float64)
         iterations = xrange(repeat)
-        print("ERF: {}: Size: {}".format(name, nopt), end=' ', flush=True)
         sys.stdout.flush()
 
         if pass_args:
@@ -145,13 +152,14 @@ def run(name, alg, sizes=14, step=2, nopt=2**15, nparr=True, dask=False, pass_ar
             for _ in iterations:
                 alg(nopt, price, strike, t, RISK_FREE, VOLATILITY, **kwargs)
         mops,time = get_mops(t0, now(), nopt)
-        print("MOPS:", mops*2*repeat, "Time:", time, "Iters:", iterations)
+        print("ERF: {:15s} | Size: {:10d} | MOPS: {:15.2f} | TIME: {:10.6f}".format(name, nopt, mops*2*repeat,time),flush=True)
+        output['metrics'].append((nopt,mops,time))
         f1.write(str(nopt) + "," + str(mops*2*repeat) + "\n")
         f2.write(str(nopt) + "," + str(time) + "\n")
         nopt *= step
         repeat -= step
         if repeat < 1:
             repeat = 1
-
+    json.dump(output,open(args.json,'w'),indent=2, sort_keys=True)
     f1.close()
     f2.close()

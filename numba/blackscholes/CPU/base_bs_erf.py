@@ -6,6 +6,7 @@
 from __future__ import print_function
 import numpy as np
 import sys,json
+import datetime
 
 try:
     import numpy.random_intel as rnd
@@ -98,6 +99,7 @@ def run(name, alg, sizes=14, step=2, nopt=2**15, nparr=True, dask=False, pass_ar
  
     output = {}
     output['name']      = name
+    output['datetime']  = datetime.datetime.strftime(datetime.datetime.now(),'%Y-%m-%d %H:%M:%S')
     output['sizes']     = sizes
     output['step']      = step
     output['repeat']    = repeat

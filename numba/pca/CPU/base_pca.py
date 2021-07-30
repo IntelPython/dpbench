@@ -4,6 +4,7 @@
 
 from sklearn.datasets import make_classification, make_regression
 import sys,json
+import datetime
 import numpy.random as rnd
 
 try:
@@ -70,6 +71,7 @@ def run(name, alg, sizes=10, step=2, nopt=2**10):
  
     output = {}
     output['name']      = name
+    output['datetime']  = datetime.datetime.strftime(datetime.datetime.now(),'%Y-%m-%d %H:%M:%S')
     output['sizes']     = sizes
     output['step']      = step
     output['repeat']    = repeat

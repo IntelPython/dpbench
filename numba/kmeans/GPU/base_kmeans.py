@@ -5,6 +5,7 @@
 import numpy as np
 import numpy.random as rnd
 import sys,json,os
+import datetime
 import dpctl, dpctl.memory as dpmem
 
 try:
@@ -106,6 +107,7 @@ def run(name, alg, sizes=10, step=2, nopt=2**13):
      
     output = {}
     output['name']      = name
+    output['datetime']  = datetime.datetime.strftime(datetime.datetime.now(),'%Y-%m-%d %H:%M:%S')
     output['sizes']     = sizes
     output['step']      = step
     output['repeat']    = repeat

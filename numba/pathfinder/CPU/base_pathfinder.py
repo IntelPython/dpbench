@@ -1,5 +1,6 @@
 import numpy as np
 import sys,json
+import datetime
 import numpy.random as rnd
 from timeit import default_timer as now
 
@@ -56,6 +57,7 @@ def run(name, alg, sizes=10, step=2, rows=2**10, cols=2**6, pyramid_height=20):
  
     output = {}
     output['name']      = name
+    output['datetime']  = datetime.datetime.strftime(datetime.datetime.now(),'%Y-%m-%d %H:%M:%S')
     output['sizes']     = sizes
     output['step']      = step
     output['repeat']    = repeat

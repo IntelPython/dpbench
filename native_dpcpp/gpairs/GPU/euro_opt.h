@@ -7,6 +7,9 @@
 #ifndef __EURO_OPT_BENCH_H
 #define __EURO_OPT_BENCH_H
 
+#include <CL/sycl.hpp>
+using namespace cl::sycl;
+
 #ifdef __DO_FLOAT__
     typedef float tfloat; 
 #else
@@ -27,7 +30,7 @@ void InitData( size_t npoints, tfloat **x1, tfloat **y1, tfloat **z1, tfloat **w
 void FreeData( tfloat *x1, tfloat *y1, tfloat *z1, tfloat *w1,
 	       tfloat *x2, tfloat *y2, tfloat *z2, tfloat *w2, tfloat *rbins, tfloat *results_test);
 
-void call_gpairs(size_t nopt, tfloat *x1, tfloat *y1, tfloat *z1, tfloat *w1,
+void call_gpairs(queue* q, size_t nopt, tfloat *x1, tfloat *y1, tfloat *z1, tfloat *w1,
 		 tfloat *x2, tfloat *y2, tfloat *z2, tfloat *w2, tfloat *rbins, tfloat *results_test);
 
 #endif // #ifndef __EURO_OPT_BENCH_H

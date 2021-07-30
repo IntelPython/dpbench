@@ -7,7 +7,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <time.h>
-#include <stdio.h>
 #include "euro_opt.h"
 #include "rdtsc.h"
 
@@ -48,6 +47,16 @@ int main(int argc, char * argv[])
       printf("Error!");   
       exit(1);             
     }
+
+    queue *q = nullptr;
+
+    try {
+      q = new queue{gpu_selector()};
+    } catch (runtime_error &re) {
+      std::cerr << "No GPU device found\n";
+      exit(1);
+    }
+    
     tfloat *x1, *y1, *z1, *w1, *x2, *y2, *z2, *w2, *rbins, *results_test;
     int i, j;
     for(i = 0; i < STEPS; i++) {
@@ -56,14 +65,14 @@ int main(int argc, char * argv[])
       
       /* Warm up cycle */
       for(j = 0; j < 1; j++) {
-	call_gpairs( nopt, x1, y1, z1, w1, x2, y2, z2, w2, rbins, results_test);
+	call_gpairs( q, nopt, x1, y1, z1, w1, x2, y2, z2, w2, rbins, results_test);
       }
 
       if (repeat < 1) repeat = 1;
 
       t1 = timer_rdtsc();
       for(j = 0; j < repeat; j++) {
-	call_gpairs( nopt, x1, y1, z1, w1, x2, y2, z2, w2, rbins, results_test );
+	call_gpairs( q, nopt, x1, y1, z1, w1, x2, y2, z2, w2, rbins, results_test );
       }
       t2 = timer_rdtsc();
       printf("%lu,%.6lf\n",nopt,((double) (t2 - t1) / getHz()));
@@ -73,10 +82,10 @@ int main(int argc, char * argv[])
 
 #if 0 //print result
       for (size_t i = 0; i < (DEFAULT_NBINS-1); i++) {
-	printf("%lf\n",results_test[i]);
+	std::cout << results_test[i] << std::endl;
       }
-#endif
-      
+#endif      
+
       /* Deallocate arrays */
       FreeData( x1, y1, z1, w1, x2, y2, z2, w2, rbins, results_test );
 

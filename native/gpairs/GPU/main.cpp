@@ -15,7 +15,7 @@ int main(int argc, char * argv[])
 {
     size_t nopt = 1024;
     int repeat = 1;
-    int STEPS = 10;
+    int STEPS = 3;
 
     clock_t t1 = 0, t2 = 0;
 

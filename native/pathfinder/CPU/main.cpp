@@ -50,7 +50,7 @@ int main(int argc, char** argv)
   int* result;
   size_t pyramid_height = 20;
   int repeat = 1;
-  int STEPS  = 10;
+  int STEPS  = 5;
 
   /* Read nopt number of options parameter from command line */
   if (argc < 2) {

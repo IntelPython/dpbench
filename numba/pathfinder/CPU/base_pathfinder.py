@@ -34,7 +34,7 @@ def gen_data(rows, cols):
 
 ##############################################	
 
-def run(name, alg, sizes=10, step=2, rows=2**10, cols=2**6, pyramid_height=20):
+def run(name, alg, sizes=5, step=2, rows=2**10, cols=2**6, pyramid_height=20):
     import argparse
     parser = argparse.ArgumentParser()
     parser.add_argument('--steps', required=False, default=sizes,  help="Number of steps")

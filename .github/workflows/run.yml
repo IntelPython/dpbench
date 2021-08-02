@@ -1,17 +1,62 @@
-name: Run benchmark
+name: Run dpbench
 
 on:
   workflow_dispatch:
     inputs:
-      command:
-        description: 'Command to run'
+      run:
+        description: run - all|execute|plot
         required: true
-        default: echo "Hello world!"
-  push:
+        # default: all
+        default: execute
+      ws:
+        description: ws - benchmark name/s
+        required: true
+        # default: all
+        default: blackscholes
+      impl:
+        description: impl - all|native|numba|dpnp|native_dpcpp
+        required: true
+        # default: all
+        default: numba
+      k:
+        description: k - <empty>|-k
+        required: false
+        # default: -k
+        default: ''
+      platform:
+        description: platform - all|cpu|gpu
+        required: true
+        # default: all
+        default: gpu
+      analysis:
+        description: analysis - test|perf|vtune|advisor
+        required: true
+        # default: perf
+        default: test
 
 jobs:
-  run:
-    runs-on: ubuntu-latest
+  test-input:
+    runs-on: [self-hosted, devcloud, gen9]
     steps:
+      - uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+          repository: IntelPython/dpbench
+
       - run: |
-          echo "Command: ${{ github.event.inputs.command }}"
+          source /opt/intel/oneapi/intelpython/latest/bin/activate
+
+          python automate_run.py \
+            --run ${{ github.event.inputs.run }} \
+            -ws ${{ github.event.inputs.ws }} \
+            --impl ${{ github.event.inputs.impl }} \
+            ${{ github.event.inputs.k }} \
+            --platform ${{ github.event.inputs.platform }} \
+            --analysis ${{ github.event.inputs.analysis }}
+
+      - uses: actions/upload-artifact@v2
+        with:
+          name: results
+          path: |
+            **/*.json
+            **/*.csv

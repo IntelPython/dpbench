@@ -93,11 +93,11 @@ size_t simple_vote(struct neighbors* neighbors)
   return max_ind;
 }
 
-size_t* run_knn(double** train, size_t *train_labels, double** test, size_t train_nrows, size_t test_size, size_t *predictions)
+size_t* run_knn(double** train, size_t* train_labels, double** test, size_t train_nrows, size_t test_size, size_t* predictions)
 {
     //#pragma omp parallel for simd
 #pragma omp target teams distribute					\
-  parallel for simd map(to:train_labels,train,test) map(from:predictions[0:test_size])
+  parallel for simd
     for (size_t i = 0; i < test_size; ++i) {
       //std::array<std::pair<double, size_t>, NEAREST_NEIGHS> queue_neighbors;
       struct neighbors queue_neighbors[NEAREST_NEIGHS] = {{ 0 }};

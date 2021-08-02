@@ -26,7 +26,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <stdlib.h>
 #include <time.h>
 #include <vector>
-#include "knn.h"
+#include "knn_comp.h"
 #include "rdtsc.h"
 #include <sstream>
 
@@ -135,16 +135,19 @@ int main(int argc, char* argv[]) {
         double** data_test = gen_data_x(nPoints);
 
 	size_t* predictions = new size_t[nPoints];
-	size_t* train_labels = labels.data();	
-
-        /* Warm up cycle */
-        run_knn(data_train, train_labels, data_test, nPoints_train, nPoints, predictions);
-
-        t1 = timer_rdtsc();
-        for (j = 0; j < repeat; j++) {
+	size_t* train_labels = labels.data();
+	
+#pragma omp target data map(to: train_labels, data_train, data_test) map(from: predictions[0:nPoints])
+	{	
+	  /* Warm up cycle */
 	  run_knn(data_train, train_labels, data_test, nPoints_train, nPoints, predictions);
-        }
-        t2 = timer_rdtsc();
+
+	  t1 = timer_rdtsc();
+	  for (j = 0; j < repeat; j++) {
+	    run_knn(data_train, train_labels, data_test, nPoints_train, nPoints, predictions);
+	  }
+	  t2 = timer_rdtsc();
+	}
 
         MOPS = (nPoints * repeat / 1e6) / ((double)(t2 - t1) / getHz());
         time = ((double)(t2 - t1) / getHz());

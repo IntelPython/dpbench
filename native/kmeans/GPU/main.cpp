@@ -24,7 +24,7 @@ int main(int argc, char * argv[])
 
     clock_t t1 = 0, t2 = 0;
 
-    int STEPS = 10;
+    int STEPS = 3;
 
     /* Read nopt number of options parameter from command line */
     if (argc < 2)

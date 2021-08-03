@@ -2,6 +2,7 @@ import numpy as np
 import sys,json,os
 import numpy.random as rnd
 from timeit import default_timer as now
+import dpctl, dpctl.memory as dpmem
 
 ######################################################
 # GLOBAL DECLARATIONS THAT WILL BE USED IN ALL FILES #
@@ -39,10 +40,25 @@ def get_device_selector (is_gpu = True):
 
     return os.environ.get('SYCL_DEVICE_FILTER')
 
-def gen_data(rows, cols):
+def gen_data_np(rows, cols):
     return (
         rnd.randint(LOW, HIGH, (rows, cols)),
         np.empty(cols)
+    )
+
+def gen_data_usm(rows, cols):
+    data_buf = rnd.randint(LOW, HIGH, (rows, cols), dtype=np.int32)
+    result_buf = np.empty(cols, dtype=np.int32)
+
+    with dpctl.device_context(get_device_selector()):
+        data_usm = dpmem.MemoryUSMShared(rows*cols*np.dtype('i4').itemsize)
+        result_usm = dpmem.MemoryUSMShared(cols*np.dtype('i4').itemsize)
+
+        data_usm.copy_from_host(data_buf.reshape((-1)).view("u1"))
+        result_usm.copy_from_host(result_buf.view("u1"))
+    
+    return (np.ndarray((rows,cols), buffer=data_usm, dtype='i4'),
+            np.ndarray((cols), buffer=result_usm, dtype='i4')
     )
 
 ##############################################	
@@ -57,6 +73,7 @@ def run(name, alg, sizes=5, step=2, rows=2**10, cols=2**6, pyramid_height=20):
     parser.add_argument('--pyht',  required=False, default=pyramid_height,   help="Initial pyramid height")
     parser.add_argument('--repeat',required=False, default=1,    help="Iterations inside measured region")
     parser.add_argument('--json',  required=False, default=__file__.replace('py','json'), help="output json data filename")
+    parser.add_argument('--usm',   required=False, action='store_true',  help="Use USM Shared or pure numpy")
 	
     args = parser.parse_args()
     sizes= int(args.steps)
@@ -79,7 +96,10 @@ def run(name, alg, sizes=5, step=2, rows=2**10, cols=2**6, pyramid_height=20):
     f2 = open("runtimes.csv",'w',1)
     
     for i in xrange(sizes):
-        data, result = gen_data(rows, cols)
+        if args.usm is True:
+            data, result = gen_data_usm(rows, cols)
+        else:
+            data, result = gen_data_np(rows, cols)
         iterations = xrange(repeat)
         t0 = now()
         for _ in iterations:

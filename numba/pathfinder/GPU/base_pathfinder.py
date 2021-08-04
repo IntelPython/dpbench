@@ -100,6 +100,9 @@ def run(name, alg, sizes=5, step=2, rows=2**10, cols=2**6, pyramid_height=20):
             data, result = gen_data_usm(rows, cols)
         else:
             data, result = gen_data_np(rows, cols)
+
+        alg(data, rows, cols, pyramid_height, result)
+        
         iterations = xrange(repeat)
         t0 = now()
         for _ in iterations:

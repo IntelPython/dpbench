@@ -32,13 +32,6 @@ def forward_sub_kernel(m, a, b, size, t):
             b[global_id_x + 1 + t] -= m[size * (global_id_x + 1 + t) + (global_id_y + t)] * b[t]
 
 
-def forward_sub_runner(a, m, b, size):
-    # Setup and Run kernels
-    for t in range(size - 1):
-        compute_ratio_kernel[size*size, numba_dppy.DEFAULT_LOCAL_SIZE](m, a, size, t)
-        forward_sub_kernel[[size, size], numba_dppy.DEFAULT_LOCAL_SIZE](m, a, b, size, t)
-
-
 def run_gaussian_elim(size, solve_matrix, coef_vec, extra_matrix):
     # Determine block sizes
     local_work_size_buf_1 = [BLOCK_SIZE_0]

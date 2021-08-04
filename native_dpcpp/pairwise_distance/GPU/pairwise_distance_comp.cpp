@@ -17,8 +17,6 @@ using namespace cl::sycl;
 #endif
 
 void pairwise_distance( queue* q, size_t nopt, struct point * p1, struct point * p2, tfloat* distance_op ) {
-  size_t i;
-
   // allocate GPU data using malloc_device
   // struct point* d_p1, *d_p2;
   // tfloat* d_distance_op;

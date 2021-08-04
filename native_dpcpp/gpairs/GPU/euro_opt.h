@@ -24,10 +24,10 @@ using namespace cl::sycl;
 #define LBOX    500.0f
 #define DEFAULT_NBINS 20
 
-void InitData( size_t npoints, tfloat **x1, tfloat **y1, tfloat **z1, tfloat **w1,
+void InitData( queue* q, size_t npoints, tfloat **x1, tfloat **y1, tfloat **z1, tfloat **w1,
 	      tfloat **x2, tfloat **y2, tfloat **z2, tfloat **w2, tfloat **rbins, tfloat **results_test );
 
-void FreeData( tfloat *x1, tfloat *y1, tfloat *z1, tfloat *w1,
+void FreeData( queue* q, tfloat *x1, tfloat *y1, tfloat *z1, tfloat *w1,
 	       tfloat *x2, tfloat *y2, tfloat *z2, tfloat *w2, tfloat *rbins, tfloat *results_test);
 
 void call_gpairs(queue* q, size_t nopt, tfloat *x1, tfloat *y1, tfloat *z1, tfloat *w1,

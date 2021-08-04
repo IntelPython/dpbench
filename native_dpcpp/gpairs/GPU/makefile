@@ -5,11 +5,6 @@
 # ==============================================================================
 # Makefile for GNU make
 
-SRC:=                      \
-       data_gen.cpp          \
-       main.cpp
-
-
 # ==============================================================================
 # ############## Configure CFLAGS  #############################################
 # ==============================================================================
@@ -35,10 +30,15 @@ endif
 
 all: $(TARGET)
 
-$(TARGET): $(SRC) gpairs.cpp
+comp: $(TARGET)_comp
+
+$(TARGET): data_gen.cpp main.cpp gpairs.cpp
 	$(CC) $(CPPFLAGS) $(CFLAGS) $^ -o $(TARGET)
 
+$(TARGET)_comp: data_gen_comp.cpp main.cpp gpairs_comp.cpp
+	$(CC) $(CPPFLAGS) $(CFLAGS) $^ -o $(TARGET)_comp
+
 clean:
-	rm -rf *.o *.out *.optrpt *.yaml *~ gpairs
+	rm -rf *.o *.out *.optrpt *.yaml *~ gpairs gpairs_comp
 
 .PHONY: all clean

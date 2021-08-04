@@ -61,7 +61,7 @@ int main(int argc, char * argv[])
     int i, j;
     for(i = 0; i < STEPS; i++) {
       /* Allocate arrays, generate input data */
-      InitData( nopt, &x1, &y1, &z1, &w1, &x2, &y2, &z2, &w2, &rbins, &results_test);
+      InitData( q, nopt, &x1, &y1, &z1, &w1, &x2, &y2, &z2, &w2, &rbins, &results_test);
       
       /* Warm up cycle */
       for(j = 0; j < 1; j++) {
@@ -87,7 +87,7 @@ int main(int argc, char * argv[])
 #endif      
 
       /* Deallocate arrays */
-      FreeData( x1, y1, z1, w1, x2, y2, z2, w2, rbins, results_test );
+      FreeData( q, x1, y1, z1, w1, x2, y2, z2, w2, rbins, results_test );
 
       nopt = nopt * 2;
       if (repeat > 2) repeat -= 2;

@@ -14,19 +14,20 @@
 
 #include "euro_opt.h"
 
+using namespace cl::sycl;
+
 tfloat RandRange( tfloat a, tfloat b, struct drand48_data *seed ) {
     double r;
     drand48_r(seed, &r);
     return r*(b-a) + a;
 }
 
-void InitRbins_Results(tfloat **rbins, tfloat **results_test) {
+void InitRbins_Results(queue *q, tfloat **rbins, tfloat **results_test) {
   const float DEFAULT_RMIN = 0.1;
   const int DEFAULT_RMAX = 50;
 
-  *rbins = (tfloat*)_mm_malloc(DEFAULT_NBINS * sizeof(tfloat), ALIGN_FACTOR);
-  //result = (tfloat*)_mm_malloc(DEFAULT_NBINS * sizeof(tfloat), ALIGN_FACTOR);
-  *results_test = (tfloat*)_mm_malloc((DEFAULT_NBINS-1) * sizeof(tfloat), ALIGN_FACTOR);
+  *rbins = (tfloat*)malloc_shared(DEFAULT_NBINS * sizeof(tfloat), *q);
+  *results_test = (tfloat*)malloc_shared((DEFAULT_NBINS-1) * sizeof(tfloat), *q);
   
   tfloat start = log10(DEFAULT_RMIN);
   tfloat stop = log10(DEFAULT_RMAX);
@@ -48,14 +49,14 @@ void InitRbins_Results(tfloat **rbins, tfloat **results_test) {
 void InitData(queue* q, size_t npoints, tfloat **x1, tfloat **y1, tfloat **z1, tfloat **w1,
 	      tfloat **x2, tfloat **y2, tfloat **z2, tfloat **w2, tfloat **rbins, tfloat **results_test) {
   /* Allocate aligned memory */
-  *x1 = (tfloat*)_mm_malloc(npoints * sizeof(tfloat), ALIGN_FACTOR);
-  *y1 = (tfloat*)_mm_malloc(npoints * sizeof(tfloat), ALIGN_FACTOR);
-  *z1 = (tfloat*)_mm_malloc(npoints * sizeof(tfloat), ALIGN_FACTOR);
-  *w1 = (tfloat*)_mm_malloc(npoints * sizeof(tfloat), ALIGN_FACTOR);
-  *x2 = (tfloat*)_mm_malloc(npoints * sizeof(tfloat), ALIGN_FACTOR);
-  *y2 = (tfloat*)_mm_malloc(npoints * sizeof(tfloat), ALIGN_FACTOR);
-  *z2 = (tfloat*)_mm_malloc(npoints * sizeof(tfloat), ALIGN_FACTOR);
-  *w2 = (tfloat*)_mm_malloc(npoints * sizeof(tfloat), ALIGN_FACTOR);
+  *x1 = (tfloat*)malloc_shared(npoints * sizeof(tfloat), *q);
+  *y1 = (tfloat*)malloc_shared(npoints * sizeof(tfloat), *q);
+  *z1 = (tfloat*)malloc_shared(npoints * sizeof(tfloat), *q);
+  *w1 = (tfloat*)malloc_shared(npoints * sizeof(tfloat), *q);
+  *x2 = (tfloat*)malloc_shared(npoints * sizeof(tfloat), *q);
+  *y2 = (tfloat*)malloc_shared(npoints * sizeof(tfloat), *q);
+  *z2 = (tfloat*)malloc_shared(npoints * sizeof(tfloat), *q);
+  *w2 = (tfloat*)malloc_shared(npoints * sizeof(tfloat), *q);
 
   if ( (*x1 == NULL) || (*y1 == NULL) || (*z1 == NULL) || (*w1 == NULL) ||
        (*x2 == NULL) || (*y2 == NULL) || (*z2 == NULL) || (*w2 == NULL)) {
@@ -84,7 +85,7 @@ void InitData(queue* q, size_t npoints, tfloat **x1, tfloat **y1, tfloat **z1, t
       }
   }
 
-  InitRbins_Results(rbins, results_test);
+  InitRbins_Results(q, rbins, results_test);
 }
 
 /* Deallocate arrays */
@@ -92,14 +93,14 @@ void FreeData( queue* q, tfloat *x1, tfloat *y1, tfloat *z1, tfloat *w1,
 	       tfloat *x2, tfloat *y2, tfloat *z2, tfloat *w2, tfloat *rbins, tfloat *results_test )
 {
     /* Free memory */
-    _mm_free(x1);
-    _mm_free(y1);
-    _mm_free(z1);
-    _mm_free(w1);
-    _mm_free(x2);
-    _mm_free(y2);
-    _mm_free(z2);
-    _mm_free(w2);
-    _mm_free(rbins);
-    _mm_free(results_test);
+  free(x1, q->get_context());
+  free(y1, q->get_context());
+  free(z1, q->get_context());
+  free(w1, q->get_context());
+  free(x2, q->get_context());
+  free(y2, q->get_context());
+  free(z2, q->get_context());
+  free(w2, q->get_context());
+  free(rbins, q->get_context());
+  free(results_test, q->get_context());
 }

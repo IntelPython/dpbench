@@ -12,7 +12,7 @@
 
 int main(int argc, char * argv[])
 {
-    int nopt = 1 << 10;
+    int nopt = 1 << 16;
     int repeat = 1;
     tfloat *x1, *x2, distance_op;
 

@@ -162,14 +162,7 @@ def run_knn_kernel(train, train_labels, test, k, classes_num, train_size, predic
 
     predictions[i] =  max_ind
 
-def run_knn(train, train_labels, test, k=5, classes_num=3):
-    test_size = len(test)
-    train_size = len(train)
-
-    predictions = np.empty(test_size)
-    queue_neighbors_lst = np.empty((test_size,k,2))
-    votes_to_classes_lst = np.zeros((test_size,classes_num))
-    
+def run_knn(train, train_labels, test, k, classes_num, test_size, train_size, predictions, queue_neighbors_lst, votes_to_classes_lst):
     with dpctl.device_context(base_knn.get_device_selector()):
         run_knn_kernel[test_size,numba_dppy.DEFAULT_LOCAL_SIZE](train, train_labels, test, k, classes_num, train_size, predictions, queue_neighbors_lst, votes_to_classes_lst)
 

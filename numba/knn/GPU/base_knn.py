@@ -31,7 +31,8 @@ import numpy.random as rnd
 
 DATA_DIM = 16
 SEED = 7777777
-
+CLASSES_NUM = 3
+n_neighbors = 5
 
 try:
     import itimer as it
@@ -75,7 +76,7 @@ def gen_data_x(nopt, data_dim=DATA_DIM):
     return data
 
 
-def gen_data_y(nopt, classes_num=3):
+def gen_data_y(nopt, classes_num):
     data = rnd.randint(classes_num, size=nopt)
     return data
 
@@ -113,18 +114,20 @@ def run(name, alg, sizes=10, step=2, nopt=2**10):
     with open('perf_output.csv', 'w', 1) as fd,  open("runtimes.csv", 'w', 1) as fd2:
         for _ in xrange(args.steps):
 
-            x_train, y_train = gen_data_x(train_data_size), gen_data_y(train_data_size)
+            x_train, y_train = gen_data_x(train_data_size), gen_data_y(train_data_size, CLASSES_NUM)
             x_test = gen_data_x(nopt)
-
-            n_neighbors = 5
 
             sys.stdout.flush()
 
-            predictions = alg(x_train, y_train, x_test, k=n_neighbors)  # warmup
+            predictions = np.empty(nopt)
+            queue_neighbors_lst = np.empty((nopt,n_neighbors,2))
+            votes_to_classes_lst = np.zeros((nopt,CLASSES_NUM))
+
+            alg(x_train, y_train, x_test, n_neighbors, CLASSES_NUM, nopt, train_data_size, predictions, queue_neighbors_lst, votes_to_classes_lst)  # warmup
 
             t0 = now()
             for _ in xrange(repeat):
-                predictions = alg(x_train, y_train, x_test, k=n_neighbors)
+                alg(x_train, y_train, x_test, n_neighbors, CLASSES_NUM, nopt, train_data_size, predictions, queue_neighbors_lst, votes_to_classes_lst)
             mops, time = get_mops(t0, now(), nopt)
 
             result_mops = mops * repeat

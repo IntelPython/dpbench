@@ -82,10 +82,10 @@ knn: $(TARGET)
 
 comp: $(TARGET)_comp
 
-$(TARGET): main.cpp
+$(TARGET): main.cpp knn.cpp
 	$(CC) $(CPPFLAGS) $(CFLAGS) $^ -o $(TARGET)
 
-$(TARGET)_comp: main_comp.cpp
+$(TARGET)_comp: main_comp.cpp knn_comp.cpp
 	$(CC) $(CPPFLAGS) $(CFLAGS) $^ -o $(TARGET)_comp
 
 clean:

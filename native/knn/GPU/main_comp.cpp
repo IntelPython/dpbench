@@ -26,9 +26,11 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <stdlib.h>
 #include <time.h>
 #include <vector>
-#include "knn_comp.h"
+#include "knn.h"
 #include "rdtsc.h"
 #include <sstream>
+
+#define SEED 7777777
 
 int stoi(char* h) {
     std::stringstream in(h);
@@ -49,14 +51,13 @@ double rand32(double a, double b) {
 }
 
 
-double** gen_data_x(size_t data_size)
+double* gen_data_x(size_t data_size)
 {
-    double** data = new double*[data_size];
+    double* data = new double[data_size*DATADIM];
 
     for (size_t i = 0; i < data_size; ++i) {
-      data[i] = new double[DATADIM];
       for (size_t j = 0; j < DATADIM; ++j){
-	data[i][j] = rand32(0, 1);
+	data[i*DATADIM + j] = rand32(0, 1);
       }
     }
 
@@ -124,21 +125,23 @@ int main(int argc, char* argv[]) {
         exit(1);
     }
 
+    srand(SEED);
+
     int i, j;
     double MOPS = 0.0;
     double time;
     for (i = 0; i < STEPS; i++) {
 
-        double** data_train = gen_data_x(nPoints_train);
+        double* data_train = gen_data_x(nPoints_train);
         std::vector<size_t> labels = gen_data_y(nPoints_train);
 
-        double** data_test = gen_data_x(nPoints);
+        double* data_test = gen_data_x(nPoints);
 
 	size_t* predictions = new size_t[nPoints];
-	size_t* train_labels = labels.data();
-	
-#pragma omp target data map(to: train_labels, data_train, data_test) map(from: predictions[0:nPoints])
-	{	
+	size_t* train_labels = labels.data();	
+
+#pragma omp target data map(to:data_train[0:nPoints_train*DATADIM], data_test[0:nPoints*DATADIM],train_labels[0:nPoints_train]) map(from:predictions[0:nPoints])
+	{
 	  /* Warm up cycle */
 	  run_knn(data_train, train_labels, data_test, nPoints_train, nPoints, predictions);
 
@@ -151,6 +154,10 @@ int main(int argc, char* argv[]) {
 
         MOPS = (nPoints * repeat / 1e6) / ((double)(t2 - t1) / getHz());
         time = ((double)(t2 - t1) / getHz());
+
+	for (size_t j = 0; j < nPoints; ++j) {
+	  printf("%lu\n", predictions[j]);
+	}
 
         printf("ERF: Native-C-VML: Size: %ld Time: %.6lf\n", nPoints, time);
         fflush(stdout);

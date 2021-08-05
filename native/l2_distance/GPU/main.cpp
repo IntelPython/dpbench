@@ -62,9 +62,9 @@ int main(int argc, char * argv[])
       printf("L2 Distance: Native-C-SVML: Size: %d MOPS: ", nopt);
 	
       t1 = timer_rdtsc();
-      // for(j = 0; j < repeat; j++) {
-      // 	l2_distance( nopt, x1, x2, &distance_op );
-      // }
+      for(j = 0; j < repeat; j++) {
+      	l2_distance( nopt, x1, x2, &distance_op );
+      }
       t2 = timer_rdtsc();
       printf("%.6lf\n", (2.0 * nopt * 100 / 1e6)/((double) (t2 - t1) / getHz()));
       fflush(stdout);

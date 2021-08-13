@@ -7,6 +7,7 @@ from __future__ import print_function
 import numpy as np
 import sys,json,os
 import dpctl, dpctl.memory as dpmem
+from bs_erf_python import black_scholes_python
 
 try:
     import numpy.random_intel as rnd
@@ -60,11 +61,6 @@ TL = 1.0
 TH = 2.0
 RISK_FREE = 0.1
 VOLATILITY = 0.2
-# RISK_FREE = np.float32(0.1)
-# VOLATILITY = np.float32(0.2)
-# C10 = np.float32(1.)
-# C05 = np.float32(.5)
-# C025 = np.float32(.25)
 TEST_ARRAY_LENGTH = 1024
 
 ###############################################
@@ -132,6 +128,7 @@ def run(name, alg, sizes=14, step=2, nopt=2**15):
     parser.add_argument('--text',  required=False, default="",     help="Print with each result")
     parser.add_argument('--json',  required=False, default=__file__.replace('py','json'), help="output json data filename")
     parser.add_argument('--usm',   required=False, action='store_true',  help="Use USM Shared or pure numpy")
+    parser.add_argument('--test',  required=False, action='store_true', help="Check for correctness by comparing output with naieve Python version")
 	
     args = parser.parse_args()
     sizes= int(args.steps)
@@ -149,6 +146,20 @@ def run(name, alg, sizes=14, step=2, nopt=2**15):
     kwargs={}
 
     rnd.seed(SEED)
+
+    if args.test:
+        price, strike, t, p_call, p_put = gen_data_np(nopt)
+        black_scholes_python(nopt, price, strike, t, RISK_FREE, VOLATILITY, p_call, p_put)
+
+        price_1, strike_1, t_1, n_call, n_put = gen_data_np(nopt)
+        alg(nopt, price, strike, t, RISK_FREE, VOLATILITY, n_call, n_put)
+
+        if np.allclose(n_call, p_call) and np.allclose(n_put, p_put):
+            print("Test succeeded\n")
+        else:
+            print("Test failed\n")
+        return
+    
     f1 = open("perf_output.csv",'w',1)
     f2 = open("runtimes.csv",'w',1)
     

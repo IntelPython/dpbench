@@ -36,4 +36,4 @@ def black_scholes( nopt, price, strike, t, rate, vol, call, put):
         call [i] = r
         put [i] = r - P + Se
 
-base_bs_erf.run("Numba@jit-loop-par", black_scholes, nparr=True, pass_args=True)
+base_bs_erf.run("Numba@jit-loop-par", black_scholes)

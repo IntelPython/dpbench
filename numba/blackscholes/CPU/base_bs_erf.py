@@ -6,6 +6,7 @@
 from __future__ import print_function
 import numpy as np
 import sys,json
+from bs_erf_python import black_scholes_python
 
 try:
     import numpy.random_intel as rnd
@@ -59,11 +60,6 @@ TL = 1.0
 TH = 2.0
 RISK_FREE = 0.1
 VOLATILITY = 0.2
-# RISK_FREE = np.float32(0.1)
-# VOLATILITY = np.float32(0.2)
-# C10 = np.float32(1.)
-# C05 = np.float32(.5)
-# C025 = np.float32(.25)
 TEST_ARRAY_LENGTH = 1024
 
 ###############################################
@@ -77,23 +73,21 @@ def gen_data(nopt):
 
 ##############################################	
 
-def run(name, alg, sizes=14, step=2, nopt=2**15, nparr=True, dask=False, pass_args=False):
+def run(name, alg, sizes=14, step=2, nopt=2**15):
     import argparse
     parser = argparse.ArgumentParser()
     parser.add_argument('--steps', required=False, default=sizes,  help="Number of steps")
     parser.add_argument('--step',  required=False, default=step,   help="Factor for each step")
-    parser.add_argument('--chunk', required=False, default=2000000,help="Chunk size for Dask")
     parser.add_argument('--size',  required=False, default=nopt,   help="Initial data size")
     parser.add_argument('--repeat',required=False, default=1,    help="Iterations inside measured region")
-    parser.add_argument('--dask',  required=False, default="sq",   help="Dask scheduler: sq, mt, mp")
     parser.add_argument('--text',  required=False, default="",     help="Print with each result")
+    parser.add_argument('--test',  required=False, action='store_true', help="Check for correctness by comparing output with naieve Python version")
     parser.add_argument('--json',  required=False, default=__file__.replace('py','json'), help="output json data filename")
 	
     args = parser.parse_args()
     sizes= int(args.steps)
     step = int(args.step)
     nopt = int(args.size)
-    chunk= int(args.chunk)
     repeat=int(args.repeat)
  
     output = {}
@@ -105,52 +99,39 @@ def run(name, alg, sizes=14, step=2, nopt=2**15, nparr=True, dask=False, pass_ar
     output['metrics']   = []
     kwargs={}
 
-    if(dask):
-        import dask
-        import dask.multiprocessing
-        import dask.array as da
-        dask_modes = {
-	    "sq": 'single-threaded',
-	    "mt": 'threads',
-	    "mp": 'processes'
-	}
-        kwargs = {"schd": dask_modes[args.dask]}
-        name += "-"+args.dask
-
     rnd.seed(SEED)
+
+    if args.test:
+        price, strike, t = gen_data(nopt)
+        p_call = np.zeros(nopt, dtype=np.float64)
+        p_put  = -np.ones(nopt, dtype=np.float64)
+        black_scholes_python(nopt, price, strike, t, RISK_FREE, VOLATILITY, p_call, p_put)
+
+        n_call = np.zeros(nopt, dtype=np.float64)
+        n_put  = -np.ones(nopt, dtype=np.float64)
+        alg(nopt, price, strike, t, RISK_FREE, VOLATILITY, n_call, n_put)
+
+        if np.allclose(n_call, p_call) and np.allclose(n_put, p_put):
+            print("Test succeeded\n")
+        else:
+            print("Test failed\n")
+        return
+            
     f1 = open("perf_output.csv",'w',1)
     f2 = open("runtimes.csv",'w',1)
     
     for i in xrange(sizes):
         price, strike, t = gen_data(nopt)
-        if not nparr:
-            call = [0.0 for i in range(nopt)]
-            put = [-1.0 for i in range(nopt)]
-            price=list(price)
-            strike=list(strike)
-            t=list(t)
-            repeat=1 # !!!!! ignore repeat count
-        if dask:
-            assert(not pass_args)
-            price = da.from_array(price, chunks=(chunk,), name=False)
-            strike = da.from_array(strike, chunks=(chunk,), name=False)
-            t = da.from_array(t, chunks=(chunk,), name=False)
-        if pass_args:
-            call = np.zeros(nopt, dtype=np.float64)
-            put  = -np.ones(nopt, dtype=np.float64)
+        call = np.zeros(nopt, dtype=np.float64)
+        put  = -np.ones(nopt, dtype=np.float64)
         iterations = xrange(repeat)
         sys.stdout.flush()
 
-        if pass_args:
-            alg(nopt, price, strike, t, RISK_FREE, VOLATILITY, call, put) #warmup
-            t0 = now()
-            for _ in iterations:
-                alg(nopt, price, strike, t, RISK_FREE, VOLATILITY, call, put, **kwargs)
-        else:
-            alg(nopt, price, strike, t, RISK_FREE, VOLATILITY) #warmup
-            t0 = now()
-            for _ in iterations:
-                alg(nopt, price, strike, t, RISK_FREE, VOLATILITY, **kwargs)
+        alg(nopt, price, strike, t, RISK_FREE, VOLATILITY, call, put) #warmup
+        t0 = now()
+        for _ in iterations:
+            alg(nopt, price, strike, t, RISK_FREE, VOLATILITY, call, put)
+            
         mops,time = get_mops(t0, now(), nopt)
         print("ERF: {:15s} | Size: {:10d} | MOPS: {:15.2f} | TIME: {:10.6f}".format(name, nopt, mops*2*repeat,time),flush=True)
         output['metrics'].append((nopt,mops,time))

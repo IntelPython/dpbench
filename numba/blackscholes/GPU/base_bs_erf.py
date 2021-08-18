@@ -39,6 +39,7 @@ except:
     now = default_timer
     get_mops = lambda t0, t1, n: (n / (t1 - t0),t1-t0)
 
+from dpbench_datagen.blackscholes import gen_rand_data
 
 print("Using ", numpy_ver, " numpy ", np.__version__)
 
@@ -80,17 +81,14 @@ def get_device_selector (is_gpu = True):
     return os.environ.get('SYCL_DEVICE_FILTER')
 
 def gen_data_np(nopt):
-    return (rnd.uniform(S0L, S0H, nopt),
-            rnd.uniform(XL, XH, nopt),
-            rnd.uniform(TL, TH, nopt),
+    price, strike, t =  gen_rand_data(nopt)
+    return (price, strike, t,
             np.zeros(nopt, dtype=np.float64),
             -np.ones(nopt, dtype=np.float64))
 
 def gen_data_usm(nopt):
     # init numpy obj
-    price_buf = rnd.uniform(S0L, S0H, nopt)
-    strike_buf = rnd.uniform(XL, XH, nopt)
-    t_buf = rnd.uniform(TL, TH, nopt)
+    price_buf, strike_buf, t_buf = gen_rand_data(nopt)
     call_buf = np.zeros(nopt, dtype=np.float64)
     put_buf  = -np.ones(nopt, dtype=np.float64)    
 

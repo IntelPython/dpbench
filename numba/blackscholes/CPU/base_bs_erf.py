@@ -38,6 +38,8 @@ except:
     now = default_timer
     get_mops = lambda t0, t1, n: (n / (t1 - t0),t1-t0)
 
+from dpbench_datagen.blackscholes import gen_rand_data    
+
 
 print("Using ", numpy_ver, " numpy ", np.__version__)
 
@@ -65,11 +67,7 @@ TEST_ARRAY_LENGTH = 1024
 ###############################################
 
 def gen_data(nopt):
-    return (
-        rnd.uniform(S0L, S0H, nopt),
-        rnd.uniform(XL, XH, nopt),
-        rnd.uniform(TL, TH, nopt),
-    )
+    return (gen_rand_data(nopt))
 
 ##############################################	
 

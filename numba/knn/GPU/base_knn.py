@@ -29,9 +29,13 @@ import sys,os,json
 import numpy as np
 import numpy.random as rnd
 
-DATA_DIM = 16
+from knn_python import knn_python
+
+
+DATA_DIM = 2**8
 SEED = 7777777
 CLASSES_NUM = 3
+TRAIN_DATA_SIZE = 2**10
 n_neighbors = 5
 
 try:
@@ -71,6 +75,7 @@ def get_device_selector (is_gpu = True):
 
     return os.environ.get('SYCL_DEVICE_FILTER')
 
+
 def gen_data_x(nopt, data_dim=DATA_DIM):
     data = rnd.rand(nopt, data_dim)
     return data
@@ -94,12 +99,13 @@ def run(name, alg, sizes=10, step=2, nopt=2**10):
     parser.add_argument('--repeat', type=int, default=1,
                         help='Iterations inside measured region')
     parser.add_argument('--text', default='', help='Print with each result')
+    parser.add_argument('--test', required=False, action='store_true', help="Check for correctness by comparing output with naieve Python version")
     parser.add_argument('--json',  required=False, default=__file__.replace('py','json'), help="output json data filename")
 
     args = parser.parse_args()
     nopt = args.size
     repeat = args.repeat
-    train_data_size = 2**10
+    train_data_size = TRAIN_DATA_SIZE
  
     output = {}
     output['name']      = name
@@ -110,6 +116,27 @@ def run(name, alg, sizes=10, step=2, nopt=2**10):
     output['metrics']   = []
 
     rnd.seed(SEED)
+
+    if args.test:
+        x_train, y_train = gen_data_x(train_data_size), gen_data_y(train_data_size, CLASSES_NUM)
+        x_test = gen_data_x(nopt)
+        p_predictions = np.empty(nopt)
+        p_queue_neighbors_lst = np.empty((nopt, n_neighbors, 2))
+        p_votes_to_classes_lst = np.zeros((nopt, CLASSES_NUM))
+
+        knn_python(x_train, y_train, x_test, n_neighbors, CLASSES_NUM, train_data_size, nopt, p_predictions, p_queue_neighbors_lst, p_votes_to_classes_lst)
+        
+        n_predictions = np.empty(nopt)
+        n_queue_neighbors_lst = np.empty((nopt, n_neighbors, 2))
+        n_votes_to_classes_lst = np.zeros((nopt, CLASSES_NUM))
+
+        alg(x_train, y_train, x_test, n_neighbors, CLASSES_NUM, nopt, train_data_size, n_predictions, n_queue_neighbors_lst, n_votes_to_classes_lst)
+
+        if np.allclose(n_predictions, p_predictions):
+            print("Test succeeded\n")
+        else:
+            print("Test failed\n")
+        return
     
     with open('perf_output.csv', 'w', 1) as fd,  open("runtimes.csv", 'w', 1) as fd2:
         for _ in xrange(args.steps):
@@ -120,8 +147,8 @@ def run(name, alg, sizes=10, step=2, nopt=2**10):
             sys.stdout.flush()
 
             predictions = np.empty(nopt)
-            queue_neighbors_lst = np.empty((nopt,n_neighbors,2))
-            votes_to_classes_lst = np.zeros((nopt,CLASSES_NUM))
+            queue_neighbors_lst = np.empty((nopt, n_neighbors, 2))
+            votes_to_classes_lst = np.zeros((nopt, CLASSES_NUM))
 
             alg(x_train, y_train, x_test, n_neighbors, CLASSES_NUM, nopt, train_data_size, predictions, queue_neighbors_lst, votes_to_classes_lst)  # warmup
 

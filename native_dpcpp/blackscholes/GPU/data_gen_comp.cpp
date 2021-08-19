@@ -13,6 +13,7 @@
 
 #include "euro_opt.h"
 
+using namespace std;
 using namespace cl::sycl;
 
 tfloat RandRange( tfloat a, tfloat b, struct drand48_data *seed ) {
@@ -53,22 +54,38 @@ void InitData( queue *q, size_t nopt, tfloat* *s0, tfloat* *x, tfloat* *t,
         exit(-1);
     }
 
-    /* NUMA-friendly data init */
-    #pragma omp parallel
-    {
-        struct drand48_data seed;
-        srand48_r(omp_get_thread_num()+SEED, &seed);
-        #pragma omp for simd
-        for ( i = 0; i < nopt; i++ )
-        {
-            ts0[i] = RandRange( S0L, S0H, &seed );
-            tx[i]  = RandRange( XL, XH, &seed );
-            tt[i]  = RandRange( TL, TH, &seed );
-
-            tvcall_compiler[i] = 0.0;
-            tvput_compiler[i]  = 0.0;
-        }
+    ifstream file;
+    file.open("price.bin", ios::in|ios::binary);
+    if (file) {
+      file.read(reinterpret_cast<char *>(ts0), nopt*sizeof(tfloat));
+      file.close();
+    } else {
+      std::cout << "Input file not found.\n";
+      exit(0);
     }
+
+    file.open("strike.bin", ios::in|ios::binary);
+    if (file) {
+      file.read(reinterpret_cast<char *>(tx), nopt*sizeof(tfloat));
+      file.close();
+    } else {
+      std::cout << "Input file not found.\n";
+      exit(0);
+    }
+
+    file.open("t.bin", ios::in|ios::binary);
+    if (file) {
+      file.read(reinterpret_cast<char *>(tt), nopt*sizeof(tfloat));
+      file.close();
+    } else {
+      std::cout << "Input file not found.\n";
+      exit(0);
+    }
+
+    for ( i = 0; i < nopt; i++ ){	
+      tvcall_compiler[i] = 0.0;
+      tvput_compiler[i]  = 0.0;
+    }    
 
     *s0 = ts0;
     *x  = tx;

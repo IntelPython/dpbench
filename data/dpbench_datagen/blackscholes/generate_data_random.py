@@ -24,6 +24,16 @@ def dump_binary(price, strike, t):
     with open('t.bin', 'w') as fd:
         t.tofile(fd)
 
+def dump_text(price, strike, t):
+    with open('gen_price.txt', 'w') as fd:
+        price.tofile(fd, '\n', '%s')
+
+    with open('gen_strike.txt', 'w') as fd:
+        strike.tofile(fd, '\n', '%s')
+
+    with open('gen_t.txt', 'w') as fd:
+        t.tofile(fd, '\n', '%s')
+        
 def gen_rand_data(nopt):
     rnd.seed(SEED)
     return (rnd.uniform(S0L, S0H, nopt),
@@ -33,3 +43,4 @@ def gen_rand_data(nopt):
 def gen_data_to_file(nopt = 2**10):
     price, strike, t = gen_rand_data(nopt)
     dump_binary(price, strike, t)
+    #dump_text(price, strike, t)

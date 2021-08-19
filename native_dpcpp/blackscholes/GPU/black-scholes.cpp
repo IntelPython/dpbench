@@ -57,16 +57,17 @@ using namespace cl::sycl;
 {
   // allocate GPU data using malloc_device
   tfloat *d_s0, *d_x, *d_t, *d_vcall, *d_vput;
-  d_s0 = (tfloat*)malloc_device( nopt * sizeof(tfloat), *q);
-  d_x = (tfloat*)malloc_device( nopt * sizeof(tfloat), *q);
-  d_t = (tfloat*)malloc_device( nopt * sizeof(tfloat), *q);
-  d_vcall = (tfloat*)malloc_device( nopt * sizeof(tfloat), *q);
-  d_vput = (tfloat*)malloc_device( nopt * sizeof(tfloat), *q);
+  d_s0 = (tfloat*)malloc_shared( nopt * sizeof(tfloat), *q);
+  d_x = (tfloat*)malloc_shared( nopt * sizeof(tfloat), *q);
+  d_t = (tfloat*)malloc_shared( nopt * sizeof(tfloat), *q);
+  d_vcall = (tfloat*)malloc_shared( nopt * sizeof(tfloat), *q);
+  d_vput = (tfloat*)malloc_shared( nopt * sizeof(tfloat), *q);
 
   // copy data host to device
   q->memcpy(d_s0, s0, nopt * sizeof(tfloat));
   q->memcpy(d_x, x, nopt * sizeof(tfloat));
   q->memcpy(d_t, t, nopt * sizeof(tfloat));
+  q->wait();
 
   // compute
   int i;

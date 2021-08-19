@@ -10,13 +10,6 @@ import dpctl, dpctl.memory as dpmem
 from bs_erf_python import black_scholes_python
 
 try:
-    import numpy.random_intel as rnd
-    numpy_ver="Intel"
-except:
-    import numpy.random as rnd
-    numpy_ver="regular"
-
-try:
     from numpy import erf
     numpy_ver += "-erf"
 except:
@@ -142,8 +135,6 @@ def run(name, alg, sizes=14, step=2, nopt=2**15):
     output['randseed']  = SEED
     output['metrics']   = []
     kwargs={}
-
-    rnd.seed(SEED)
 
     if args.test:
         price, strike, t, p_call, p_put = gen_data_np(nopt)

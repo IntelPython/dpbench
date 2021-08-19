@@ -56,6 +56,6 @@ $(TARGET)_comp: main.cpp data_gen_comp.cpp black-scholes_comp.cpp
 	$(CC) $(CPPFLAGS) $(CFLAGS) $^ -o $(TARGET)_comp
 
 clean:
-	rm -rf *.o *.out *.optrpt *.yaml *~ $(foreach acc,ha la ep,black_scholes black_scholes_comp)
+	rm -rf *.o *.out *.optrpt *.yaml *.bin *~ $(foreach acc,ha la ep,black_scholes black_scholes_comp)
 
 .PHONY: all clean comp black_scholes

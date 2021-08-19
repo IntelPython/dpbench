@@ -30,15 +30,13 @@ tfloat RandRange( tfloat a, tfloat b, struct drand48_data *seed ) {
 //     x    - strike price
 //     t    - maturity
 // Output arrays for call and put prices
-//     vcall_compiler, vcall_mkl
-//     vput_compiler, vput_mkl
+//     vcall_compiler
+//     vput_compiler
 */
 void InitData( queue *q, size_t nopt, tfloat* *s0, tfloat* *x, tfloat* *t,
-                   tfloat* *vcall_compiler, tfloat* *vput_compiler,
-                   tfloat* *vcall_mkl, tfloat* *vput_mkl
-             )
+                   tfloat* *vcall_compiler, tfloat* *vput_compiler)
 {
-    tfloat *ts0, *tx, *tt, *tvcall_compiler, *tvput_compiler, *tvcall_mkl, *tvput_mkl;
+    tfloat *ts0, *tx, *tt, *tvcall_compiler, *tvput_compiler;
     int i;
 
     /* Allocate aligned memory */
@@ -47,12 +45,9 @@ void InitData( queue *q, size_t nopt, tfloat* *s0, tfloat* *x, tfloat* *t,
     tt              = (tfloat*)malloc_shared( nopt * sizeof(tfloat), *q);
     tvcall_compiler = (tfloat*)malloc_shared( nopt * sizeof(tfloat), *q);
     tvput_compiler  = (tfloat*)malloc_shared( nopt * sizeof(tfloat), *q);
-    tvcall_mkl      = (tfloat*)malloc_shared( nopt * sizeof(tfloat), *q);
-    tvput_mkl       = (tfloat*)malloc_shared( nopt * sizeof(tfloat), *q);
 
     if ( (ts0 == NULL) || (tx == NULL) || (tt == NULL) ||
-         (tvcall_compiler == NULL) || (tvput_compiler == NULL) ||
-         (tvcall_mkl == NULL) || (tvput_mkl == NULL) )
+         (tvcall_compiler == NULL) || (tvput_compiler == NULL) )
     {
         printf("Memory allocation failure\n");
         exit(-1);
@@ -72,8 +67,6 @@ void InitData( queue *q, size_t nopt, tfloat* *s0, tfloat* *x, tfloat* *t,
 
             tvcall_compiler[i] = 0.0;
             tvput_compiler[i]  = 0.0;
-            tvcall_mkl[i] = 0.0;
-            tvput_mkl[i]  = 0.0;
         }
     }
 
@@ -82,15 +75,11 @@ void InitData( queue *q, size_t nopt, tfloat* *s0, tfloat* *x, tfloat* *t,
     *t  = tt;
     *vcall_compiler = tvcall_compiler;
     *vput_compiler  = tvput_compiler;
-    *vcall_mkl = tvcall_mkl;
-    *vput_mkl  = tvput_mkl;
 }
 
 /* Deallocate arrays */
 void FreeData( queue* q, tfloat *s0, tfloat *x, tfloat *t,
-                   tfloat *vcall_compiler, tfloat *vput_compiler,
-                   tfloat *vcall_mkl, tfloat *vput_mkl
-             )
+                   tfloat *vcall_compiler, tfloat *vput_compiler)
 {
     /* Free memory */
   free(s0, q->get_context());
@@ -98,6 +87,4 @@ void FreeData( queue* q, tfloat *s0, tfloat *x, tfloat *t,
   free(t, q->get_context());
   free(vcall_compiler, q->get_context());
   free(vput_compiler, q->get_context());
-  free(vcall_mkl, q->get_context());
-  free(vput_mkl, q->get_context());
 }

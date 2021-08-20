@@ -3,7 +3,9 @@
 # SPDX-License-Identifier: MIT
 
 import os, utils
-from dpbench_datagen.blackscholes import gen_data_to_file
+import numpy as np
+from dpbench_datagen.blackscholes import gen_data_to_file, gen_rand_data
+from dpbench_python.blackscholes.bs_python import black_scholes_python
 
 # make xrange available in python 3
 try:
@@ -11,8 +13,17 @@ try:
 except NameError:
     xrange = range
 
-def gen_data_np(nopt):
+def ip_data_to_file(nopt):
     gen_data_to_file(nopt)
+
+def gen_data_np(nopt):
+    price, strike, t =  gen_rand_data(nopt)
+    return (price, strike, t,
+            np.zeros(nopt, dtype=np.float64),
+            -np.ones(nopt, dtype=np.float64))
+
+RISK_FREE = 0.1
+VOLATILITY = 0.2
     
 # create input data, call blackscholes computation function (alg)
 def run(name, sizes=14, step=2, nopt=2**15):
@@ -31,22 +42,41 @@ def run(name, sizes=14, step=2, nopt=2**15):
     nopt = int(args.size)
     repeat=int(args.repeat)
 
-    #TODO
-    if args.test:
-        return
-
-    if os.path.isfile('runtimes.csv'):
-        os.remove('runtimes.csv')
-
     clean_string = ['make', 'clean']
     utils.run_command(clean_string, verbose=True)
 
     build_string = ['make']
     utils.run_command(build_string, verbose=True)        
+    
+    if args.test:
+        #run sequential python
+        price, strike, t, p_call, p_put = gen_data_np(nopt)
+        black_scholes_python(nopt, price, strike, t, RISK_FREE, VOLATILITY, p_call, p_put)
+
+        #run dpcpp
+        ip_data_to_file(nopt)
+        run_cmd = ['./black_scholes', str(nopt), str(1), "-t"]
+        utils.run_command(run_cmd, verbose=True)
+
+        #read output of dpcpp into n_call, n_put
+        n_call = np.fromfile("call.bin", np.float64)
+
+        #read output of dpcpp into n_call, n_put
+        n_put = np.fromfile("put.bin", np.float64)
+        
+        #compare outputs
+        if np.allclose(n_call, p_call) and np.allclose(n_put, p_put):
+            print("Test succeeded\n")
+        else:
+            print("Test failed\n")        
+        return
+
+    if os.path.isfile('runtimes.csv'):
+        os.remove('runtimes.csv')
         
     for i in xrange(sizes):
         # generate input data
-        gen_data_np(nopt)            
+        ip_data_to_file(nopt)
         iterations = xrange(repeat)
 
         # run the C program

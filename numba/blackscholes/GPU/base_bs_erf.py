@@ -7,7 +7,7 @@ from __future__ import print_function
 import numpy as np
 import sys,json,os
 import dpctl, dpctl.memory as dpmem
-from bs_erf_python import black_scholes_python
+from dpbench_python.blackscholes.bs_python import black_scholes_python
 
 try:
     from numpy import erf
@@ -33,8 +33,6 @@ except:
     get_mops = lambda t0, t1, n: (n / (t1 - t0),t1-t0)
 
 from dpbench_datagen.blackscholes import gen_rand_data
-
-print("Using ", numpy_ver, " numpy ", np.__version__)
 
 ######################################################
 # GLOBAL DECLARATIONS THAT WILL BE USED IN ALL FILES #

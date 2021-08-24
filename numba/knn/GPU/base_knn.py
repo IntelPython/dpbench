@@ -25,11 +25,12 @@
 # *****************************************************************************
 
 import argparse
-import sys,os,json
+import sys, os, json
 import numpy as np
 import numpy.random as rnd
 
 from knn_python import knn_python
+from dpbench_datagen.knn import gen_data_x, gen_data_y
 
 
 DATA_DIM = 2**8
@@ -74,16 +75,6 @@ def get_device_selector (is_gpu = True):
         return "level_zero:" + device_selector
 
     return os.environ.get('SYCL_DEVICE_FILTER')
-
-
-def gen_data_x(nopt, data_dim=DATA_DIM):
-    data = rnd.rand(nopt, data_dim)
-    return data
-
-
-def gen_data_y(nopt, classes_num):
-    data = rnd.randint(classes_num, size=nopt)
-    return data
 
 
 ##############################################
@@ -138,11 +129,13 @@ def run(name, alg, sizes=10, step=2, nopt=2**10):
             print("Test failed\n")
         return
     
-    with open('perf_output.csv', 'w', 1) as fd,  open("runtimes.csv", 'w', 1) as fd2:
-        for _ in xrange(args.steps):
+    with open('../../../../../../Users/akharche/OneDrive - Intel Corporation/Desktop/perf_output.csv', 'w', 1) as fd,  open(
+            "../../../../../../Users/akharche/OneDrive - Intel Corporation/Desktop/runtimes.csv", 'w', 1) as fd2:
 
-            x_train, y_train = gen_data_x(train_data_size), gen_data_y(train_data_size, CLASSES_NUM)
-            x_test = gen_data_x(nopt)
+        x_train, y_train = gen_data_x(train_data_size), gen_data_y(train_data_size, CLASSES_NUM)
+        x_test = gen_data_x(nopt)
+        
+        for _ in xrange(args.steps):
 
             sys.stdout.flush()
 

@@ -1,0 +1,3 @@
+from .generate_data_random import gen_data_x
+from .generate_data_random import gen_data_y
+from .generate_data_random import gen_data_to_file

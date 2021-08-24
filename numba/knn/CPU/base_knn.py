@@ -30,6 +30,7 @@ import numpy as np
 import numpy.random as rnd
 
 from knn_python import knn_python
+from dpbench_datagen.knn import gen_data_x, gen_data_y
 
 DATA_DIM = 2**8
 SEED = 7777777
@@ -61,17 +62,7 @@ except NameError:
 
 
 ###############################################
-def gen_data_x(nopt, data_dim=DATA_DIM):
-    data = rnd.rand(nopt, data_dim)
-    return data
 
-
-def gen_data_y(nopt, classes_num=3):
-    data = rnd.randint(classes_num, size=nopt)
-    return data
-
-
-##############################################
 
 def run(name, alg, sizes=10, step=2, nopt=2**10):
     parser = argparse.ArgumentParser()
@@ -115,7 +106,8 @@ def run(name, alg, sizes=10, step=2, nopt=2**10):
             print("Test failed\n")
         return
     
-    with open('perf_output.csv', 'w', 1) as fd,  open("runtimes.csv", 'w', 1) as fd2:
+    with open('../../../../../../Users/akharche/OneDrive - Intel Corporation/Desktop/perf_output.csv', 'w', 1) as fd,  open(
+            "../../../../../../Users/akharche/OneDrive - Intel Corporation/Desktop/runtimes.csv", 'w', 1) as fd2:
         for _ in xrange(args.steps):
 
             x_train, y_train = gen_data_x(train_data_size), gen_data_y(train_data_size)

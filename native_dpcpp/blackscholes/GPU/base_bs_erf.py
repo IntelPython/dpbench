@@ -45,9 +45,15 @@ def run(name, sizes=14, step=2, nopt=2**15):
     clean_string = ['make', 'clean']
     utils.run_command(clean_string, verbose=True)
 
-    build_string = ['make']
-    utils.run_command(build_string, verbose=True)        
-    
+    if args.usm:
+        build_string = ['make' ,'comp']
+        utils.run_command(build_string, verbose=True)
+        exec_name = "./black_scholes_comp"
+    else:
+        build_string = ['make']
+        utils.run_command(build_string, verbose=True)
+        exec_name = "./black_scholes"
+        
     if args.test:
         #run sequential python
         price, strike, t, p_call, p_put = gen_data_np(nopt)
@@ -55,7 +61,7 @@ def run(name, sizes=14, step=2, nopt=2**15):
 
         #run dpcpp
         ip_data_to_file(nopt)
-        run_cmd = ['./black_scholes', str(nopt), str(1), "-t"]
+        run_cmd = [exec_name, str(nopt), str(1), "-t"]
         utils.run_command(run_cmd, verbose=True)
 
         #read output of dpcpp into n_call, n_put
@@ -80,7 +86,7 @@ def run(name, sizes=14, step=2, nopt=2**15):
         iterations = xrange(repeat)
 
         # run the C program
-        run_cmd = ['./black_scholes', str(nopt), str(repeat)]
+        run_cmd = [exec_name, str(nopt), str(repeat)]
         utils.run_command(run_cmd, verbose=True)
         nopt *= step
         repeat -= step

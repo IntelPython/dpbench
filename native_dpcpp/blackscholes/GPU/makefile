@@ -52,7 +52,7 @@ comp: $(TARGET)_comp
 $(TARGET): data_gen.cpp main.cpp black-scholes.cpp
 	$(CC) $(CPPFLAGS) $(CFLAGS) $^ -o $(TARGET)
 
-$(TARGET)_comp: main.cpp data_gen_comp.cpp black-scholes_comp.cpp
+$(TARGET)_comp: main_comp.cpp data_gen_comp.cpp black-scholes_comp.cpp
 	$(CC) $(CPPFLAGS) $(CFLAGS) $^ -o $(TARGET)_comp
 
 clean:

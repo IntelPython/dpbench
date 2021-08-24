@@ -6,7 +6,7 @@
 from __future__ import print_function
 import numpy as np
 import sys,json,os
-import dpctl, dpctl.memory as dpmem
+import dpctl, dpctl.memory as dpmem, dpctl.tensor as dpt
 from dpbench_python.blackscholes.bs_python import black_scholes_python
 
 try:
@@ -83,26 +83,32 @@ def gen_data_usm(nopt):
     call_buf = np.zeros(nopt, dtype=np.float64)
     put_buf  = -np.ones(nopt, dtype=np.float64)    
 
-    with dpctl.device_context(get_device_selector()):    
-        #copy numpy to usmshared
-        price_usm = dpmem.MemoryUSMShared(nopt*np.dtype('f8').itemsize)
-        strike_usm = dpmem.MemoryUSMShared(nopt*np.dtype('f8').itemsize)
-        t_usm = dpmem.MemoryUSMShared(nopt*np.dtype('f8').itemsize)
-        call_usm = dpmem.MemoryUSMShared(nopt*np.dtype('f8').itemsize)
-        put_usm = dpmem.MemoryUSMShared(nopt*np.dtype('f8').itemsize)
+    with dpctl.device_context(get_device_selector()) as gpu_queue:
+        #init usmdevice memory        
+        # price_usm = dpmem.MemoryUSMDevice(nopt*np.dtype('f8').itemsize)
+        # strike_usm = dpmem.MemoryUSMDevice(nopt*np.dtype('f8').itemsize)
+        # t_usm = dpmem.MemoryUSMDevice(nopt*np.dtype('f8').itemsize)
+        # call_usm = dpmem.MemoryUSMDevice(nopt*np.dtype('f8').itemsize)
+        # put_usm = dpmem.MemoryUSMDevice(nopt*np.dtype('f8').itemsize)
+        price_usm = dpt.usm_ndarray(price_buf.shape, dtype=price_buf.dtype, buffer="device", buffer_ctor_kwargs={"queue": gpu_queue})
+        strike_usm = dpt.usm_ndarray(strike_buf.shape, dtype=strike_buf.dtype, buffer="device", buffer_ctor_kwargs={"queue": gpu_queue})
+        t_usm = dpt.usm_ndarray(t_buf.shape, dtype=t_buf.dtype, buffer="device", buffer_ctor_kwargs={"queue": gpu_queue})
+        call_usm = dpt.usm_ndarray(call_buf.shape, dtype=call_buf.dtype, buffer="device", buffer_ctor_kwargs={"queue": gpu_queue})
+        put_usm = dpt.usm_ndarray(put_buf.shape, dtype=put_buf.dtype, buffer="device", buffer_ctor_kwargs={"queue": gpu_queue})
 
-        #return numpy obj with usmshared obj set to buffer
-        price_usm.copy_from_host(price_buf.view("u1"))
-        strike_usm.copy_from_host(strike_buf.view("u1"))
-        t_usm.copy_from_host(t_buf.view("u1"))
-        call_usm.copy_from_host(call_buf.view("u1"))
-        put_usm.copy_from_host(put_buf.view("u1"))        
+    price_usm.usm_data.copy_from_host(price_buf.view("u1"))
+    strike_usm.usm_data.copy_from_host(strike_buf.view("u1"))
+    t_usm.usm_data.copy_from_host(t_buf.view("u1"))
+    call_usm.usm_data.copy_from_host(call_buf.view("u1"))
+    put_usm.usm_data.copy_from_host(put_buf.view("u1"))        
 
-    return(np.ndarray((nopt,), buffer=price_usm, dtype='f8'),
-           np.ndarray((nopt,), buffer=strike_usm, dtype='f8'),
-           np.ndarray((nopt,), buffer=t_usm, dtype='f8'),
-           np.ndarray((nopt,), buffer=call_usm, dtype='f8'),
-           np.ndarray((nopt,), buffer=put_usm, dtype='f8'))
+    return (price_usm, strike_usm, t_usm, call_usm, put_usm)
+    #return numpy obj with usmshared obj set to buffer        
+    # return(np.ndarray((nopt,), buffer=price_usm, dtype='f8'),
+    #        np.ndarray((nopt,), buffer=strike_usm, dtype='f8'),
+    #        np.ndarray((nopt,), buffer=t_usm, dtype='f8'),
+    #        np.ndarray((nopt,), buffer=call_usm, dtype='f8'),
+    #        np.ndarray((nopt,), buffer=put_usm, dtype='f8'))
 
 ##############################################	
 
@@ -138,8 +144,18 @@ def run(name, alg, sizes=14, step=2, nopt=2**15):
         price, strike, t, p_call, p_put = gen_data_np(nopt)
         black_scholes_python(nopt, price, strike, t, RISK_FREE, VOLATILITY, p_call, p_put)
 
-        price_1, strike_1, t_1, n_call, n_put = gen_data_np(nopt)
-        alg(nopt, price, strike, t, RISK_FREE, VOLATILITY, n_call, n_put)
+        if args.usm is True: #test usm feature
+            price_usm, strike_usm, t_usm, call_usm, put_usm = gen_data_usm(nopt)
+            #pass usm input data to kernel
+            alg(nopt, price_usm, strike_usm, t_usm, RISK_FREE, VOLATILITY, call_usm, put_usm)
+            n_call = np.empty(nopt, dtype=np.float64)
+            n_put  = np.empty(nopt, dtype=np.float64)    
+            call_usm.usm_data.copy_to_host(n_call.view("u1"))
+            put_usm.usm_data.copy_to_host(n_put.view("u1"))
+        else:
+            price_1, strike_1, t_1, n_call, n_put = gen_data_np(nopt)
+            #pass numpy generated data to kernel
+            alg(nopt, price, strike, t, RISK_FREE, VOLATILITY, n_call, n_put)
 
         if np.allclose(n_call, p_call) and np.allclose(n_put, p_put):
             print("Test succeeded\n")

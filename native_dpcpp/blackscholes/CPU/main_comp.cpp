@@ -79,16 +79,25 @@ int main(int argc, char * argv[])
       ofstream file;
       file.open("call.bin", ios::out|ios::binary);
       if (file) {
-	file.write(reinterpret_cast<char *>(vcall_compiler), nopt*sizeof(tfloat));
+	// copy vcall_compiler back to host
+	tfloat* tvcall_compiler = (tfloat*)_mm_malloc( nopt * sizeof(tfloat), ALIGN_FACTOR);
+	q->memcpy(tvcall_compiler, vcall_compiler, nopt * sizeof(tfloat));
+	q->wait();
+	file.write(reinterpret_cast<char *>(tvcall_compiler), nopt*sizeof(tfloat));
 	file.close();
+	_mm_free(tvcall_compiler);
       } else {
 	std::cout << "Unable to open output file.\n";
       }
 
       file.open("put.bin", ios::out|ios::binary);
       if (file) {
-	file.write(reinterpret_cast<char *>(vput_compiler), nopt*sizeof(tfloat));
+	tfloat* tvput_compiler = (tfloat*)_mm_malloc( nopt * sizeof(tfloat), ALIGN_FACTOR);
+	q->memcpy(tvput_compiler, vput_compiler, nopt * sizeof(tfloat));
+	q->wait();
+	file.write(reinterpret_cast<char *>(tvput_compiler), nopt*sizeof(tfloat));
 	file.close();
+	_mm_free(tvput_compiler);
       } else {
 	std::cout << "Unable to open output file.\n";
       }

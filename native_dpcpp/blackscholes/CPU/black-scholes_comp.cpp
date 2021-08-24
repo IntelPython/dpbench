@@ -55,22 +55,6 @@ using namespace cl::sycl;
     tfloat r, tfloat sig, tfloat * price, tfloat * strike,
     tfloat * t, tfloat * vcall, tfloat * vput )
 {
-  // allocate GPU data using malloc_device
-  tfloat *d_price, *d_strike, *d_t, *d_vcall, *d_vput;
-  d_price = (tfloat*)malloc_shared( nopt * sizeof(tfloat), *q);
-  d_strike = (tfloat*)malloc_shared( nopt * sizeof(tfloat), *q);
-  d_t = (tfloat*)malloc_shared( nopt * sizeof(tfloat), *q);
-  d_vcall = (tfloat*)malloc_shared( nopt * sizeof(tfloat), *q);
-  d_vput = (tfloat*)malloc_shared( nopt * sizeof(tfloat), *q);
-
-  // copy data host to device
-  q->memcpy(d_price, price, nopt * sizeof(tfloat));
-  q->memcpy(d_strike, strike, nopt * sizeof(tfloat));
-  q->memcpy(d_t, t, nopt * sizeof(tfloat));
-  q->memcpy(d_vcall, vcall, nopt * sizeof(tfloat));
-  q->memcpy(d_vput, vput, nopt * sizeof(tfloat));
-  q->wait();
-
   // compute  
   q->submit([&](handler& h) {
       h.parallel_for<class theKernel>(range<1>{nopt}, [=](id<1> myID) {
@@ -81,10 +65,10 @@ using namespace cl::sycl;
 	  tfloat a, b, c, y, z, e;
 	  tfloat d1, d2, w1, w2;
 
-	  a = LOG( d_price[i] / d_strike[i] );
-	  b = d_t[i] * mr;
+	  a = LOG( price[i] / strike[i] );
+	  b = t[i] * mr;
  
-	  z = d_t[i] * sig_sig_two;       
+	  z = t[i] * sig_sig_two;       
 	  c = QUARTER * z;
 	  y = INVSQRT( z );
                              
@@ -98,27 +82,12 @@ using namespace cl::sycl;
 
 	  e = EXP ( b );
 
-	  d_vcall[i] = d_price[i]*d1 - d_strike[i]*e*d2;
-	  d_vput[i]  = d_vcall[i] - d_price[i] + d_strike[i]*e;	    
+	  vcall[i] = price[i]*d1 - strike[i]*e*d2;
+	  vput[i]  = vcall[i] - price[i] + strike[i]*e;	    
 	});
     });
 
   q->wait();
-
-  // copy data host to device
-  q->memcpy(price, d_price, nopt * sizeof(tfloat));
-  q->memcpy(strike, d_strike, nopt * sizeof(tfloat));
-  q->memcpy(t, d_t, nopt * sizeof(tfloat));  
-  q->memcpy(vcall, d_vcall, nopt * sizeof(tfloat));
-  q->memcpy(vput, d_vput, nopt * sizeof(tfloat));
-
-  q->wait();
-  
-  free(d_price,q->get_context());
-  free(d_strike,q->get_context());
-  free(d_t,q->get_context());
-  free(d_vcall,q->get_context());
-  free(d_vput,q->get_context());
 }
 
 void BlackScholesNaive(

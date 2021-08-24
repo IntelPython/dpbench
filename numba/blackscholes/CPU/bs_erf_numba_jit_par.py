@@ -2,13 +2,14 @@
 #
 # SPDX-License-Identifier: MIT
 
-
+import dpctl
 import base_bs_erf
 import numba as nb
 from math import log, sqrt, exp, erf
 
-@nb.njit(fastmath=True, parallel=True)
-def black_scholes( nopt, price, strike, t, rate, vol, call, put):
+#blackscholes implemented as a parallel loop using numba.prange
+@nb.njit(parallel=True,fastmath=True)
+def black_scholes_kernel( nopt, price, strike, t, rate, vol, call, put):
     mr = -rate
     sig_sig_two = vol * vol * 2
 
@@ -36,4 +37,10 @@ def black_scholes( nopt, price, strike, t, rate, vol, call, put):
         call [i] = r
         put [i] = r - P + Se
 
+def black_scholes(nopt, price, strike, t, rate, vol, call, put):
+    # offload blackscholes computation to CPU (toggle level0 or opencl driver).
+    with dpctl.device_context(base_bs_erf.get_device_selector()):
+        black_scholes_kernel( nopt, price, strike, t, rate, vol, call, put )
+
+# call the run function to setup input data and performance data infrastructure
 base_bs_erf.run("Numba@jit-loop-par", black_scholes)

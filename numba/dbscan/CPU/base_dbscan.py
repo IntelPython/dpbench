@@ -32,6 +32,7 @@ import sys,json
 from typing import NamedTuple
 from sklearn.datasets import make_blobs
 from sklearn.preprocessing import StandardScaler
+import dbscan_python
 
 try:
     import itimer as it
@@ -124,6 +125,7 @@ def run(name, alg, sizes=5, step=2, nopt=2**10):
     parser.add_argument('--eps', type=float, default=0.6, help='Neighborhood value')
     parser.add_argument('--minpts', type=int, default=20, help='minPts')
     parser.add_argument('--json',  required=False, default=__file__.replace('py','json'), help="output json data filename")
+    parser.add_argument('--test',  required=False, action='store_true', help="Check for correctness by comparing output with naieve Python version")
 
     args = parser.parse_args()
     nopt = args.size
@@ -138,6 +140,24 @@ def run(name, alg, sizes=5, step=2, nopt=2**10):
     output['metrics']   = []
 
     rnd.seed(SEED)
+
+    if args.test:
+        data = gen_data(nopt, args.dims)
+        assignments = np.empty(nopt, dtype=np.int64)
+        data_size = DataSize(n_samples=nopt, n_features=args.dims)
+        params = OPTIMAL_PARAMS.get(data_size, Params(eps=args.eps, minpts=args.minpts))        
+        minpts = params.minpts or args.minpts
+        eps = params.eps or args.eps
+        
+        p_nclusters = dbscan_python.dbscan(nopt, args.dims, data, eps, minpts, assignments)
+        n_nclusters = alg(nopt, args.dims, data, eps, minpts, assignments)
+
+        if np.allclose(n_nclusters, p_nclusters):
+            print("Test succeeded\n")
+        else:
+            print("Test failed\n")
+        return
+
 
     with open('perf_output.csv', 'w', 1) as mops_fd, open('runtimes.csv', 'w', 1) as runtimes_fd:
         for _ in xrange(args.steps):

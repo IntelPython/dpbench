@@ -128,6 +128,9 @@ int main(int argc, char *argv[])
 {
     int STEPS = 10;
 
+    int repeat = 1;
+    double t1 = 0, t2 = 0;
+
     size_t nPoints_train = pow(2, 10);
     size_t nPoints = pow(2, 10);
 
@@ -135,35 +138,15 @@ int main(int argc, char *argv[])
     size_t minPts = 5;
     double eps = 1.0;
 
-    if (argc < 2)
+    /* Read number of options parameter from command line */
+    if (argc >= 2)
     {
-        printf("Usage: expect STEPS input integer parameter, defaulting to %d\n", STEPS);
+        sscanf(argv[1], "%lu", &nPoints);
     }
-    else
+    if (argc >= 3)
     {
-        STEPS = stoi(argv[1]);
-        if (argc > 2)
-        {
-            nPoints = stoi(argv[2]);
-        }
-        if (argc > 3)
-        {
-            nFeatures = stoi(argv[3]);
-        }
-        if (argc > 4)
-        {
-            minPts = stoi(argv[4]);
-        }
-        if (argc > 5)
-        {
-            eps = stof(argv[5]);
-        }
+        sscanf(argv[2], "%d", &repeat);
     }
-
-    double *data;
-
-    int repeat = 1;
-    double t1 = 0, t2 = 0;
 
     FILE *fptr;
     fptr = fopen("perf_output.csv", "w");
@@ -239,7 +222,6 @@ int main(int argc, char *argv[])
         if (repeat > 2)
             repeat -= 2;
     }
-
     fclose(fptr);
     fclose(fptr1);
 

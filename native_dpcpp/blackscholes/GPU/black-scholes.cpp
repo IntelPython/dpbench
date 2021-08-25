@@ -52,61 +52,70 @@ using namespace cl::sycl;
 //       that none of the arrays overlap in memory.
 */
   void BlackScholesFormula_Compiler( size_t nopt, queue* q,
-    tfloat r, tfloat sig, tfloat * s0, tfloat * x,
+    tfloat r, tfloat sig, tfloat * price, tfloat * strike,
     tfloat * t, tfloat * vcall, tfloat * vput )
 {
   // allocate GPU data using malloc_device
-  tfloat *d_s0, *d_x, *d_t, *d_vcall, *d_vput;
-  d_s0 = (tfloat*)malloc_device( nopt * sizeof(tfloat), *q);
-  d_x = (tfloat*)malloc_device( nopt * sizeof(tfloat), *q);
-  d_t = (tfloat*)malloc_device( nopt * sizeof(tfloat), *q);
-  d_vcall = (tfloat*)malloc_device( nopt * sizeof(tfloat), *q);
-  d_vput = (tfloat*)malloc_device( nopt * sizeof(tfloat), *q);
+  tfloat *d_price, *d_strike, *d_t, *d_vcall, *d_vput;
+  d_price = (tfloat*)malloc_shared( nopt * sizeof(tfloat), *q);
+  d_strike = (tfloat*)malloc_shared( nopt * sizeof(tfloat), *q);
+  d_t = (tfloat*)malloc_shared( nopt * sizeof(tfloat), *q);
+  d_vcall = (tfloat*)malloc_shared( nopt * sizeof(tfloat), *q);
+  d_vput = (tfloat*)malloc_shared( nopt * sizeof(tfloat), *q);
 
   // copy data host to device
-  q->memcpy(d_s0, s0, nopt * sizeof(tfloat));
-  q->memcpy(d_x, x, nopt * sizeof(tfloat));
+  q->memcpy(d_price, price, nopt * sizeof(tfloat));
+  q->memcpy(d_strike, strike, nopt * sizeof(tfloat));
   q->memcpy(d_t, t, nopt * sizeof(tfloat));
+  q->memcpy(d_vcall, vcall, nopt * sizeof(tfloat));
+  q->memcpy(d_vput, vput, nopt * sizeof(tfloat));
+  q->wait();
 
-  // compute
-  int i;
-  tfloat mr = -r;
-  tfloat sig_sig_two = sig * sig * TWO;
-
+  // compute  
   q->submit([&](handler& h) {
       h.parallel_for<class theKernel>(range<1>{nopt}, [=](id<1> myID) {
+	  tfloat mr = -r;
+	  tfloat sig_sig_two = sig * sig * TWO;
+
 	  int i = myID[0];
 	  tfloat a, b, c, y, z, e;
 	  tfloat d1, d2, w1, w2;
 
-	  a = LOG( d_s0[i] / d_x[i] );
+	  a = LOG( d_price[i] / d_strike[i] );
 	  b = d_t[i] * mr;
-	  z = d_t[i] * sig_sig_two;
-        
+ 
+	  z = d_t[i] * sig_sig_two;       
 	  c = QUARTER * z;
-	  e = EXP ( b );
 	  y = INVSQRT( z );
                              
 	  w1 = ( a - b + c ) * y;
 	  w2 = ( a - b - c ) * y;
+	  
 	  d1 = ERF( w1 );
 	  d2 = ERF( w2 );
 	  d1 = HALF + HALF*d1;
 	  d2 = HALF + HALF*d2;
 
-	  d_vcall[i] = d_s0[i]*d1 - d_x[i]*e*d2;
-	  d_vput[i]  = d_vcall[i] - d_s0[i] + d_x[i]*e;	    
+	  e = EXP ( b );
+
+	  d_vcall[i] = d_price[i]*d1 - d_strike[i]*e*d2;
+	  d_vput[i]  = d_vcall[i] - d_price[i] + d_strike[i]*e;	    
 	});
-    }).wait();
+    });
+
+  q->wait();
 
   // copy data host to device
+  q->memcpy(price, d_price, nopt * sizeof(tfloat));
+  q->memcpy(strike, d_strike, nopt * sizeof(tfloat));
+  q->memcpy(t, d_t, nopt * sizeof(tfloat));  
   q->memcpy(vcall, d_vcall, nopt * sizeof(tfloat));
   q->memcpy(vput, d_vput, nopt * sizeof(tfloat));
 
   q->wait();
   
-  free(d_s0,q->get_context());
-  free(d_x,q->get_context());
+  free(d_price,q->get_context());
+  free(d_strike,q->get_context());
   free(d_t,q->get_context());
   free(d_vcall,q->get_context());
   free(d_vput,q->get_context());

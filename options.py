@@ -124,7 +124,7 @@ class workloads():
             all_workloads.blackscholes.value: {
                 'execute': False,
                 'ref_input': 2**28,
-                'NUMBA_TEST_CMD': ["python", wl_names[all_workloads.blackscholes.value]['numba'] if not kernel_mode else wl_names[all_workloads.blackscholes.value]['kernel'], "--steps", "1"],
+                'NUMBA_TEST_CMD': ["python", wl_names[all_workloads.blackscholes.value]['numba'] if not kernel_mode else wl_names[all_workloads.blackscholes.value]['kernel'], "--test"],
                 'NUMBA_PERF_CMD': ["python", wl_names[all_workloads.blackscholes.value]['numba'] if not kernel_mode else wl_names[all_workloads.blackscholes.value]['kernel']],
                 'NUMBA_VTUNE_CMD': ["python", wl_names[all_workloads.blackscholes.value]['numba'] if not kernel_mode else wl_names[all_workloads.blackscholes.value]['kernel'], "--steps", "1", "--size", str(2**28)],
                 'NUMBA_ADVISOR_CMD': ["python", wl_names[all_workloads.blackscholes.value]['numba'] if not kernel_mode else wl_names[all_workloads.blackscholes.value]['kernel'], "--steps", "1", "--size", str(2**28)],

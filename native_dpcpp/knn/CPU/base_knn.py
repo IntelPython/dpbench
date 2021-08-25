@@ -18,9 +18,6 @@ DATA_DIM = 2**8
 CLASSES_NUM = 3
 TRAIN_DATA_SIZE = 2**10
 
-RISK_FREE = 0.1
-VOLATILITY = 0.2
-
 # create input data, call blackscholes computation function (alg)
 def run(name, sizes=10, step=2, nopt=2**10):
     parser = argparse.ArgumentParser()

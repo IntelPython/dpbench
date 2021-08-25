@@ -151,8 +151,6 @@ int main(int argc, char* argv[]) {
     }
 
     double* data;
-    double lBound = 0.0;
-    double rBound = 10.0;
 
     int repeat = 1;
     double t1 = 0, t2 = 0;
@@ -196,8 +194,7 @@ int main(int argc, char* argv[]) {
 
     for (i = 0; i < STEPS; i++)
     {
-
-       double *data_train = read_data_x(nPoints_train, "x_train.bin").get();
+        double *data_train = read_data_x(nPoints_train, "x_train.bin").get();
         size_t *train_labels = read_data_y(nPoints_train, "y_train.bin").get();
         double *data_test = read_data_x(nPoints, "x_test.bin").get();
         size_t *predictions = new size_t[nPoints];

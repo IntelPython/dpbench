@@ -29,6 +29,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "knn.h"
 #include "rdtsc.h"
 #include <sstream>
+#include <fstream>
 
 #define SEED 7777777
 
@@ -64,6 +65,28 @@ double* gen_data_x(size_t data_size)
     return data;
 }
 
+auto read_data_x(size_t data_size, std::string filename)
+{
+
+    auto n = data_size * DATADIM;
+    auto data = std::make_unique<double_t[]>(n);
+
+    std::ifstream file;
+    file.open(filename, std::ios::in | std::ios::binary);
+    if (file)
+    {
+        file.read(reinterpret_cast<char *>(data.get()), n * sizeof(double));
+        file.close();
+    }
+    else
+    {
+        std::cout << "Input file not found.\n";
+        exit(0);
+    }
+
+    return data;
+}
+
 std::vector<size_t> gen_data_y(size_t data_size)
 {
     std::vector<size_t> labels;
@@ -74,6 +97,29 @@ std::vector<size_t> gen_data_y(size_t data_size)
 
     return labels;
 }
+
+auto read_data_y(size_t data_size, std::string filename)
+{
+
+    auto n = data_size;
+    auto data = std::make_unique<size_t[]>(n);
+
+    std::ifstream file;
+    file.open(filename, std::ios::in | std::ios::binary);
+    if (file)
+    {
+        file.read(reinterpret_cast<char *>(data.get()), n * sizeof(size_t));
+        file.close();
+    }
+    else
+    {
+        std::cout << "Input file not found.\n";
+        exit(0);
+    }
+
+    return data;
+}
+
 
 int main(int argc, char* argv[]) {
     int STEPS = 10;
@@ -138,22 +184,28 @@ int main(int argc, char* argv[]) {
     int i, j;
     double MOPS = 0.0;
     double time;
-    for (i = 0; i < STEPS; i++) {
 
-        double* data_train = gen_data_x(nPoints_train);
-        std::vector<size_t> labels = gen_data_y(nPoints_train);
+    double *data_train = read_data_x(nPoints_train, "x_train.bin").get();
+    size_t *train_labels = read_data_y(nPoints_train, "y_train.bin").get();
 
-        double* data_test = gen_data_x(nPoints);
+    double *data_test = read_data_x(nPoints, "x_test.bin").get();
+    size_t *predictions = new size_t[nPoints];
 
-	size_t* predictions = new size_t[nPoints];
-	size_t* train_labels = labels.data();	
+    /* Warm up cycle */
+    run_knn(q, data_train, train_labels, data_test, nPoints_train, nPoints, predictions);
 
-        /* Warm up cycle */
-        run_knn(q, data_train, train_labels, data_test, nPoints_train, nPoints, predictions);
+    for (i = 0; i < STEPS; i++)
+    {
+
+       double *data_train = read_data_x(nPoints_train, "x_train.bin").get();
+        size_t *train_labels = read_data_y(nPoints_train, "y_train.bin").get();
+        double *data_test = read_data_x(nPoints, "x_test.bin").get();
+        size_t *predictions = new size_t[nPoints];
 
         t1 = timer_rdtsc();
-        for (j = 0; j < repeat; j++) {
-	  run_knn(q, data_train, train_labels, data_test, nPoints_train, nPoints, predictions);
+        for (j = 0; j < repeat; j++)
+        {
+            run_knn(q, data_train, train_labels, data_test, nPoints_train, nPoints, predictions);
         }
         t2 = timer_rdtsc();
 

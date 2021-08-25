@@ -21,7 +21,6 @@ TRAIN_DATA_SIZE = 2**10
 RISK_FREE = 0.1
 VOLATILITY = 0.2
 
-
 # create input data, call blackscholes computation function (alg)
 def run(name, sizes=10, step=2, nopt=2**10):
     parser = argparse.ArgumentParser()
@@ -47,7 +46,7 @@ def run(name, sizes=10, step=2, nopt=2**10):
     utils.run_command(clean_string, verbose=True)
 
     build_string = ['make']
-    utils.run_command(build_string, verbose=True)        
+    utils.run_command(build_string, verbose=True)
 
 
     if os.path.isfile('runtimes.csv'):

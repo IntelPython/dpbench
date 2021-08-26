@@ -34,6 +34,7 @@ void push_queue(struct neighbors *queue, double new_distance, size_t new_label, 
   {
     queue[index] = queue[index - 1];
     --index;
+
     queue[index].dist = new_distance;
     queue[index].label = new_label;
   }
@@ -106,7 +107,7 @@ void run_knn(queue *q, double *train, size_t *train_labels, double *test, size_t
                                               {
                                                 size_t i = myID[0];
                                                 //std::array<std::pair<double, size_t>, NEAREST_NEIGHS> queue_neighbors;
-                                                struct neighbors queue_neighbors[NEAREST_NEIGHS] = {{0}};
+                                                struct neighbors queue_neighbors[NEAREST_NEIGHS] = {0};
 
                                                 //count distances
                                                 for (int j = 0; j < NEAREST_NEIGHS; ++j)
@@ -119,16 +120,17 @@ void run_knn(queue *q, double *train, size_t *train_labels, double *test, size_t
 
                                                 for (int j = NEAREST_NEIGHS; j < train_nrows; ++j)
                                                 {
-                                                  double dist = euclidean_dist(d_train, j, d_test, i);
+                                                  double new_dist = euclidean_dist(d_train, j, d_test, i);
+                                                  size_t new_label = d_train_labels[j];
                                                   //auto new_neighbor = std::make_pair(dist, train_labels[j]);
 
-                                                  if (dist < queue_neighbors[NEAREST_NEIGHS - 1].dist)
+                                                  if (new_dist < queue_neighbors[NEAREST_NEIGHS - 1].dist)
                                                   {
                                                     //queue_neighbors[NEAREST_NEIGHS-1] = new_neighbor;
-                                                    queue_neighbors[NEAREST_NEIGHS - 1].dist = dist;
-                                                    queue_neighbors[NEAREST_NEIGHS - 1].label = d_train_labels[j];
+                                                    queue_neighbors[NEAREST_NEIGHS - 1].dist = new_dist;
+                                                    queue_neighbors[NEAREST_NEIGHS - 1].label = new_label;
 
-                                                    push_queue(queue_neighbors, dist, d_train_labels[j], NEAREST_NEIGHS - 1);
+                                                    push_queue(queue_neighbors, new_dist, d_train_labels[j], NEAREST_NEIGHS - 1);
                                                   }
                                                 }
                                                 d_predictions[i] = simple_vote(queue_neighbors);

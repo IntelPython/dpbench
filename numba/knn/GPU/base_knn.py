@@ -32,11 +32,10 @@ import numpy.random as rnd
 from knn_python import knn_python
 from dpbench_datagen.knn import gen_data_x, gen_data_y
 
-
-DATA_DIM = 2**8
+DATA_DIM = 2 ** 8
 SEED = 7777777
 CLASSES_NUM = 3
-TRAIN_DATA_SIZE = 2**10
+TRAIN_DATA_SIZE = 2 ** 10
 n_neighbors = 5
 
 try:
@@ -48,7 +47,7 @@ except:
     from timeit import default_timer
 
     now = default_timer
-    get_mops = lambda t0, t1, n: (n / (t1 - t0),t1-t0)
+    get_mops = lambda t0, t1, n: (n / (t1 - t0), t1 - t0)
 
 ######################################################
 # GLOBAL DECLARATIONS THAT WILL BE USED IN ALL FILES #
@@ -62,7 +61,7 @@ except NameError:
 
 
 ###############################################
-def get_device_selector (is_gpu = True):
+def get_device_selector(is_gpu=True):
     if is_gpu is True:
         device_selector = "gpu"
     else:
@@ -79,7 +78,7 @@ def get_device_selector (is_gpu = True):
 
 ##############################################
 
-def run(name, alg, sizes=10, step=2, nopt=2**10):
+def run(name, alg, sizes=10, step=2, nopt=2 ** 10):
     parser = argparse.ArgumentParser()
     parser.add_argument('--steps', type=int, default=sizes,
                         help='Number of steps')
@@ -90,51 +89,54 @@ def run(name, alg, sizes=10, step=2, nopt=2**10):
     parser.add_argument('--repeat', type=int, default=1,
                         help='Iterations inside measured region')
     parser.add_argument('--text', default='', help='Print with each result')
-    parser.add_argument('--test', required=False, action='store_true', help="Check for correctness by comparing output with naieve Python version")
-    parser.add_argument('--json',  required=False, default=__file__.replace('py','json'), help="output json data filename")
+    parser.add_argument('--test', required=False, action='store_true',
+                        help="Check for correctness by comparing output with naieve Python version")
+    parser.add_argument('--json', required=False, default=__file__.replace('py', 'json'),
+                        help="output json data filename")
 
     args = parser.parse_args()
     nopt = args.size
     repeat = args.repeat
     train_data_size = TRAIN_DATA_SIZE
- 
+
     output = {}
-    output['name']      = name
-    output['sizes']     = sizes
-    output['step']      = step
-    output['repeat']    = repeat
-    output['randseed']  = SEED
-    output['metrics']   = []
+    output['name'] = name
+    output['sizes'] = sizes
+    output['step'] = step
+    output['repeat'] = repeat
+    output['randseed'] = SEED
+    output['metrics'] = []
 
     rnd.seed(SEED)
 
     if args.test:
-        x_train, y_train = gen_data_x(train_data_size), gen_data_y(train_data_size, CLASSES_NUM)
-        x_test = gen_data_x(nopt)
+        x_train, y_train = gen_data_x(train_data_size, seed=0), gen_data_y(train_data_size, CLASSES_NUM, seed=0)
+        x_test = gen_data_x(nopt, seed=777777)
         p_predictions = np.empty(nopt)
         p_queue_neighbors_lst = np.empty((nopt, n_neighbors, 2))
         p_votes_to_classes_lst = np.zeros((nopt, CLASSES_NUM))
 
-        knn_python(x_train, y_train, x_test, n_neighbors, CLASSES_NUM, train_data_size, nopt, p_predictions, p_queue_neighbors_lst, p_votes_to_classes_lst)
-        
+        knn_python(x_train, y_train, x_test, n_neighbors, CLASSES_NUM, train_data_size, nopt, p_predictions,
+                   p_queue_neighbors_lst, p_votes_to_classes_lst)
+
         n_predictions = np.empty(nopt)
         n_queue_neighbors_lst = np.empty((nopt, n_neighbors, 2))
         n_votes_to_classes_lst = np.zeros((nopt, CLASSES_NUM))
 
-        alg(x_train, y_train, x_test, n_neighbors, CLASSES_NUM, nopt, train_data_size, n_predictions, n_queue_neighbors_lst, n_votes_to_classes_lst)
+        alg(x_train, y_train, x_test, n_neighbors, CLASSES_NUM, nopt, train_data_size, n_predictions,
+            n_queue_neighbors_lst, n_votes_to_classes_lst)
 
         if np.allclose(n_predictions, p_predictions):
             print("Test succeeded\n")
         else:
             print("Test failed\n")
         return
-    
-    with open('../../../../../../Users/akharche/OneDrive - Intel Corporation/Desktop/perf_output.csv', 'w', 1) as fd,  open(
-            "../../../../../../Users/akharche/OneDrive - Intel Corporation/Desktop/runtimes.csv", 'w', 1) as fd2:
 
-        x_train, y_train = gen_data_x(train_data_size), gen_data_y(train_data_size, CLASSES_NUM)
-        x_test = gen_data_x(nopt)
-        
+    with open('perf_output.csv', 'w', 1) as fd, open("runtimes.csv", 'w', 1) as fd2:
+
+        x_train, y_train = gen_data_x(train_data_size, seed=0), gen_data_y(train_data_size, CLASSES_NUM, seed=0)
+        x_test = gen_data_x(nopt, seed=777777)
+
         for _ in xrange(args.steps):
 
             sys.stdout.flush()
@@ -143,20 +145,24 @@ def run(name, alg, sizes=10, step=2, nopt=2**10):
             queue_neighbors_lst = np.empty((nopt, n_neighbors, 2))
             votes_to_classes_lst = np.zeros((nopt, CLASSES_NUM))
 
-            alg(x_train, y_train, x_test, n_neighbors, CLASSES_NUM, nopt, train_data_size, predictions, queue_neighbors_lst, votes_to_classes_lst)  # warmup
+            alg(x_train, y_train, x_test, n_neighbors, CLASSES_NUM, nopt, train_data_size, predictions,
+                queue_neighbors_lst, votes_to_classes_lst)  # warmup
 
             t0 = now()
             for _ in xrange(repeat):
-                alg(x_train, y_train, x_test, n_neighbors, CLASSES_NUM, nopt, train_data_size, predictions, queue_neighbors_lst, votes_to_classes_lst)
+                alg(x_train, y_train, x_test, n_neighbors, CLASSES_NUM, nopt, train_data_size, predictions,
+                    queue_neighbors_lst, votes_to_classes_lst)
             mops, time = get_mops(t0, now(), nopt)
 
             result_mops = mops * repeat
             fd.write('{},{}\n'.format(nopt, result_mops))
             fd2.write('{},{}\n'.format(nopt, time))
-            
-            print("ERF: {:15s} | Size: {:10d} | MOPS: {:15.2f} | TIME: {:10.6f}".format(name, nopt, mops*repeat,time),flush=True)
-            output['metrics'].append((nopt,mops,time))
+
+            print(
+                "ERF: {:15s} | Size: {:10d} | MOPS: {:15.2f} | TIME: {:10.6f}".format(name, nopt, mops * repeat, time),
+                flush=True)
+            output['metrics'].append((nopt, mops, time))
 
             nopt *= args.step
             repeat = max(repeat - args.step, 1)
-    json.dump(output,open(args.json,'w'),indent=2, sort_keys=True)
+    json.dump(output, open(args.json, 'w'), indent=2, sort_keys=True)

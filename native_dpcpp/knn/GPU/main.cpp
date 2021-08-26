@@ -126,8 +126,6 @@ auto read_data_y(size_t data_size, std::string filename)
 
 int main(int argc, char *argv[])
 {
-    int STEPS = 10;
-
     int repeat = 1;
     double t1 = 0, t2 = 0;
 
@@ -181,49 +179,46 @@ int main(int argc, char *argv[])
     double MOPS = 0.0;
     double time;
 
-    double *data_train = read_data_x(nPoints_train, "x_train.bin").get();
-    size_t *train_labels = read_data_y(nPoints_train, "y_train.bin").get();
+    auto data_train_ptr = read_data_x(nPoints_train, "x_train.bin");
+    double *data_train = data_train_ptr.get();
 
-    double *data_test = read_data_x(nPoints, "x_test.bin").get();
+    auto train_labels_ptr = read_data_y(nPoints_train, "y_train.bin");
+    size_t *train_labels = train_labels_ptr.get();
+
+    auto data_test_ptr = read_data_x(nPoints, "x_test.bin");
+    double *data_test = data_test_ptr.get();
+
     size_t *predictions = new size_t[nPoints];
 
     /* Warm up cycle */
     run_knn(q, data_train, train_labels, data_test, nPoints_train, nPoints, predictions);
 
-    for (i = 0; i < STEPS; i++)
+    t1 = timer_rdtsc();
+    for (j = 0; j < repeat; j++)
     {
-
-        double *data_train = read_data_x(nPoints_train, "x_train.bin").get();
-        size_t *train_labels = read_data_y(nPoints_train, "y_train.bin").get();
-        double *data_test = read_data_x(nPoints, "x_test.bin").get();
-        size_t *predictions = new size_t[nPoints];
-
-        t1 = timer_rdtsc();
-        for (j = 0; j < repeat; j++)
-        {
-            run_knn(q, data_train, train_labels, data_test, nPoints_train, nPoints, predictions);
-        }
-        t2 = timer_rdtsc();
-
-        MOPS = (nPoints * repeat / 1e6) / ((double)(t2 - t1) / getHz());
-        time = ((double)(t2 - t1) / getHz());
-
-#if 0
-	for (size_t j = 0; j < nPoints; j++) {
-	  printf("%lu\n", predictions[i]);
-	}
-#endif
-
-        printf("ERF: Native-C-VML: Size: %ld Time: %.6lf\n", nPoints, time);
-        fflush(stdout);
-        fprintf(fptr, "%ld,%.6lf\n", nPoints, MOPS);
-        fprintf(fptr1, "%ld,%.6lf\n", nPoints, time);
-
-        if (repeat > 2)
-            repeat -= 2;
+        run_knn(q, data_train, train_labels, data_test, nPoints_train, nPoints, predictions);
     }
+    t2 = timer_rdtsc();
+
+    MOPS = (nPoints * repeat / 1e6) / ((double)(t2 - t1) / getHz());
+    time = ((double)(t2 - t1) / getHz());
+
+    printf("ERF: Native-C-VML: Size: %ld Time: %.6lf\n", nPoints, time);
+    fflush(stdout);
+    fprintf(fptr, "%ld,%.6lf\n", nPoints, MOPS);
+    fprintf(fptr1, "%ld,%.6lf\n", nPoints, time);
+
     fclose(fptr);
     fclose(fptr1);
+
+    for (j = 0; j < nPoints; j++)
+    {
+        std::cout << predictions[j] << " ";
+    }
+
+    std::cout << std::endl;
+
+    delete[] predictions;
 
     return 0;
 }

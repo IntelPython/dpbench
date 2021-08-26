@@ -30,7 +30,7 @@ EQCOLON     :="="
 TARGET      := knn
 
 CFLAGS      += -g -O3
-CFLAGS      += -fsycl -qopenmp
+CFLAGS      += -fsycl
 CFLAGS      += -I./
 
 PREC ?= d

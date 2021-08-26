@@ -5,9 +5,7 @@
 import os, utils
 import numpy as np
 import argparse
-from dpbench_datagen.knn import gen_data_to_file, gen_data_x, gen_data_y
-
-import pdb
+from dpbench_datagen.knn import gen_data_to_file
 
 # make xrange available in python 3
 try:
@@ -16,13 +14,12 @@ except NameError:
     xrange = range
 
 
-DATA_DIM = 2**8
 CLASSES_NUM = 3
 TRAIN_DATA_SIZE = 2**10
 
 
 # create input data, call blackscholes computation function (alg)
-def run(name, sizes=3, step=2, nopt=2**10):
+def run(name, sizes=1, step=2, nopt=2**10):
     parser = argparse.ArgumentParser()
     parser.add_argument('--steps', type=int, default=sizes,
                         help='Number of steps')
@@ -46,9 +43,6 @@ def run(name, sizes=3, step=2, nopt=2**10):
 
     build_string = ['make']
     utils.run_command(build_string, verbose=True)
-
-    pdb.set_trace()
-
 
     if os.path.isfile('runtimes.csv'):
         os.remove('runtimes.csv')

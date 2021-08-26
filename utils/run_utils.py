@@ -61,9 +61,11 @@ def mkdir(path):
 
 def chdir(path):
     if os.path.exists(path):
-        print('Changing to directory `{}`'.format(path))
+        print("Changing to directory `%s`" % path)
         os.chdir(path)
-
+        return True
+    else:
+        return False
 
 ########## Log file code ##########
 

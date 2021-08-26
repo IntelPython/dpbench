@@ -190,13 +190,15 @@ int main(int argc, char *argv[])
 
     size_t *predictions = new size_t[nPoints];
 
+    double *votes_to_classes = (double *) calloc(nPoints * NUM_CLASSES, sizeof(double));
+
     /* Warm up cycle */
-    run_knn(q, data_train, train_labels, data_test, nPoints_train, nPoints, predictions);
+    run_knn(q, data_train, train_labels, data_test, nPoints_train, nPoints, predictions, votes_to_classes);
 
     t1 = timer_rdtsc();
     for (j = 0; j < repeat; j++)
     {
-        run_knn(q, data_train, train_labels, data_test, nPoints_train, nPoints, predictions);
+        run_knn(q, data_train, train_labels, data_test, nPoints_train, nPoints, predictions, votes_to_classes);
     }
     t2 = timer_rdtsc();
 
@@ -211,14 +213,18 @@ int main(int argc, char *argv[])
     fclose(fptr);
     fclose(fptr1);
 
+    /*
     for (j = 0; j < nPoints; j++)
     {
         std::cout << predictions[j] << " ";
     }
+    */
 
     std::cout << std::endl;
 
     delete[] predictions;
+
+    free(votes_to_classes);
 
     return 0;
 }

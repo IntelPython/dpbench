@@ -29,6 +29,7 @@ import numba
 import base_knn
 import dpctl
 import numba_dppy
+import math
 
 import dpctl.tensor as dpt
 
@@ -69,19 +70,18 @@ def run_knn_kernel(train, train_labels, test, k, classes_num, train_size, predic
     queue_neighbors = queue_neighbors_lst[i]
 
     for j in range(k):
-        #dist = euclidean_dist(train[j], test[i])
         x1 = train[j]
         x2 = test[i]
 
-        distance = 0.0            
+        distance = 0.0
         for jj in range(base_knn.DATA_DIM):
             diff = x1[jj] - x2[jj]
             distance += diff * diff
-        dist = distance ** 0.5    
-     
+        dist = math.sqrt(distance)
+
         queue_neighbors[j, 0] = dist
         queue_neighbors[j, 1] = train_labels[j]
-    
+
     # sort_queue(queue_neighbors)
     for j in range(len(queue_neighbors)):
         # push_queue(queue_neighbors, queue_neighbors[i], i)
@@ -92,9 +92,9 @@ def run_knn_kernel(train, train_labels, test, k, classes_num, train_size, predic
         while (index > 0 and new_distance < queue_neighbors[index - 1, 0]):
             queue_neighbors[index, 0] = queue_neighbors[index - 1, 0]
             queue_neighbors[index, 1] = queue_neighbors[index - 1, 1]
-            
+
             index = index - 1
-            
+
             queue_neighbors[index, 0] = new_distance
             queue_neighbors[index, 1] = new_neighbor_label
 
@@ -107,7 +107,7 @@ def run_knn_kernel(train, train_labels, test, k, classes_num, train_size, predic
         for jj in range(base_knn.DATA_DIM):
             diff = x1[jj] - x2[jj]
             distance += diff * diff
-        dist = distance ** 0.5
+        dist = math.sqrt(distance)
 
         if (dist < queue_neighbors[k - 1][0]):
             queue_neighbors[k - 1][0] = dist
@@ -120,11 +120,11 @@ def run_knn_kernel(train, train_labels, test, k, classes_num, train_size, predic
             while (index > 0 and new_distance < queue_neighbors[index - 1, 0]):
                 queue_neighbors[index, 0] = queue_neighbors[index - 1, 0]
                 queue_neighbors[index, 1] = queue_neighbors[index - 1, 1]
-                
+
                 index = index - 1
-                
+
                 queue_neighbors[index, 0] = new_distance
-                queue_neighbors[index, 1] = new_neighbor_label                
+                queue_neighbors[index, 1] = new_neighbor_label
 
     votes_to_classes = votes_to_classes_lst[i]
 
@@ -143,7 +143,6 @@ def run_knn_kernel(train, train_labels, test, k, classes_num, train_size, predic
 
 
 def run_knn(train, train_labels, test, k, classes_num, test_size, train_size, predictions, queue_neighbors_lst, votes_to_classes_lst):
-    
     with dpctl.device_context(base_knn.get_device_selector()) as gpu_queue:
         d_train = dpt.usm_ndarray(train.shape, dtype=train.dtype, buffer="device", buffer_ctor_kwargs={"queue": gpu_queue})
         d_train.usm_data.copy_from_host(train.reshape((-1)).view("|u1"))
@@ -158,11 +157,11 @@ def run_knn(train, train_labels, test, k, classes_num, test_size, train_size, pr
         d_predictions.usm_data.copy_from_host(predictions.reshape((-1)).view("|u1"))
 
         d_queue_neighbors_lst = dpt.usm_ndarray(queue_neighbors_lst.shape, dtype=queue_neighbors_lst.dtype, buffer="device", buffer_ctor_kwargs={"queue": gpu_queue})
-        d_queue_neighbors_lst.usm_data.copy_from_host(queue_neighbors_lst.reshape((-1)).view("|u1"))
+        #d_queue_neighbors_lst.usm_data.copy_from_host(queue_neighbors_lst.reshape((-1)).view("|u1"))
 
         d_votes_to_classes_lst = dpt.usm_ndarray(votes_to_classes_lst.shape, dtype=votes_to_classes_lst.dtype, buffer="device", buffer_ctor_kwargs={"queue": gpu_queue})
         d_votes_to_classes_lst.usm_data.copy_from_host(votes_to_classes_lst.reshape((-1)).view("|u1"))
-        
+
         run_knn_kernel[test_size, numba_dppy.DEFAULT_LOCAL_SIZE](d_train, d_train_labels, d_test, k, classes_num, train_size, d_predictions, d_queue_neighbors_lst, d_votes_to_classes_lst)
 
         d_predictions.usm_data.copy_to_host(predictions.reshape((-1)).view("|u1"))

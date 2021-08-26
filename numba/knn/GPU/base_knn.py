@@ -29,12 +29,12 @@ import sys, os, json
 import numpy as np
 import numpy.random as rnd
 
-from knn_python import knn_python
+#from knn_python import knn_python
 from dpbench_datagen.knn import gen_data_x, gen_data_y
 import dpctl
 import dpctl.tensor as dpt
 
-DATA_DIM = 2 ** 8
+DATA_DIM = 16
 SEED = 7777777
 CLASSES_NUM = 3
 TRAIN_DATA_SIZE = 2 ** 10
@@ -150,8 +150,8 @@ def run(name, alg, sizes=10, step=2, nopt=2 ** 10):
         p_queue_neighbors_lst = np.empty((nopt, n_neighbors, 2))
         p_votes_to_classes_lst = np.zeros((nopt, CLASSES_NUM))
 
-        knn_python(x_train, y_train, x_test, n_neighbors, CLASSES_NUM, TRAIN_DATA_SIZE, nopt, p_predictions,
-                   p_queue_neighbors_lst, p_votes_to_classes_lst)
+        #knn_python(x_train, y_train, x_test, n_neighbors, CLASSES_NUM, TRAIN_DATA_SIZE, nopt, p_predictions,
+        #           p_queue_neighbors_lst, p_votes_to_classes_lst)
 
         n_predictions = np.empty(nopt)
         n_queue_neighbors_lst = np.empty((nopt, n_neighbors, 2))
@@ -166,7 +166,7 @@ def run(name, alg, sizes=10, step=2, nopt=2 ** 10):
             print("Test failed\n")
         return
 
-    train, train_labels, test, predictions, queue_neighbors_lst, votes_to_classes_lst = gen_data_usm(nopt)
+    #train, train_labels, test, predictions, queue_neighbors_lst, votes_to_classes_lst = gen_data_usm(nopt)
 
     with open('perf_output.csv', 'w', 1) as fd, open("runtimes.csv", 'w', 1) as fd2:
 
@@ -180,13 +180,14 @@ def run(name, alg, sizes=10, step=2, nopt=2 ** 10):
             queue_neighbors_lst = np.empty((nopt, n_neighbors, 2))
             votes_to_classes_lst = np.zeros((nopt, CLASSES_NUM))
 
-            alg(train, train_labels, test, n_neighbors, CLASSES_NUM, nopt, TRAIN_DATA_SIZE, predictions,
+
+            alg(x_train, y_train, x_test, n_neighbors, CLASSES_NUM, nopt, TRAIN_DATA_SIZE, predictions,
                 queue_neighbors_lst, votes_to_classes_lst)  # warmup
 
             t0 = now()
             for _ in xrange(repeat):
-                alg(train, train_labels, test, n_neighbors, CLASSES_NUM, nopt, TRAIN_DATA_SIZE, predictions,
-                    queue_neighbors_lst, votes_to_classes_lst)
+                alg(x_train, y_train, x_test, n_neighbors, CLASSES_NUM, nopt, TRAIN_DATA_SIZE, predictions,
+                    queue_neighbors_lst, votes_to_classes_lst)  # warmup
             mops, time = get_mops(t0, now(), nopt)
 
             # predictions_host = np.empty(nopt)

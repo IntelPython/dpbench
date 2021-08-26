@@ -31,6 +31,8 @@ import numpy.random as rnd
 
 from knn_python import knn_python
 from dpbench_datagen.knn import gen_data_x, gen_data_y
+import dpctl
+import dpctl.tensor as dpt
 
 DATA_DIM = 2 ** 8
 SEED = 7777777
@@ -76,6 +78,38 @@ def get_device_selector(is_gpu=True):
     return os.environ.get('SYCL_DEVICE_FILTER')
 
 
+def gen_data_usm(nopt):
+    # init numpy obj
+    x_train, y_train = gen_data_x(TRAIN_DATA_SIZE, seed=0), gen_data_y(TRAIN_DATA_SIZE, CLASSES_NUM, seed=0)
+    x_test = gen_data_x(nopt, seed=777777)
+    predictions = np.empty(nopt)
+    queue_neighbors_lst = np.empty((nopt, n_neighbors, 2))
+    votes_to_classes_lst = np.zeros((nopt, CLASSES_NUM))
+
+    with dpctl.device_context(get_device_selector()) as gpu_queue:
+        train_usm = dpt.usm_ndarray(x_train.shape, dtype=x_train.dtype, buffer="device",
+                                    buffer_ctor_kwargs={"queue": gpu_queue})
+        train_labels_usm = dpt.usm_ndarray(y_train.shape, dtype=y_train.dtype, buffer="device",
+                                           buffer_ctor_kwargs={"queue": gpu_queue})
+        test_usm = dpt.usm_ndarray(x_test.shape, dtype=x_test.dtype, buffer="device",
+                                   buffer_ctor_kwargs={"queue": gpu_queue})
+        predictions_usm = dpt.usm_ndarray(predictions.shape, dtype=predictions.dtype, buffer="device",
+                                          buffer_ctor_kwargs={"queue": gpu_queue})
+        queue_neighbors_lst_usm = dpt.usm_ndarray(queue_neighbors_lst.shape, dtype=queue_neighbors_lst.dtype,
+                                                  buffer="device", buffer_ctor_kwargs={"queue": gpu_queue})
+        votes_to_classes_lst_usm = dpt.usm_ndarray(votes_to_classes_lst.shape, dtype=votes_to_classes_lst.dtype,
+                                                   buffer="device", buffer_ctor_kwargs={"queue": gpu_queue})
+
+    train_usm.usm_data.copy_from_host(x_train.reshape((-1)).view("|u1"))
+    train_labels_usm.usm_data.copy_from_host(y_train.reshape((-1)).view("|u1"))
+    test_usm.usm_data.copy_from_host(x_test.reshape((-1)).view("|u1"))
+    predictions_usm.usm_data.copy_from_host(predictions.reshape((-1)).view("|u1"))
+    queue_neighbors_lst_usm.usm_data.copy_from_host(queue_neighbors_lst.reshape((-1)).view("|u1"))
+    votes_to_classes_lst_usm.usm_data.copy_from_host(votes_to_classes_lst.reshape((-1)).view("|u1"))
+
+    return train_usm, train_labels_usm, test_usm, predictions_usm, queue_neighbors_lst_usm, votes_to_classes_lst_usm
+
+
 ##############################################
 
 def run(name, alg, sizes=10, step=2, nopt=2 ** 10):
@@ -116,14 +150,14 @@ def run(name, alg, sizes=10, step=2, nopt=2 ** 10):
         p_queue_neighbors_lst = np.empty((nopt, n_neighbors, 2))
         p_votes_to_classes_lst = np.zeros((nopt, CLASSES_NUM))
 
-        knn_python(x_train, y_train, x_test, n_neighbors, CLASSES_NUM, train_data_size, nopt, p_predictions,
+        knn_python(x_train, y_train, x_test, n_neighbors, CLASSES_NUM, TRAIN_DATA_SIZE, nopt, p_predictions,
                    p_queue_neighbors_lst, p_votes_to_classes_lst)
 
         n_predictions = np.empty(nopt)
         n_queue_neighbors_lst = np.empty((nopt, n_neighbors, 2))
         n_votes_to_classes_lst = np.zeros((nopt, CLASSES_NUM))
 
-        alg(x_train, y_train, x_test, n_neighbors, CLASSES_NUM, nopt, train_data_size, n_predictions,
+        alg(x_train, y_train, x_test, n_neighbors, CLASSES_NUM, nopt, TRAIN_DATA_SIZE, n_predictions,
             n_queue_neighbors_lst, n_votes_to_classes_lst)
 
         if np.allclose(n_predictions, p_predictions):
@@ -132,27 +166,32 @@ def run(name, alg, sizes=10, step=2, nopt=2 ** 10):
             print("Test failed\n")
         return
 
-    with open('perf_output.csv', 'w', 1) as fd, open("runtimes.csv", 'w', 1) as fd2:
+    train, train_labels, test, predictions, queue_neighbors_lst, votes_to_classes_lst = gen_data_usm(nopt)
 
-        x_train, y_train = gen_data_x(train_data_size, seed=0), gen_data_y(train_data_size, CLASSES_NUM, seed=0)
-        x_test = gen_data_x(nopt, seed=777777)
+    with open('perf_output.csv', 'w', 1) as fd, open("runtimes.csv", 'w', 1) as fd2:
 
         for _ in xrange(args.steps):
 
             sys.stdout.flush()
 
+            x_train, y_train = gen_data_x(TRAIN_DATA_SIZE, seed=0), gen_data_y(TRAIN_DATA_SIZE, CLASSES_NUM, seed=0)
+            x_test = gen_data_x(nopt, seed=777777)
             predictions = np.empty(nopt)
             queue_neighbors_lst = np.empty((nopt, n_neighbors, 2))
             votes_to_classes_lst = np.zeros((nopt, CLASSES_NUM))
 
-            alg(x_train, y_train, x_test, n_neighbors, CLASSES_NUM, nopt, train_data_size, predictions,
+            alg(train, train_labels, test, n_neighbors, CLASSES_NUM, nopt, TRAIN_DATA_SIZE, predictions,
                 queue_neighbors_lst, votes_to_classes_lst)  # warmup
 
             t0 = now()
             for _ in xrange(repeat):
-                alg(x_train, y_train, x_test, n_neighbors, CLASSES_NUM, nopt, train_data_size, predictions,
+                alg(train, train_labels, test, n_neighbors, CLASSES_NUM, nopt, TRAIN_DATA_SIZE, predictions,
                     queue_neighbors_lst, votes_to_classes_lst)
             mops, time = get_mops(t0, now(), nopt)
+
+            # predictions_host = np.empty(nopt)
+
+            # predictions.usm_data.copy_to_host(predictions_host.reshape((-1)).view("|u1"))
 
             result_mops = mops * repeat
             fd.write('{},{}\n'.format(nopt, result_mops))

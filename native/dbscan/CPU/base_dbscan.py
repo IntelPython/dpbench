@@ -32,7 +32,7 @@ import pandas as pd
 from sklearn.datasets import make_blobs
 from sklearn.preprocessing import StandardScaler
 
-import utils
+import run_utils as utils
 
 ######################################################
 # GLOBAL DECLARATIONS THAT WILL BE USED IN ALL FILES #

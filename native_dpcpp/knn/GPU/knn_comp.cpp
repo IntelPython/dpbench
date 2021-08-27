@@ -116,8 +116,8 @@ size_t simple_vote(struct neighbors* neighbors)
 //}
 
 
-void run_knn(queue *q, double *train, size_t *train_labels, double *test, size_t train_nrows, size_t test_size,
-size_t *predictions, double *votes_to_classes)
+void run_knn_usm(queue *q, double *train, size_t *train_labels, double *test, size_t train_nrows, size_t test_size,
+size_t *predictions, double *votes_to_classes, double *queue_neighbors)
 {
   q->submit([&](handler &h)
             {
@@ -127,14 +127,14 @@ size_t *predictions, double *votes_to_classes)
                         for (int j = 0; j < NEAREST_NEIGHS; ++j) {
                             double distance = 0.0;
                             for (std::size_t jj = 0; jj < DATADIM; ++jj) {
-                                double diff = d_train[j * DATADIM + jj] - d_test[i * DATADIM + jj];
+                                double diff = train[j * DATADIM + jj] - test[i * DATADIM + jj];
                                 distance += diff * diff;
                             }
 
                             double dist = sqrt(distance);
 
                             queue_neighbors[i + test_size * (j + NEAREST_NEIGHS * 0)] = dist;
-                            queue_neighbors[i + test_size * (j + NEAREST_NEIGHS * 1)] = d_train_labels[j];
+                            queue_neighbors[i + test_size * (j + NEAREST_NEIGHS * 1)] = train_labels[j];
                         }
 
                         for (int j = 0; j < NEAREST_NEIGHS; ++j) {
@@ -155,7 +155,7 @@ size_t *predictions, double *votes_to_classes)
                         for (int j = NEAREST_NEIGHS; j < train_nrows; ++j) {
                             double distance = 0.0;
                             for (std::size_t jj = 0; jj < DATADIM; ++jj) {
-                                double diff = d_train[j * DATADIM + jj] - d_test[i * DATADIM + jj];
+                                double diff = train[j * DATADIM + jj] - test[i * DATADIM + jj];
                                 distance += diff * diff;
                             }
 
@@ -163,7 +163,7 @@ size_t *predictions, double *votes_to_classes)
 
                             if (dist < queue_neighbors[i + test_size * ((NEAREST_NEIGHS-1) + NEAREST_NEIGHS * 0)]) {
                                 queue_neighbors[i + test_size * ((NEAREST_NEIGHS-1) + NEAREST_NEIGHS * 0)] = dist;
-                                queue_neighbors[i + test_size * ((NEAREST_NEIGHS-1) + NEAREST_NEIGHS * 1)] = d_train_labels[j];
+                                queue_neighbors[i + test_size * ((NEAREST_NEIGHS-1) + NEAREST_NEIGHS * 1)] = train_labels[j];
 
 
 
@@ -185,19 +185,19 @@ size_t *predictions, double *votes_to_classes)
                         }
 
                         for (int j = 0; j < NEAREST_NEIGHS; ++j) {
-                            d_votes_to_classes[test_size * i + int(queue_neighbors[i + test_size * (j + NEAREST_NEIGHS * 1)])] += 1;
+                            votes_to_classes[test_size * i + int(queue_neighbors[i + test_size * (j + NEAREST_NEIGHS * 1)])] += 1;
                         }
 
                         int max_ind = 0;
                         double max_value = 0.0;
 
                         for (int j = 0; j < NUM_CLASSES; ++j) {
-                            if (d_votes_to_classes[test_size * i + j] > max_value ) {
-                                max_value = d_votes_to_classes[test_size * i + j];
+                            if (votes_to_classes[test_size * i + j] > max_value ) {
+                                max_value = votes_to_classes[test_size * i + j];
                                 max_ind = j;
                             }
                         }
-                        d_predictions[i] =  max_ind;
+                        predictions[i] =  max_ind;
                       });
             })
       .wait();

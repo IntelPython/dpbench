@@ -192,28 +192,29 @@ int main(int argc, char *argv[])
     double *votes_to_classes = (double *)calloc(nPoints * NUM_CLASSES, sizeof(double));
 
 
-    double *d_votes_to_classes = (double *)malloc_device(test_size * NUM_CLASSES * sizeof(double), *q);
-    double *queue_neighbors = (double *)malloc_device(test_size * NEAREST_NEIGHS * 2 * sizeof(double), *q);
+    double *d_votes_to_classes = (double *)malloc_shared(nPoints * NUM_CLASSES * sizeof(double), *q);
+    double *queue_neighbors = (double *)malloc_shared(nPoints * NEAREST_NEIGHS * 2 * sizeof(double), *q);
 
-    double *d_train = (double *)malloc_device(train_nrows * DATADIM * sizeof(double), *q);
-    size_t *d_train_labels = (size_t *)malloc_device(train_nrows * sizeof(size_t), *q);
-    double *d_test = (double *)malloc_device(test_size * DATADIM * sizeof(double *), *q);
-    size_t *d_predictions = (size_t *)malloc_device(test_size * sizeof(size_t), *q);
+    double *d_train = (double *)malloc_shared(nPoints_train * DATADIM * sizeof(double), *q);
+    size_t *d_train_labels = (size_t *)malloc_shared(nPoints_train * sizeof(size_t), *q);
+    double *d_test = (double *)malloc_shared(nPoints * DATADIM * sizeof(double *), *q);
+    size_t *d_predictions = (size_t *)malloc_shared(nPoints * sizeof(size_t), *q);
+
 
     // copy data host to device
-    q->memcpy(d_train, train, train_nrows * DATADIM * sizeof(double));
-    q->memcpy(d_train_labels, train_labels, train_nrows * sizeof(size_t));
-    q->memcpy(d_test, test, test_size * DATADIM * sizeof(double));
-    q->memcpy(d_votes_to_classes, votes_to_classes, test_size * NUM_CLASSES * sizeof(double));
+    q->memcpy(d_train, data_train, nPoints_train * DATADIM * sizeof(double));
+    q->memcpy(d_train_labels, train_labels, nPoints_train * sizeof(size_t));
+    q->memcpy(d_test, data_test, nPoints * DATADIM * sizeof(double));
+    q->memcpy(d_votes_to_classes, votes_to_classes, nPoints * NUM_CLASSES * sizeof(double));
     q->wait();
 
     /* Warm up cycle */
-    run_knn(q, data_train, train_labels, data_test, nPoints_train, nPoints, predictions, votes_to_classes);
+    run_knn_usm(q, d_train, d_train_labels, d_test, nPoints_train, nPoints, d_predictions, d_votes_to_classes, queue_neighbors);
 
     t1 = timer_rdtsc();
     for (j = 0; j < repeat; j++)
     {
-        run_knn(q, data_train, train_labels, data_test, nPoints_train, nPoints, predictions, votes_to_classes);
+        run_knn_usm(q, d_train, d_train_labels, d_test, nPoints_train, nPoints, d_predictions, d_votes_to_classes, queue_neighbors);
     }
     t2 = timer_rdtsc();
 
@@ -228,7 +229,7 @@ int main(int argc, char *argv[])
     fclose(fptr);
     fclose(fptr1);
 
-    q->memcpy(predictions, d_predictions, test_size * sizeof(size_t));
+    // q->memcpy(predictions, d_predictions, nPoints * sizeof(size_t));
 
     delete[] predictions;
 

@@ -144,10 +144,11 @@ def run_knn_kernel(train, train_labels, test, k, classes_num, train_size, predic
 
 
 def run_knn(train, train_labels, test, k, classes_num, test_size, train_size, predictions, queue_neighbors_lst,
-            votes_to_classes_lst):
+            votes_to_classes_lst, data_dim):
     with dpctl.device_context(base_knn.get_device_selector()) as gpu_queue:
         run_knn_kernel[test_size, numba_dppy.DEFAULT_LOCAL_SIZE](train, train_labels, test, k, classes_num, train_size,
-                                                                 predictions, queue_neighbors_lst, votes_to_classes_lst)
+                                                                 predictions, queue_neighbors_lst, votes_to_classes_lst,
+                                                                 data_dim)
 
 
 base_knn.run("K-Nearest-Neighbors Numba", run_knn)

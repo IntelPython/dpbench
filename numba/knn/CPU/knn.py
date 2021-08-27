@@ -75,7 +75,7 @@ def simple_vote(neighbors, classes_num=3):
 
 
 @numba.jit(nopython=True, parallel=True)
-def run_knn(train, train_labels, test, k=5, classes_num=3,):
+def run_knn(train, train_labels, test, k=5, classes_num=3):
     test_size = len(test)
     train_size = len(train)
 

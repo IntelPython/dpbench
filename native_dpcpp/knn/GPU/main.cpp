@@ -213,15 +213,6 @@ int main(int argc, char *argv[])
     fclose(fptr);
     fclose(fptr1);
 
-    /*
-    for (j = 0; j < nPoints; j++)
-    {
-        std::cout << predictions[j] << " ";
-    }
-    */
-
-    std::cout << std::endl;
-
     delete[] predictions;
 
     free(votes_to_classes);

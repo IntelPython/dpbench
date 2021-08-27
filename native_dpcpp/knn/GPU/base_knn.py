@@ -29,10 +29,10 @@ def run(name, sizes=1, step=2, nopt=2**10):
                         help='Initial data size')
     parser.add_argument('--repeat', type=int, default=1,
                         help='Iterations inside measured region')
-    # parser.add_argument('--text', default='', help='Print with each result')
-    parser.add_argument('--test', required=False, action='store_true', help="Check for correctness by comparing output with naieve Python version")
+    # parser.add_argument('--test', required=False, action='store_true',
+    #                     help="Check for correctness by comparing output with naieve Python version")
+    parser.add_argument('--usm', required=False, action='store_true', help="Use USM Shared or data transfer")
     parser.add_argument('--json',  required=False, default=__file__.replace('py','json'), help="output json data filename")
-
 
     args = parser.parse_args()
     nopt = args.size
@@ -44,6 +44,15 @@ def run(name, sizes=1, step=2, nopt=2**10):
     build_string = ['make']
     utils.run_command(build_string, verbose=True)
 
+    if args.usm:
+        build_string = ['make', 'comp']
+        utils.run_command(build_string, verbose=True)
+        exec_name = "./knn_comp"
+    else:
+        build_string = ['make']
+        utils.run_command(build_string, verbose=True)
+        exec_name = "./knn"
+
     if os.path.isfile('runtimes.csv'):
         os.remove('runtimes.csv')
 
@@ -52,7 +61,7 @@ def run(name, sizes=1, step=2, nopt=2**10):
         gen_data_to_file(nopt)
 
         # run the C program
-        run_cmd = ['./knn', str(nopt), str(repeat)]
+        run_cmd = [exec_name, str(nopt), str(repeat)]
         utils.run_command(run_cmd, verbose=True)
         nopt *= step
         repeat -= step

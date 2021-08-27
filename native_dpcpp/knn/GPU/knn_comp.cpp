@@ -82,35 +82,124 @@ size_t simple_vote(struct neighbors* neighbors)
   return max_ind;
 }
 
-void run_knn(queue* q, double* train, size_t *train_labels, double* test, size_t train_nrows, size_t test_size, size_t *predictions) {
-  double *d_train, *d_test; size_t *d_train_labels, *d_predictions;  
-  q->submit([&](handler& h) {
-      h.parallel_for<class theKernel>(range<1>{test_size}, [=](id<1> myID) {
-	  size_t i = myID[0];
-	  //std::array<std::pair<double, size_t>, NEAREST_NEIGHS> queue_neighbors;
-	  struct neighbors queue_neighbors[NEAREST_NEIGHS] = {{ 0 }};
-      
-	  //count distances
-	  for (int j = 0; j < NEAREST_NEIGHS; ++j) {
-	    queue_neighbors[j].dist = euclidean_dist(train, j, test, i);
-	    queue_neighbors[j].label = train_labels[j];
-	  }
+//void run_knn(queue* q, double* train, size_t *train_labels, double* test, size_t train_nrows, size_t test_size, size_t *predictions) {
+//  double *d_train, *d_test; size_t *d_train_labels, *d_predictions;
+//  q->submit([&](handler& h) {
+//      h.parallel_for<class theKernel>(range<1>{test_size}, [=](id<1> myID) {
+//	  size_t i = myID[0];
+//	  //std::array<std::pair<double, size_t>, NEAREST_NEIGHS> queue_neighbors;
+//	  struct neighbors queue_neighbors[NEAREST_NEIGHS] = {{ 0 }};
+//
+//	  //count distances
+//	  for (int j = 0; j < NEAREST_NEIGHS; ++j) {
+//	    queue_neighbors[j].dist = euclidean_dist(train, j, test, i);
+//	    queue_neighbors[j].label = train_labels[j];
+//	  }
+//
+//	  sort_queue(queue_neighbors);
+//
+//	  for (int j = NEAREST_NEIGHS; j < train_nrows; ++j) {
+//	    double dist = euclidean_dist(train, j, test, i);
+//	    //auto new_neighbor = std::make_pair(dist, train_labels[j]);
+//
+//	    if (dist < queue_neighbors[NEAREST_NEIGHS-1].dist) {
+//	      //queue_neighbors[NEAREST_NEIGHS-1] = new_neighbor;
+//	      queue_neighbors[NEAREST_NEIGHS-1].dist = dist;
+//	      queue_neighbors[NEAREST_NEIGHS-1].label = train_labels[j];
+//
+//	      push_queue(queue_neighbors, dist, train_labels[j], NEAREST_NEIGHS-1);
+//	    }
+//	  }
+//	  predictions[i] = simple_vote(queue_neighbors);
+//	});
+//    }).wait();
+//}
 
-	  sort_queue(queue_neighbors);
 
-	  for (int j = NEAREST_NEIGHS; j < train_nrows; ++j) {
-	    double dist = euclidean_dist(train, j, test, i);
-	    //auto new_neighbor = std::make_pair(dist, train_labels[j]);
+void run_knn(queue *q, double *train, size_t *train_labels, double *test, size_t train_nrows, size_t test_size,
+size_t *predictions, double *votes_to_classes)
+{
+  q->submit([&](handler &h)
+            {
+              h.parallel_for<class theKernel>(range<1>{test_size}, [=](id<1> myID)
+                  {
+                        size_t i = myID[0];
+                        for (int j = 0; j < NEAREST_NEIGHS; ++j) {
+                            double distance = 0.0;
+                            for (std::size_t jj = 0; jj < DATADIM; ++jj) {
+                                double diff = d_train[j * DATADIM + jj] - d_test[i * DATADIM + jj];
+                                distance += diff * diff;
+                            }
 
-	    if (dist < queue_neighbors[NEAREST_NEIGHS-1].dist) {
-	      //queue_neighbors[NEAREST_NEIGHS-1] = new_neighbor;
-	      queue_neighbors[NEAREST_NEIGHS-1].dist = dist;
-	      queue_neighbors[NEAREST_NEIGHS-1].label = train_labels[j];
-	  
-	      push_queue(queue_neighbors, dist, train_labels[j], NEAREST_NEIGHS-1);
-	    }
-	  }
-	  predictions[i] = simple_vote(queue_neighbors);
-	});
-    }).wait();
+                            double dist = sqrt(distance);
+
+                            queue_neighbors[i + test_size * (j + NEAREST_NEIGHS * 0)] = dist;
+                            queue_neighbors[i + test_size * (j + NEAREST_NEIGHS * 1)] = d_train_labels[j];
+                        }
+
+                        for (int j = 0; j < NEAREST_NEIGHS; ++j) {
+                            double new_distance = queue_neighbors[i + test_size * (j + NEAREST_NEIGHS * 0)];
+                            double new_neighbor_label = queue_neighbors[i + test_size * (j + NEAREST_NEIGHS * 1)];
+                            int index = j;
+                            while (index > 0 && new_distance < queue_neighbors[i + test_size * ((index-1) + NEAREST_NEIGHS * 0)] ) {
+                                queue_neighbors[i + test_size * (index + NEAREST_NEIGHS * 0)] = queue_neighbors[i + test_size * ((index-1) + NEAREST_NEIGHS * 0)];
+                                queue_neighbors[i + test_size * (index + NEAREST_NEIGHS * 1)] = queue_neighbors[i + test_size * ((index-1) + NEAREST_NEIGHS * 1)];
+                                index = index - 1;
+
+                                queue_neighbors[i + test_size * (index + NEAREST_NEIGHS * 0)] = new_distance;
+                                queue_neighbors[i + test_size * (index + NEAREST_NEIGHS * 1)] = new_neighbor_label;
+                            }
+
+                        }
+
+                        for (int j = NEAREST_NEIGHS; j < train_nrows; ++j) {
+                            double distance = 0.0;
+                            for (std::size_t jj = 0; jj < DATADIM; ++jj) {
+                                double diff = d_train[j * DATADIM + jj] - d_test[i * DATADIM + jj];
+                                distance += diff * diff;
+                            }
+
+                            double dist = sqrt(distance);
+
+                            if (dist < queue_neighbors[i + test_size * ((NEAREST_NEIGHS-1) + NEAREST_NEIGHS * 0)]) {
+                                queue_neighbors[i + test_size * ((NEAREST_NEIGHS-1) + NEAREST_NEIGHS * 0)] = dist;
+                                queue_neighbors[i + test_size * ((NEAREST_NEIGHS-1) + NEAREST_NEIGHS * 1)] = d_train_labels[j];
+
+
+
+                                double new_distance = queue_neighbors[i + test_size * ((NEAREST_NEIGHS-1) + NEAREST_NEIGHS * 0)];
+                                double new_neighbor_label = queue_neighbors[i + test_size * ((NEAREST_NEIGHS-1) + NEAREST_NEIGHS * 1)];
+                                int index = NEAREST_NEIGHS-1;
+
+                                while (index > 0 && new_distance < queue_neighbors[i + test_size * ((index-1) + NEAREST_NEIGHS * 0)] ) {
+                                    queue_neighbors[i + test_size * (index + NEAREST_NEIGHS * 0)] = queue_neighbors[i + test_size * ((index-1) + NEAREST_NEIGHS * 0)];
+                                    queue_neighbors[i + test_size * (index + NEAREST_NEIGHS * 1)] = queue_neighbors[i + test_size * ((index-1) + NEAREST_NEIGHS * 1)];
+                                    index = index - 1;
+
+                                    queue_neighbors[i + test_size * (index + NEAREST_NEIGHS * 0)] = new_distance;
+                                    queue_neighbors[i + test_size * (index + NEAREST_NEIGHS * 1)] = new_neighbor_label;
+                                }
+                            }
+
+
+                        }
+
+                        for (int j = 0; j < NEAREST_NEIGHS; ++j) {
+                            d_votes_to_classes[test_size * i + int(queue_neighbors[i + test_size * (j + NEAREST_NEIGHS * 1)])] += 1;
+                        }
+
+                        int max_ind = 0;
+                        double max_value = 0.0;
+
+                        for (int j = 0; j < NUM_CLASSES; ++j) {
+                            if (d_votes_to_classes[test_size * i + j] > max_value ) {
+                                max_value = d_votes_to_classes[test_size * i + j];
+                                max_ind = j;
+                            }
+                        }
+                        d_predictions[i] =  max_ind;
+                      });
+            })
+      .wait();
 }
+

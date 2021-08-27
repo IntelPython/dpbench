@@ -29,7 +29,8 @@ import numba
 import base_knn
 
 
-def knn_python(train, train_labels, test, k, classes_num, train_size, test_size, predictions, queue_neighbors_lst, votes_to_classes_lst):
+def knn_python(train, train_labels, test, k, classes_num, train_size, test_size, predictions,
+               queue_neighbors_lst, votes_to_classes_lst, data_dim):
     for i in range(test_size):
         queue_neighbors = queue_neighbors_lst[i]
 
@@ -39,7 +40,7 @@ def knn_python(train, train_labels, test, k, classes_num, train_size, test_size,
             x2 = test[i]
 
             distance = 0.0            
-            for jj in range(base_knn.DATA_DIM):
+            for jj in range(data_dim):
                 diff = x1[jj] - x2[jj]
                 distance += diff * diff
             dist = distance ** 0.5    
@@ -105,4 +106,4 @@ def knn_python(train, train_labels, test, k, classes_num, train_size, test_size,
                 max_value = votes_to_classes[j]
                 max_ind = j
 
-        predictions[i] =  max_ind
+        predictions[i] = max_ind

@@ -39,10 +39,10 @@ import dpctl.tensor as dpt
 #     return np.linalg.norm(x1-x2)
 
 @numba_dppy.func
-def euclidean_dist(x1, x2):
+def euclidean_dist(x1, x2, data_dim):
     distance = 0
 
-    for i in range(base_knn.DATA_DIM):
+    for i in range(data_dim):
         diff = x1[i] - x2[i]
         distance += diff * diff
 
@@ -65,7 +65,8 @@ def sort_queue(queue_neighbors):
 
 
 @numba_dppy.kernel
-def run_knn_kernel(train, train_labels, test, k, classes_num, train_size, predictions, queue_neighbors_lst, votes_to_classes_lst):
+def run_knn_kernel(train, train_labels, test, k, classes_num, train_size, predictions, queue_neighbors_lst,
+                   votes_to_classes_lst, data_dim):
     i = numba_dppy.get_global_id(0)
     queue_neighbors = queue_neighbors_lst[i]
 
@@ -74,7 +75,7 @@ def run_knn_kernel(train, train_labels, test, k, classes_num, train_size, predic
         x2 = test[i]
 
         distance = 0.0
-        for jj in range(base_knn.DATA_DIM):
+        for jj in range(data_dim):
             diff = x1[jj] - x2[jj]
             distance += diff * diff
         dist = math.sqrt(distance)
@@ -139,31 +140,14 @@ def run_knn_kernel(train, train_labels, test, k, classes_num, train_size, predic
             max_value = votes_to_classes[j]
             max_ind = j
 
-    predictions[i] =  max_ind
+    predictions[i] = max_ind
 
 
-def run_knn(train, train_labels, test, k, classes_num, test_size, train_size, predictions, queue_neighbors_lst, votes_to_classes_lst):
+def run_knn(train, train_labels, test, k, classes_num, test_size, train_size, predictions, queue_neighbors_lst,
+            votes_to_classes_lst):
     with dpctl.device_context(base_knn.get_device_selector()) as gpu_queue:
-        d_train = dpt.usm_ndarray(train.shape, dtype=train.dtype, buffer="device", buffer_ctor_kwargs={"queue": gpu_queue})
-        d_train.usm_data.copy_from_host(train.reshape((-1)).view("|u1"))
+        run_knn_kernel[test_size, numba_dppy.DEFAULT_LOCAL_SIZE](train, train_labels, test, k, classes_num, train_size,
+                                                                 predictions, queue_neighbors_lst, votes_to_classes_lst)
 
-        d_train_labels = dpt.usm_ndarray(train_labels.shape, dtype=train_labels.dtype, buffer="device", buffer_ctor_kwargs={"queue": gpu_queue})
-        d_train_labels.usm_data.copy_from_host(train_labels.reshape((-1)).view("|u1"))
-
-        d_test = dpt.usm_ndarray(test.shape, dtype=test.dtype, buffer="device", buffer_ctor_kwargs={"queue": gpu_queue})
-        d_test.usm_data.copy_from_host(test.reshape((-1)).view("|u1"))
-
-        d_predictions = dpt.usm_ndarray(predictions.shape, dtype=predictions.dtype, buffer="device", buffer_ctor_kwargs={"queue": gpu_queue})
-        d_predictions.usm_data.copy_from_host(predictions.reshape((-1)).view("|u1"))
-
-        d_queue_neighbors_lst = dpt.usm_ndarray(queue_neighbors_lst.shape, dtype=queue_neighbors_lst.dtype, buffer="device", buffer_ctor_kwargs={"queue": gpu_queue})
-        #d_queue_neighbors_lst.usm_data.copy_from_host(queue_neighbors_lst.reshape((-1)).view("|u1"))
-
-        d_votes_to_classes_lst = dpt.usm_ndarray(votes_to_classes_lst.shape, dtype=votes_to_classes_lst.dtype, buffer="device", buffer_ctor_kwargs={"queue": gpu_queue})
-        d_votes_to_classes_lst.usm_data.copy_from_host(votes_to_classes_lst.reshape((-1)).view("|u1"))
-
-        run_knn_kernel[test_size, numba_dppy.DEFAULT_LOCAL_SIZE](d_train, d_train_labels, d_test, k, classes_num, train_size, d_predictions, d_queue_neighbors_lst, d_votes_to_classes_lst)
-
-        d_predictions.usm_data.copy_to_host(predictions.reshape((-1)).view("|u1"))
 
 base_knn.run("K-Nearest-Neighbors Numba", run_knn)

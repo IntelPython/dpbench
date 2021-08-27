@@ -32,6 +32,7 @@ import numpy.random as rnd
 from knn_python import knn_python
 from dpbench_datagen.knn import gen_data_x, gen_data_y
 
+DATA_DIM = 16
 SEED = 7777777
 CLASSES_NUM = 3
 TRAIN_DATA_SIZE = 2 ** 10
@@ -94,8 +95,9 @@ def run(name, alg, sizes=10, step=2, nopt=2 ** 10):
     rnd.seed(SEED)
 
     if args.test:
-        x_train, y_train = gen_data_x(train_data_size, seed=0), gen_data_y(train_data_size, CLASSES_NUM, seed=0)
-        x_test = gen_data_x(nopt, seed=777777)
+        x_train, y_train = gen_data_x(TRAIN_DATA_SIZE, seed=0, dim=DATA_DIM), \
+                           gen_data_y(TRAIN_DATA_SIZE, CLASSES_NUM, seed=0)
+        x_test = gen_data_x(nopt, seed=777777, dim=DATA_DIM)
 
         print("TRAIN: ", x_train[:10])
         print(y_train[:10])
@@ -114,8 +116,9 @@ def run(name, alg, sizes=10, step=2, nopt=2 ** 10):
     with open("perf_output.csv", 'w', 1) as fd, open("runtimes.csv", 'w', 1) as fd2:
         for _ in xrange(args.steps):
 
-            x_train, y_train = gen_data_x(train_data_size, seed=0), gen_data_y(train_data_size, CLASSES_NUM, seed=0)
-            x_test = gen_data_x(nopt, seed=777777)
+            x_train, y_train = gen_data_x(TRAIN_DATA_SIZE, seed=0, dim=DATA_DIM), \
+                               gen_data_y(TRAIN_DATA_SIZE, CLASSES_NUM, seed=0)
+            x_test = gen_data_x(nopt, seed=777777, dim=DATA_DIM)
 
             sys.stdout.flush()
 

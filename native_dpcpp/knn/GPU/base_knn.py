@@ -2,7 +2,8 @@
 #
 # SPDX-License-Identifier: MIT
 
-import os, utils
+import os
+import run_utils as utils
 import numpy as np
 import argparse
 from dpbench_datagen.knn import gen_data_to_file

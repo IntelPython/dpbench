@@ -28,7 +28,7 @@ import os
 import numpy as np
 from sklearn.datasets import make_classification, make_regression
 import pandas as pd
-import utils
+import run_utils as utils
 
 ######################################################
 # GLOBAL DECLARATIONS THAT WILL BE USED IN ALL FILES #

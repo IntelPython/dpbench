@@ -62,13 +62,13 @@ class run(enum.Enum):
 
 class implementation(enum.Enum):
     all = 'all'
-    native = 'native'
+    #native = 'native'
     native_dpcpp = 'native_dpcpp'
-    native_optimised = 'native_optimised'
+    #native_optimised = 'native_optimised'
     numba = 'numba'
-    scikit_learn = 'scikit_learn'
-    daal4py = 'daal4py'
-    dpnp = 'dpnp'
+    #scikit_learn = 'scikit_learn'
+    #daal4py = 'daal4py'
+    #dpnp = 'dpnp'
 
     def __str__(self):
         return self.value
@@ -132,10 +132,11 @@ class workloads():
                 'NUMBA_CPU_PERF_CMD': ["python", wl_names[all_workloads.blackscholes.value]['numba']],
                 'NUMBA_CPU_VTUNE_CMD': ["python", wl_names[all_workloads.blackscholes.value]['numba'], "--steps", "1", "--size", str(2**28)],
                 'NUMBA_CPU_ADVISOR_CMD': ["python", wl_names[all_workloads.blackscholes.value]['numba'], "--steps", "1", "--size", str(2**28)],
-                'NATIVE_TEST_CMD': ["./black_scholes", "1"],
-                'NATIVE_PERF_CMD': ["./black_scholes"],
-                'NATIVE_VTUNE_CMD': ["./black_scholes", "1", str(2**28), "1"],
-                'NATIVE_ADVISOR_CMD': ["./black_scholes", "1", str(2**28), "1"],
+                'NATIVE_TEST_CMD': ["python", "base_bs_erf.py", "--test"],
+                'NATIVE_PERF_CMD': ["python", "base_bs_erf.py"],
+                'NATIVE_PERF_REF_CMD': ["python", "base_bs_erf.py", "--steps", "1", "--size", str(2**28)],
+                'NATIVE_VTUNE_CMD': ["./black_scholes", str(2**28)],
+                'NATIVE_ADVISOR_CMD': ["./black_scholes", str(2**28)],
             },
             all_workloads.dbscan.value: {
                 'execute': False,

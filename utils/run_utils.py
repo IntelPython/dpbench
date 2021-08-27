@@ -61,9 +61,11 @@ def mkdir(path):
 
 def chdir(path):
     if os.path.exists(path):
-        print('Changing to directory `{}`'.format(path))
+        print("Changing to directory `%s`" % path)
         os.chdir(path)
-
+        return True
+    else:
+        return False
 
 ########## Log file code ##########
 
@@ -110,7 +112,10 @@ class ExperimentError(Exception):
         return 'ExperimentError:' + repr(self.command)
 
 
-def run_command(command_string, verbose=False, echo=True, throw_exception=True):
+def run_command(command_string, verbose=False, echo=True, throw_exception=True, dry_run=False):
+    if dry_run:
+        print('dry-run executing:', subprocess.list2cmdline(command_string))
+        return None
 
     if echo:
         print('executing:', subprocess.list2cmdline(command_string))

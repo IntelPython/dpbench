@@ -3,7 +3,7 @@ import shutil
 import sys
 
 import options
-import util
+import run_utils as util
 
 
 def run_native_optimised_CPU(app_name, cmds, analysis):
@@ -133,11 +133,17 @@ def run_native_CPU(app_name, cmds, analysis):
         util.run_command(run_cmd, verbose=True)
 
     if analysis == options.analysis.vtune or analysis == options.analysis.all:
+        run_cmd = cmds['NATIVE_PERF_REF_CMD']
+        util.run_command(run_cmd, verbose=True)
+        
         shutil.rmtree('vtune_dir', ignore_errors=True)
         run_cmd = options.VTUNE_THREADING_CMD + cmds['NATIVE_VTUNE_CMD']
         util.run_command(run_cmd, verbose=True)
 
     if analysis == options.analysis.advisor or analysis == options.analysis.all:
+        run_cmd = cmds['NATIVE_PERF_REF_CMD']
+        util.run_command(run_cmd, verbose=True)
+        
         shutil.rmtree('roofline', ignore_errors=True)
         run_cmd = options.ADVISOR_SURVEY_CMD + cmds['NATIVE_ADVISOR_CMD']
         util.run_command(run_cmd, verbose=True)
@@ -180,6 +186,9 @@ def run_native_GPU(app_name, cmds, analysis):
         util.run_command(run_cmd, verbose=True)
 
     if analysis == options.analysis.vtune or analysis == options.analysis.all:
+        run_cmd = cmds['NATIVE_PERF_REF_CMD']
+        util.run_command(run_cmd, verbose=True)
+        
         shutil.rmtree('vtune_dir', ignore_errors=True)
         run_cmd = options.VTUNE_GPU_OFFLOAD_CMD + cmds['NATIVE_VTUNE_CMD']
         util.run_command(run_cmd, verbose=True)
@@ -188,6 +197,9 @@ def run_native_GPU(app_name, cmds, analysis):
         util.run_command(run_cmd, verbose=True)
 
     if analysis == options.analysis.advisor or analysis == options.analysis.all:
+        run_cmd = cmds['NATIVE_PERF_REF_CMD']
+        util.run_command(run_cmd, verbose=True)
+        
         shutil.rmtree('roofline', ignore_errors=True)
         run_cmd = options.ADVISOR_GPU_SURVEY_CMD + cmds['NATIVE_ADVISOR_CMD']
         util.run_command(run_cmd, verbose=True)
@@ -536,7 +548,7 @@ def check_envvars_tools(opts):
     #             sys.exit()
 
     from shutil import which
-    if opts.impl == options.implementation.native or opts.impl == options.implementation.all:
+    if opts.impl == options.implementation.native_dpcpp or opts.impl == options.implementation.all:
         if which("icx") is None:
             print("ICX compiler is required to run native implementations. Exiting\n")
             sys.exit()
@@ -587,30 +599,30 @@ def run(opts):
 
     ref_cwd = os.getcwd()
 
-    if opts.impl == options.implementation.native or opts.impl == options.implementation.all:
-        run_native(opts)
-        util.chdir(ref_cwd)        
-
     if opts.impl == options.implementation.numba or opts.impl == options.implementation.all:
         run_numba(opts)
         util.chdir(ref_cwd)
 
-    if opts.impl == options.implementation.native_dpcpp:
+    if opts.impl == options.implementation.native_dpcpp or opts.impl == options.implementation.all:
         run_native_dpcpp(opts)
         util.chdir(ref_cwd)
 
-    if opts.impl == options.implementation.dpnp:
-        run_dpnp(opts)
-        util.chdir(ref_cwd)        
+    # if opts.impl == options.implementation.native:
+    #     run_native(opts)
+    #     util.chdir(ref_cwd)        
+
+    # if opts.impl == options.implementation.dpnp:
+    #     run_dpnp(opts)
+    #     util.chdir(ref_cwd)        
         
-    if opts.impl == options.implementation.scikit_learn:
-        run_scikit_learn(opts)
-        util.chdir(ref_cwd)
+    # if opts.impl == options.implementation.scikit_learn:
+    #     run_scikit_learn(opts)
+    #     util.chdir(ref_cwd)
 
-    if opts.impl == options.implementation.daal4py:
-        run_daal4py(opts)
-        util.chdir(ref_cwd)
+    # if opts.impl == options.implementation.daal4py:
+    #     run_daal4py(opts)
+    #     util.chdir(ref_cwd)
 
-    if opts.impl == options.implementation.native_optimised:
-        run_native_optimised(opts)
-        util.chdir(ref_cwd)        
+    # if opts.impl == options.implementation.native_optimised:
+    #     run_native_optimised(opts)
+    #     util.chdir(ref_cwd)        

@@ -45,7 +45,7 @@ def gen_rand_data(nopt, dtype = np.float64):
             rnd.uniform(TL, TH, nopt).astype(dtype))
 
 # call numpy.random.uniform to generate input data and write the input as binary to a file
-def gen_data_to_file(nopt = 2**10, dtype = np.float64):
+def gen_data_to_file(nopt, dtype = np.float64):
     price, strike, t = gen_rand_data(nopt, dtype)
     __dump_binary__(price, strike, t)
     #__dump_text__(price, strike, t) #for verification purpose only

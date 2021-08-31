@@ -29,36 +29,63 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "knn.h"
 #include "rdtsc.h"
 #include <sstream>
+#include <fstream>
 
 #define SEED 7777777
 
-int stoi(char* h) {
+int stoi(char *h)
+{
     std::stringstream in(h);
     int res;
     in >> res;
     return res;
 }
 
-double stof(char* h) {
+double stof(char *h)
+{
     std::stringstream in(h);
     double res;
     in >> res;
     return res;
 }
 
-double rand32(double a, double b) {
+double rand32(double a, double b)
+{
     return abs((rand() << 16) | rand()) % 1000000000 / 1000000000.0 * (b - a) + a;
 }
 
-
-double* gen_data_x(size_t data_size)
+double *gen_data_x(size_t data_size)
 {
-    double* data = new double[data_size*DATADIM];
+    double *data = new double[data_size * DATADIM];
 
-    for (size_t i = 0; i < data_size; ++i) {
-      for (size_t j = 0; j < DATADIM; ++j){
-	data[i*DATADIM + j] = rand32(0, 1);
-      }
+    for (size_t i = 0; i < data_size; ++i)
+    {
+        for (size_t j = 0; j < DATADIM; ++j)
+        {
+            data[i * DATADIM + j] = rand32(0, 1);
+        }
+    }
+
+    return data;
+}
+
+auto read_data_x(size_t data_size, std::string filename)
+{
+
+    auto n = data_size * DATADIM;
+    auto data = std::make_unique<double_t[]>(n);
+
+    std::ifstream file;
+    file.open(filename, std::ios::in | std::ios::binary);
+    if (file)
+    {
+        file.read(reinterpret_cast<char *>(data.get()), n * sizeof(double));
+        file.close();
+    }
+    else
+    {
+        std::cout << "Input file not found.\n";
+        exit(0);
     }
 
     return data;
@@ -75,8 +102,34 @@ std::vector<size_t> gen_data_y(size_t data_size)
     return labels;
 }
 
-int main(int argc, char* argv[]) {
+auto read_data_y(size_t data_size, std::string filename)
+{
+
+    auto n = data_size;
+    auto data = std::make_unique<size_t[]>(n);
+
+    std::ifstream file;
+    file.open(filename, std::ios::in | std::ios::binary);
+    if (file)
+    {
+        file.read(reinterpret_cast<char *>(data.get()), n * sizeof(size_t));
+        file.close();
+    }
+    else
+    {
+        std::cout << "Input file not found.\n";
+        exit(0);
+    }
+
+    return data;
+}
+
+int main(int argc, char *argv[])
+{
     int STEPS = 10;
+
+    int repeat = 1;
+    double t1 = 0, t2 = 0;
 
     size_t nPoints_train = pow(2, 10);
     size_t nPoints = pow(2, 10);
@@ -85,42 +138,28 @@ int main(int argc, char* argv[]) {
     size_t minPts = 5;
     double eps = 1.0;
 
-    if (argc < 2) {
-        printf("Usage: expect STEPS input integer parameter, defaulting to %d\n", STEPS);
+    /* Read number of options parameter from command line */
+    if (argc >= 2)
+    {
+        sscanf(argv[1], "%lu", &nPoints);
     }
-    else {
-        STEPS = stoi(argv[1]);
-        if (argc > 2) {
-            nPoints = stoi(argv[2]);
-        }
-        if (argc > 3) {
-            nFeatures = stoi(argv[3]);
-        }
-        if (argc > 4) {
-            minPts = stoi(argv[4]);
-        }
-        if (argc > 5) {
-            eps = stof(argv[5]);
-        }
+    if (argc >= 3)
+    {
+        sscanf(argv[2], "%d", &repeat);
     }
 
-    double* data;
-    double lBound = 0.0;
-    double rBound = 10.0;
-
-    int repeat = 1;
-    double t1 = 0, t2 = 0;
-
-    FILE* fptr;
+    FILE *fptr;
     fptr = fopen("perf_output.csv", "w");
-    if (fptr == NULL) {
+    if (fptr == NULL)
+    {
         printf("Error!");
         exit(1);
     }
 
-    FILE* fptr1;
+    FILE *fptr1;
     fptr1 = fopen("runtimes.csv", "w");
-    if (fptr1 == NULL) {
+    if (fptr1 == NULL)
+    {
         printf("Error!");
         exit(1);
     }
@@ -128,32 +167,41 @@ int main(int argc, char* argv[]) {
     srand(SEED);
 
     queue *q = nullptr;
-    try {
-      q = new queue{cpu_selector()};
-    } catch (runtime_error &re) {
-      std::cerr << "No GPU device found\n";
-      exit(1);
-    }    
+    try
+    {
+        q = new queue{gpu_selector()};
+    }
+    catch (runtime_error &re)
+    {
+        std::cerr << "No GPU device found\n";
+        exit(1);
+    }
 
     int i, j;
     double MOPS = 0.0;
     double time;
-    for (i = 0; i < STEPS; i++) {
 
-        double* data_train = gen_data_x(nPoints_train);
-        std::vector<size_t> labels = gen_data_y(nPoints_train);
+    double *data_train = read_data_x(nPoints_train, "x_train.bin").get();
+    size_t *train_labels = read_data_y(nPoints_train, "y_train.bin").get();
 
-        double* data_test = gen_data_x(nPoints);
+    double *data_test = read_data_x(nPoints, "x_test.bin").get();
+    size_t *predictions = new size_t[nPoints];
 
-	size_t* predictions = new size_t[nPoints];
-	size_t* train_labels = labels.data();	
+    /* Warm up cycle */
+    run_knn(q, data_train, train_labels, data_test, nPoints_train, nPoints, predictions);
 
-        /* Warm up cycle */
-        run_knn(q, data_train, train_labels, data_test, nPoints_train, nPoints, predictions);
+    for (i = 0; i < STEPS; i++)
+    {
+
+        double *data_train = read_data_x(nPoints_train, "x_train.bin").get();
+        size_t *train_labels = read_data_y(nPoints_train, "y_train.bin").get();
+        double *data_test = read_data_x(nPoints, "x_test.bin").get();
+        size_t *predictions = new size_t[nPoints];
 
         t1 = timer_rdtsc();
-        for (j = 0; j < repeat; j++) {
-	  run_knn(q, data_train, train_labels, data_test, nPoints_train, nPoints, predictions);
+        for (j = 0; j < repeat; j++)
+        {
+            run_knn(q, data_train, train_labels, data_test, nPoints_train, nPoints, predictions);
         }
         t2 = timer_rdtsc();
 
@@ -171,8 +219,8 @@ int main(int argc, char* argv[]) {
         fprintf(fptr, "%ld,%.6lf\n", nPoints, MOPS);
         fprintf(fptr1, "%ld,%.6lf\n", nPoints, time);
 
-        nPoints = nPoints * 2;
-        if (repeat > 2) repeat -= 2;
+        if (repeat > 2)
+            repeat -= 2;
     }
     fclose(fptr);
     fclose(fptr1);

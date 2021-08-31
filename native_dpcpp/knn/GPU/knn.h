@@ -40,4 +40,4 @@ struct neighbors{
 };
 
 void run_knn(queue *q, double* train, size_t *train_labels, double* test, size_t train_nrows, size_t test_size, size_t *predictions, double *votes_to_classes);
-void run_knn_usm(queue *q, double* train, size_t *train_labels, double* test, size_t train_nrows, size_t test_size, size_t *predictions, double *votes_to_classes, double *queue_neighbors);
+void run_knn_usm(queue *q, double* train, size_t *train_labels, double* test, size_t train_nrows, size_t test_size, size_t *predictions, double *votes_to_classes, struct neighbors *queue_neighbors);

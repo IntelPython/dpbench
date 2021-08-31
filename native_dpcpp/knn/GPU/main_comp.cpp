@@ -31,8 +31,6 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <sstream>
 #include <fstream>
 
-#define SEED 7777777
-
 int stoi(char *h)
 {
     std::stringstream in(h);
@@ -69,6 +67,17 @@ double *gen_data_x(size_t data_size)
     return data;
 }
 
+std::vector<size_t> gen_data_y(size_t data_size)
+{
+    std::vector<size_t> labels;
+    for (size_t i = 0; i < data_size; ++i)
+    {
+        labels.push_back((size_t)rand() % NUM_CLASSES);
+    }
+
+    return labels;
+}
+
 auto read_data_x(size_t data_size, std::string filename)
 {
 
@@ -89,17 +98,6 @@ auto read_data_x(size_t data_size, std::string filename)
     }
 
     return data;
-}
-
-std::vector<size_t> gen_data_y(size_t data_size)
-{
-    std::vector<size_t> labels;
-    for (size_t i = 0; i < data_size; ++i)
-    {
-        labels.push_back((size_t)rand() % NUM_CLASSES);
-    }
-
-    return labels;
 }
 
 auto read_data_y(size_t data_size, std::string filename)
@@ -132,9 +130,7 @@ int main(int argc, char *argv[])
     size_t nPoints_train = pow(2, 10);
     size_t nPoints = pow(2, 10);
 
-    size_t nFeatures = 1;
-    size_t minPts = 5;
-    double eps = 1.0;
+    bool test = false;
 
     /* Read number of options parameter from command line */
     if (argc >= 2)
@@ -145,6 +141,12 @@ int main(int argc, char *argv[])
     {
         sscanf(argv[2], "%d", &repeat);
     }
+    if (argc == 4) {
+      char test_str[] = "-t";
+      if (strcmp(test_str, argv[3]) == 0) {
+	test = true;
+      }
+    }    
 
     FILE *fptr;
     fptr = fopen("perf_output.csv", "w");
@@ -162,8 +164,6 @@ int main(int argc, char *argv[])
         exit(1);
     }
 
-    srand(SEED);
-
     queue *q = nullptr;
     try
     {
@@ -175,51 +175,57 @@ int main(int argc, char *argv[])
         exit(1);
     }
 
-    int i, j;
-    double MOPS = 0.0;
-    double time;
-
     auto data_train_ptr = read_data_x(nPoints_train, "x_train.bin");
     double *data_train = data_train_ptr.get();
 
     auto train_labels_ptr = read_data_y(nPoints_train, "y_train.bin");
     size_t *train_labels = train_labels_ptr.get();
-
+    
     auto data_test_ptr = read_data_x(nPoints, "x_test.bin");
     double *data_test = data_test_ptr.get();
 
     size_t *predictions = new size_t[nPoints];
-    double *votes_to_classes = (double *)calloc(nPoints * NUM_CLASSES, sizeof(double));
 
+    double *votes_to_classes = new double[nPoints * NUM_CLASSES]();
 
-    double *d_votes_to_classes = (double *)malloc_shared(nPoints * NUM_CLASSES * sizeof(double), *q);
-    double *queue_neighbors = (double *)malloc_shared(nPoints * NEAREST_NEIGHS * 2 * sizeof(double), *q);
+    double *d_votes_to_classes = (double *)malloc_device(nPoints * NUM_CLASSES * sizeof(double), *q);
+    struct neighbors *d_queue_neighbors_lst = (struct neighbors *)malloc_device(nPoints * NEAREST_NEIGHS * sizeof(struct neighbors), *q);
 
-    double *d_train = (double *)malloc_shared(nPoints_train * DATADIM * sizeof(double), *q);
-    size_t *d_train_labels = (size_t *)malloc_shared(nPoints_train * sizeof(size_t), *q);
-    double *d_test = (double *)malloc_shared(nPoints * DATADIM * sizeof(double *), *q);
-    size_t *d_predictions = (size_t *)malloc_shared(nPoints * sizeof(size_t), *q);
-
+    double *d_train = (double *)malloc_device(nPoints_train * DATADIM * sizeof(double), *q);
+    size_t *d_train_labels = (size_t *)malloc_device(nPoints_train * sizeof(size_t), *q);
+    double *d_test = (double *)malloc_device(nPoints * DATADIM * sizeof(double), *q);
+    size_t *d_predictions = (size_t *)malloc_device(nPoints * sizeof(size_t), *q);
 
     // copy data host to device
     q->memcpy(d_train, data_train, nPoints_train * DATADIM * sizeof(double));
     q->memcpy(d_train_labels, train_labels, nPoints_train * sizeof(size_t));
     q->memcpy(d_test, data_test, nPoints * DATADIM * sizeof(double));
     q->memcpy(d_votes_to_classes, votes_to_classes, nPoints * NUM_CLASSES * sizeof(double));
-    q->wait();
+    q->wait();    
 
     /* Warm up cycle */
-    run_knn_usm(q, d_train, d_train_labels, d_test, nPoints_train, nPoints, d_predictions, d_votes_to_classes, queue_neighbors);
+    run_knn_usm(q, d_train, d_train_labels, d_test, nPoints_train, nPoints, d_predictions, d_votes_to_classes, d_queue_neighbors_lst);
 
     t1 = timer_rdtsc();
-    for (j = 0; j < repeat; j++)
+    for (int j = 0; j < repeat; j++)
     {
-        run_knn_usm(q, d_train, d_train_labels, d_test, nPoints_train, nPoints, d_predictions, d_votes_to_classes, queue_neighbors);
+      run_knn_usm(q, d_train, d_train_labels, d_test, nPoints_train, nPoints, d_predictions, d_votes_to_classes, d_queue_neighbors_lst);
     }
     t2 = timer_rdtsc();
 
-    MOPS = (nPoints * repeat / 1e6) / ((double)(t2 - t1) / getHz());
-    time = ((double)(t2 - t1) / getHz());
+    // copy result device to host
+    q->memcpy(predictions, d_predictions, nPoints * sizeof(size_t));
+    q->wait();
+    
+    free(d_train, q->get_context());
+    free(d_test, q->get_context());
+    free(d_train_labels, q->get_context());
+    free(d_predictions, q->get_context());
+    free(d_queue_neighbors_lst, q->get_context());
+    free(d_votes_to_classes, q->get_context());    
+
+    double MOPS = (nPoints * repeat / 1e6) / ((double)(t2 - t1) / getHz());
+    double time = ((double)(t2 - t1) / getHz());
 
     printf("ERF: Native-C-VML: Size: %ld Time: %.6lf\n", nPoints, time);
     fflush(stdout);
@@ -229,15 +235,20 @@ int main(int argc, char *argv[])
     fclose(fptr);
     fclose(fptr1);
 
-    // q->memcpy(predictions, d_predictions, nPoints * sizeof(size_t));
+    if (test) {
+      std::ofstream file;
+      file.open("predictions.bin", std::ios::out|std::ios::binary);
+      if (file) {
+	file.write(reinterpret_cast<char *>(predictions), nPoints*sizeof(double));
+	file.close();
+      } else {
+	std::cout << "Unable to open output file.\n";
+      }
+    }    
 
     delete[] predictions;
 
-    free(d_train, q->get_context());
-    free(d_test, q->get_context());
-    free(d_train_labels, q->get_context());
-    free(d_predictions, q->get_context());
-    free(d_votes_to_classes, q->get_context());
+    delete[] votes_to_classes;
 
     return 0;
 }

@@ -54,6 +54,6 @@ $(TARGET)_comp: main_comp.cpp knn_comp.cpp
 	$(CC) $(CPPFLAGS) $(CFLAGS) $^ -o $(TARGET)_comp
 
 clean:
-	rm -rf *.o *.out *.optrpt *.yaml *~ $(foreach acc,ha la ep,knn) knn_comp
+	rm -rf *.o *.out *.optrpt *.yaml *~ $(foreach acc,ha la ep,knn) knn_comp *.bin
 
 .PHONY: all clean

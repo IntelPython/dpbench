@@ -24,8 +24,6 @@
 # EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 # *****************************************************************************
 
-import numpy as np
-import numba
 import base_knn
 import dpctl
 import numba_dppy
@@ -47,7 +45,6 @@ def euclidean_dist(x1, x2, data_dim):
         distance += diff * diff
 
     result = distance ** 0.5
-    # result = np.sqrt(distance)
     return result
 
 @numba_dppy.func

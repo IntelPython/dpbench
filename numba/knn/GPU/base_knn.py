@@ -29,18 +29,10 @@ import sys, os, json
 import numpy as np
 import numpy.random as rnd
 
-#from knn_python import knn_python
-from dpbench_datagen.knn import gen_data_x, gen_data_y
+from dpbench_datagen.knn import gen_train_data, gen_test_data, CLASSES_NUM, DATA_DIM, TRAIN_DATA_SIZE, N_NEIGHBORS
+from dpbench_python.knn.knn_python import knn_python
 import dpctl
 import dpctl.tensor as dpt
-
-from dpbench_python.knn.knn_python import knn_python
-
-DATA_DIM = 16
-SEED = 7777777
-CLASSES_NUM = 3
-TRAIN_DATA_SIZE = 2 ** 10
-n_neighbors = 5
 
 try:
     import itimer as it
@@ -82,12 +74,11 @@ def get_device_selector(is_gpu=True):
 
 def gen_data_usm(nopt):
     # init numpy obj
-    x_train, y_train = gen_data_x(TRAIN_DATA_SIZE, seed=0, dim=DATA_DIM), \
-                       gen_data_y(TRAIN_DATA_SIZE, CLASSES_NUM, seed=0)
-    x_test = gen_data_x(nopt, seed=777777, dim=DATA_DIM)
+    x_train, y_train = gen_train_data()
+    x_test = gen_test_data(nopt)
 
     predictions = np.empty(nopt)
-    queue_neighbors_lst = np.empty((nopt, n_neighbors, 2))
+    queue_neighbors_lst = np.empty((nopt, N_NEIGHBORS, 2))
     votes_to_classes_lst = np.zeros((nopt, CLASSES_NUM))
 
     with dpctl.device_context(get_device_selector()) as gpu_queue:
@@ -136,50 +127,45 @@ def run(name, alg, sizes=10, step=2, nopt=2 ** 10):
     args = parser.parse_args()
     nopt = args.size
     repeat = args.repeat
-    train_data_size = TRAIN_DATA_SIZE
 
     output = {}
     output['name'] = name
     output['sizes'] = sizes
     output['step'] = step
     output['repeat'] = repeat
-    output['randseed'] = SEED
     output['metrics'] = []
 
-    rnd.seed(SEED)
-
     if args.test:
-        x_train, y_train = gen_data_x(train_data_size, seed=0, dim=DATA_DIM), \
-                           gen_data_y(train_data_size, CLASSES_NUM, seed=0)
-        x_test = gen_data_x(nopt, seed=777777, dim=DATA_DIM)
+        x_train, y_train = gen_train_data()
+        x_test = gen_test_data(nopt)
         p_predictions = np.empty(nopt)
-        p_queue_neighbors_lst = np.empty((nopt, n_neighbors, 2))
+        p_queue_neighbors_lst = np.empty((nopt, N_NEIGHBORS, 2))
         p_votes_to_classes_lst = np.zeros((nopt, CLASSES_NUM))
 
-        knn_python(x_train, y_train, x_test, n_neighbors, CLASSES_NUM, TRAIN_DATA_SIZE, nopt, p_predictions,
+        knn_python(x_train, y_train, x_test, N_NEIGHBORS, CLASSES_NUM, TRAIN_DATA_SIZE, nopt, p_predictions,
                   p_queue_neighbors_lst, p_votes_to_classes_lst, DATA_DIM)
 
         if args.usm is True:  # test usm feature
             train_usm, train_labels_usm, test_usm, predictions_usm, queue_neighbors_lst_usm, votes_to_classes_lst_usm = \
             gen_data_usm(nopt)
-            alg(train_usm, train_labels_usm, test_usm, n_neighbors, CLASSES_NUM, nopt, TRAIN_DATA_SIZE, predictions_usm,
-                    queue_neighbors_lst_usm, votes_to_classes_lst_usm)
+            alg(train_usm, train_labels_usm, test_usm, N_NEIGHBORS, CLASSES_NUM, nopt, TRAIN_DATA_SIZE, predictions_usm,
+                    queue_neighbors_lst_usm, votes_to_classes_lst_usm, DATA_DIM)
 
             n_predictions = np.empty(nopt)
             predictions_usm.usm_data.copy_to_host(n_predictions.view("u1"))
 
         else:
             n_predictions = np.empty(nopt)
-            n_queue_neighbors_lst = np.empty((nopt, n_neighbors, 2))
+            n_queue_neighbors_lst = np.empty((nopt, N_NEIGHBORS, 2))
             n_votes_to_classes_lst = np.zeros((nopt, CLASSES_NUM))
 
-            alg(x_train, y_train, x_test, n_neighbors, CLASSES_NUM, TRAIN_DATA_SIZE, nopt, n_predictions,
+            alg(x_train, y_train, x_test, N_NEIGHBORS, CLASSES_NUM, TRAIN_DATA_SIZE, nopt, n_predictions,
              n_queue_neighbors_lst, n_votes_to_classes_lst, DATA_DIM)
 
         if np.allclose(n_predictions, p_predictions):
-            print("Test succeeded\n")
+            print("Test succeeded. Python predictions: ", p_predictions, " Numba predictions: ", n_predictions, "\n")
         else:
-            print("Test failed\n")
+            print("Test failed. Python predictions: ", p_predictions, " Numba predictions: ", n_predictions, "\n")
         return
 
     with open('perf_output.csv', 'w', 1) as fd, open("runtimes.csv", 'w', 1) as fd2:
@@ -191,20 +177,18 @@ def run(name, alg, sizes=10, step=2, nopt=2 ** 10):
                 x_train, y_train, x_test, predictions, queue_neighbors_lst, votes_to_classes_lst = \
                     gen_data_usm(nopt)
             else:
-                x_train, y_train = gen_data_x(TRAIN_DATA_SIZE, seed=0, dim=DATA_DIM), \
-                                   gen_data_y(TRAIN_DATA_SIZE, CLASSES_NUM, seed=0)
-
-                x_test = gen_data_x(nopt, seed=777777, dim=DATA_DIM)
+                x_train, y_train = gen_train_data()
+                x_test = gen_test_data(nopt)
                 predictions = np.empty(nopt)
-                queue_neighbors_lst = np.empty((nopt, n_neighbors, 2))
+                queue_neighbors_lst = np.empty((nopt, N_NEIGHBORS, 2))
                 votes_to_classes_lst = np.zeros((nopt, CLASSES_NUM))
 
-            alg(x_train, y_train, x_test, n_neighbors, CLASSES_NUM, nopt, TRAIN_DATA_SIZE, predictions,
+            alg(x_train, y_train, x_test, N_NEIGHBORS, CLASSES_NUM, nopt, TRAIN_DATA_SIZE, predictions,
                 queue_neighbors_lst, votes_to_classes_lst, DATA_DIM)  # warmup
 
             t0 = now()
             for _ in xrange(repeat):
-                alg(x_train, y_train, x_test, n_neighbors, CLASSES_NUM, nopt, TRAIN_DATA_SIZE, predictions,
+                alg(x_train, y_train, x_test, N_NEIGHBORS, CLASSES_NUM, nopt, TRAIN_DATA_SIZE, predictions,
                     queue_neighbors_lst, votes_to_classes_lst, DATA_DIM)
             mops, time = get_mops(t0, now(), nopt)
 

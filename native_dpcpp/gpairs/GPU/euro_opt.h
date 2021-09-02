@@ -34,4 +34,6 @@ void FreeData( queue* q, tfloat *x1, tfloat *y1, tfloat *z1, tfloat *w1,
 void call_gpairs(queue* q, size_t nopt, tfloat *x1, tfloat *y1, tfloat *z1, tfloat *w1,
 		 tfloat *x2, tfloat *y2, tfloat *z2, tfloat *w2, tfloat *rbins, tfloat *results_test);
 
+void ResetResult (queue* q, tfloat* results_test);
+
 #endif // #ifndef __EURO_OPT_BENCH_H

@@ -27,7 +27,7 @@ void ReadInputFromBinFile (char const * filename, char* data_ptr, size_t data_si
       file.read(data_ptr, data_size*sizeof(T));
       file.close();
     } else {
-      std::cout << "Input file not found.\n";
+      std::cout << "Input file - " << filename << " not found.\n";
       exit(0);
     }
 }
@@ -63,6 +63,10 @@ void InitData(queue* q, size_t npoints, tfloat **x1, tfloat **y1, tfloat **z1, t
   ReadInputFromBinFile<tfloat> ("w2.bin", reinterpret_cast<char *>(*w2), npoints);
   ReadInputFromBinFile<tfloat> ("DEFAULT_RBINS_SQUARED.bin", reinterpret_cast<char *>(*rbins), DEFAULT_NBINS);
   memset (*results_test,0,(DEFAULT_NBINS-1) * sizeof(tfloat));
+}
+
+void ResetResult (queue* q, tfloat* results_test) {
+  memset (results_test,0,(DEFAULT_NBINS-1) * sizeof(tfloat));
 }
 
 /* Deallocate arrays */

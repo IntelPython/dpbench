@@ -35,7 +35,7 @@ comp: $(TARGET)_comp
 $(TARGET): data_gen.cpp main.cpp gpairs.cpp
 	$(CC) $(CPPFLAGS) $(CFLAGS) $^ -o $(TARGET)
 
-$(TARGET)_comp: data_gen_comp.cpp main.cpp gpairs_comp.cpp
+$(TARGET)_comp: data_gen_comp.cpp main_comp.cpp gpairs_comp.cpp
 	$(CC) $(CPPFLAGS) $(CFLAGS) $^ -o $(TARGET)_comp
 
 clean:

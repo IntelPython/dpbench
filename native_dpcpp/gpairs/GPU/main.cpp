@@ -14,24 +14,23 @@ int main(int argc, char * argv[])
 {
     size_t nopt = 1024;
     int repeat = 1;
-    int STEPS = 3;
 
     clock_t t1 = 0, t2 = 0;
 
+    bool test = false;
+
     /* Read nopt number of options parameter from command line */
-    if (argc < 2)
-    {
-        printf("Usage: expect STEPS input integer parameter, defaulting to %d\n", STEPS);
+    if (argc >= 2) {
+      sscanf(argv[1], "%lu", &nopt);
     }
-    else
-    {
-        sscanf(argv[1], "%d", &STEPS);
-	if (argc == 3) {
-	  sscanf(argv[2], "%lu", &nopt);
-	}
-	if (argc == 4) {
-	  sscanf(argv[3], "%d", &repeat);
-	}	
+    if (argc >= 3) {
+      sscanf(argv[2], "%d", &repeat);
+    }
+    if (argc == 4) {
+      char test_str[] = "-t";
+      if (strcmp(test_str, argv[3]) == 0) {
+	test = true;
+      }
     }
 
     FILE *fptr;
@@ -52,46 +51,51 @@ int main(int argc, char * argv[])
 
     try {
       q = new queue{gpu_selector()};
-    } catch (runtime_error &re) {
+    } catch (sycl::runtime_error &re) {
       std::cerr << "No GPU device found\n";
       exit(1);
     }
     
     tfloat *x1, *y1, *z1, *w1, *x2, *y2, *z2, *w2, *rbins, *results_test;
-    int i, j;
-    for(i = 0; i < STEPS; i++) {
-      /* Allocate arrays, generate input data */
-      InitData( q, nopt, &x1, &y1, &z1, &w1, &x2, &y2, &z2, &w2, &rbins, &results_test);
+
+    /* Allocate arrays, generate input data */
+    InitData( q, nopt, &x1, &y1, &z1, &w1, &x2, &y2, &z2, &w2, &rbins, &results_test);
       
-      /* Warm up cycle */
-      for(j = 0; j < 1; j++) {
-	call_gpairs( q, nopt, x1, y1, z1, w1, x2, y2, z2, w2, rbins, results_test);
-      }
+    /* Warm up cycle */
+    call_gpairs( q, nopt, x1, y1, z1, w1, x2, y2, z2, w2, rbins, results_test);
 
-      if (repeat < 1) repeat = 1;
+    memset (results_test,0,(DEFAULT_NBINS-1) * sizeof(tfloat));
 
-      t1 = timer_rdtsc();
-      for(j = 0; j < repeat; j++) {
-	call_gpairs( q, nopt, x1, y1, z1, w1, x2, y2, z2, w2, rbins, results_test );
+    t1 = timer_rdtsc();
+    for(int j = 0; j < repeat; j++) {
+      call_gpairs( q, nopt, x1, y1, z1, w1, x2, y2, z2, w2, rbins, results_test );
+    }
+    t2 = timer_rdtsc();
+    
+    printf("%lu,%.6lf\n",nopt,((double) (t2 - t1) / getHz()));
+    fflush(stdout);
+    fprintf(fptr, "%lu,%.6lf\n",nopt,(2.0 * nopt * repeat )/((double) (t2 - t1) / getHz()));
+    fprintf(fptr1, "%lu,%.6lf\n",nopt,((double) (t2 - t1) / getHz()));
+
+    if (test) {
+      ofstream file;
+      file.open("result.bin", ios::out|ios::binary);
+      if (file) {
+    	file.write(reinterpret_cast<char *>(results_test), (DEFAULT_NBINS-1)*sizeof(tfloat));
+    	file.close();
+      } else {
+    	std::cout << "Unable to open output file.\n";
       }
-      t2 = timer_rdtsc();
-      printf("%lu,%.6lf\n",nopt,((double) (t2 - t1) / getHz()));
-      fflush(stdout);
-      fprintf(fptr, "%lu,%.6lf\n",nopt,(2.0 * nopt * repeat )/((double) (t2 - t1) / getHz()));
-      fprintf(fptr1, "%lu,%.6lf\n",nopt,((double) (t2 - t1) / getHz()));
+    }    
 
 #if 0 //print result
-      for (size_t i = 0; i < (DEFAULT_NBINS-1); i++) {
-	std::cout << results_test[i] << std::endl;
-      }
+    for (size_t i = 0; i < (DEFAULT_NBINS-1); i++) {
+      std::cout << results_test[i] << std::endl;
+    }
 #endif      
 
-      /* Deallocate arrays */
-      FreeData( q, x1, y1, z1, w1, x2, y2, z2, w2, rbins, results_test );
-
-      nopt = nopt * 2;
-      if (repeat > 2) repeat -= 2;
-    }
+    /* Deallocate arrays */
+    FreeData( q, x1, y1, z1, w1, x2, y2, z2, w2, rbins, results_test );
     
     fclose(fptr);
     fclose(fptr1);

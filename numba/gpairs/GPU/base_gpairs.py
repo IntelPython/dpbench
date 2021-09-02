@@ -5,6 +5,10 @@
 import os,json
 import numpy as np
 import numpy.random as rnd
+import dpctl, dpctl.tensor as dpt
+from dpbench_python.gpairs.gpairs_python import gpairs_python
+from dpbench_datagen.gpairs import gen_rand_data
+
 try:
     import itimer as it
     now = it.itime
@@ -13,15 +17,6 @@ except:
     from timeit import default_timer
     now = default_timer
     get_mops = lambda t0, t1, n: (n / (t1 - t0),t1-t0)
-
-SEED = 7777777
-DEFAULT_SEED=SEED  
-DEFAULT_NBINS = 20
-DEFAULT_RMIN, DEFAULT_RMAX = 0.1, 50
-DEFAULT_RBINS = np.logspace(
-    np.log10(DEFAULT_RMIN), np.log10(DEFAULT_RMAX), DEFAULT_NBINS).astype(
-        np.float64)
-DEFAULT_RBINS_SQUARED = (DEFAULT_RBINS**2).astype(np.float64)
 
 ######################################################
 # GLOBAL DECLARATIONS THAT WILL BE USED IN ALL FILES #
@@ -48,53 +43,14 @@ def get_device_selector (is_gpu = True):
 
     return os.environ.get('SYCL_DEVICE_FILTER')
 
-def random_weighted_points(n, Lbox, seed=DEFAULT_SEED):
-    """
-    """
-    rng = rnd.RandomState(seed)
-    data = rng.uniform(0, 1, n*4)
-    x, y, z, w = (
-        data[:n]*Lbox, data[n:2*n]*Lbox, data[2*n:3*n]*Lbox, data[3*n:])
-    return (
-        x.astype(np.float64), y.astype(np.float64), z.astype(np.float64),
-        w.astype(np.float64))
-
-def gen_data(npoints):
-    Lbox = 500.
-    n1 = npoints
-    n2 = npoints
-    x1, y1, z1, w1 = random_weighted_points(n1, Lbox, 0)
-    x2, y2, z2, w2 = random_weighted_points(n2, Lbox, 1)
-
-    return (
-        x1, y1, z1, w1, x2, y2, z2, w2
-    )
-
-def copy_h2d(x1, y1, z1, w1, x2, y2, z2, w2):
-    device_env = ocldrv.runtime.get_gpu_device()
-    d_x1 = device_env.copy_array_to_device(x1.astype(np.float64))
-    d_y1 = device_env.copy_array_to_device(y1.astype(np.float64))
-    d_z1 = device_env.copy_array_to_device(z1.astype(np.float64))
-    d_w1 = device_env.copy_array_to_device(w1.astype(np.float64))
-
-    d_x2 = device_env.copy_array_to_device(x2.astype(np.float64))
-    d_y2 = device_env.copy_array_to_device(y2.astype(np.float64))
-    d_z2 = device_env.copy_array_to_device(z2.astype(np.float64))
-    d_w2 = device_env.copy_array_to_device(w2.astype(np.float64))
-
-    d_rbins_squared = device_env.copy_array_to_device(
-        DEFAULT_RBINS_SQUARED.astype(np.float64))
-
-    return (
-        d_x1, d_y1, d_z1, d_w1, d_x2, d_y2, d_z2, d_w2, d_rbins_squared
-    )
-
-def copy_d2h(d_result):
-    device_env.copy_array_from_device(d_result)
+def gen_data_np(npoints, dtype = np.float64):
+    x1, y1, z1, w1, x2, y2, z2, w2, DEFAULT_RBINS_SQUARED = gen_rand_data(npoints, dtype)
+    result = np.zeros_like(DEFAULT_RBINS_SQUARED)[:-1].astype(dtype)
+    return (x1, y1, z1, w1, x2, y2, z2, w2, DEFAULT_RBINS_SQUARED, result)
 
 ##############################################	
 
-def run(name, alg, sizes=3, step=2, nopt=2**10):
+def run(name, alg, sizes=5, step=2, nopt=2**10):
     import argparse
     parser = argparse.ArgumentParser()
     parser.add_argument('--steps', required=False, default=sizes,  help="Number of steps")
@@ -103,6 +59,8 @@ def run(name, alg, sizes=3, step=2, nopt=2**10):
     parser.add_argument('--repeat',required=False, default=1,    help="Iterations inside measured region")
     parser.add_argument('--text',  required=False, default="",     help="Print with each result")
     parser.add_argument('--json',  required=False, default=__file__.replace('py','json'), help="output json data filename")
+    parser.add_argument('--usm',   required=False, action='store_true',  help="Use USM Shared or pure numpy")
+    parser.add_argument('--test',  required=False, action='store_true', help="Check for correctness by comparing output with naieve Python version")    
     
     args = parser.parse_args()
     sizes= int(args.steps)
@@ -115,23 +73,37 @@ def run(name, alg, sizes=3, step=2, nopt=2**10):
     output['sizes']     = sizes
     output['step']      = step
     output['repeat']    = repeat
-    output['randseed']  = SEED
     output['metrics']   = []
 
-    rnd.seed(SEED)
+    if args.test:
+        x1, y1, z1, w1, x2, y2, z2, w2, DEFAULT_RBINS_SQUARED, result_p = gen_data_np(nopt)
+        gpairs_python(x1, y1, z1, w1, x2, y2, z2, w2, DEFAULT_RBINS_SQUARED, result_p)
+
+        if args.usm is True: #test usm feature
+            x1, y1, z1, w1, x2, y2, z2, w2, DEFAULT_RBINS_SQUARED, result_p = gen_data_np(nopt)
+        else:
+            x1_n, y1_n, z1_n, w1_n, x2_n, y2_n, z2_n, w2_n, DEFAULT_RBINS_SQUARED, result_n = gen_data_np(nopt)
+            
+            #pass numpy generated data to kernel
+            alg(x1, y1, z1, w1, x2, y2, z2, w2, DEFAULT_RBINS_SQUARED, result_n)
+
+        if np.allclose(result_p, result_n):
+            print("Test succeeded\n")
+        else:
+            print("Test failed\n")
+        return    
 
     f=open("perf_output.csv",'w')
     f2 = open("runtimes.csv",'w',1)
     
     for i in xrange(sizes):
-        x1, y1, z1, w1, x2, y2, z2, w2 = gen_data(nopt)
-        #d_x1, d_y1, d_z1, d_w1, d_x2, d_y2, d_z2, d_w2, d_rbins_squared = copy_h2d(x1, y1, z1, w1, x2, y2, z2, w2)
+        x1, y1, z1, w1, x2, y2, z2, w2, DEFAULT_RBINS_SQUARED, result = gen_data_np(nopt)
         iterations = xrange(repeat)
 
-        alg(x1, y1, z1, w1, x2, y2, z2, w2, DEFAULT_RBINS_SQUARED) #warmup
+        alg(x1, y1, z1, w1, x2, y2, z2, w2, DEFAULT_RBINS_SQUARED, result) #warmup
         t0 = now()
         for _ in iterations:
-            alg(x1, y1, z1, w1, x2, y2, z2, w2, DEFAULT_RBINS_SQUARED)
+            alg(x1, y1, z1, w1, x2, y2, z2, w2, DEFAULT_RBINS_SQUARED, result)
 
         mops,time = get_mops(t0, now(), nopt)
         f.write(str(nopt) + "," + str(mops*2*repeat) + "\n")

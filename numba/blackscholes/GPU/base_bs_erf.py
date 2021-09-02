@@ -6,7 +6,7 @@
 from __future__ import print_function
 import numpy as np
 import sys,json,os
-import dpctl, dpctl.memory as dpmem, dpctl.tensor as dpt
+import dpctl, dpctl.tensor as dpt#, dpctl.memory as dpmem
 from dpbench_python.blackscholes.bs_python import black_scholes_python
 
 try:
@@ -44,7 +44,6 @@ try:
 except NameError:
     xrange = range
 
-SEED = 7777777
 S0L = 10.0
 S0H = 50.0
 XL = 10.0
@@ -136,7 +135,6 @@ def run(name, alg, sizes=14, step=2, nopt=2**15):
     output['sizes']     = sizes
     output['step']      = step
     output['repeat']    = repeat
-    output['randseed']  = SEED
     output['metrics']   = []
     kwargs={}
 

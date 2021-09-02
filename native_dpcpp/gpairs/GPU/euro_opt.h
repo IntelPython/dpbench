@@ -9,6 +9,7 @@
 
 #include <CL/sycl.hpp>
 using namespace cl::sycl;
+using namespace std;
 
 #ifdef __DO_FLOAT__
     typedef float tfloat; 

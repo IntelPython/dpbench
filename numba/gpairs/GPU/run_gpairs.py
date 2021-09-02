@@ -13,11 +13,8 @@ import dpctl
 #         np.float32)
 # DEFAULT_RBINS_SQUARED = (DEFAULT_RBINS**2).astype(np.float32)
 
-def run_gpairs(d_x1, d_y1, d_z1, d_w1, d_x2, d_y2, d_z2, d_w2, d_rbins_squared):
+def run_gpairs(d_x1, d_y1, d_z1, d_w1, d_x2, d_y2, d_z2, d_w2, d_rbins_squared, result):
     blocks = 512
-
-    result = np.zeros_like(d_rbins_squared)[:-1]
-    result = result.astype(np.float64)
 
     with dpctl.device_context(base_gpairs.get_device_selector()):
         # gwpc.count_weighted_pairs_3d_intel[blocks, numba_dppy.DEFAULT_LOCAL_SIZE](

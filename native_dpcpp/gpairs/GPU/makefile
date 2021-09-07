@@ -17,6 +17,7 @@ TARGET      := gpairs
 CFLAGS      += -g -O3
 CFLAGS      += -fsycl
 CFLAGS      += -I./
+CFLAGS      += -DSYCL_USE_NATIVE_FP_ATOMICS
 
 PREC ?= d
 ifeq ($(PREC),d)

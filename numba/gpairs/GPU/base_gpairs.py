@@ -4,8 +4,8 @@
 
 import os,json
 import numpy as np
-import numpy.random as rnd
 import dpctl, dpctl.tensor as dpt
+
 from dpbench_python.gpairs.gpairs_python import gpairs_python
 from dpbench_datagen.gpairs import gen_rand_data
 
@@ -54,7 +54,7 @@ def gen_data_usm(npoints):
     x1, y1, z1, w1, x2, y2, z2, w2, DEFAULT_RBINS_SQUARED, result = gen_data_np(npoints)
 
     with dpctl.device_context(get_device_selector()) as gpu_queue:
-        #init usmdevice memory        
+        #init usmdevice memory
         x1_usm = dpt.usm_ndarray(x1.shape, dtype=x1.dtype, buffer="device", buffer_ctor_kwargs={"queue": gpu_queue})
         y1_usm = dpt.usm_ndarray(y1.shape, dtype=y1.dtype, buffer="device", buffer_ctor_kwargs={"queue": gpu_queue})
         z1_usm = dpt.usm_ndarray(z1.shape, dtype=z1.dtype, buffer="device", buffer_ctor_kwargs={"queue": gpu_queue})
@@ -79,7 +79,7 @@ def gen_data_usm(npoints):
 
     return (x1_usm,y1_usm,z1_usm,w1_usm,x2_usm,y2_usm,z2_usm,w2_usm, DEFAULT_RBINS_SQUARED_usm, result_usm)
 
-##############################################	
+##############################################
 
 def run(name, alg, sizes=5, step=2, nopt=2**10):
     import argparse
@@ -91,14 +91,14 @@ def run(name, alg, sizes=5, step=2, nopt=2**10):
     parser.add_argument('--text',  required=False, default="",     help="Print with each result")
     parser.add_argument('--json',  required=False, default=__file__.replace('py','json'), help="output json data filename")
     parser.add_argument('--usm',   required=False, action='store_true',  help="Use USM Shared or pure numpy")
-    parser.add_argument('--test',  required=False, action='store_true', help="Check for correctness by comparing output with naieve Python version")    
-    
+    parser.add_argument('--test',  required=False, action='store_true', help="Check for correctness by comparing output with naieve Python version")
+
     args = parser.parse_args()
     sizes= int(args.steps)
     step = int(args.step)
     nopt = int(args.size)
     repeat=int(args.repeat)
- 
+
     output = {}
     output['name']      = name
     output['sizes']     = sizes
@@ -117,7 +117,7 @@ def run(name, alg, sizes=5, step=2, nopt=2**10):
             result_usm.usm_data.copy_to_host(result_n.view("u1"))
         else:
             x1_n, y1_n, z1_n, w1_n, x2_n, y2_n, z2_n, w2_n, DEFAULT_RBINS_SQUARED, result_n = gen_data_np(nopt)
-            
+
             #pass numpy generated data to kernel
             alg(x1, y1, z1, w1, x2, y2, z2, w2, DEFAULT_RBINS_SQUARED, result_n)
 
@@ -125,11 +125,11 @@ def run(name, alg, sizes=5, step=2, nopt=2**10):
             print("Test succeeded\n")
         else:
             print("Test failed\n")
-        return    
+        return
 
     f=open("perf_output.csv",'w')
     f2 = open("runtimes.csv",'w',1)
-    
+
     for i in xrange(sizes):
         if args.usm is True:
             x1, y1, z1, w1, x2, y2, z2, w2, DEFAULT_RBINS_SQUARED, result = gen_data_usm(nopt)

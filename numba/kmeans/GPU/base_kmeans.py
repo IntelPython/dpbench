@@ -5,7 +5,9 @@
 import numpy as np
 import numpy.random as rnd
 import sys,json,os
-import dpctl, dpctl.memory as dpmem
+import dpctl, dpctl.memory as dpmem, dpctl.tensor as dpt
+from dpbench_python.kmeans.kmeans_python import kmeans_python
+from dpbench_datagen.kmeans import gen_rand_data
 
 try:
     import itimer as it
@@ -26,10 +28,6 @@ try:
 except NameError:
     xrange = range
 
-SEED = 7777777
-XL = 1.0
-XH = 5.0
-dims = 2
 NUMBER_OF_CENTROIDS = 10
 
 ###############################################
@@ -48,40 +46,26 @@ def get_device_selector (is_gpu = True):
     return os.environ.get('SYCL_DEVICE_FILTER')
 
 def gen_data_np(nopt):
-    return (
-        rnd.uniform(XL, XH, (nopt, dims)),
-        np.ones(nopt, dtype=np.int32),
-        np.ones((NUMBER_OF_CENTROIDS, 2), dtype=np.float64),
-        np.ones((NUMBER_OF_CENTROIDS, 2), dtype=np.float64),
-        np.ones(NUMBER_OF_CENTROIDS, dtype=np.int32)        
-    )
+    X,arrayPclusters,arrayC,arrayCsum,arrayCnumpoint = gen_rand_data(nopt)
+    return (X,arrayPclusters,arrayC,arrayCsum,arrayCnumpoint)
 
 def gen_data_usm(nopt):
-    X_buf = rnd.uniform(XL, XH, (nopt, dims))
-    arrayPclusters_buf = np.ones(nopt, dtype=np.int32)
-    arrayC_buf = np.ones((NUMBER_OF_CENTROIDS, dims), dtype=np.float64)
-    arrayCsum_buf = np.ones((NUMBER_OF_CENTROIDS, dims), dtype=np.float64)
-    arrayCnumpoint_buf = np.ones(NUMBER_OF_CENTROIDS, dtype=np.int32)
+    X,arrayPclusters,arrayC,arrayCsum,arrayCnumpoint = gen_rand_data(nopt)
 
-    with dpctl.device_context(get_device_selector()):
-        X_usm = dpmem.MemoryUSMShared(nopt*dims*np.dtype('f8').itemsize)
-        arrayPclusters_usm = dpmem.MemoryUSMShared(nopt*np.dtype('i4').itemsize)
-        arrayC_usm = dpmem.MemoryUSMShared(NUMBER_OF_CENTROIDS*dims*np.dtype('f8').itemsize)
-        arrayCsum_usm = dpmem.MemoryUSMShared(NUMBER_OF_CENTROIDS*dims*np.dtype('f8').itemsize)
-        arrayCnumpoint_usm = dpmem.MemoryUSMShared(NUMBER_OF_CENTROIDS*np.dtype('i4').itemsize)
+    X_usm = dpt.usm_ndarray(X.shape, dtype=X.dtype, buffer="device", buffer_ctor_kwargs={"queue":gpu_queue})
+    arrayPclusters_usm = dpt.usm_ndarray(arrayPclusters.shape, dtype=arrayPclusters.dtype, buffer="device", buffer_ctor_kwargs={"queue":gpu_queue})
+    arrayC_usm = dpt.usm_ndarray(arrayC.shape, dtype=arrayC.dtype, buffer="device", buffer_ctor_kwargs={"queue":gpu_queue})
+    arrayCsum_usm = dpt.usm_ndarray(arrayCsum.shape, dtype=arrayCsum.dtype, buffer="device", buffer_ctor_kwargs={"queue":gpu_queue})
+    arrayCnumpoint_usm = dpt.usm_ndarray(arrayCnumpoint.shape, dtype=arrayCnumpoint.dtype, buffer="device", buffer_ctor_kwargs={"queue":gpu_queue})
 
-        X_usm.copy_from_host(X_buf.reshape((-1)).view("u1"))
-        arrayPclusters_usm.copy_from_host(arrayPclusters_buf.view("u1"))
-        arrayC_usm.copy_from_host(arrayC_buf.reshape((-1)).view("u1"))
-        arrayCsum_usm.copy_from_host(arrayCsum_buf.reshape((-1)).view("u1"))
-        arrayCnumpoint_usm.copy_from_host(arrayCnumpoint_buf.view("u1"))
+    X_usm.usm_data.copy_from_host(X.reshape((-1)).view("u1"))
+    arrayPclusters_usm.usm_data.copy_from_host(arrayPclusters.view("u1"))
+    arrayC_usm.usm_data.copy_from_host(arrayC.reshape((-1)).view("u1"))
+    arrayCsum_usm.usm_data.copy_from_host(arrayCsum.reshape((-1)).view("u1"))
+    arrayCnumpoint_usm.usm_data.copy_from_host(arrayCnumpoint.view("u1"))
     
-    return (np.ndarray((nopt,dims), buffer=X_usm, dtype='f8'),
-            np.ndarray((nopt,), buffer=arrayPclusters_usm, dtype='i4'),
-            np.ndarray((NUMBER_OF_CENTROIDS, dims), buffer=arrayC_usm, dtype='f8'),
-            np.ndarray((NUMBER_OF_CENTROIDS, dims), buffer=arrayCsum_usm, dtype='f8'),
-            np.ndarray((NUMBER_OF_CENTROIDS,), buffer=arrayCnumpoint_usm, dtype='i4'))
-
+    return (X_usm, arrayPclusters_usm, arrayC_usm, arrayCsum_usm, arrayCnumpoint_usm)
+    
 ##############################################	
 
 def run(name, alg, sizes=3, step=2, nopt=2**13):
@@ -94,6 +78,7 @@ def run(name, alg, sizes=3, step=2, nopt=2**13):
     parser.add_argument('--text',  required=False, default="",     help="Print with each result")
     parser.add_argument('--json',  required=False, default=__file__.replace('py','json'), help="output json data filename")
     parser.add_argument('--usm',   required=False, action='store_true',  help="Use USM Shared or pure numpy")
+    parser.add_argument('--test',  required=False, action='store_true', help="Check for correctness by comparing output with naieve Python version")
     
     args = parser.parse_args()
     sizes= int(args.steps)
@@ -109,10 +94,29 @@ def run(name, alg, sizes=3, step=2, nopt=2**13):
     output['sizes']     = sizes
     output['step']      = step
     output['repeat']    = repeat
-    output['randseed']  = SEED
     output['metrics']   = []
 
-    rnd.seed(SEED)
+    if args.test:
+        X,arrayPclusters_p,arrayC_p,arrayCsum_p,arrayCnumpoint_p = gen_data_np(nopt)
+        kmeans_python(X, arrayPclusters_p, arrayC_p, arrayCsum_p, arrayCnumpoint_p, nopt, NUMBER_OF_CENTROIDS)
+
+        if args.usm is True: #test usm feature
+            return
+            # x1, y1, z1, w1, x2, y2, z2, w2, DEFAULT_RBINS_SQUARED, result_usm = gen_data_usm(nopt)
+            # alg(x1, y1, z1, w1, x2, y2, z2, w2, DEFAULT_RBINS_SQUARED, result_usm)
+            # result_n = np.empty(DEFAULT_NBINS-1, dtype=np.float64)
+            # result_usm.usm_data.copy_to_host(result_n.view("u1"))
+        else:
+            X_n,arrayPclusters_n,arrayC_n,arrayCsum_n,arrayCnumpoint_n = gen_data_np(nopt)
+
+            #pass numpy generated data to kernel
+            alg(X, arrayPclusters_n, arrayC_n, arrayCsum_n, arrayCnumpoint_n, nopt, NUMBER_OF_CENTROIDS)
+
+        if np.allclose(arrayC_n, arrayC_p) and np.allclose(arrayCsum_n, arrayCsum_p) and np.allclose(arrayCnumpoint_n, arrayCnumpoint_p):
+            print("Test succeeded\n")
+        else:
+            print("Test failed\n")
+        return
 
     for i in xrange(sizes):
         if args.usm is True:

@@ -34,7 +34,7 @@ void call_gpairs_naieve( queue* q, size_t npoints, tfloat* x1, tfloat* y1, tfloa
 	if (k <=0) break;
       }
     }
-  }
+  }  
 }
 
 void call_gpairs( queue* q, size_t npoints, tfloat* x1, tfloat* y1, tfloat* z1, tfloat* w1, tfloat* x2,tfloat* y2,tfloat* z2, tfloat* w2,tfloat* rbins,tfloat* results_test) {
@@ -88,8 +88,8 @@ void call_gpairs( queue* q, size_t npoints, tfloat* x1, tfloat* y1, tfloat* z1, 
 
   	    int k = nbins - 1;
   	    while(dsq <= d_rbins[k]) {	  
-  	      sycl::ONEAPI::atomic_ref<tfloat, sycl::ONEAPI::memory_order::relaxed,
-  	      			       sycl::ONEAPI::memory_scope::device,
+  	      sycl::ext::oneapi::atomic_ref<tfloat, sycl::ext::oneapi::memory_order::relaxed,
+  	      			       sycl::ext::oneapi::memory_scope::device,
   	      			       sycl::access::address_space::global_space>atomic_data(d_results_test[k-1]);
 	  
   	      atomic_data += wprod;

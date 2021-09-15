@@ -32,6 +32,20 @@ void ReadInputFromBinFile (char const * filename, char* data_ptr, size_t data_si
     }
 }
 
+void WriteOutputToTextFile (char const * filename, tfloat* data_ptr, size_t data_size) {
+    ofstream file;
+    file.open(filename, ios::out);
+    if (file) {
+      for (size_t i = 0; i < data_size; i++) {
+	file << *data_ptr << std::endl;
+      }
+      file.close();
+    } else {
+      std::cout << "Input file - " << filename << " not found.\n";
+      exit(0);
+    }
+}
+
 void InitData(queue* q, size_t npoints, tfloat **x1, tfloat **y1, tfloat **z1, tfloat **w1,
 	      tfloat **x2, tfloat **y2, tfloat **z2, tfloat **w2, tfloat **rbins, tfloat **results_test) {
   /* Allocate aligned memory */
@@ -53,7 +67,7 @@ void InitData(queue* q, size_t npoints, tfloat **x1, tfloat **y1, tfloat **z1, t
     exit(-1);
   }
 
-  ReadInputFromBinFile<tfloat> ("x1.bin", reinterpret_cast<char *>(*x1), npoints);  
+  ReadInputFromBinFile<tfloat> ("x1.bin", reinterpret_cast<char *>(*x1), npoints);
   ReadInputFromBinFile<tfloat> ("y1.bin", reinterpret_cast<char *>(*y1), npoints);
   ReadInputFromBinFile<tfloat> ("z1.bin", reinterpret_cast<char *>(*z1), npoints);
   ReadInputFromBinFile<tfloat> ("w1.bin", reinterpret_cast<char *>(*w1), npoints);

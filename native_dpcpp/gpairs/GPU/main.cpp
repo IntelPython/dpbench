@@ -51,7 +51,7 @@ int main(int argc, char * argv[])
 
     try {
       q = new queue{gpu_selector()};
-    } catch (sycl::runtime_error &re) {
+    } catch (sycl::exception &re) {
       std::cerr << "No GPU device found\n";
       exit(1);
     }

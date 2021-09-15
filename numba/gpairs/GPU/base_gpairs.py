@@ -44,7 +44,7 @@ def get_device_selector (is_gpu = True):
 
     return os.environ.get('SYCL_DEVICE_FILTER')
 
-def gen_data_np(npoints, dtype = np.float64):
+def gen_data_np(npoints, dtype = np.float32):
     x1, y1, z1, w1, x2, y2, z2, w2, DEFAULT_RBINS_SQUARED = gen_rand_data(npoints, dtype)
     result = np.zeros_like(DEFAULT_RBINS_SQUARED)[:-1].astype(dtype)
     return (x1, y1, z1, w1, x2, y2, z2, w2, DEFAULT_RBINS_SQUARED, result)
@@ -113,7 +113,7 @@ def run(name, alg, sizes=5, step=2, nopt=2**10):
         if args.usm is True: #test usm feature
             x1, y1, z1, w1, x2, y2, z2, w2, DEFAULT_RBINS_SQUARED, result_usm = gen_data_usm(nopt)
             alg(x1, y1, z1, w1, x2, y2, z2, w2, DEFAULT_RBINS_SQUARED, result_usm)
-            result_n = np.empty(DEFAULT_NBINS-1, dtype=np.float64)
+            result_n = np.empty(DEFAULT_NBINS-1, dtype=np.float32)
             result_usm.usm_data.copy_to_host(result_n.view("u1"))
         else:
             x1_n, y1_n, z1_n, w1_n, x2_n, y2_n, z2_n, w2_n, DEFAULT_RBINS_SQUARED, result_n = gen_data_np(nopt)
@@ -124,7 +124,7 @@ def run(name, alg, sizes=5, step=2, nopt=2**10):
         if np.allclose(result_p, result_n):
             print("Test succeeded\n")
         else:
-            print("Test failed\n")
+            print("Test failed\n", "Python result: ", result_p, "\n numba result:", result_n)
         return
 
     f=open("perf_output.csv",'w')

@@ -32,7 +32,7 @@ except NameError:
 
 ###############################################
 
-def gen_data_np(npoints, dtype = np.float64):
+def gen_data_np(npoints, dtype = np.float32):
     x1, y1, z1, w1, x2, y2, z2, w2, DEFAULT_RBINS_SQUARED  = gen_rand_data(npoints, dtype)
     result = np.zeros_like(DEFAULT_RBINS_SQUARED)[:-1].astype(dtype)
     return (x1, y1, z1, w1, x2, y2, z2, w2, DEFAULT_RBINS_SQUARED, result)
@@ -72,18 +72,18 @@ def run(name, sizes=5, step=2, nopt=2**10):
         gpairs_python(x1, y1, z1, w1, x2, y2, z2, w2, DEFAULT_RBINS_SQUARED, result_p)
 
         #run dpcpp
-        gen_data_to_file(nopt)
+        gen_data_to_file(nopt, np.float32)
         run_cmd = [exec_name, str(nopt), str(1), "-t"]
         utils.run_command(run_cmd, verbose=True)
 
         #read output of dpcpp into result_p
-        result_n = np.fromfile("result.bin", np.float64)
+        result_n = np.fromfile("result.bin", np.float32)
         
         #compare outputs
         if np.allclose(result_p, result_n):
-            print("Test succeeded. Python predictions: ", result_p, "\nDPC++ predictions: ", result_n, "\n")
+            print("Test succeeded. Python result: ", result_p, "\nDPC++ result: ", result_n, "\n")
         else:
-            print("Test failed. Python predictions: ", result_p, "\nDPC++ predictions: ", result_n, "\n")
+            print("Test failed. Python result: ", result_p, "\nDPC++ result: ", result_n, "\n")
         return        
 
     if os.path.isfile('runtimes.csv'):
@@ -91,7 +91,7 @@ def run(name, sizes=5, step=2, nopt=2**10):
         
     for i in xrange(sizes):
         # generate input data
-        gen_data_to_file(nopt)
+        gen_data_to_file(nopt, np.float32)
 
         # run the C program
         run_cmd = [exec_name, str(nopt), str(repeat)]

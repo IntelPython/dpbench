@@ -52,11 +52,12 @@ def gen_data_np(nopt):
 def gen_data_usm(nopt):
     X,arrayPclusters,arrayC,arrayCsum,arrayCnumpoint = gen_rand_data(nopt)
 
-    X_usm = dpt.usm_ndarray(X.shape, dtype=X.dtype, buffer="device", buffer_ctor_kwargs={"queue":gpu_queue})
-    arrayPclusters_usm = dpt.usm_ndarray(arrayPclusters.shape, dtype=arrayPclusters.dtype, buffer="device", buffer_ctor_kwargs={"queue":gpu_queue})
-    arrayC_usm = dpt.usm_ndarray(arrayC.shape, dtype=arrayC.dtype, buffer="device", buffer_ctor_kwargs={"queue":gpu_queue})
-    arrayCsum_usm = dpt.usm_ndarray(arrayCsum.shape, dtype=arrayCsum.dtype, buffer="device", buffer_ctor_kwargs={"queue":gpu_queue})
-    arrayCnumpoint_usm = dpt.usm_ndarray(arrayCnumpoint.shape, dtype=arrayCnumpoint.dtype, buffer="device", buffer_ctor_kwargs={"queue":gpu_queue})
+    with dpctl.device_context(get_device_selector()) as gpu_queue:
+        X_usm = dpt.usm_ndarray(X.shape, dtype=X.dtype, buffer="device", buffer_ctor_kwargs={"queue":gpu_queue})
+        arrayPclusters_usm = dpt.usm_ndarray(arrayPclusters.shape, dtype=arrayPclusters.dtype, buffer="device", buffer_ctor_kwargs={"queue":gpu_queue})
+        arrayC_usm = dpt.usm_ndarray(arrayC.shape, dtype=arrayC.dtype, buffer="device", buffer_ctor_kwargs={"queue":gpu_queue})
+        arrayCsum_usm = dpt.usm_ndarray(arrayCsum.shape, dtype=arrayCsum.dtype, buffer="device", buffer_ctor_kwargs={"queue":gpu_queue})
+        arrayCnumpoint_usm = dpt.usm_ndarray(arrayCnumpoint.shape, dtype=arrayCnumpoint.dtype, buffer="device", buffer_ctor_kwargs={"queue":gpu_queue})
 
     X_usm.usm_data.copy_from_host(X.reshape((-1)).view("u1"))
     arrayPclusters_usm.usm_data.copy_from_host(arrayPclusters.view("u1"))
@@ -101,11 +102,20 @@ def run(name, alg, sizes=3, step=2, nopt=2**13):
         kmeans_python(X, arrayPclusters_p, arrayC_p, arrayCsum_p, arrayCnumpoint_p, nopt, NUMBER_OF_CENTROIDS)
 
         if args.usm is True: #test usm feature
-            return
             # x1, y1, z1, w1, x2, y2, z2, w2, DEFAULT_RBINS_SQUARED, result_usm = gen_data_usm(nopt)
             # alg(x1, y1, z1, w1, x2, y2, z2, w2, DEFAULT_RBINS_SQUARED, result_usm)
             # result_n = np.empty(DEFAULT_NBINS-1, dtype=np.float64)
             # result_usm.usm_data.copy_to_host(result_n.view("u1"))
+            X,arrayPclusters,arrayC_usm,arrayCsum_usm,arrayCnumpoint_usm = gen_data_usm(nopt)
+            alg(X, arrayPclusters, arrayC_usm, arrayCsum_usm, arrayCnumpoint_usm, nopt, NUMBER_OF_CENTROIDS)
+            arrayC_n = np.empty((NUMBER_OF_CENTROIDS,2), dtype=np.float64)
+            arrayC_usm.usm_data.copy_to_host(arrayC_n.reshape((-1)).view("u1"))
+
+            arrayCsum_n = np.empty((NUMBER_OF_CENTROIDS,2), dtype=np.float64)
+            arrayCsum_usm.usm_data.copy_to_host(arrayCsum_n.reshape((-1)).view("u1"))
+
+            arrayCnumpoint_n = np.empty(NUMBER_OF_CENTROIDS, dtype=np.int32)
+            arrayCnumpoint_usm.usm_data.copy_to_host(arrayCnumpoint_n.view("u1"))            
         else:
             X_n,arrayPclusters_n,arrayC_n,arrayCsum_n,arrayCnumpoint_n = gen_data_np(nopt)
 
@@ -115,7 +125,9 @@ def run(name, alg, sizes=3, step=2, nopt=2**13):
         if np.allclose(arrayC_n, arrayC_p) and np.allclose(arrayCsum_n, arrayCsum_p) and np.allclose(arrayCnumpoint_n, arrayCnumpoint_p):
             print("Test succeeded\n")
         else:
-            print("Test failed\n")
+            print("Test failed\n", "arrayC_Python:", arrayC_p, "\n arrayC_numba:", arrayC_n,
+                  "arrayCsum_python:", arrayCsum_p, "\n arracyCsum_numba:", arrayCsum_n,
+                  "arrayCnumpoint_python:", arrayCnumpoint_p, "\n arrayCnumpoint_numba:", arrayCnumpoint_n)
         return
 
     for i in xrange(sizes):

@@ -81,8 +81,12 @@ int main(int argc, char * argv[])
       ofstream file;
       file.open("result.bin", ios::out|ios::binary);
       if (file) {
-    	file.write(reinterpret_cast<char *>(results_test), (DEFAULT_NBINS-1)*sizeof(tfloat));
+	tfloat* t_results_test = (tfloat*)_mm_malloc((DEFAULT_NBINS-1) * sizeof(tfloat), ALIGN_FACTOR);
+	q->memcpy(t_results_test, results_test, (DEFAULT_NBINS-1) * sizeof(tfloat));
+	q->wait();
+    	file.write(reinterpret_cast<char *>(t_results_test), (DEFAULT_NBINS-1)*sizeof(tfloat));
     	file.close();
+	_mm_free(t_results_test);
       } else {
     	std::cout << "Unable to open output file.\n";
       }

@@ -15,10 +15,11 @@ EQCOLON     :="="
 TARGET      := gpairs
 
 CFLAGS      += -g -O3
-CFLAGS      += -fsycl -qopenmp
+CFLAGS      += -fsycl
 CFLAGS      += -I./
+CFLAGS      += -DSYCL_USE_NATIVE_FP_ATOMICS
 
-PREC ?= d
+PREC ?= f
 ifeq ($(PREC),d)
 else
     CFLAGS += -D__DO_FLOAT__
@@ -35,10 +36,10 @@ comp: $(TARGET)_comp
 $(TARGET): data_gen.cpp main.cpp gpairs.cpp
 	$(CC) $(CPPFLAGS) $(CFLAGS) $^ -o $(TARGET)
 
-$(TARGET)_comp: data_gen_comp.cpp main.cpp gpairs_comp.cpp
+$(TARGET)_comp: data_gen_comp.cpp main_comp.cpp gpairs_comp.cpp
 	$(CC) $(CPPFLAGS) $(CFLAGS) $^ -o $(TARGET)_comp
 
 clean:
-	rm -rf *.o *.out *.optrpt *.yaml *~ gpairs gpairs_comp
+	rm -rf *.o *.out *.optrpt *.yaml *~ gpairs gpairs_comp *.bin
 
 .PHONY: all clean

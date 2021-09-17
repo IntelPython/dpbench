@@ -98,8 +98,8 @@ void InitData( queue *q, size_t nopt, tfloat* *s0, tfloat* *x, tfloat* *t,
   q->memcpy(d_price, ts0, nopt * sizeof(tfloat));
   q->memcpy(d_strike, tx, nopt * sizeof(tfloat));
   q->memcpy(d_t, tt, nopt * sizeof(tfloat));
-  q->memcpy(d_vcall, tvcall_compiler, nopt * sizeof(tfloat));
-  q->memcpy(d_vput, tvput_compiler, nopt * sizeof(tfloat));
+  // q->memcpy(d_vcall, tvcall_compiler, nopt * sizeof(tfloat));
+  // q->memcpy(d_vput, tvput_compiler, nopt * sizeof(tfloat));
   q->wait();
 
   *s0 = d_price;

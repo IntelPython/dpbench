@@ -8,7 +8,7 @@ import numba_dppy
 from math import log, sqrt, exp, erf
 
 #blackscholes implemented using dppy.kernel
-@numba_dppy.kernel
+@numba_dppy.kernel(access_types={"read_only": ["price", "strike", "t"], "write_only": ["call", "put"]})
 def black_scholes( nopt, price, strike, t, rate, vol, call, put):
     mr = -rate
     sig_sig_two = vol * vol * 2

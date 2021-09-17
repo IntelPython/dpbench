@@ -67,8 +67,8 @@ using namespace cl::sycl;
   q->memcpy(d_price, price, nopt * sizeof(tfloat));
   q->memcpy(d_strike, strike, nopt * sizeof(tfloat));
   q->memcpy(d_t, t, nopt * sizeof(tfloat));
-  q->memcpy(d_vcall, vcall, nopt * sizeof(tfloat));
-  q->memcpy(d_vput, vput, nopt * sizeof(tfloat));
+  // q->memcpy(d_vcall, vcall, nopt * sizeof(tfloat));
+  // q->memcpy(d_vput, vput, nopt * sizeof(tfloat));
   q->wait();
 
   // compute  
@@ -106,9 +106,9 @@ using namespace cl::sycl;
   q->wait();
 
   // copy data host to device
-  q->memcpy(price, d_price, nopt * sizeof(tfloat));
-  q->memcpy(strike, d_strike, nopt * sizeof(tfloat));
-  q->memcpy(t, d_t, nopt * sizeof(tfloat));  
+  // q->memcpy(price, d_price, nopt * sizeof(tfloat));
+  // q->memcpy(strike, d_strike, nopt * sizeof(tfloat));
+  // q->memcpy(t, d_t, nopt * sizeof(tfloat));  
   q->memcpy(vcall, d_vcall, nopt * sizeof(tfloat));
   q->memcpy(vput, d_vput, nopt * sizeof(tfloat));
 

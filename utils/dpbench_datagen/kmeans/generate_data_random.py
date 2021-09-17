@@ -17,14 +17,14 @@ def __dump_binary__(X,arrayPclusters,arrayC,arrayCsum,arrayCnumpoint):
     with open('arrayPclusters.bin', 'w') as fd:
         arrayPclusters.tofile(fd)
 
-    with open('arrayC.bin', 'w') as fd:
-        arrayC.tofile(fd)
+    # with open('arrayC.bin', 'w') as fd:
+    #     arrayC.tofile(fd)
 
-    with open('arrayCsum.bin', 'w') as fd:
-        arrayCsum.tofile(fd)
+    # with open('arrayCsum.bin', 'w') as fd:
+    #     arrayCsum.tofile(fd)
 
-    with open('arrayCnumpoint.bin', 'w') as fd:
-        arrayCnumpoint.tofile(fd)
+    # with open('arrayCnumpoint.bin', 'w') as fd:
+    #     arrayCnumpoint.tofile(fd)
         
 #write input data to a file in text format
 def __dump_text__(X,arrayPclusters,arrayC,arrayCsum,arrayCnumpoint):
@@ -34,14 +34,14 @@ def __dump_text__(X,arrayPclusters,arrayC,arrayCsum,arrayCnumpoint):
     with open('arrayPclusters.txt', 'w') as fd:
         arrayPclusters.tofile(fd, '\n', '%s')
 
-    with open('arrayC.txt', 'w') as fd:
-        arrayC.tofile(fd, '\n', '%s')
+    # with open('arrayC.txt', 'w') as fd:
+    #     arrayC.tofile(fd, '\n', '%s')
  
-    with open('arrayCsum.txt', 'w') as fd:
-        arrayCsum.tofile(fd, '\n', '%s')
+    # with open('arrayCsum.txt', 'w') as fd:
+    #     arrayCsum.tofile(fd, '\n', '%s')
 
-    with open('arrayCnumpoint.txt', 'w') as fd:
-        arrayCnumpoint.tofile(fd, '\n', '%s')        
+    # with open('arrayCnumpoint.txt', 'w') as fd:
+    #     arrayCnumpoint.tofile(fd, '\n', '%s')        
        
 # call numpy.random.uniform to generate input data
 def gen_rand_data(nopt, dims = 2, NUMBER_OF_CENTROIDS = 10, dtype = np.float64):
@@ -55,5 +55,5 @@ def gen_rand_data(nopt, dims = 2, NUMBER_OF_CENTROIDS = 10, dtype = np.float64):
 # call numpy.random.uniform to generate input data and write the input as binary to a file
 def gen_data_to_file(nopt, dims = 2, NUMBER_OF_CENTROIDS = 10, dtype = np.float64):
     X,arrayPclusters,arrayC,arrayCsum,arrayCnumpoint = gen_rand_data(nopt, dims, NUMBER_OF_CENTROIDS, dtype)
-    __dump_binary__(price, strike, t)
-    #__dump_text__(price, strike, t) #for verification purpose only
+    __dump_binary__(X,arrayPclusters,arrayC,arrayCsum,arrayCnumpoint)
+    # __dump_text__(X,arrayPclusters,arrayC,arrayCsum,arrayCnumpoint) #for verification purpose only

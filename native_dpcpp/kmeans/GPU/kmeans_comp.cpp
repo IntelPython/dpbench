@@ -23,12 +23,12 @@ void groupByCluster(queue* q,
       h.parallel_for<class theKernel>(range<1>{num_points}, [=](id<1> myID) {
   	  size_t i0 = myID[0];
   
-  	  float minor_distance = -1.0;
+  	  tfloat minor_distance = -1.0;
 
   	  for (size_t i1 = 0; i1 < num_centroids; i1++) {
-  	    float dx = points[i0].x - centroids[i1].x;
-  	    float dy = points[i0].y - centroids[i1].y;
-  	    float my_distance = cl::sycl::sqrt(dx*dx + dy*dy);
+  	    tfloat dx = points[i0].x - centroids[i1].x;
+  	    tfloat dy = points[i0].y - centroids[i1].y;
+  	    tfloat my_distance = cl::sycl::sqrt(dx*dx + dy*dy);
   	    if (minor_distance > my_distance || minor_distance == -1.0) {
   	      minor_distance = my_distance;
   	      points[i0].cluster = i1;
@@ -67,15 +67,15 @@ void calCentroidsSum(queue* q,
   	  size_t i = myID[0];
   	  size_t ci = points[i].cluster;
 
-  	  sycl::ONEAPI::atomic_ref<tfloat, sycl::ONEAPI::memory_order::relaxed, sycl::ONEAPI::memory_scope::system,
+  	  sycl::ext::oneapi::atomic_ref<tfloat, sycl::ext::oneapi::memory_order::relaxed, sycl::ext::oneapi::memory_scope::system,
   		     access::address_space::global_space> centroid_x_sum(centroids[ci].x_sum);
   	  centroid_x_sum += points[i].x;
 
-  	  sycl::ONEAPI::atomic_ref<tfloat, sycl::ONEAPI::memory_order::relaxed, sycl::ONEAPI::memory_scope::system,
+  	  sycl::ext::oneapi::atomic_ref<tfloat, sycl::ext::oneapi::memory_order::relaxed, sycl::ext::oneapi::memory_scope::system,
   		     access::address_space::global_space> centroid_y_sum(centroids[ci].y_sum);	  
   	  centroid_y_sum += points[i].y;
 
-  	  sycl::ONEAPI::atomic_ref<size_t, sycl::ONEAPI::memory_order::relaxed, sycl::ONEAPI::memory_scope::system,
+  	  sycl::ext::oneapi::atomic_ref<tint, sycl::ext::oneapi::memory_order::relaxed, sycl::ext::oneapi::memory_scope::system,
   		     access::address_space::global_space> centroid_num_points(centroids[ci].num_points);	  
   	  centroid_num_points += 1;
 

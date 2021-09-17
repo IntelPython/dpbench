@@ -108,10 +108,10 @@ def run(name, alg, sizes=3, step=2, nopt=2**13):
             # result_usm.usm_data.copy_to_host(result_n.view("u1"))
             X,arrayPclusters,arrayC_usm,arrayCsum_usm,arrayCnumpoint_usm = gen_data_usm(nopt)
             alg(X, arrayPclusters, arrayC_usm, arrayCsum_usm, arrayCnumpoint_usm, nopt, NUMBER_OF_CENTROIDS)
-            arrayC_n = np.empty((NUMBER_OF_CENTROIDS,2), dtype=np.float64)
+            arrayC_n = np.empty((NUMBER_OF_CENTROIDS,2), dtype=np.float32)
             arrayC_usm.usm_data.copy_to_host(arrayC_n.reshape((-1)).view("u1"))
 
-            arrayCsum_n = np.empty((NUMBER_OF_CENTROIDS,2), dtype=np.float64)
+            arrayCsum_n = np.empty((NUMBER_OF_CENTROIDS,2), dtype=np.float32)
             arrayCsum_usm.usm_data.copy_to_host(arrayCsum_n.reshape((-1)).view("u1"))
 
             arrayCnumpoint_n = np.empty(NUMBER_OF_CENTROIDS, dtype=np.int32)

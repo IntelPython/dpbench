@@ -13,12 +13,22 @@
 
 #include "data_gen.h"
 
+using namespace std;
 using namespace cl::sycl;
 
-tfloat RandRange( tfloat a, tfloat b, struct drand48_data *seed ) {
-    double r;
-    drand48_r(seed, &r);
-    return r*(b-a) + a;
+void WriteOutputToTextFile (char const * filename, Point* data_ptr, size_t data_size) {
+    ofstream file;
+    file.open(filename, ios::out);
+    
+    if (file) {
+      for (size_t i = 0; i < data_size; i++) {
+	file << data_ptr[i].x << "," << data_ptr[i].y << std::endl;
+      }
+      file.close();
+    } else {
+      std::cout << "Input file - " << filename << " not found.\n";
+      exit(0);
+    }
 }
 
 void InitData( queue *q, size_t nopt, int ncentroids, Point** points, Centroid** centroids )
@@ -31,25 +41,22 @@ void InitData( queue *q, size_t nopt, int ncentroids, Point** points, Centroid**
   pts = (Point*)_mm_malloc( nopt * sizeof(Point), ALIGN_FACTOR);
   cents = (Centroid*)_mm_malloc( ncentroids * sizeof(Centroid), ALIGN_FACTOR);
 
-  if ( (pts == NULL) || (cents == NULL) )
-    {
-      printf("Memory allocation failure\n");
-      exit(-1);
-    }
-
-  /* NUMA-friendly data init */
-#pragma omp parallel
-  {
-    struct drand48_data seed;
-    srand48_r(omp_get_thread_num()+SEED, &seed);
-#pragma omp for simd
-    for ( i = 0; i < nopt; i++ )
-      {
-	pts[i].x = RandRange( XL, XH, &seed );
-	pts[i].y = RandRange( XL, XH, &seed );
-      }
+  if ( (pts == NULL) || (cents == NULL) ) {
+    printf("Memory allocation failure\n");
+    exit(-1);
   }
 
+  ifstream file;
+  file.open("X.bin", ios::in|ios::binary);
+  
+  for ( i = 0; i < nopt; i++ ) {
+    file.read(reinterpret_cast<char*>(&pts[i].x), sizeof(tfloat));
+    file.read(reinterpret_cast<char*>(&pts[i].y), sizeof(tfloat));
+  }
+
+  file.close();
+
+  //WriteOutputToTextFile("X_dpcpp.txt", pts, nopt);
   *points = pts;
   *centroids = cents;
 }

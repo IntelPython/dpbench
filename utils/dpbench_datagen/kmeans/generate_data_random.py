@@ -48,8 +48,8 @@ def gen_rand_data(nopt, dims = 2, NUMBER_OF_CENTROIDS = 10, dtype = np.float64):
     rnd.seed(SEED)
     return (rnd.uniform(XL, XH, (nopt, dims)).astype(dtype),
             np.ones(nopt, dtype=np.int32),
-            np.ones((NUMBER_OF_CENTROIDS, 2), dtype=np.float64),
-            np.ones((NUMBER_OF_CENTROIDS, 2), dtype=np.float64),
+            np.ones((NUMBER_OF_CENTROIDS, 2), dtype=dtype),
+            np.ones((NUMBER_OF_CENTROIDS, 2), dtype=dtype),
             np.ones(NUMBER_OF_CENTROIDS, dtype=np.int32))
 
 # call numpy.random.uniform to generate input data and write the input as binary to a file

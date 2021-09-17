@@ -46,11 +46,11 @@ def get_device_selector (is_gpu = True):
     return os.environ.get('SYCL_DEVICE_FILTER')
 
 def gen_data_np(nopt):
-    X,arrayPclusters,arrayC,arrayCsum,arrayCnumpoint = gen_rand_data(nopt)
+    X,arrayPclusters,arrayC,arrayCsum,arrayCnumpoint = gen_rand_data(nopt, dtype=np.float32)
     return (X,arrayPclusters,arrayC,arrayCsum,arrayCnumpoint)
 
 def gen_data_usm(nopt):
-    X,arrayPclusters,arrayC,arrayCsum,arrayCnumpoint = gen_rand_data(nopt)
+    X,arrayPclusters,arrayC,arrayCsum,arrayCnumpoint = gen_rand_data(nopt, dtype=np.float32)
 
     with dpctl.device_context(get_device_selector()) as gpu_queue:
         X_usm = dpt.usm_ndarray(X.shape, dtype=X.dtype, buffer="device", buffer_ctor_kwargs={"queue":gpu_queue})
@@ -123,7 +123,9 @@ def run(name, alg, sizes=3, step=2, nopt=2**13):
             alg(X, arrayPclusters_n, arrayC_n, arrayCsum_n, arrayCnumpoint_n, nopt, NUMBER_OF_CENTROIDS)
 
         if np.allclose(arrayC_n, arrayC_p) and np.allclose(arrayCsum_n, arrayCsum_p) and np.allclose(arrayCnumpoint_n, arrayCnumpoint_p):
-            print("Test succeeded\n")
+            print("Test suceeded\n", "arrayC_Python:", arrayC_p.dtype, "\n arrayC_numba:", arrayC_n.dtype,
+                  "arrayCsum_python:", arrayCsum_p, "\n arracyCsum_numba:", arrayCsum_n,
+                  "arrayCnumpoint_python:", arrayCnumpoint_p, "\n arrayCnumpoint_numba:", arrayCnumpoint_n)            
         else:
             print("Test failed\n", "arrayC_Python:", arrayC_p, "\n arrayC_numba:", arrayC_n,
                   "arrayCsum_python:", arrayCsum_p, "\n arracyCsum_numba:", arrayCsum_n,

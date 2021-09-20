@@ -99,11 +99,17 @@ def compute_clusters(n, min_pts, assignments, sizes, indices_list):
 
     return nclusters
 
+def dbscan_python(n, dim, data, eps, min_pts, assignments):
+    # indices_list = np.empty(n*n, dtype=np.int64)
+    # sizes = np.zeros(n, dtype=np.int64)
 
-def dbscan(n, dim, data, eps, min_pts, assignments):
-    indices_list = np.empty(n*n, dtype=np.int64)
-    sizes = np.zeros(n, dtype=np.int64)
+    # get_neighborhood(n, dim, data, eps, indices_list, sizes, assignments)
 
-    get_neighborhood(n, dim, data, eps, indices_list, sizes, assignments)
+    # return compute_clusters(n, min_pts, assignments, sizes, indices_list)
 
-    return compute_clusters(n, min_pts, assignments, sizes, indices_list)
+    # Scikit learn implementation
+    data = np.reshape(data,(n,dim))
+    from sklearn.cluster import DBSCAN
+    labels = DBSCAN(eps=eps, min_samples=min_pts).fit_predict(data)
+    np.copyto(assignments, labels)
+    return len(set(assignments)) - (1 if -1 in labels else 0)

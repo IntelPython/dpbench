@@ -75,7 +75,7 @@ def gen_rand_data(n_samples, n_features, centers=10, dtype = np.float64):
 
 # call numpy.random.uniform to generate input data and write the input as binary to a file
 def gen_data_to_file(n_samples, n_features, centers=10, dtype = np.float64):
-    X,params = gen_rand_data(n_samples, n_features, centers, dtype)
+    X,eps, minpts = gen_rand_data(n_samples, n_features, centers, dtype)
     __dump_binary__(X)
-    return (params.eps, params.minpts)
+    return (eps, minpts)
     # __dump_text__(X) #for verification purpose only

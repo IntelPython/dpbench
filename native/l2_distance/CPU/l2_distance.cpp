@@ -24,5 +24,5 @@ void l2_distance( int nopt, tfloat * x1, tfloat * x2, tfloat* distance_op ) {
     b = a * a;
     sum += b;
   }
-  *distance_op = SQRT(sum);      
+  *distance_op = SQRT(sum);
 }

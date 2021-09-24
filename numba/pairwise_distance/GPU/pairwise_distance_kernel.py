@@ -10,7 +10,7 @@ import numba_dppy
 @numba_dppy.kernel
 def pairwise_python(X1, X2, D):
     i = numba_dppy.get_global_id(0)
-    
+
     N = X2.shape[0]
     O = X1.shape[1]
     for j in range(N):

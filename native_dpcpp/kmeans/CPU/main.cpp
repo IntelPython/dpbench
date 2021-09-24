@@ -46,15 +46,15 @@ int main(int argc, char * argv[])
     FILE *fptr;
     fptr = fopen("perf_output.csv", "w");
     if(fptr == NULL) {
-      printf("Error!");   
-      exit(1);             
+      printf("Error!");
+      exit(1);
     }
 
     FILE *fptr1;
     fptr1 = fopen("runtimes.csv", "w");
     if(fptr1 == NULL) {
-      printf("Error!");   
-      exit(1);             
+      printf("Error!");
+      exit(1);
     }
 
     queue *q = nullptr;
@@ -64,11 +64,11 @@ int main(int argc, char * argv[])
     } catch (runtime_error &re) {
       std::cerr << "No GPU device found\n";
       exit(1);
-    }    
-    
+    }
+
     int i, j;
     for(i = 0; i < STEPS; i++) {
-    
+
       /* Allocate arrays, generate input data */
       InitData( nopt, NUMBER_OF_CENTROIDS, &points, &centroids );
 
@@ -85,7 +85,7 @@ int main(int argc, char * argv[])
 	runKmeans(q, points, centroids, nopt, NUMBER_OF_CENTROIDS);
       }
       t2 = timer_rdtsc();
-      
+
       printf("%.6lf\n", (2.0 * nopt * repeat / 1e6)/((double) (t2 - t1) / getHz()));
       printf("%lu ,%.6lf\n",nopt,((double) (t2 - t1) / getHz()));
       fflush(stdout);

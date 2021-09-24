@@ -135,7 +135,7 @@ def run_native_CPU(app_name, cmds, analysis):
     if analysis == options.analysis.vtune or analysis == options.analysis.all:
         run_cmd = cmds['NATIVE_PERF_REF_CMD']
         util.run_command(run_cmd, verbose=True)
-        
+
         shutil.rmtree('vtune_dir', ignore_errors=True)
         run_cmd = options.VTUNE_THREADING_CMD + cmds['NATIVE_VTUNE_CMD']
         util.run_command(run_cmd, verbose=True)
@@ -143,7 +143,7 @@ def run_native_CPU(app_name, cmds, analysis):
     if analysis == options.analysis.advisor or analysis == options.analysis.all:
         run_cmd = cmds['NATIVE_PERF_REF_CMD']
         util.run_command(run_cmd, verbose=True)
-        
+
         shutil.rmtree('roofline', ignore_errors=True)
         run_cmd = options.ADVISOR_SURVEY_CMD + cmds['NATIVE_ADVISOR_CMD']
         util.run_command(run_cmd, verbose=True)
@@ -188,7 +188,7 @@ def run_native_GPU(app_name, cmds, analysis):
     if analysis == options.analysis.vtune or analysis == options.analysis.all:
         run_cmd = cmds['NATIVE_PERF_REF_CMD']
         util.run_command(run_cmd, verbose=True)
-        
+
         shutil.rmtree('vtune_dir', ignore_errors=True)
         run_cmd = options.VTUNE_GPU_OFFLOAD_CMD + cmds['NATIVE_VTUNE_CMD']
         util.run_command(run_cmd, verbose=True)
@@ -199,7 +199,7 @@ def run_native_GPU(app_name, cmds, analysis):
     if analysis == options.analysis.advisor or analysis == options.analysis.all:
         run_cmd = cmds['NATIVE_PERF_REF_CMD']
         util.run_command(run_cmd, verbose=True)
-        
+
         shutil.rmtree('roofline', ignore_errors=True)
         run_cmd = options.ADVISOR_GPU_SURVEY_CMD + cmds['NATIVE_ADVISOR_CMD']
         util.run_command(run_cmd, verbose=True)
@@ -214,7 +214,7 @@ def run_native_GPU(app_name, cmds, analysis):
             run_cmd = options.ADVISOR_GPU_METRICS_CMD
             util.run_command(run_cmd, verbose=True, filename="GPU_Metrics.txt")
         except:
-            print("Failed to generate Advisor GPU Metrics")        
+            print("Failed to generate Advisor GPU Metrics")
 
     if analysis == options.analysis.perf or analysis == options.analysis.all:
         run_cmd = cmds['NATIVE_PERF_CMD']
@@ -271,7 +271,7 @@ def run_numba_GPU(app_name, cmds, analysis):
         util.run_command(run_cmd, verbose=True)
         shutil.rmtree('vtune_hotspots_dir', ignore_errors=True)
         run_cmd = options.VTUNE_GPU_HOTSPOTS_CMD + cmds['NUMBA_VTUNE_CMD']
-        util.run_command(run_cmd, verbose=True)        
+        util.run_command(run_cmd, verbose=True)
 
     if analysis == options.analysis.advisor or analysis == options.analysis.all:
         shutil.rmtree('roofline', ignore_errors=True)
@@ -288,7 +288,7 @@ def run_numba_GPU(app_name, cmds, analysis):
             run_cmd = options.ADVISOR_GPU_METRICS_CMD
             util.run_command(run_cmd, verbose=True, filename="GPU_Metrics.txt")
         except:
-            print("Failed to generate Advisor GPU Metrics")            
+            print("Failed to generate Advisor GPU Metrics")
 
     if analysis == options.analysis.perf or analysis == options.analysis.all:
         run_cmd = cmds['NUMBA_PERF_CMD']
@@ -301,7 +301,7 @@ def run_scikit_learn_CPU(app_name, cmds, analysis):
     if not util.chdir("CPU"):
         print("SKLearn CPU version of " + str(app_name) + " not available")
         return
-    
+
     if analysis == options.analysis.test:
         run_cmd = cmds['SCIKIT_LEARN_TEST_CMD']
         util.run_command(run_cmd, verbose=True)
@@ -370,7 +370,7 @@ def run_native_optimised(opts):
     # run native_optimised GPU
     # cd back to root folder
     util.chdir("native_optimised")
-        
+
     native_optimised_dir = os.getcwd()
 
     for app, cmds in opts.wls.wl_list.items():
@@ -432,7 +432,7 @@ def run_native_dpcpp(opts):
             if opts.platform == options.platform.gpu or opts.platform == options.platform.all:
                 run_native_GPU(app, cmds, opts.analysis)
 
-            util.chdir(native_dir)            
+            util.chdir(native_dir)
 
 def run_numba(opts):
     # cd to numba folder
@@ -481,7 +481,7 @@ def run_dpnp(opts):
                 run_numba_GPU(app, cmds, opts.analysis)
 
             util.chdir(numba_dir)
-            
+
 
 def run_scikit_learn(opts):
     # cd to scikit_learn folder
@@ -578,7 +578,7 @@ def check_envvars_tools(opts):
         if os.environ.get('ZE_ENABLE_API_TRACING') is None:
             os.environ['ZE_ENABLE_API_TRACING'] = '1'
         print(os.environ['ZE_ENABLE_API_TRACING'])
-        
+
         if opts.platform == options.platform.gpu or opts.platform == options.platform.all:
             if os.environ.get('ADVIXE_EXPERIMENTAL') is None:
                 os.environ['ADVIXE_EXPERIMENTAL'] = 'gpu-profiling'
@@ -609,12 +609,12 @@ def run(opts):
 
     # if opts.impl == options.implementation.native:
     #     run_native(opts)
-    #     util.chdir(ref_cwd)        
+    #     util.chdir(ref_cwd)
 
     # if opts.impl == options.implementation.dpnp:
     #     run_dpnp(opts)
-    #     util.chdir(ref_cwd)        
-        
+    #     util.chdir(ref_cwd)
+
     # if opts.impl == options.implementation.scikit_learn:
     #     run_scikit_learn(opts)
     #     util.chdir(ref_cwd)
@@ -625,4 +625,4 @@ def run(opts):
 
     # if opts.impl == options.implementation.native_optimised:
     #     run_native_optimised(opts)
-    #     util.chdir(ref_cwd)        
+    #     util.chdir(ref_cwd)

@@ -71,7 +71,7 @@ using namespace cl::sycl;
   // q->memcpy(d_vput, vput, nopt * sizeof(tfloat));
   q->wait();
 
-  // compute  
+  // compute
   q->submit([&](handler& h) {
       h.parallel_for<class theKernel>(range<1>{nopt}, [=](id<1> myID) {
 	  tfloat mr = -r;
@@ -83,14 +83,14 @@ using namespace cl::sycl;
 
 	  a = LOG( d_price[i] / d_strike[i] );
 	  b = d_t[i] * mr;
- 
-	  z = d_t[i] * sig_sig_two;       
+
+	  z = d_t[i] * sig_sig_two;
 	  c = QUARTER * z;
 	  y = INVSQRT( z );
-                             
+
 	  w1 = ( a - b + c ) * y;
 	  w2 = ( a - b - c ) * y;
-	  
+
 	  d1 = ERF( w1 );
 	  d2 = ERF( w2 );
 	  d1 = HALF + HALF*d1;
@@ -99,7 +99,7 @@ using namespace cl::sycl;
 	  e = EXP ( b );
 
 	  d_vcall[i] = d_price[i]*d1 - d_strike[i]*e*d2;
-	  d_vput[i]  = d_vcall[i] - d_price[i] + d_strike[i]*e;	    
+	  d_vput[i]  = d_vcall[i] - d_price[i] + d_strike[i]*e;
 	});
     });
 
@@ -108,12 +108,12 @@ using namespace cl::sycl;
   // copy data host to device
   // q->memcpy(price, d_price, nopt * sizeof(tfloat));
   // q->memcpy(strike, d_strike, nopt * sizeof(tfloat));
-  // q->memcpy(t, d_t, nopt * sizeof(tfloat));  
+  // q->memcpy(t, d_t, nopt * sizeof(tfloat));
   q->memcpy(vcall, d_vcall, nopt * sizeof(tfloat));
   q->memcpy(vput, d_vput, nopt * sizeof(tfloat));
 
   q->wait();
-  
+
   free(d_price,q->get_context());
   free(d_strike,q->get_context());
   free(d_t,q->get_context());

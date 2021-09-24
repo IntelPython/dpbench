@@ -29,7 +29,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <cmath>
 #include <CL/sycl.hpp>
 using namespace cl::sycl;
- 
+
 #define DATADIM 16
 #define NEAREST_NEIGHS 5
 #define NUM_CLASSES 3

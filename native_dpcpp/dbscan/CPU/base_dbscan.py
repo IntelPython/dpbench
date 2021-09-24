@@ -100,7 +100,7 @@ def run(name, sizes=5, step=2, nopt=2**10):
         else:
             print("Test failed.\n")
             print("n_assignments = ", n_assignments, "\n p_assignments = ", p_assignments)
-        return        
+        return
 
     # delete perf_output csv and runtimes csv
     if os.path.isfile('runtimes.csv'):

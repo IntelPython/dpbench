@@ -36,15 +36,15 @@ int main(int argc, char * argv[])
     FILE *fptr;
     fptr = fopen("perf_output.csv", "w");
     if(fptr == NULL) {
-      printf("Error!");   
-      exit(1);             
+      printf("Error!");
+      exit(1);
     }
 
     FILE *fptr1;
     fptr1 = fopen("runtimes.csv", "w");
     if(fptr1 == NULL) {
-      printf("Error!");   
-      exit(1);             
+      printf("Error!");
+      exit(1);
     }
 
     queue *q = nullptr;
@@ -55,12 +55,12 @@ int main(int argc, char * argv[])
       std::cerr << "No GPU device found\n";
       exit(1);
     }
-    
+
     tfloat *x1, *y1, *z1, *w1, *x2, *y2, *z2, *w2, *rbins, *results_test;
 
     /* Allocate arrays, generate input data */
     InitData( q, nopt, &x1, &y1, &z1, &w1, &x2, &y2, &z2, &w2, &rbins, &results_test);
-      
+
     /* Warm up cycle */
     call_gpairs( q, nopt, x1, y1, z1, w1, x2, y2, z2, w2, rbins, results_test);
 
@@ -71,7 +71,7 @@ int main(int argc, char * argv[])
       call_gpairs( q, nopt, x1, y1, z1, w1, x2, y2, z2, w2, rbins, results_test );
     }
     t2 = timer_rdtsc();
-    
+
     printf("%lu,%.6lf\n",nopt,((double) (t2 - t1) / getHz()));
     fflush(stdout);
     fprintf(fptr, "%lu,%.6lf\n",nopt,(2.0 * nopt * repeat )/((double) (t2 - t1) / getHz()));
@@ -90,17 +90,17 @@ int main(int argc, char * argv[])
       } else {
     	std::cout << "Unable to open output file.\n";
       }
-    }    
+    }
 
 #if 0 //print result
     for (size_t i = 0; i < (DEFAULT_NBINS-1); i++) {
       std::cout << results_test[i] << std::endl;
     }
-#endif      
+#endif
 
     /* Deallocate arrays */
     FreeData( q, x1, y1, z1, w1, x2, y2, z2, w2, rbins, results_test );
-    
+
     fclose(fptr);
     fclose(fptr1);
 

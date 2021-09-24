@@ -56,12 +56,12 @@ def gen_data_usm(rows, cols):
 
         data_usm.copy_from_host(data_buf.reshape((-1)).view("u1"))
         result_usm.copy_from_host(result_buf.view("u1"))
-    
+
     return (np.ndarray((rows,cols), buffer=data_usm, dtype='i4'),
             np.ndarray((cols), buffer=result_usm, dtype='i4')
     )
 
-##############################################	
+##############################################
 
 def run(name, alg, sizes=5, step=2, rows=2**10, cols=2**6, pyramid_height=20):
     import argparse
@@ -74,7 +74,7 @@ def run(name, alg, sizes=5, step=2, rows=2**10, cols=2**6, pyramid_height=20):
     parser.add_argument('--repeat',required=False, default=1,    help="Iterations inside measured region")
     parser.add_argument('--json',  required=False, default=__file__.replace('py','json'), help="output json data filename")
     parser.add_argument('--usm',   required=False, action='store_true',  help="Use USM Shared or pure numpy")
-	
+
     args = parser.parse_args()
     sizes= int(args.steps)
     step = int(args.step)
@@ -83,7 +83,7 @@ def run(name, alg, sizes=5, step=2, rows=2**10, cols=2**6, pyramid_height=20):
     pyramid_height = int(args.pyht)
     repeat=int(args.repeat)
     kwargs={}
- 
+
     output = {}
     output['name']      = name
     output['sizes']     = sizes
@@ -94,7 +94,7 @@ def run(name, alg, sizes=5, step=2, rows=2**10, cols=2**6, pyramid_height=20):
 
     rnd.seed(SEED)
     f2 = open("runtimes.csv",'w',1)
-    
+
     for i in xrange(sizes):
         if args.usm is True:
             data, result = gen_data_usm(rows, cols)
@@ -102,13 +102,13 @@ def run(name, alg, sizes=5, step=2, rows=2**10, cols=2**6, pyramid_height=20):
             data, result = gen_data_np(rows, cols)
 
         alg(data, rows, cols, pyramid_height, result)
-        
+
         iterations = xrange(repeat)
         t0 = now()
         for _ in iterations:
             alg(data, rows, cols, pyramid_height, result)
         time = now() - t0
-        
+
         f2.write(str(rows) + "," + str(time) + "\n")
         rows *= step
         mops = 0.

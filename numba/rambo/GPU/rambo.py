@@ -124,7 +124,7 @@ def generate_points(ecms, nevts, nout):
     B = numpy.zeros(output_mom_sum.shape)
     B[..., 1:4] = -output_mom_sum[..., 1:4] / output_mass
     B = numpy.repeat(B[:, numpy.newaxis, :], nout, axis=1)
-    
+
     A = 1. / (1. + G)
 
     E = output_particles[..., 0]

@@ -35,7 +35,7 @@ def gen_data(nopt,dims):
         rnd.random((nopt, dims)).astype(np.float32)
     )
 
-##############################################	
+##############################################
 
 def run(name, alg, sizes=10, step=2, nopt=2**16):
     import argparse
@@ -45,9 +45,9 @@ def run(name, alg, sizes=10, step=2, nopt=2**16):
     parser.add_argument('--size',  required=False, default=nopt,   help="Initial data size")
     parser.add_argument('--repeat',required=False, default=1,    help="Iterations inside measured region")
     parser.add_argument('--text',  required=False, default="",     help="Print with each result")
-    parser.add_argument('--json',  required=False, default=__file__.replace('py','json'), help="output json data filename") 
+    parser.add_argument('--json',  required=False, default=__file__.replace('py','json'), help="output json data filename")
     parser.add_argument('-d', type=int, default=1, help='Dimensions')
-    
+
     args = parser.parse_args()
     sizes= int(args.steps)
     step = int(args.step)
@@ -86,7 +86,7 @@ def run(name, alg, sizes=10, step=2, nopt=2**16):
         output['metrics'].append((nopt,mops,time))
         f.write(str(nopt) + "," + str(mops*2*repeat) + "\n")
         f2.write(str(nopt) + "," + str(time) + "\n")
-        
+
         nopt *= step
         repeat -= step
         if repeat < 1:

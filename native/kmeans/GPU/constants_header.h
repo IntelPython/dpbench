@@ -8,7 +8,7 @@
 #define __CONSTANTS_HEADER_H
 
 #ifdef __DO_FLOAT__
-    typedef float tfloat; 
+    typedef float tfloat;
 #else
     typedef double  tfloat;
 #endif

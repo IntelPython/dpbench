@@ -42,20 +42,20 @@ int main(int argc, char * argv[])
     FILE *fptr;
     fptr = fopen("perf_output.csv", "w");
     if(fptr == NULL) {
-      printf("Error!");   
-      exit(1);             
+      printf("Error!");
+      exit(1);
     }
 
     FILE *fptr1;
     fptr1 = fopen("runtimes.csv", "w");
     if(fptr1 == NULL) {
-      printf("Error!");   
-      exit(1);             
+      printf("Error!");
+      exit(1);
     }
-    
+
     int i, j;
     for(i = 0; i < STEPS; i++) {
-    
+
       /* Allocate arrays, generate input data */
       InitData( nopt, NUMBER_OF_CENTROIDS, &points, &centroids );
 
@@ -66,7 +66,7 @@ int main(int argc, char * argv[])
 
       /* Compute call and put prices using compiler math libraries */
       printf("Kmeans: Native-C-SVML: Size: %lu MOPS: ", nopt);
-	
+
       t1 = timer_rdtsc();
       for(j = 0; j < repeat; j++) {
 	runKmeans(points, centroids, nopt, NUMBER_OF_CENTROIDS);

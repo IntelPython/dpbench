@@ -48,15 +48,15 @@ int main(int argc, char * argv[])
   FILE *fptr;
   fptr = fopen("perf_output.csv", "w");
   if(fptr == NULL) {
-    printf("Error!");   
-    exit(1);             
+    printf("Error!");
+    exit(1);
   }
 
   FILE *fptr1;
   fptr1 = fopen("runtimes.csv", "w");
   if(fptr1 == NULL) {
-    printf("Error!");   
-    exit(1);             
+    printf("Error!");
+    exit(1);
   }
 
   queue *q = nullptr;
@@ -66,8 +66,8 @@ int main(int argc, char * argv[])
   } catch (sycl::exception &re) {
     std::cerr << "No GPU device found\n";
     exit(1);
-  }    
-    
+  }
+
   /* Allocate arrays, generate input data */
   InitData( q, nopt, NUMBER_OF_CENTROIDS, &points, &centroids );
 
@@ -82,7 +82,7 @@ int main(int argc, char * argv[])
     runKmeans(q, points, centroids, nopt, NUMBER_OF_CENTROIDS);
   }
   t2 = timer_rdtsc();
-      
+
   printf("%.6lf\n", (2.0 * nopt * repeat / 1e6)/((double) (t2 - t1) / getHz()));
   printf("%lu ,%.6lf\n",nopt,((double) (t2 - t1) / getHz()));
   fflush(stdout);
@@ -93,7 +93,7 @@ int main(int argc, char * argv[])
     Centroid* t_centroids = (Centroid*)_mm_malloc( NUMBER_OF_CENTROIDS * sizeof(Centroid), ALIGN_FACTOR);
     q->memcpy(t_centroids, centroids, NUMBER_OF_CENTROIDS * sizeof(Centroid));
     q->wait();
-    
+
     ofstream file1, file2, file3;
     file1.open("arrayC.bin", ios::out|ios::binary|ios::app);
     file2.open("arrayCsum.bin", ios::out|ios::binary|ios::app);
@@ -118,7 +118,7 @@ int main(int argc, char * argv[])
 
   /**************************/
   //printCentroids (centroids, NUMBER_OF_CENTROIDS);
-  
+
   /* Deallocate arrays */
   FreeData( q, points, centroids );
 

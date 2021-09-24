@@ -63,23 +63,23 @@ int main(int argc, char** argv)
     }
     if (argc >= 4) {
       sscanf(argv[3], "%d", &repeat);
-    }	
+    }
   }
 
   FILE *fptr;
   fptr = fopen("perf_output.csv", "w");
   if(fptr == NULL) {
-    printf("Error!");   
-    exit(1);             
+    printf("Error!");
+    exit(1);
   }
 
   FILE *fptr1;
   fptr1 = fopen("runtimes.csv", "w");
   if(fptr1 == NULL) {
-    printf("Error!");   
-    exit(1);             
+    printf("Error!");
+    exit(1);
   }
-  
+
   for(int ii = 0; ii < STEPS; ii++) {
     data = new int[rows * cols];
     wall = new int*[rows];
@@ -156,7 +156,7 @@ int main(int argc, char** argv)
 
 	// Copy results back to host.
 	q.submit([&](handler& cgh) {
-	    accessor<int, 1, sycl_read, sycl_global_buffer> 
+	    accessor<int, 1, sycl_read, sycl_global_buffer>
 	      d_gpuResult_acc(d_gpuResult[final_ret], cgh, range<1>(cols), id<1>(0));
 	    cgh.copy(d_gpuResult_acc, result);
 	  });
@@ -183,7 +183,7 @@ int main(int argc, char** argv)
     free(h_outputBuffer);
 
     rows = rows * 2;
-    if (repeat > 2) repeat -= 2;    
+    if (repeat > 2) repeat -= 2;
   }
 
   return EXIT_SUCCESS;

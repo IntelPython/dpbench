@@ -33,7 +33,7 @@ def gen_data(nopt,dims):
         rnd.random((nopt, dims))
     )
 
-##############################################	
+##############################################
 
 def run(name, alg, sizes=15, step=2, nopt=c**16):
     import argparse
@@ -44,7 +44,7 @@ def run(name, alg, sizes=15, step=2, nopt=c**16):
     parser.add_argument('--repeat',required=False, default=100,    help="Iterations inside measured region")
     parser.add_argument('--text',  required=False, default="",     help="Print with each result")
     parser.add_argument('-d', type=int, default=1, help='Dimensions')
-    
+
     args = parser.parse_args()
     sizes= int(args.steps)
     step = int(args.step)

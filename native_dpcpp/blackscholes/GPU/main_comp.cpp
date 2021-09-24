@@ -43,7 +43,7 @@ int main(int argc, char * argv[])
     FILE *fptr1;
     fptr1 = fopen("runtimes.csv", "a");
     if(fptr1 == NULL) {
-      printf("Error!");   
+      printf("Error!");
       exit(1);
     }
 
@@ -55,7 +55,7 @@ int main(int argc, char * argv[])
       std::cerr << "No GPU device found\n";
       exit(1);
     }
-    
+
     /* Allocate arrays, generate input data */
     InitData(q, nopt, &s0, &x, &t, &vcall_compiler, &vput_compiler );
 
@@ -102,7 +102,7 @@ int main(int argc, char * argv[])
 	std::cout << "Unable to open output file.\n";
       }
     }
-    
+
     /* Deallocate arrays */
     FreeData( q, s0, x, t, vcall_compiler, vput_compiler );
 

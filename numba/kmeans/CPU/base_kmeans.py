@@ -40,10 +40,10 @@ def gen_data(nopt):
         np.ones(nopt, dtype=np.int32),
         np.ones((NUMBER_OF_CENTROIDS, 2), dtype=np.float64),
         np.ones((NUMBER_OF_CENTROIDS, 2), dtype=np.float64),
-        np.ones(NUMBER_OF_CENTROIDS, dtype=np.int32)        
+        np.ones(NUMBER_OF_CENTROIDS, dtype=np.int32)
     )
 
-##############################################	
+##############################################
 
 def run(name, alg, sizes=3, step=2, nopt=2**13):
     import argparse
@@ -54,13 +54,13 @@ def run(name, alg, sizes=3, step=2, nopt=2**13):
     parser.add_argument('--repeat',required=False, default=1,    help="Iterations inside measured region")
     parser.add_argument('--text',  required=False, default="",     help="Print with each result")
     parser.add_argument('--json',  required=False, default=__file__.replace('py','json'), help="output json data filename")
-    
+
     args = parser.parse_args()
     sizes= int(args.steps)
     step = int(args.step)
     nopt = int(args.size)
     repeat=int(args.repeat)
- 
+
     output = {}
     output['name']      = name
     output['sizes']     = sizes
@@ -72,11 +72,11 @@ def run(name, alg, sizes=3, step=2, nopt=2**13):
     rnd.seed(SEED)
     f=open("perf_output.csv",'w')
     f2 = open("runtimes.csv",'w',1)
-    
+
     for i in xrange(sizes):
         X,arrayPclusters,arrayC,arrayCsum,arrayCnumpoint = gen_data(nopt)
         iterations = xrange(repeat)
-        
+
         alg(X, arrayPclusters,arrayC,arrayCsum,arrayCnumpoint, nopt, NUMBER_OF_CENTROIDS) #warmup
         t0 = now()
         for _ in iterations:

@@ -15,7 +15,7 @@ def matmul(X,Y):
             for k in range(Y.shape[0]):
                 result[i,j] += X[i,k] * Y[k,j]
     return result
-                
+
 @numba.njit(parallel=True, fastmath=True)
 def compute_mean_axis_0(data):
     tdata = data.T

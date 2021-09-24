@@ -37,7 +37,7 @@ def gen_data_np(npoints, dtype = np.float32):
     result = np.zeros_like(DEFAULT_RBINS_SQUARED)[:-1].astype(dtype)
     return (x1, y1, z1, w1, x2, y2, z2, w2, DEFAULT_RBINS_SQUARED, result)
 
-##############################################	
+##############################################
 
 def run(name, sizes=5, step=2, nopt=2**10):
     import argparse
@@ -47,8 +47,8 @@ def run(name, sizes=5, step=2, nopt=2**10):
     parser.add_argument('--size',  required=False, default=nopt,   help="Initial data size")
     parser.add_argument('--repeat',required=False, default=1,    help="Iterations inside measured region")
     parser.add_argument('--usm',   required=False, action='store_true',  help="Use USM Shared or pure numpy")
-    parser.add_argument('--test',  required=False, action='store_true', help="Check for correctness by comparing output with naieve Python version")    
-    
+    parser.add_argument('--test',  required=False, action='store_true', help="Check for correctness by comparing output with naieve Python version")
+
     args = parser.parse_args()
     sizes= int(args.steps)
     step = int(args.step)
@@ -66,7 +66,7 @@ def run(name, sizes=5, step=2, nopt=2**10):
         build_string = ['make']
         utils.run_command(build_string, verbose=True)
         exec_name = "./gpairs"
-    
+
     if args.test:
         x1, y1, z1, w1, x2, y2, z2, w2, DEFAULT_RBINS_SQUARED, result_p = gen_data_np(nopt)
         gpairs_python(x1, y1, z1, w1, x2, y2, z2, w2, DEFAULT_RBINS_SQUARED, result_p)
@@ -78,17 +78,17 @@ def run(name, sizes=5, step=2, nopt=2**10):
 
         #read output of dpcpp into result_p
         result_n = np.fromfile("result.bin", np.float32)
-        
+
         #compare outputs
         if np.allclose(result_p, result_n):
             print("Test succeeded. Python result: ", result_p, "\nDPC++ result: ", result_n, "\n")
         else:
             print("Test failed. Python result: ", result_p, "\nDPC++ result: ", result_n, "\n")
-        return        
+        return
 
     if os.path.isfile('runtimes.csv'):
         os.remove('runtimes.csv')
-        
+
     for i in xrange(sizes):
         # generate input data
         gen_data_to_file(nopt, np.float32)

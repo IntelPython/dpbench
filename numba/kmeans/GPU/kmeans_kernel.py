@@ -46,7 +46,7 @@ def copy_arrayC(arrayC, arrayP):
     i = numba_dppy.get_global_id(0)
     arrayC[i, 0] = arrayP[i, 0]
     arrayC[i, 1] = arrayP[i, 1]
-    
+
 def kmeans(arrayP, arrayPcluster,
            arrayC, arrayCsum, arrayCnumpoint,
            num_points, num_centroids):
@@ -59,7 +59,7 @@ def kmeans(arrayP, arrayPcluster,
             arrayC,
             num_points, num_centroids
         )
-        
+
         calCentroidsSum1[num_centroids,numba_dppy.DEFAULT_LOCAL_SIZE](
             arrayCsum, arrayCnumpoint,
         )
@@ -70,7 +70,7 @@ def kmeans(arrayP, arrayPcluster,
         )
 
         updateCentroids[num_centroids,numba_dppy.DEFAULT_LOCAL_SIZE](
-            arrayC, arrayCsum, arrayCnumpoint,num_centroids)        
+            arrayC, arrayCsum, arrayCnumpoint,num_centroids)
 
     return arrayC, arrayCsum, arrayCnumpoint
 
@@ -84,7 +84,7 @@ def printCentroid(arrayC, arrayCsum, arrayCnumpoint, NUMBER_OF_CENTROIDS):
 
 def run_kmeans(arrayP, arrayPclusters,arrayC,arrayCsum,arrayCnumpoint, NUMBER_OF_POINTS, NUMBER_OF_CENTROIDS):
 
-    with dpctl.device_context(base_kmeans.get_device_selector()):    
+    with dpctl.device_context(base_kmeans.get_device_selector()):
         for i in range(REPEAT):
             arrayC, arrayCsum, arrayCnumpoint = kmeans(
                 arrayP, arrayPclusters,

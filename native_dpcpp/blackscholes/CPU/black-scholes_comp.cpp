@@ -55,7 +55,7 @@ using namespace cl::sycl;
     tfloat r, tfloat sig, tfloat * price, tfloat * strike,
     tfloat * t, tfloat * vcall, tfloat * vput )
 {
-  // compute  
+  // compute
   q->submit([&](handler& h) {
       h.parallel_for<class theKernel>(range<1>{nopt}, [=](id<1> myID) {
 	  tfloat mr = -r;
@@ -67,14 +67,14 @@ using namespace cl::sycl;
 
 	  a = LOG( price[i] / strike[i] );
 	  b = t[i] * mr;
- 
-	  z = t[i] * sig_sig_two;       
+
+	  z = t[i] * sig_sig_two;
 	  c = QUARTER * z;
 	  y = INVSQRT( z );
-                             
+
 	  w1 = ( a - b + c ) * y;
 	  w2 = ( a - b - c ) * y;
-	  
+
 	  d1 = ERF( w1 );
 	  d2 = ERF( w2 );
 	  d1 = HALF + HALF*d1;
@@ -83,7 +83,7 @@ using namespace cl::sycl;
 	  e = EXP ( b );
 
 	  vcall[i] = price[i]*d1 - strike[i]*e*d2;
-	  vput[i]  = vcall[i] - price[i] + strike[i]*e;	    
+	  vput[i]  = vcall[i] - price[i] + strike[i]*e;
 	});
     });
 

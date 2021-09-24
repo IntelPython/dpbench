@@ -83,13 +83,13 @@ size_t simple_vote(struct neighbors* neighbors)
 }
 
 void run_knn(queue* q, double* train, size_t *train_labels, double* test, size_t train_nrows, size_t test_size, size_t *predictions) {
-  double *d_train, *d_test; size_t *d_train_labels, *d_predictions;  
+  double *d_train, *d_test; size_t *d_train_labels, *d_predictions;
   q->submit([&](handler& h) {
       h.parallel_for<class theKernel>(range<1>{test_size}, [=](id<1> myID) {
 	  size_t i = myID[0];
 	  //std::array<std::pair<double, size_t>, NEAREST_NEIGHS> queue_neighbors;
 	  struct neighbors queue_neighbors[NEAREST_NEIGHS] = {{ 0 }};
-      
+
 	  //count distances
 	  for (int j = 0; j < NEAREST_NEIGHS; ++j) {
 	    queue_neighbors[j].dist = euclidean_dist(train, j, test, i);
@@ -106,7 +106,7 @@ void run_knn(queue* q, double* train, size_t *train_labels, double* test, size_t
 	      //queue_neighbors[NEAREST_NEIGHS-1] = new_neighbor;
 	      queue_neighbors[NEAREST_NEIGHS-1].dist = dist;
 	      queue_neighbors[NEAREST_NEIGHS-1].label = train_labels[j];
-	  
+
 	      push_queue(queue_neighbors, dist, train_labels[j], NEAREST_NEIGHS-1);
 	    }
 	  }

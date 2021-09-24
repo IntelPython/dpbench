@@ -63,7 +63,7 @@ def run(name, sizes=10, step=2, nopt=2**10):
     parser.add_argument('--repeat', type=int, default=1, help='Iterations inside measured region')
     parser.add_argument('--text', default='', help='Print with each result')
     parser.add_argument('--dims', type=int, default=2**7, help='Dimensions')
-    
+
     args = parser.parse_args()
     repeat = args.repeat
 
@@ -76,10 +76,10 @@ def run(name, sizes=10, step=2, nopt=2**10):
 
     clean_string = ['make', 'clean']
     utils.run_command(clean_string, verbose=True)
-        
+
     build_string = ['make']
     utils.run_command(build_string, verbose=True)
-        
+
     nopt = int(args.size)
     for i in xrange(args.steps):
         r_data, _ = gen_r_data(nopt, args.dims)

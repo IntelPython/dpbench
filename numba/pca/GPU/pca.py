@@ -29,5 +29,5 @@ def pca_impl(data):
 def call_pca(data):
     with dpctl.device_context(base_pca.get_device_selector()):
         pca_impl(data)
-        
+
 base_pca.run("Numba", pca_impl)

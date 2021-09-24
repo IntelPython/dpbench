@@ -104,7 +104,7 @@ int main(int argc, char * argv[]) {
         exit(1);
     }
     double MOPS = 0.0;
-    
+
     //services::Environment::getInstance()->setNumberOfThreads(1);
 
     /* Initialize FileDataSource<CSVFeatureManager> to retrieve the input data from a .csv file */

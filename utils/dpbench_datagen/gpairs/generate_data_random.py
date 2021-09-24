@@ -29,11 +29,11 @@ def __dump_binary__(x1, y1, z1, w1, x2, y2, z2, w2, DEFAULT_RBINS_SQUARED):
         z2.tofile(fd)
 
     with open('w2.bin', 'w') as fd:
-        w2.tofile(fd)        
+        w2.tofile(fd)
 
     with open('DEFAULT_RBINS_SQUARED.bin', 'w') as fd:
         DEFAULT_RBINS_SQUARED.tofile(fd)
-        
+
 #write input data to a file in text format
 def __dump_text__(x1, y1, z1, w1, x2, y2, z2, w2, DEFAULT_RBINS_SQUARED):
     with open('x1.txt', 'w') as fd:
@@ -61,7 +61,7 @@ def __dump_text__(x1, y1, z1, w1, x2, y2, z2, w2, DEFAULT_RBINS_SQUARED):
         w2.tofile(fd, '\n', '%s')
 
     with open('DEFAULT_RBINS_SQUARED.txt', 'w') as fd:
-        DEFAULT_RBINS_SQUARED.tofile(fd, '\n', '%s')        
+        DEFAULT_RBINS_SQUARED.tofile(fd, '\n', '%s')
 
 def __random_weighted_points__(n, Lbox, seed, dtype):
     rng = rnd.RandomState(seed)
@@ -77,7 +77,7 @@ def __generate_rbins__(dtype):
     DEFAULT_RBINS_SQUARED = (DEFAULT_RBINS**2).astype(dtype)
 
     return DEFAULT_RBINS_SQUARED
-        
+
 # call numpy to generate input data
 def gen_rand_data(npoints, dtype = np.float64):
     Lbox = 500.
@@ -90,7 +90,7 @@ def gen_rand_data(npoints, dtype = np.float64):
 
     return (
         x1, y1, z1, w1, x2, y2, z2, w2, DEFAULT_RBINS_SQUARED
-    )    
+    )
 
 # call numpy.random.uniform to generate input data and write the input as binary to a file
 def gen_data_to_file(npoints, dtype = np.float64):

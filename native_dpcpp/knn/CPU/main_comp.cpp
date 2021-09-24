@@ -132,7 +132,7 @@ int main(int argc, char* argv[]) {
     } catch (runtime_error &re) {
       std::cerr << "No GPU device found\n";
       exit(1);
-    }    
+    }
 
     int i, j;
     double MOPS = 0.0;

@@ -138,7 +138,7 @@ int main(int argc, char* argv[]) {
         double* data_test = gen_data_x(nPoints);
 
 	size_t* predictions = new size_t[nPoints];
-	size_t* train_labels = labels.data();	
+	size_t* train_labels = labels.data();
 
 #pragma omp target data map(to:data_train[0:nPoints_train*DATADIM], data_test[0:nPoints*DATADIM],train_labels[0:nPoints_train]) map(from:predictions[0:nPoints])
 	{

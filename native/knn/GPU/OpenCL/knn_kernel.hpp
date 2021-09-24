@@ -108,4 +108,3 @@ void kernel run_knn(global double* train, int trainSize, global int* labels, glo
     }
     predictions[id] = simple_vote(queueLabels);
 }
-

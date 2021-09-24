@@ -81,10 +81,10 @@ def gen_data_usm(nopt):
     # init numpy obj
     price_buf, strike_buf, t_buf = gen_rand_data(nopt)
     call_buf = np.zeros(nopt, dtype=np.float64)
-    put_buf  = -np.ones(nopt, dtype=np.float64)    
+    put_buf  = -np.ones(nopt, dtype=np.float64)
 
     with dpctl.device_context(get_device_selector()) as cpu_queue:
-        #init usmdevice memory        
+        #init usmdevice memory
         # price_usm = dpmem.MemoryUSMDevice(nopt*np.dtype('f8').itemsize)
         # strike_usm = dpmem.MemoryUSMDevice(nopt*np.dtype('f8').itemsize)
         # t_usm = dpmem.MemoryUSMDevice(nopt*np.dtype('f8').itemsize)
@@ -100,17 +100,17 @@ def gen_data_usm(nopt):
     strike_usm.usm_data.copy_from_host(strike_buf.view("u1"))
     t_usm.usm_data.copy_from_host(t_buf.view("u1"))
     call_usm.usm_data.copy_from_host(call_buf.view("u1"))
-    put_usm.usm_data.copy_from_host(put_buf.view("u1"))        
+    put_usm.usm_data.copy_from_host(put_buf.view("u1"))
 
     return (price_usm, strike_usm, t_usm, call_usm, put_usm)
-    #return numpy obj with usmshared obj set to buffer        
+    #return numpy obj with usmshared obj set to buffer
     # return(np.ndarray((nopt,), buffer=price_usm, dtype='f8'),
     #        np.ndarray((nopt,), buffer=strike_usm, dtype='f8'),
     #        np.ndarray((nopt,), buffer=t_usm, dtype='f8'),
     #        np.ndarray((nopt,), buffer=call_usm, dtype='f8'),
     #        np.ndarray((nopt,), buffer=put_usm, dtype='f8'))
 
-##############################################	
+##############################################
 
 # create input data, call blackscholes computation function (alg)
 def run(name, alg, sizes=14, step=2, nopt=2**15):
@@ -124,7 +124,7 @@ def run(name, alg, sizes=14, step=2, nopt=2**15):
     parser.add_argument('--json',  required=False, default=__file__.replace('py','json'), help="output json data filename")
     parser.add_argument('--usm',   required=False, action='store_true',  help="Use USM Shared or pure numpy")
     parser.add_argument('--test',  required=False, action='store_true', help="Check for correctness by comparing output with naieve Python version")
-	
+
     args = parser.parse_args()
     sizes= int(args.steps)
     step = int(args.step)
@@ -149,7 +149,7 @@ def run(name, alg, sizes=14, step=2, nopt=2**15):
             #pass usm input data to kernel
             alg(nopt, price_usm, strike_usm, t_usm, RISK_FREE, VOLATILITY, call_usm, put_usm)
             n_call = np.empty(nopt, dtype=np.float64)
-            n_put  = np.empty(nopt, dtype=np.float64)    
+            n_put  = np.empty(nopt, dtype=np.float64)
             call_usm.usm_data.copy_to_host(n_call.view("u1"))
             put_usm.usm_data.copy_to_host(n_put.view("u1"))
         else:
@@ -162,28 +162,28 @@ def run(name, alg, sizes=14, step=2, nopt=2**15):
         else:
             print("Test failed\n")
         return
-    
+
     f1 = open("perf_output.csv",'w',1)
     f2 = open("runtimes.csv",'w',1)
-    
+
     for i in xrange(sizes):
         # generate input data
         if args.usm is True:
             price, strike, t, call, put = gen_data_usm(nopt)
         else:
             price, strike, t, call, put = gen_data_np(nopt)
-            
+
         iterations = xrange(repeat)
         print("ERF: {}: Size: {}".format(name, nopt), end=' ', flush=True)
         sys.stdout.flush()
 
         # call algorithm
         alg(nopt, price, strike, t, RISK_FREE, VOLATILITY, call, put) #warmup
-            
+
         t0 = now()
         for _ in iterations:
             alg(nopt, price, strike, t, RISK_FREE, VOLATILITY, call, put)
-            
+
         mops,time = get_mops(t0, now(), nopt)
 
         # record performance data - mops, time

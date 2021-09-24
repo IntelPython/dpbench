@@ -135,7 +135,7 @@ void BlackScholesFormula_MKL( int nopt,
             vcall[i+j] = vcallij;
             vput[i+j]  = vcallij - s0j + xj*ej;
         }
-#if 0 
+#if 0
         for ( j = 0; j < nbuf; j++ )
         {
             d1[j] = HALF + HALF*d1[j];

@@ -181,13 +181,13 @@ int main(int argc, char* argv[]) {
 
         std::cout << "TRAIN_SIZE: " << nPoints_train << std::endl;
         std::cout << "TEST_SIZE: " << nPoints << std::endl;
- 
+
         // Define CL device, allocate buffers
         KNN knnAlg;
         knnAlg.init();
         knnAlg.allocate_buffers(nPoints_train, nPoints);
 
-        // Map buffers ToDo: remove copying 
+        // Map buffers ToDo: remove copying
         auto train_ptr = knnAlg.map_train(nPoints_train);
         for (int k = 0; k < nPoints_train * nFeatures; ++k)
         {
@@ -213,7 +213,7 @@ int main(int argc, char* argv[]) {
             knnAlg.run_knn_opencl(train_ptr, test_ptr, labels_ptr, predictions_ptr, nPoints_train, nPoints);
         }
         auto end = std::chrono::high_resolution_clock::now();
-        
+
         std::chrono::duration<double> elapsed_seconds = end - start;
 
         //write_predictions(predictions_ptr, nPoints, "y_test.csv");

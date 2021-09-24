@@ -65,11 +65,11 @@ void BlackScholesFormula_Compiler( int nopt,
         a = LOG( s0[i] / x[i] );
         b = t[i] * mr;
         z = t[i] * sig_sig_two;
-        
+
         c = QUARTER * z;
         e = EXP ( b );
         y = INVSQRT( z );
-                             
+
         w1 = ( a - b + c ) * y;
         w2 = ( a - b - c ) * y;
         d1 = ERF( w1 );

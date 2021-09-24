@@ -146,7 +146,7 @@ int main(int argc, char *argv[])
       if (strcmp(test_str, argv[3]) == 0) {
 	test = true;
       }
-    }    
+    }
 
     FILE *fptr;
     fptr = fopen("perf_output.csv", "w");
@@ -180,7 +180,7 @@ int main(int argc, char *argv[])
 
     auto train_labels_ptr = read_data_y(nPoints_train, "y_train.bin");
     size_t *train_labels = train_labels_ptr.get();
-    
+
     auto data_test_ptr = read_data_x(nPoints, "x_test.bin");
     double *data_test = data_test_ptr.get();
 
@@ -201,7 +201,7 @@ int main(int argc, char *argv[])
     q->memcpy(d_train_labels, train_labels, nPoints_train * sizeof(size_t));
     q->memcpy(d_test, data_test, nPoints * DATADIM * sizeof(double));
     q->memcpy(d_votes_to_classes, votes_to_classes, nPoints * NUM_CLASSES * sizeof(double));
-    q->wait();    
+    q->wait();
 
     /* Warm up cycle */
     run_knn_usm(q, d_train, d_train_labels, d_test, nPoints_train, nPoints, d_predictions, d_votes_to_classes, d_queue_neighbors_lst);
@@ -216,13 +216,13 @@ int main(int argc, char *argv[])
     // copy result device to host
     q->memcpy(predictions, d_predictions, nPoints * sizeof(size_t));
     q->wait();
-    
+
     free(d_train, q->get_context());
     free(d_test, q->get_context());
     free(d_train_labels, q->get_context());
     free(d_predictions, q->get_context());
     free(d_queue_neighbors_lst, q->get_context());
-    free(d_votes_to_classes, q->get_context());    
+    free(d_votes_to_classes, q->get_context());
 
     double MOPS = (nPoints * repeat / 1e6) / ((double)(t2 - t1) / getHz());
     double time = ((double)(t2 - t1) / getHz());
@@ -244,7 +244,7 @@ int main(int argc, char *argv[])
       } else {
 	std::cout << "Unable to open output file.\n";
       }
-    }    
+    }
 
     delete[] predictions;
 

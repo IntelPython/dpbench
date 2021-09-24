@@ -116,7 +116,7 @@ def run(name, alg, sizes=5, step=2, nopt=2**10):
     args = parser.parse_args()
     nopt = args.size
     repeat = args.repeat
- 
+
     output = {}
     output['name']      = name
     output['sizes']     = sizes
@@ -144,7 +144,7 @@ def run(name, alg, sizes=5, step=2, nopt=2**10):
         else:
             print("Test failed. Python clusters = ", p_nclusters, ", numba clusters = ", n_nclusters, "\n")
             print("n_assignments = ", n_assignments, "\n p_assignments = ", p_assignments)
-        return    
+        return
 
     with open('perf_output.csv', 'w', 1) as mops_fd, open('runtimes.csv', 'w', 1) as runtimes_fd:
         for _ in xrange(args.steps):
@@ -157,7 +157,7 @@ def run(name, alg, sizes=5, step=2, nopt=2**10):
             mops, time = get_mops(t0, now(), nopt)
             result_mops = mops * repeat / 1e6
 
-            
+
             print("ERF: {:15s} | Size: {:10d} | MOPS: {:15.2f} | TIME: {:10.6f}".format(name, nopt, result_mops,time),flush=True)
             output['metrics'].append((nopt,mops,time))
 

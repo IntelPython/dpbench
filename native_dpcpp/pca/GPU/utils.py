@@ -45,7 +45,7 @@ def parse_time(s):
 
     obj = re.compile(regex, re.VERBOSE).search(s)
     assert(obj)
-    
+
     user, system, elapsed = obj.groups()
     return float(user)
 

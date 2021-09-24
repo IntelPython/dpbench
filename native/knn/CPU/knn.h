@@ -32,7 +32,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <array>
 #include <algorithm>
 #include <omp.h>
- 
+
 
 using dtype = double;
 const size_t classesNum = 3;

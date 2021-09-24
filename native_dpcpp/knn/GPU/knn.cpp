@@ -118,9 +118,9 @@ size_t *predictions, double *votes_to_classes)
 	      double diff = d_train[j * DATADIM + jj] - d_test[i * DATADIM + jj];
 	      distance += diff * diff;
 	    }
-			  
+
 	    double dist = sqrt(distance);
-			  
+
 	    queue_neighbors[j].dist = dist;
 	    queue_neighbors[j].label = d_train_labels[j];
 	  }
@@ -151,7 +151,7 @@ size_t *predictions, double *votes_to_classes)
 
 	    if (dist < queue_neighbors[NEAREST_NEIGHS-1].dist) {
 	      queue_neighbors[NEAREST_NEIGHS-1].dist = dist;
-	      queue_neighbors[NEAREST_NEIGHS-1].label = d_train_labels[j];			    
+	      queue_neighbors[NEAREST_NEIGHS-1].label = d_train_labels[j];
 
 	      //push queue
 	      double new_distance = queue_neighbors[NEAREST_NEIGHS-1].dist;
@@ -193,7 +193,7 @@ size_t *predictions, double *votes_to_classes)
   // q->memcpy(test, test, d_test_size * DATADIM * sizeof(double));
   // q->memcpy(votes_to_classes, d_votes_to_classes, test_size * NUM_CLASSES * sizeof(double));
   // q->memcpy(queue_neighbors_lst, d_queue_neighbors_lst, test_size * NEAREST_NEIGHS * sizeof(struct neighbors));
-  
+
 
   q->wait();
 

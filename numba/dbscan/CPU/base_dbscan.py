@@ -94,7 +94,7 @@ OPTIMAL_PARAMS = {
     DataSize(n_samples=2**14, n_features=10): Params(eps=0.6, minpts=20),
     DataSize(n_samples=2**15, n_features=2): Params(eps=0.0695, minpts=4),
     DataSize(n_samples=2**15, n_features=3): Params(eps=0.108, minpts=6),
-    DataSize(n_samples=2**15, n_features=10): Params(eps=0.6, minpts=20),    
+    DataSize(n_samples=2**15, n_features=10): Params(eps=0.6, minpts=20),
     DataSize(n_samples=2**16, n_features=2): Params(eps=0.0695, minpts=4),
     DataSize(n_samples=2**16, n_features=3): Params(eps=0.108, minpts=6),
     DataSize(n_samples=2**16, n_features=10): Params(eps=0.6, minpts=20),
@@ -130,7 +130,7 @@ def run(name, alg, sizes=5, step=2, nopt=2**10):
     args = parser.parse_args()
     nopt = args.size
     repeat = args.repeat
- 
+
     output = {}
     output['name']      = name
     output['sizes']     = sizes
@@ -145,10 +145,10 @@ def run(name, alg, sizes=5, step=2, nopt=2**10):
         data = gen_data(nopt, args.dims)
         assignments = np.empty(nopt, dtype=np.int64)
         data_size = DataSize(n_samples=nopt, n_features=args.dims)
-        params = OPTIMAL_PARAMS.get(data_size, Params(eps=args.eps, minpts=args.minpts))        
+        params = OPTIMAL_PARAMS.get(data_size, Params(eps=args.eps, minpts=args.minpts))
         minpts = params.minpts or args.minpts
         eps = params.eps or args.eps
-        
+
         p_nclusters = dbscan_python.dbscan(nopt, args.dims, data, eps, minpts, assignments)
         n_nclusters = alg(nopt, args.dims, data, eps, minpts, assignments)
 

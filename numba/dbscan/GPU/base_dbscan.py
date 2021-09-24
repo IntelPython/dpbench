@@ -27,12 +27,9 @@
 import argparse
 import sys, os, json
 import numpy as np
-import numpy.random as rnd
-
-from typing import NamedTuple
-from sklearn.datasets import make_blobs
-from sklearn.preprocessing import StandardScaler
-import dbscan_python
+import dpctl, dpctl.tensor as dpt
+from dpbench_python.dbscan.dbscan_python import dbscan_python
+from dpbench_datagen.dbscan import gen_rand_data
 
 try:
     import itimer as it
@@ -72,57 +69,32 @@ def get_device_selector (is_gpu = True):
 
     return os.environ.get('SYCL_DEVICE_FILTER')
 
-class DataSize(NamedTuple):
-    n_samples: int
-    n_features: int
-
-
-class Params(NamedTuple):
-    eps: float
-    minpts: int
-
-
-SEED = 7777777
-OPTIMAL_PARAMS = {
-    DataSize(n_samples=2**8, n_features=2): Params(eps=0.173, minpts=4),
-    DataSize(n_samples=2**8, n_features=3): Params(eps=0.35, minpts=6),
-    DataSize(n_samples=2**8, n_features=10): Params(eps=0.8, minpts=20),
-    DataSize(n_samples=2**9, n_features=2): Params(eps=0.15, minpts=4),
-    DataSize(n_samples=2**9, n_features=3): Params(eps=0.1545, minpts=6),
-    DataSize(n_samples=2**9, n_features=10): Params(eps=0.7, minpts=20),
-    DataSize(n_samples=2**10, n_features=2): Params(eps=0.1066, minpts=4),
-    DataSize(n_samples=2**10, n_features=3): Params(eps=0.26, minpts=6),
-    DataSize(n_samples=2**10, n_features=10): Params(eps=0.6, minpts=20),
-    DataSize(n_samples=2**11, n_features=2): Params(eps=0.095, minpts=4),
-    DataSize(n_samples=2**11, n_features=3): Params(eps=0.18, minpts=6),
-    DataSize(n_samples=2**11, n_features=10): Params(eps=0.6, minpts=20),
-    DataSize(n_samples=2**12, n_features=2): Params(eps=0.0715, minpts=4),
-    DataSize(n_samples=2**12, n_features=3): Params(eps=0.17, minpts=6),
-    DataSize(n_samples=2**12, n_features=10): Params(eps=0.6, minpts=20),
-    DataSize(n_samples=2**13, n_features=2): Params(eps=0.073, minpts=4),
-    DataSize(n_samples=2**13, n_features=3): Params(eps=0.149, minpts=6),
-    DataSize(n_samples=2**13, n_features=10): Params(eps=0.6, minpts=20),
-    DataSize(n_samples=2**14, n_features=2): Params(eps=0.0695, minpts=4),
-    DataSize(n_samples=2**14, n_features=3): Params(eps=0.108, minpts=6),
-    DataSize(n_samples=2**14, n_features=10): Params(eps=0.6, minpts=20),
-    DataSize(n_samples=2**15, n_features=2): Params(eps=0.0695, minpts=4),
-    DataSize(n_samples=2**15, n_features=3): Params(eps=0.108, minpts=6),
-    DataSize(n_samples=2**15, n_features=10): Params(eps=0.6, minpts=20),    
-    DataSize(n_samples=2**16, n_features=2): Params(eps=0.0695, minpts=4),
-    DataSize(n_samples=2**16, n_features=3): Params(eps=0.108, minpts=6),
-    DataSize(n_samples=2**16, n_features=10): Params(eps=0.6, minpts=20),
-}
-
-
-def gen_data(n_samples, n_features, centers=10, random_state=SEED):
-    X, *_ = make_blobs(n_samples=n_samples, n_features=n_features,
-                       centers=centers, random_state=SEED)
-    X = StandardScaler().fit_transform(X)
-
-    return X.flatten()
-
-
 ##############################################
+
+def gen_data_usm(nopt, dims, a_minpts, a_eps):
+    data, p_eps, p_minpts = gen_rand_data(nopt, dims)
+    assignments = np.empty(nopt, dtype=np.int64)
+
+    with dpctl.device_context(get_device_selector()) as gpu_queue:
+        data_usm = dpt.usm_ndarray(data.shape, dtype=data.dtype, buffer="device", buffer_ctor_kwargs={"queue": gpu_queue})
+        assignments_usm = dpt.usm_ndarray(assignments.shape, dtype=assignments.dtype, buffer="device", buffer_ctor_kwargs={"queue": gpu_queue})
+
+    data_usm.usm_data.copy_from_host(data.view("u1"))
+    assignments_usm.usm_data.copy_from_host(assignments.view("u1"))
+
+    minpts = p_minpts or a_minpts
+    eps = p_eps or a_eps
+
+    return (data_usm, assignments_usm, eps, minpts)
+
+def gen_data_np(nopt, dims, a_minpts, a_eps):
+    data, p_eps, p_minpts = gen_rand_data(nopt, dims)
+    assignments = np.empty(nopt, dtype=np.int64)
+
+    minpts = p_minpts or a_minpts
+    eps = p_eps or a_eps
+
+    return (data, assignments, eps, minpts)
 
 def run(name, alg, sizes=5, step=2, nopt=2**10):
     parser = argparse.ArgumentParser()
@@ -139,6 +111,7 @@ def run(name, alg, sizes=5, step=2, nopt=2**10):
     parser.add_argument('--minpts', type=int, default=20, help='minPts')
     parser.add_argument('--json',  required=False, default=__file__.replace('py','json'), help="output json data filename")
     parser.add_argument('--test',  required=False, action='store_true', help="Check for correctness by comparing output with naieve Python version")
+    parser.add_argument('--usm',   required=False, action='store_true',  help="Use USM Shared or pure numpy")
 
     args = parser.parse_args()
     nopt = args.size
@@ -149,42 +122,33 @@ def run(name, alg, sizes=5, step=2, nopt=2**10):
     output['sizes']     = sizes
     output['step']      = step
     output['repeat']    = repeat
-    output['randseed']  = SEED
     output['metrics']   = []
 
-    rnd.seed(SEED)
+    if args.usm:
+        print("Warn: Use of USM data not supported since DBSCAN has both host and device executions. Using numpy input data instead of USM\n")
 
     if args.test:
-        data = gen_data(nopt, args.dims)
-        assignments = np.empty(nopt, dtype=np.int64)
-        data_size = DataSize(n_samples=nopt, n_features=args.dims)
-        params = OPTIMAL_PARAMS.get(data_size, Params(eps=args.eps, minpts=args.minpts))        
-        minpts = params.minpts or args.minpts
-        eps = params.eps or args.eps
-        
-        p_nclusters = dbscan_python.dbscan(nopt, args.dims, data, eps, minpts, assignments)
-        n_nclusters = alg(nopt, args.dims, data, eps, minpts, assignments)
+        data, p_assignments, eps, minpts = gen_data_np(nopt, args.dims, args.minpts, args.eps)
+        p_nclusters = dbscan_python(nopt, args.dims, data, eps, minpts, p_assignments)
 
-        if np.allclose(n_nclusters, p_nclusters):
-            print("Test succeeded\n")
+        # if args.usm is True:
+        #     data, assignments, eps, minpts = gen_data_usm(nopt, args.dims, args.minpts, args.eps)
+        #     n_nclusters = alg(nopt, args.dims, data, eps, minpts, assignments)
+        # else:
+        data, n_assignments, eps, minpts = gen_data_np(nopt, args.dims, args.minpts, args.eps)
+        n_nclusters = alg(nopt, args.dims, data, eps, minpts, n_assignments)
+
+        if np.allclose(n_nclusters, p_nclusters) and np.allclose(n_assignments, p_assignments):
+            print("Test succeeded. Python clusters = ", p_nclusters, ", numba clusters = ", n_nclusters, "\n")
+            print("n_assignments = ", n_assignments, "\n p_assignments = ", p_assignments)
         else:
-            print("Test failed\n")
+            print("Test failed. Python clusters = ", p_nclusters, ", numba clusters = ", n_nclusters, "\n")
+            print("n_assignments = ", n_assignments, "\n p_assignments = ", p_assignments)
         return    
 
     with open('perf_output.csv', 'w', 1) as mops_fd, open('runtimes.csv', 'w', 1) as runtimes_fd:
         for _ in xrange(args.steps):
-            data = gen_data(nopt, args.dims)
-            assignments = np.empty(nopt, dtype=np.int64)
-
-            data_size = DataSize(n_samples=nopt, n_features=args.dims)
-            params = OPTIMAL_PARAMS.get(data_size, Params(eps=args.eps, minpts=args.minpts))
-            # if params.eps is None or params.minpts is None:
-            #     err_msg_tmpl = 'ERF: {}: Size: {} Dim: {} Eps: {} minPts: {}'
-            #     raise ValueError(err_msg_tmpl.format(name, nopt, args.dims, params.eps, params.minpts))
-
-            minpts = params.minpts or args.minpts
-            eps = params.eps or args.eps
-
+            data, assignments, eps, minpts = gen_data_np(nopt, dims, args.minpts, args.eps)
             nclusters = alg(nopt, args.dims, data, eps, minpts, assignments)  # warmup
 
             t0 = now()

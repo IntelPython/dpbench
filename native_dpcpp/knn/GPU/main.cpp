@@ -146,7 +146,7 @@ int main(int argc, char *argv[])
       if (strcmp(test_str, argv[3]) == 0) {
 	test = true;
       }
-    }    
+    }
 
     FILE *fptr;
     fptr = fopen("perf_output.csv", "w");
@@ -180,7 +180,7 @@ int main(int argc, char *argv[])
 
     auto train_labels_ptr = read_data_y(nPoints_train, "y_train.bin");
     size_t *train_labels = train_labels_ptr.get();
-    
+
     auto data_test_ptr = read_data_x(nPoints, "x_test.bin");
     double *data_test = data_test_ptr.get();
 
@@ -218,7 +218,7 @@ int main(int argc, char *argv[])
       } else {
 	std::cout << "Unable to open output file.\n";
       }
-    }    
+    }
 
     delete[] predictions;
 

@@ -16,5 +16,5 @@ def l2_distance(a,b):
 def l2_distance_dpctl(a,b):
     with dpctl.device_context("opencl:gpu"):
         l2_distance(a,b)
-        
+
 base_l2_distance.run("l2 distance", l2_distance_dpctl)

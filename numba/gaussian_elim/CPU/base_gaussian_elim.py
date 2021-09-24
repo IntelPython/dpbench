@@ -60,7 +60,7 @@ def gen_matrix(size):
     for i in range(size):
         for j in range(size):
             m[i * size + j] = coef[size - 1 - i + j]
-    
+
     return m
 
 
@@ -70,7 +70,7 @@ def gen_matrix_usm(size):
     with dpctl.device_context(get_device_selector()):
         m_usm = dpmem.MemoryUSMShared(size * size * np.dtype('float').itemsize)
         m_usm.copy_from_host(m_buf.view("u1"))
-    
+
     return np.array(size * size, buffer=m_usm, dtype='i4')
 
 
@@ -84,7 +84,7 @@ def gen_vec_usm(size, value):
     with dpctl.device_context(get_device_selector()):
         v_usm = dpmem.MemoryUSMShared(size * np.dtype('float').itemsize)
         v_usm.copy_from_host(v_buf.view("u1"))
-    
+
     return np.array(size, buffer=v_usm, dtype='float')
 
 
@@ -96,7 +96,7 @@ def backward_sub(a, b, x, size):
 
         for j in range(i+1, size):
             x[i] -= a[i*size + j] * x[j]
-        
+
         x[i] = x[i] / a[i * size + i]
 
 
@@ -116,7 +116,7 @@ def run(name, alg, steps=5, step=2, size=10):
     step = int(args.step)
     size = int(args.size)
     repeat = int(args.repeat)
- 
+
     output = {}
     output['name']      = name
     output['sizes']     = steps
@@ -135,9 +135,9 @@ def run(name, alg, steps=5, step=2, size=10):
             solve_matrix = gen_matrix(size)
             coef_vec = gen_vec(size, 1.0)
             extra_matrix = gen_vec(size, 0.0)
-        
+
         return solve_matrix, coef_vec, extra_matrix
-    
+
     for i in xrange(steps):
         solution_vec = gen_vec(size, 0.0)
 
@@ -147,7 +147,7 @@ def run(name, alg, steps=5, step=2, size=10):
         alg(size, solve_matrix, coef_vec, extra_matrix)
 
         solve_matrix, coef_vec, extra_matrix = gen_data()
-        
+
         iterations = xrange(repeat)
         t0 = now()
         for _ in iterations:
@@ -160,7 +160,7 @@ def run(name, alg, steps=5, step=2, size=10):
         print(solution_vec)
 
         f2.write(str(size) + "," + str(time) + "\n")
-        
+
         size *= step
         mops = 0.
         nopt = 0

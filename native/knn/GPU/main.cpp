@@ -122,7 +122,7 @@ int main(int argc, char* argv[]) {
         double* data_test = gen_data_x(nPoints);
 
 	size_t* predictions = new size_t[nPoints];
-	size_t* train_labels = labels.data();	
+	size_t* train_labels = labels.data();
 
         /* Warm up cycle */
         run_knn(data_train, train_labels, data_test, nPoints_train, nPoints, predictions);

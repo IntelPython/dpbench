@@ -5,7 +5,7 @@
  */
 
 #define _XOPEN_SOURCE
-#define _DEFAULT_SOURCE 
+#define _DEFAULT_SOURCE
 #include <stdlib.h>
 #include <stdio.h>
 #include <omp.h>
@@ -83,7 +83,7 @@ void InitData( queue *q, size_t nopt, tfloat* *s0, tfloat* *x, tfloat* *t,
       exit(0);
     }
 
-    for ( i = 0; i < nopt; i++ ){	
+    for ( i = 0; i < nopt; i++ ){
       tvcall_compiler[i] = 0.0;
       tvput_compiler[i]  = 0.0;
     }

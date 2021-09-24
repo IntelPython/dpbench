@@ -25,7 +25,7 @@ def gen_data_np(nopt):
 
 RISK_FREE = 0.1
 VOLATILITY = 0.2
-    
+
 # create input data, call blackscholes computation function (alg)
 def run(name, sizes=14, step=2, nopt=2**15):
     import argparse
@@ -36,7 +36,7 @@ def run(name, sizes=14, step=2, nopt=2**15):
     parser.add_argument('--repeat',required=False, default=1,    help="Iterations inside measured region")
     parser.add_argument('--usm',   required=False, action='store_true',  help="Use USM Shared or pure numpy")
     parser.add_argument('--test',  required=False, action='store_true', help="Check for correctness by comparing output with naieve Python version")
-	
+
     args = parser.parse_args()
     sizes= int(args.steps)
     step = int(args.step)
@@ -54,7 +54,7 @@ def run(name, sizes=14, step=2, nopt=2**15):
         build_string = ['make']
         utils.run_command(build_string, verbose=True)
         exec_name = "./black_scholes"
-        
+
     if args.test:
         #run sequential python
         price, strike, t, p_call, p_put = gen_data_np(nopt)
@@ -70,17 +70,17 @@ def run(name, sizes=14, step=2, nopt=2**15):
 
         #read output of dpcpp into n_call, n_put
         n_put = np.fromfile("put.bin", np.float64)
-        
+
         #compare outputs
         if np.allclose(n_call, p_call) and np.allclose(n_put, p_put):
             print("Test succeeded\n")
         else:
-            print("Test failed\n")        
+            print("Test failed\n")
         return
 
     if os.path.isfile('runtimes.csv'):
         os.remove('runtimes.csv')
-        
+
     for i in xrange(sizes):
         # generate input data
         ip_data_to_file(nopt)

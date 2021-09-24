@@ -70,8 +70,8 @@ def run(name, sizes=10, step=2, nopt=2**10):
             print("Test succeeded. Python predictions: ", p_predictions, " DPC++ predictions: ", n_predictions, "\n")
         else:
             print("Test failed. Python predictions: ", p_predictions, " DPC++ predictions: ", n_predictions, "\n")
-        return        
-        
+        return
+
 
     if os.path.isfile('runtimes.csv'):
         os.remove('runtimes.csv')

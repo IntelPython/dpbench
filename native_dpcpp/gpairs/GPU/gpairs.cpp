@@ -28,13 +28,13 @@ void call_gpairs_naieve( queue* q, size_t npoints, tfloat* x1, tfloat* y1, tfloa
       tfloat dsq = dx*dx + dy*dy + dz*dz;
 
       int k = nbins - 1;
-      while(dsq <= rbins[k]) {	  
+      while(dsq <= rbins[k]) {
 	results_test[k-1] += wprod;
 	k = k-1;
 	if (k <=0) break;
       }
     }
-  }  
+  }
 }
 
 void call_gpairs( queue* q, size_t npoints, tfloat* x1, tfloat* y1, tfloat* z1, tfloat* w1, tfloat* x2,tfloat* y2,tfloat* z2, tfloat* w2,tfloat* rbins,tfloat* results_test) {
@@ -66,11 +66,11 @@ void call_gpairs( queue* q, size_t npoints, tfloat* x1, tfloat* y1, tfloat* z1, 
   q->memcpy(d_results_test, results_test, (DEFAULT_NBINS-1) * sizeof(tfloat));
 
   q->wait();
-  
+
   q->submit([&](handler& h) {
       h.parallel_for<class theKernel>(range<1>{npoints}, [=](id<1> myID) {
   	  size_t i = myID[0];
-	  
+
   	  tfloat px = d_x1[i];
   	  tfloat py = d_y1[i];
   	  tfloat pz = d_z1[i];
@@ -87,16 +87,16 @@ void call_gpairs( queue* q, size_t npoints, tfloat* x1, tfloat* y1, tfloat* z1, 
   	    tfloat dsq = dx*dx + dy*dy + dz*dz;
 
   	    int k = nbins - 1;
-  	    while(dsq <= d_rbins[k]) {	  
+  	    while(dsq <= d_rbins[k]) {
   	      sycl::ext::oneapi::atomic_ref<tfloat, sycl::ext::oneapi::memory_order::relaxed,
   	      			       sycl::ext::oneapi::memory_scope::device,
   	      			       sycl::access::address_space::global_space>atomic_data(d_results_test[k-1]);
-	  
+
   	      atomic_data += wprod;
   	      k = k-1;
   	      if (k <=0) break;
   	    }
-  	  }	  
+  	  }
   	});
     });
 
@@ -110,11 +110,11 @@ void call_gpairs( queue* q, size_t npoints, tfloat* x1, tfloat* y1, tfloat* z1, 
   q->memcpy(y2, d_y2, npoints * sizeof(tfloat));
   q->memcpy(z2, d_z2, npoints * sizeof(tfloat));
   q->memcpy(w2, d_w2, npoints * sizeof(tfloat));
-  q->memcpy(d_rbins, rbins, DEFAULT_NBINS * sizeof(tfloat));  
+  q->memcpy(d_rbins, rbins, DEFAULT_NBINS * sizeof(tfloat));
   q->memcpy(results_test, d_results_test, (DEFAULT_NBINS-1) * sizeof(tfloat));
 
   q->wait();
-  
+
   free(d_x1,q->get_context());
   free(d_y1,q->get_context());
   free(d_z1,q->get_context());

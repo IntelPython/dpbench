@@ -80,10 +80,10 @@ OPTIMAL_PARAMS = {
     DataSize(n_samples=2**14, n_features=10): Params(eps=0.6, minpts=20),
     DataSize(n_samples=2**15, n_features=2): Params(eps=0.0695, minpts=4),
     DataSize(n_samples=2**15, n_features=3): Params(eps=0.108, minpts=6),
-    DataSize(n_samples=2**15, n_features=10): Params(eps=0.6, minpts=20),    
+    DataSize(n_samples=2**15, n_features=10): Params(eps=0.6, minpts=20),
     DataSize(n_samples=2**16, n_features=2): Params(eps=0.0695, minpts=4),
     DataSize(n_samples=2**16, n_features=3): Params(eps=0.108, minpts=6),
-    DataSize(n_samples=2**16, n_features=10): Params(eps=0.6, minpts=20),    
+    DataSize(n_samples=2**16, n_features=10): Params(eps=0.6, minpts=20),
 }
 
 

@@ -13,7 +13,7 @@ BLOCK_SIZE_1_Y = 16
 @numba_dppy.kernel
 def compute_ratio_kernel(m, a, size, t):
     i = numba_dppy.get_global_id(0)
-    
+
     if i < size - 1 - t:
          m[size * (i + t + 1) + t] = a[size * (i + t + 1) + t] / a[size * t + t]  # ratio
 
@@ -21,7 +21,7 @@ def compute_ratio_kernel(m, a, size, t):
 @numba_dppy.kernel
 def forward_sub_kernel(m, a, b, size, t):
 
-    global_id_x = numba_dppy.get_global_id(0) 
+    global_id_x = numba_dppy.get_global_id(0)
     global_id_y = numba_dppy.get_global_id(1)
 
     if (global_id_x < size - 1 - t and global_id_y < size - t):

@@ -88,7 +88,7 @@ void run_knn(double* train, size_t *train_labels, double* test, size_t train_nro
     for (size_t i = 0; i < test_size; ++i) {
       //std::array<std::pair<double, size_t>, NEAREST_NEIGHS> queue_neighbors;
       struct neighbors queue_neighbors[NEAREST_NEIGHS] = {{ 0 }};
-      
+
       //count distances
       for (int j = 0; j < NEAREST_NEIGHS; ++j) {
       	queue_neighbors[j].dist = euclidean_dist(train, j, test, i);
@@ -105,7 +105,7 @@ void run_knn(double* train, size_t *train_labels, double* test, size_t train_nro
       	  //queue_neighbors[NEAREST_NEIGHS-1] = new_neighbor;
       	  queue_neighbors[NEAREST_NEIGHS-1].dist = dist;
       	  queue_neighbors[NEAREST_NEIGHS-1].label = train_labels[j];
-	  
+
       	  push_queue(queue_neighbors, dist, train_labels[j], NEAREST_NEIGHS-1);
       	}
       }

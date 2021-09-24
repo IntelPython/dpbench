@@ -145,12 +145,12 @@ double* getOutputMom2(queue* q, size_t nPoints, size_t nOut) {
             Q1[idx2] = genRand() * genRand();
         }
     }
-    
+
     double *d_C1Pointer = (double*) malloc_shared(commonSize * sizeof(double), *q);
     double *d_F1Pointer = (double*) malloc_shared(commonSize * sizeof(double), *q);
     double *d_Q1Pointer = (double*) malloc_shared(commonSize * sizeof(double), *q);
     double *d_outputPointer = (double*) malloc_shared(outputSize * sizeof(double), *q);
-    
+
     q->memcpy(d_C1Pointer, C1.data(), commonSize * sizeof(double));
     q->memcpy(d_F1Pointer, F1.data(), commonSize * sizeof(double));
     q->memcpy(d_Q1Pointer, Q1.data(), commonSize * sizeof(double));
@@ -261,9 +261,9 @@ double* rambo(queue* q, size_t nPoints) {
   rand_generator.seed(SEED);
   size_t ecms = 100;
   size_t nOut = NOUT;
-  
+
   return generatePoints(q, ecms, nPoints, nOut);
-    
+
     // size_t eSize2 = e.size() / nPoints / SIZE3;
     // vector<double> h(SIZE3 * nPoints);
 

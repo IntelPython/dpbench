@@ -94,7 +94,7 @@ size_t dbscan_reference_no_mem_save(queue* q, size_t n, size_t dim, double *data
 
     q->wait();
 
-    // #pragma omp target teams distribute parallel for simd map(to: data[0:n*dim]) map(from: assignments[0:n], indices[0:n2]) map(tofrom: sizes[0:n]) //thread_limit(16) //, distances[0:n2]    
+    // #pragma omp target teams distribute parallel for simd map(to: data[0:n*dim]) map(from: assignments[0:n], indices[0:n2]) map(tofrom: sizes[0:n]) //thread_limit(16) //, distances[0:n2]
     q->submit([&](handler& h) {
 	h.parallel_for<class theKernel>(range<1>{nBlocks}, [=](id<1> myID) {
 	    size_t block = myID[0];
@@ -106,7 +106,7 @@ size_t dbscan_reference_no_mem_save(queue* q, size_t n, size_t dim, double *data
 	    getNeighborhood(n, dim, d_data, i2 - i1, d_data + i1 * dim, eps, d_indices + i1 * n, d_sizes + i1); //, distances + i1 * n
 	  });
       });
-    
+
     q->wait();
 
     // copy result back to host

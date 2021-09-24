@@ -24,7 +24,7 @@ void l2_distance( queue* q, size_t nopt, tfloat * x1, tfloat * x2, tfloat* dista
 
   q->submit([&](handler& h) {
       auto sumr = sycl::ONEAPI::reduction(sum, sycl::ONEAPI::plus<>());
-      
+
       h.parallel_for<class theKernel>(sycl::nd_range<1>{nopt,256}, sumr, [=](sycl::nd_item<1> item, auto& sumr_arg) {
 	  size_t i = item.get_global_id(0);
 	  tfloat a = x1[i] - x2[i];
@@ -33,5 +33,5 @@ void l2_distance( queue* q, size_t nopt, tfloat * x1, tfloat * x2, tfloat* dista
 	});
     }).wait();
 
-  *distance_op = SQRT(*sum);      
+  *distance_op = SQRT(*sum);
 }

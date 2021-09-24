@@ -5,7 +5,7 @@
  */
 
 #define _XOPEN_SOURCE
-#define _DEFAULT_SOURCE 
+#define _DEFAULT_SOURCE
 #include <stdlib.h>
 #include <stdio.h>
 #include <omp.h>
@@ -23,7 +23,7 @@ void InitData( size_t nopt, struct point* *x1, struct point* *x2, tfloat** dista
 {
   struct point *tx1, *tx2;
   size_t i;
-  
+
   /* Allocate aligned memory */
   tx1 = (struct point*)_mm_malloc( nopt * sizeof(struct point), ALIGN_FACTOR);
   tx2 = (struct point*)_mm_malloc( nopt * sizeof(struct point), ALIGN_FACTOR);

@@ -6,7 +6,7 @@ LDFLAGS = -lm
 CC = dpcpp
 
 # link objects(binaries) together
-pathfinder: main.o 
+pathfinder: main.o
 	$(CC) main.o $(LDFLAGS) -o pathfinder
 
 # compile main function file into object (binary)

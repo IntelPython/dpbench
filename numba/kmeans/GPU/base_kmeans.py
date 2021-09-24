@@ -64,10 +64,10 @@ def gen_data_usm(nopt):
     arrayC_usm.usm_data.copy_from_host(arrayC.reshape((-1)).view("u1"))
     arrayCsum_usm.usm_data.copy_from_host(arrayCsum.reshape((-1)).view("u1"))
     arrayCnumpoint_usm.usm_data.copy_from_host(arrayCnumpoint.view("u1"))
-    
+
     return (X_usm, arrayPclusters_usm, arrayC_usm, arrayCsum_usm, arrayCnumpoint_usm)
-    
-##############################################	
+
+##############################################
 
 def run(name, alg, sizes=3, step=2, nopt=2**13):
     import argparse
@@ -80,7 +80,7 @@ def run(name, alg, sizes=3, step=2, nopt=2**13):
     parser.add_argument('--json',  required=False, default=__file__.replace('py','json'), help="output json data filename")
     parser.add_argument('--usm',   required=False, action='store_true',  help="Use USM Shared or pure numpy")
     parser.add_argument('--test',  required=False, action='store_true', help="Check for correctness by comparing output with naieve Python version")
-    
+
     args = parser.parse_args()
     sizes= int(args.steps)
     step = int(args.step)
@@ -89,7 +89,7 @@ def run(name, alg, sizes=3, step=2, nopt=2**13):
 
     f=open("perf_output.csv",'w')
     f2 = open("runtimes.csv",'w',1)
-     
+
     output = {}
     output['name']      = name
     output['sizes']     = sizes
@@ -115,7 +115,7 @@ def run(name, alg, sizes=3, step=2, nopt=2**13):
             arrayCsum_usm.usm_data.copy_to_host(arrayCsum_n.reshape((-1)).view("u1"))
 
             arrayCnumpoint_n = np.empty(NUMBER_OF_CENTROIDS, dtype=np.int32)
-            arrayCnumpoint_usm.usm_data.copy_to_host(arrayCnumpoint_n.view("u1"))            
+            arrayCnumpoint_usm.usm_data.copy_to_host(arrayCnumpoint_n.view("u1"))
         else:
             X_n,arrayPclusters_n,arrayC_n,arrayCsum_n,arrayCnumpoint_n = gen_data_np(nopt)
 
@@ -125,7 +125,7 @@ def run(name, alg, sizes=3, step=2, nopt=2**13):
         if np.allclose(arrayC_n, arrayC_p) and np.allclose(arrayCsum_n, arrayCsum_p) and np.allclose(arrayCnumpoint_n, arrayCnumpoint_p):
             print("Test succeeded\n", "arrayC_Python:", arrayC_p, "\n arrayC_numba:", arrayC_n,
                   "arrayCsum_python:", arrayCsum_p, "\n arracyCsum_numba:", arrayCsum_n,
-                  "arrayCnumpoint_python:", arrayCnumpoint_p, "\n arrayCnumpoint_numba:", arrayCnumpoint_n)            
+                  "arrayCnumpoint_python:", arrayCnumpoint_p, "\n arrayCnumpoint_numba:", arrayCnumpoint_n)
         else:
             print("Test failed\n", "arrayC_Python:", arrayC_p, "\n arrayC_numba:", arrayC_n,
                   "arrayCsum_python:", arrayCsum_p, "\n arracyCsum_numba:", arrayCsum_n,
@@ -137,7 +137,7 @@ def run(name, alg, sizes=3, step=2, nopt=2**13):
             X,arrayPclusters,arrayC,arrayCsum,arrayCnumpoint = gen_data_usm(nopt)
         else:
             X,arrayPclusters,arrayC,arrayCsum,arrayCnumpoint = gen_data_np(nopt)
-            
+
         iterations = xrange(repeat)
         sys.stdout.flush()
 

@@ -12,7 +12,7 @@
 /* void kmeans(Point* h_points, Centroid* h_centroids, int num_points, int num_centroids); */
 
 void runKmeans(cl::sycl::queue* q,
-	       Point* points, 
+	       Point* points,
 	       Centroid* centroids,
 	       size_t NUMBER_OF_POINTS,
 	       size_t NUMBER_OF_CENTROIDS

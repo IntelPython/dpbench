@@ -19,5 +19,5 @@ def pw_distance(X1,X2,D):
 def pw_distance_dpctl(X1,X2,D):
     with dpctl.device_context("opencl:cpu"):
         pw_distance(X1,X2,D)
-        
+
 base_pair_wise.run("Numba FastMath", pw_distance_dpctl)

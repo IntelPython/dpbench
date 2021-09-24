@@ -51,7 +51,7 @@ int main(int argc, char * argv[]) {
       if (strcmp(test_str, argv[3]) == 0) {
 	test = true;
       }
-    }    
+    }
 
     FILE *fptr;
     fptr = fopen("perf_output.csv", "w");
@@ -74,7 +74,7 @@ int main(int argc, char * argv[]) {
     } catch (sycl::exception &re) {
       std::cerr << "No GPU device found\n";
       exit(1);
-    }    
+    }
 
     /* Warm up cycle */
     double * output = rambo(q, nPoints);
@@ -93,7 +93,7 @@ int main(int argc, char * argv[]) {
     fflush(stdout);
     fprintf(fptr, "%zu,%.6lf\n", nPoints, MOPS);
     fprintf(fptr1, "%zu,%.6lf\n", nPoints, time);
-    
+
     fclose(fptr);
     fclose(fptr1);
 

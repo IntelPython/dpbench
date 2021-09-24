@@ -76,7 +76,7 @@ def gen_data(nopt):
         rnd.uniform(TL, TH, nopt),
     )
 
-##############################################	
+##############################################
 
 def run(name, alg, sizes=14, step=2, nopt=2**15, nparr=True, dask=False, pass_args=False):
     import argparse
@@ -88,7 +88,7 @@ def run(name, alg, sizes=14, step=2, nopt=2**15, nparr=True, dask=False, pass_ar
     parser.add_argument('--repeat',required=False, default=100,    help="Iterations inside measured region")
     parser.add_argument('--dask',  required=False, default="sq",   help="Dask scheduler: sq, mt, mp")
     parser.add_argument('--text',  required=False, default="",     help="Print with each result")
-	
+
     args = parser.parse_args()
     sizes= int(args.steps)
     step = int(args.step)
@@ -112,7 +112,7 @@ def run(name, alg, sizes=14, step=2, nopt=2**15, nparr=True, dask=False, pass_ar
     rnd.seed(SEED)
     f1 = open("perf_output.csv",'w',1)
     f2 = open("runtimes.csv",'w',1)
-    
+
     for i in xrange(sizes):
         price, strike, t = gen_data(nopt)
         if not nparr:

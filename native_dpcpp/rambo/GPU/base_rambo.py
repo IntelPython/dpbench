@@ -12,7 +12,7 @@ try:
     xrange
 except NameError:
     xrange = range
-    
+
 # create input data, call blackscholes computation function (alg)
 def run(name, sizes=5, step=2, nopt=2**20):
     import argparse
@@ -23,7 +23,7 @@ def run(name, sizes=5, step=2, nopt=2**20):
     parser.add_argument('--repeat',required=False, default=1,    help="Iterations inside measured region")
     parser.add_argument('--usm',   required=False, action='store_true',  help="Use USM Shared or pure numpy")
     parser.add_argument('--test',  required=False, action='store_true', help="Check for correctness by comparing output with naieve Python version")
-	
+
     args = parser.parse_args()
     sizes= int(args.steps)
     step = int(args.step)
@@ -41,7 +41,7 @@ def run(name, sizes=5, step=2, nopt=2**20):
         build_string = ['make']
         utils.run_command(build_string, verbose=True)
         exec_name = "./rambo"
-        
+
     if args.test:
         e_p = rambo_python(nopt)
 
@@ -55,11 +55,11 @@ def run(name, sizes=5, step=2, nopt=2**20):
             print("Test succeeded\n")
         else:
             print("Test failed\n", "Python: ", e_p, "\n Numba: ", e_n)
-        return            
+        return
 
     if os.path.isfile('runtimes.csv'):
         os.remove('runtimes.csv')
-        
+
     for i in xrange(sizes):
         # run the C program
         run_cmd = [exec_name, str(nopt), str(repeat)]

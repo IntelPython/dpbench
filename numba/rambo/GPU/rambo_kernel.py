@@ -68,7 +68,7 @@ def get_output_mom2(C1, F1, Q1, output, nout):
 def call_ocl(nevts, nout):
     C1, F1, Q1 = gen_rand_data(nevts, nout)
     output = numpy.empty((nevts, nout, 4))
-    
+
     with dpctl.device_context(base_rambo.get_device_selector()):
         get_output_mom2[nevts,numba_dppy.DEFAULT_LOCAL_SIZE](C1, F1, Q1, output, nout)
 
@@ -95,7 +95,7 @@ def GeneratePoints(ecms, nevts, nout):
     # B = numpy.zeros(output_mom_sum.shape)
     # B[..., 1:4] = -output_mom_sum[..., 1:4] / output_mass
     # B = numpy.repeat(B[:, numpy.newaxis, :], nout, axis=1)
-    
+
     # A = 1. / (1. + G)
 
     # E = output_particles[..., 0]

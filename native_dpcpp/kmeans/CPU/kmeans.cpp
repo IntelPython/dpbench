@@ -16,7 +16,7 @@ using namespace cl::sycl;
 void groupByCluster(queue* q,
 		    Point* points,
 		    Centroid* centroids,
-		    int num_centroids, 
+		    int num_centroids,
 		    size_t num_points
 		    ) {
 
@@ -29,7 +29,7 @@ void groupByCluster(queue* q,
   q->submit([&](handler& h) {
       h.parallel_for<class theKernel>(range<1>{num_points}, [=](id<1> myID) {
   	  int i0 = myID[0];
-  
+
   	  float minor_distance = -1.0;
 
   	  for (int i1 = 0; i1 < num_centroids; i1++) {
@@ -45,7 +45,7 @@ void groupByCluster(queue* q,
     });
 
   q->wait();
-  
+
   q->memcpy(points, d_points, num_points * sizeof(Point));
 
   q->wait();
@@ -56,9 +56,9 @@ void groupByCluster(queue* q,
 
 
 void calCentroidsSum(
-    Point* points, 
+    Point* points,
     Centroid* centroids,
-    int num_centroids, 
+    int num_centroids,
     size_t num_points
 ) {
 #pragma omp parallel for simd
@@ -78,7 +78,7 @@ void calCentroidsSum(
 
 
 void updateCentroids(
-    Centroid* centroids, 
+    Centroid* centroids,
     int num_centroids
 ) {
 #pragma omp parallel for simd
@@ -93,27 +93,27 @@ void updateCentroids(
 
 void kmeans(queue* q,
 	    Point* h_points,
-	    Centroid* h_centroids, 
+	    Centroid* h_centroids,
 	    size_t num_points,
 	    int num_centroids
 ) {
     for(int i = 0; i < ITERATIONS; i++) {
       groupByCluster(q,
-		     h_points, 
+		     h_points,
 		     h_centroids,
-		     num_centroids, 
+		     num_centroids,
 		     num_points
         );
-        
+
         calCentroidsSum(
-            h_points, 
+            h_points,
             h_centroids,
-            num_centroids, 
+            num_centroids,
             num_points
         );
 
         updateCentroids(
-            h_centroids, 
+            h_centroids,
             num_centroids
         );
     }
@@ -124,7 +124,7 @@ void printCentroids(
 		    int NUMBER_OF_CENTROIDS
 ) {
     for (int i = 0; i < NUMBER_OF_CENTROIDS; i++) {
-        printf("[x=%lf, y=%lf, x_sum=%lf, y_sum=%lf, num_points=%i]\n", 
+        printf("[x=%lf, y=%lf, x_sum=%lf, y_sum=%lf, num_points=%i]\n",
                centroids[i].x, centroids[i].y, centroids[i].x_sum,
                centroids[i].y_sum, centroids[i].num_points);
     }
@@ -134,7 +134,7 @@ void printCentroids(
 
 
 void runKmeans(queue* q,
-	       Point* points, 
+	       Point* points,
 	       Centroid* centroids,
 	       size_t NUMBER_OF_POINTS,
 	       int NUMBER_OF_CENTROIDS

@@ -55,7 +55,7 @@ void InitData(queue* q, size_t npoints, tfloat **x1, tfloat **y1, tfloat **z1, t
     exit(-1);
   }
 
-  ReadInputFromBinFile<tfloat> ("x1.bin", reinterpret_cast<char *>(t_x1), npoints);  
+  ReadInputFromBinFile<tfloat> ("x1.bin", reinterpret_cast<char *>(t_x1), npoints);
   ReadInputFromBinFile<tfloat> ("y1.bin", reinterpret_cast<char *>(t_y1), npoints);
   ReadInputFromBinFile<tfloat> ("z1.bin", reinterpret_cast<char *>(t_z1), npoints);
   ReadInputFromBinFile<tfloat> ("w1.bin", reinterpret_cast<char *>(t_w1), npoints);

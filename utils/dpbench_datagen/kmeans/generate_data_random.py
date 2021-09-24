@@ -25,7 +25,7 @@ def __dump_binary__(X,arrayPclusters,arrayC,arrayCsum,arrayCnumpoint):
 
     # with open('arrayCnumpoint.bin', 'w') as fd:
     #     arrayCnumpoint.tofile(fd)
-        
+
 #write input data to a file in text format
 def __dump_text__(X,arrayPclusters,arrayC,arrayCsum,arrayCnumpoint):
     with open('X.txt', 'w') as fd:
@@ -36,13 +36,13 @@ def __dump_text__(X,arrayPclusters,arrayC,arrayCsum,arrayCnumpoint):
 
     # with open('arrayC.txt', 'w') as fd:
     #     arrayC.tofile(fd, '\n', '%s')
- 
+
     # with open('arrayCsum.txt', 'w') as fd:
     #     arrayCsum.tofile(fd, '\n', '%s')
 
     # with open('arrayCnumpoint.txt', 'w') as fd:
-    #     arrayCnumpoint.tofile(fd, '\n', '%s')        
-       
+    #     arrayCnumpoint.tofile(fd, '\n', '%s')
+
 # call numpy.random.uniform to generate input data
 def gen_rand_data(nopt, dims = 2, NUMBER_OF_CENTROIDS = 10, dtype = np.float64):
     rnd.seed(SEED)

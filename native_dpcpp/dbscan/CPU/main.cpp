@@ -153,7 +153,7 @@ int main(int argc, char * argv[]) {
     std::cerr << "No GPU device found\n";
     exit(1);
   }
-  
+
   size_t *assignments = new size_t[nPoints];
   double *data = readData(nPoints, nFeatures);
 
@@ -183,12 +183,12 @@ int main(int argc, char * argv[]) {
     } else {
       std::cout << "Unable to open output file.\n";
     }
-  }    
-    
+  }
+
   delete [] data;
   delete [] assignments;
   fclose(fptr);
   fclose(fptr1);
-  
+
   return 0;
 }

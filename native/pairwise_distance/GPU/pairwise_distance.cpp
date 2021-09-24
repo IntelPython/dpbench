@@ -34,5 +34,5 @@ void pairwise_distance( size_t nopt, struct point * p1, struct point * p2, tfloa
 	distance_op[i*nopt + j] = sqrt(d);
       }
     }
-  }   
+  }
 }

@@ -5,7 +5,7 @@
  */
 
 #define _XOPEN_SOURCE
-#define _DEFAULT_SOURCE 
+#define _DEFAULT_SOURCE
 #include <stdlib.h>
 #include <stdio.h>
 #include <omp.h>
@@ -25,7 +25,7 @@ void InitData( queue* q, size_t nopt, struct point* *x1, struct point* *x2, tflo
 {
   struct point *tx1, *tx2;
   size_t i;
-  
+
   /* Allocate aligned memory */
   tx1 = (struct point*)malloc_shared( nopt * sizeof(struct point), *q);
   tx2 = (struct point*)malloc_shared( nopt * sizeof(struct point), *q);

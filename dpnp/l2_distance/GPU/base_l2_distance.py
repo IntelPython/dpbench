@@ -31,7 +31,7 @@ def gen_data(nopt,dims):
         rnd.random((nopt, dims))
     )
 
-##############################################	
+##############################################
 
 def run(name, alg, sizes=10, step=2, nopt=2**16):
     import argparse
@@ -42,7 +42,7 @@ def run(name, alg, sizes=10, step=2, nopt=2**16):
     parser.add_argument('--repeat',required=False, default=100,    help="Iterations inside measured region")
     parser.add_argument('--text',  required=False, default="",     help="Print with each result")
     parser.add_argument('-d', type=int, default=1, help='Dimensions')
-    
+
     args = parser.parse_args()
     sizes= int(args.steps)
     step = int(args.step)
@@ -53,7 +53,7 @@ def run(name, alg, sizes=10, step=2, nopt=2**16):
     rnd.seed(SEED)
     f=open("perf_output.csv",'w',1)
     f2 = open("runtimes.csv",'w',1)
-    
+
     for i in xrange(sizes):
         X,Y = gen_data(nopt,dims)
         iterations = xrange(repeat)
@@ -67,7 +67,7 @@ def run(name, alg, sizes=10, step=2, nopt=2**16):
         print("Time:",time)
         f.write(str(nopt) + "," + str(mops*2*repeat) + "\n")
         f2.write(str(nopt) + "," + str(time) + "\n")
-        
+
         nopt *= step
         repeat -= step
         if repeat < 1:

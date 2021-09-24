@@ -15,7 +15,7 @@ try:
 except NameError:
     xrange = range
 
-NUMBER_OF_CENTROIDS = 10    
+NUMBER_OF_CENTROIDS = 10
 
 # create input data, call blackscholes computation function (alg)
 def run(name, sizes=10, step=2, nopt=2**10):
@@ -51,7 +51,7 @@ def run(name, sizes=10, step=2, nopt=2**10):
     if args.test:
         X,arrayPclusters_p,arrayC_p,arrayCsum_p,arrayCnumpoint_p = gen_rand_data(nopt, dtype=np.float32)
         kmeans_python(X, arrayPclusters_p, arrayC_p, arrayCsum_p, arrayCnumpoint_p, nopt, NUMBER_OF_CENTROIDS)
-        
+
         #run dpcpp
         gen_data_to_file(nopt, dtype=np.float32)
         # run the C program

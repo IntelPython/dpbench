@@ -10,7 +10,7 @@
 void call_gpairs( size_t npoints, tfloat* x1, tfloat* y1, tfloat* z1, tfloat* w1, tfloat* x2,tfloat* y2,tfloat* z2, tfloat* w2,tfloat* rbins,tfloat* results_test) {
 
   int nbins = DEFAULT_NBINS;
-  
+
 #pragma omp target teams distribute					\
   parallel for simd
   for (unsigned int i = 0; i < npoints; i++) {

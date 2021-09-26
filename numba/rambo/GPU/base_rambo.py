@@ -2,8 +2,9 @@
 #
 # SPDX-License-Identifier: MIT
 
-import numpy.random as rnd
 import json,os
+import numpy as np
+from dpbench_python.rambo.rambo_python import rambo_python
 
 try:
     import itimer as it
@@ -38,12 +39,10 @@ def get_device_selector (is_gpu = True):
 
     return os.environ.get('SYCL_DEVICE_FILTER')
 
-SEED = 7777777
-
 ###############################################
 
 
-def run(name, alg, sizes=6, step=2, nopt=2**13):
+def run(name, alg, sizes=5, step=2, nopt=2**20):
     import argparse
     parser = argparse.ArgumentParser()
     parser.add_argument('--steps',  required=False, default=sizes,  help="Number of steps")
@@ -52,6 +51,8 @@ def run(name, alg, sizes=6, step=2, nopt=2**13):
     parser.add_argument('--repeat', required=False, default=1,    help="Iterations inside measured region")
     parser.add_argument('--text',   required=False, default="",     help="Print with each result")
     parser.add_argument('--json',  required=False, default=__file__.replace('py','json'), help="output json data filename")
+    parser.add_argument('--usm',   required=False, action='store_true',  help="Use USM Shared or pure numpy")
+    parser.add_argument('--test',  required=False, action='store_true', help="Check for correctness by comparing output with naieve Python version")
 
     args = parser.parse_args()
     sizes = int(args.steps)
@@ -64,10 +65,17 @@ def run(name, alg, sizes=6, step=2, nopt=2**13):
     output['sizes']     = sizes
     output['step']      = step
     output['repeat']    = repeat
-    output['randseed']  = SEED
     output['metrics']   = []
 
-    rnd.seed(SEED)
+    if args.test:
+        e_p = rambo_python(nopt)
+        e_n = alg(nopt)
+
+        if np.allclose(e_p, e_n):
+            print("Test succeeded\n")
+        else:
+            print("Test failed\n")
+        return
 
     f = open("perf_output.csv", 'w', 1)
     f2 = open("runtimes.csv", 'w', 1)

@@ -61,7 +61,7 @@ def sort_queue(queue_neighbors):
         push_queue(queue_neighbors, queue_neighbors[i], i)
 
 
-@numba_dppy.kernel
+@numba_dppy.kernel(access_types={"read_only": ["train", "train_labels", "test","votes_to_classes_lst", "queue_neighbors_lst"], "write_only": ["predictions"]})
 def run_knn_kernel(train, train_labels, test, k, classes_num, train_size, predictions, queue_neighbors_lst,
                    votes_to_classes_lst, data_dim):
     i = numba_dppy.get_global_id(0)
@@ -81,7 +81,8 @@ def run_knn_kernel(train, train_labels, test, k, classes_num, train_size, predic
         queue_neighbors[j, 1] = train_labels[j]
 
     # sort_queue(queue_neighbors)
-    for j in range(len(queue_neighbors)):
+    #for j in range(len(queue_neighbors)):
+    for j in range(k):
         # push_queue(queue_neighbors, queue_neighbors[i], i)
         new_distance = queue_neighbors[j, 0]
         new_neighbor_label = queue_neighbors[j, 1]
@@ -126,7 +127,7 @@ def run_knn_kernel(train, train_labels, test, k, classes_num, train_size, predic
 
     votes_to_classes = votes_to_classes_lst[i]
 
-    for j in range(len(queue_neighbors)):
+    for j in range(k):
         votes_to_classes[int(queue_neighbors[j, 1])] += 1
 
     max_ind = 0

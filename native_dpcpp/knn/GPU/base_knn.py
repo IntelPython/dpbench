@@ -16,7 +16,7 @@ except NameError:
     xrange = range
 
 # create input data, call blackscholes computation function (alg)
-def run(name, sizes=10, step=2, nopt=2**10):
+def run(name, sizes=5, step=2, nopt=2**20):
     parser = argparse.ArgumentParser()
     parser.add_argument('--steps', type=int, default=sizes,
                         help='Number of steps')

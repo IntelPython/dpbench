@@ -169,7 +169,7 @@ int main(int argc, char *argv[])
     {
         q = new queue{gpu_selector()};
     }
-    catch (runtime_error &re)
+    catch (sycl::exception &re)
     {
         std::cerr << "No GPU device found\n";
         exit(1);
@@ -204,12 +204,12 @@ int main(int argc, char *argv[])
     q->wait();
 
     /* Warm up cycle */
-    run_knn_usm(q, d_train, d_train_labels, d_test, nPoints_train, nPoints, d_predictions, d_votes_to_classes, d_queue_neighbors_lst);
+    run_knn_usm(q, d_train, d_train_labels, d_test, nPoints_train, nPoints, d_predictions, d_votes_to_classes/*, d_queue_neighbors_lst*/);
 
     t1 = timer_rdtsc();
     for (int j = 0; j < repeat; j++)
     {
-      run_knn_usm(q, d_train, d_train_labels, d_test, nPoints_train, nPoints, d_predictions, d_votes_to_classes, d_queue_neighbors_lst);
+      run_knn_usm(q, d_train, d_train_labels, d_test, nPoints_train, nPoints, d_predictions, d_votes_to_classes/*, d_queue_neighbors_lst*/);
     }
     t2 = timer_rdtsc();
 

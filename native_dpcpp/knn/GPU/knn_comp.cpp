@@ -86,13 +86,13 @@ size_t simple_vote(struct neighbors *neighbors)
 }
 
 void run_knn_usm(queue *q, double *d_train, size_t *d_train_labels, double *d_test, size_t train_nrows, size_t test_size,
-	     size_t *d_predictions, double *d_votes_to_classes, struct neighbors *d_queue_neighbors_lst)
+	     size_t *d_predictions, double *d_votes_to_classes/*, struct neighbors *d_queue_neighbors_lst*/)
 {
   q->submit([&](handler &h){
       h.parallel_for<class theKernel>(range<1>{test_size}, [=](id<1> myID) {
 	  size_t i = myID[0];
-	  //struct neighbors queue_neighbors[NEAREST_NEIGHS];
-	  struct neighbors* queue_neighbors = &d_queue_neighbors_lst[i*NEAREST_NEIGHS];
+	  struct neighbors queue_neighbors[NEAREST_NEIGHS];
+	  //struct neighbors* queue_neighbors = &d_queue_neighbors_lst[i*NEAREST_NEIGHS];
 
 	  //count distances
 	  for (int j = 0; j < NEAREST_NEIGHS; ++j) {

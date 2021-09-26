@@ -128,7 +128,7 @@ int main(int argc, char *argv[])
     double t1 = 0, t2 = 0;
 
     size_t nPoints_train = pow(2, 10);
-    size_t nPoints = pow(2, 10);
+    size_t nPoints = pow(2, 20);
 
     bool test = false;
 
@@ -149,7 +149,7 @@ int main(int argc, char *argv[])
     }
 
     FILE *fptr;
-    fptr = fopen("perf_output.csv", "w");
+    fptr = fopen("perf_output.csv", "a");
     if (fptr == NULL)
     {
         printf("Error!");
@@ -157,7 +157,7 @@ int main(int argc, char *argv[])
     }
 
     FILE *fptr1;
-    fptr1 = fopen("runtimes.csv", "w");
+    fptr1 = fopen("runtimes.csv", "a");
     if (fptr1 == NULL)
     {
         printf("Error!");
@@ -169,7 +169,7 @@ int main(int argc, char *argv[])
     {
         q = new queue{gpu_selector()};
     }
-    catch (runtime_error &re)
+    catch (sycl::exception &re)
     {
         std::cerr << "No GPU device found\n";
         exit(1);

@@ -89,7 +89,7 @@ void run_knn(queue *q, double *train, size_t *train_labels, double *test, size_t
 size_t *predictions, double *votes_to_classes)
 {
   double *d_votes_to_classes = (double *)malloc_shared(test_size * NUM_CLASSES * sizeof(double), *q);
-  struct neighbors *d_queue_neighbors_lst = (struct neighbors *)malloc_shared(test_size * NEAREST_NEIGHS * sizeof(struct neighbors), *q);
+  //struct neighbors *d_queue_neighbors_lst = (struct neighbors *)malloc_shared(test_size * NEAREST_NEIGHS * sizeof(struct neighbors), *q);
 
   double *d_train = (double *)malloc_shared(train_nrows * DATADIM * sizeof(double), *q);
   size_t *d_train_labels = (size_t *)malloc_shared(train_nrows * sizeof(size_t), *q);
@@ -108,8 +108,8 @@ size_t *predictions, double *votes_to_classes)
   q->submit([&](handler &h){
       h.parallel_for<class theKernel>(range<1>{test_size}, [=](id<1> myID) {
 	  size_t i = myID[0];
-	  //struct neighbors queue_neighbors[NEAREST_NEIGHS];
-	  struct neighbors* queue_neighbors = &d_queue_neighbors_lst[i*NEAREST_NEIGHS];
+	  struct neighbors queue_neighbors[NEAREST_NEIGHS];
+	  //struct neighbors* queue_neighbors = &d_queue_neighbors_lst[i*NEAREST_NEIGHS];
 
 	  //count distances
 	  for (int j = 0; j < NEAREST_NEIGHS; ++j) {
@@ -201,6 +201,6 @@ size_t *predictions, double *votes_to_classes)
   free(d_test, q->get_context());
   free(d_train_labels, q->get_context());
   free(d_predictions, q->get_context());
-  free(d_queue_neighbors_lst, q->get_context());
+  //free(d_queue_neighbors_lst, q->get_context());
   free(d_votes_to_classes, q->get_context());
 }

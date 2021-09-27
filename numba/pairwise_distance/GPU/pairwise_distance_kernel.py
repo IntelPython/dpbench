@@ -23,6 +23,6 @@ def pairwise_python(X1, X2, D):
 def pw_distance(X1,X2,D):
     with dpctl.device_context(base_pair_wise.get_device_selector()):
         #pairwise_python[X1.shape[0],numba_dppy.DEFAULT_LOCAL_SIZE](X1, X2, D)
-        pairwise_python[X1.shape[0],8](X1, X2, D)
+        pairwise_python[X1.shape[0],128](X1, X2, D)
 
 base_pair_wise.run("Pairwise Distance Kernel", pw_distance)

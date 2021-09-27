@@ -28,6 +28,8 @@ void pairwise_distance( queue* q, size_t nopt, struct point * p1, struct point *
   q->memcpy(d_p1, p1, nopt * sizeof(struct point));
   q->memcpy(d_p2, p2, nopt * sizeof(struct point));
 
+  q->wait();
+
   q->submit([&](handler& h) {
       h.parallel_for<class theKernel>(range<1>{nopt}, [=](id<1> myID) {
 	  size_t i = myID[0];
@@ -48,6 +50,8 @@ void pairwise_distance( queue* q, size_t nopt, struct point * p1, struct point *
 	});
     }).wait();
 
+  q->memcpy(p1, d_p1, nopt * sizeof(struct point));
+  q->memcpy(p2, d_p2, nopt * sizeof(struct point));
   q->memcpy(distance_op, d_distance_op, nopt * nopt * sizeof(tfloat));
 
   q->wait();

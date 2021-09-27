@@ -41,6 +41,7 @@ void InitData( queue* q, size_t nopt, struct point* *x1, struct point* *x2, tflo
   {
     struct drand48_data seed;
     srand48_r(omp_get_thread_num()+SEED, &seed);
+#pragma omp for
     for ( i = 0; i < nopt; i++ )
       {
 	tx1[i].x = RandRange( XL, XH, &seed );

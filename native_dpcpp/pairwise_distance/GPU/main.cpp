@@ -16,7 +16,7 @@ using namespace cl::sycl;
 int main(int argc, char * argv[])
 {
   size_t nopt = 1 << 10;
-  int repeat = 100;
+  int repeat = 1;
   struct point *x1, *x2;
   tfloat* distance_op;
 
@@ -99,7 +99,6 @@ int main(int argc, char * argv[])
       FreeData( q, x1, x2 );
 
       nopt = nopt * 2;
-      repeat -= 2;
     }
     fclose(fptr);
     fclose(fptr1);

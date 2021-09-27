@@ -141,7 +141,7 @@ class workloads():
             all_workloads.dbscan.value: {
                 'execute': False,
                 'ref_input': 2**14,
-                'NUMBA_TEST_CMD': ["python", wl_names[all_workloads.dbscan.value]['numba'] if not kernel_mode else wl_names[all_workloads.dbscan.value]['kernel'], "--steps", "1"],
+                'NUMBA_TEST_CMD': ["python", wl_names[all_workloads.dbscan.value]['numba'] if not kernel_mode else wl_names[all_workloads.dbscan.value]['kernel'], "--test"],
                 'NUMBA_PERF_CMD': ["python", wl_names[all_workloads.dbscan.value]['numba'] if not kernel_mode else wl_names[all_workloads.dbscan.value]['kernel']],
                 'NUMBA_VTUNE_CMD': ["python", wl_names[all_workloads.dbscan.value]['numba'] if not kernel_mode else wl_names[all_workloads.dbscan.value]['kernel'], "--steps", "1", "--size", str(2 ** 14)],
                 'NUMBA_ADVISOR_CMD': ["python", wl_names[all_workloads.dbscan.value]['numba'] if not kernel_mode else wl_names[all_workloads.dbscan.value]['kernel'], "--steps", "1", "--size", str(2 ** 14)],
@@ -151,13 +151,13 @@ class workloads():
                 'NUMBA_CPU_ADVISOR_CMD': ["python", wl_names[all_workloads.dbscan.value]['numba'], "--steps", "1", "--size", str(2 ** 14)],
                 'SCIKIT_LEARN_TEST_CMD': ["python", "dbscan.py", "--steps", "1"],
                 'SCIKIT_LEARN_PERF_CMD': ["python", "dbscan.py"],
-                'SCIKIT_LEARN_VTUNE_CMD': ["python", "dbscan.py", "--steps", "1", "--size", str(2 ** 13)],
-                'SCIKIT_LEARN_ADVISOR_CMD': ["python", "dbscan.py", "--steps", "1", "--size", str(2 ** 13)],
+                'SCIKIT_LEARN_VTUNE_CMD': ["python", "dbscan.py", "--steps", "1", "--size", str(2 ** 14)],
+                'SCIKIT_LEARN_ADVISOR_CMD': ["python", "dbscan.py", "--steps", "1", "--size", str(2 ** 14)],
                 'DAAL4PY_TEST_CMD': ["python", "dbscan.py", "--steps", "1"],
                 'DAAL4PY_PERF_CMD': ["python", "dbscan.py"],
-                'DAAL4PY_VTUNE_CMD': ["python", "dbscan.py", "--steps", "1", "--size", str(2 ** 13)],
-                'DAAL4PY_ADVISOR_CMD': ["python", "dbscan.py", "--steps", "1", "--size", str(2 ** 13)],
-                'NATIVE_TEST_CMD': ["python", "base_dbscan.py", "--steps", "1"],
+                'DAAL4PY_VTUNE_CMD': ["python", "dbscan.py", "--steps", "1", "--size", str(2 ** 14)],
+                'DAAL4PY_ADVISOR_CMD': ["python", "dbscan.py", "--steps", "1", "--size", str(2 ** 14)],
+                'NATIVE_TEST_CMD': ["python", "base_dbscan.py", "--test"],
                 'NATIVE_PERF_CMD': ["python", "base_dbscan.py"],
                 'NATIVE_VTUNE_CMD': ["./dbscan", "1", str(2 ** 14), "10", "20", "0.6","1"], #./dbscan 1 8192 10 20 0.6 2
                 'NATIVE_ADVISOR_CMD': ["./dbscan", "1", str(2 ** 14), "10", "20", "0.6","1"], #./dbscan 1 8192 10 20 0.6 2

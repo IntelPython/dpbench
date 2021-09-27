@@ -148,7 +148,7 @@ def run(name, alg, sizes=5, step=2, nopt=2**10):
 
     with open('perf_output.csv', 'w', 1) as mops_fd, open('runtimes.csv', 'w', 1) as runtimes_fd:
         for _ in xrange(args.steps):
-            data, assignments, eps, minpts = gen_data_np(nopt, dims, args.minpts, args.eps)
+            data, assignments, eps, minpts = gen_data_np(nopt, args.dims, args.minpts, args.eps)
             nclusters = alg(nopt, args.dims, data, eps, minpts, assignments)  # warmup
 
             t0 = now()

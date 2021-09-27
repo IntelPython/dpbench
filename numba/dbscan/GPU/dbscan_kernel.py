@@ -36,7 +36,7 @@ UNDEFINED = -2
 DEFAULT_QUEUE_CAPACITY = 10
 
 
-@numba_dppy.kernel
+@numba_dppy.kernel(access_types={"read_only": ["data"], "write_only": ["assignments", "ind_lst"], "read_write": ["sz_lst"]})
 def get_neighborhood(n, dim, data, eps, ind_lst, sz_lst, assignments,
                      block_size, nblocks):
     i = numba_dppy.get_global_id(0)

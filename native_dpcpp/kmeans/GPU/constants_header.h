@@ -11,6 +11,7 @@
     typedef float tfloat;
     typedef unsigned int tint;
 #else
+    typedef double tfloat;
     typedef size_t tint;
 #endif
 

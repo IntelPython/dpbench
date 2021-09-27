@@ -36,8 +36,6 @@ void groupByCluster(queue* q,
   	  }
   	});
     });
-
-  //q->wait();
 }
 
 
@@ -138,7 +136,7 @@ void printCentroids(Centroid* centroids,
 		    size_t NUMBER_OF_CENTROIDS
 ) {
     for (size_t i = 0; i < NUMBER_OF_CENTROIDS; i++) {
-        printf("[x=%lf, y=%lf, x_sum=%lf, y_sum=%lf, num_points=%lu]\n",
+        printf("[x=%lf, y=%lf, x_sum=%lf, y_sum=%lf, num_points=%d]\n",
                centroids[i].x, centroids[i].y, centroids[i].x_sum,
                centroids[i].y_sum, centroids[i].num_points);
     }

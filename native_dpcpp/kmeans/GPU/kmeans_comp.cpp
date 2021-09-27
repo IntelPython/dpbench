@@ -1,6 +1,5 @@
 #include <stdio.h>
 #include <stdlib.h>
-#include <omp.h>
 #include <math.h>
 #include <CL/sycl.hpp>
 
@@ -36,8 +35,6 @@ void groupByCluster(queue* q,
   	  }
   	});
     });
-
-  //q->wait();
 }
 
 
@@ -114,23 +111,23 @@ void kmeans(queue* q,
 ) {
     for(size_t i = 0; i < ITERATIONS; i++) {
       groupByCluster(q,
-		     h_points,
-		     h_centroids,
-		     num_centroids,
-		     num_points
-		     );
+      		     h_points,
+      		     h_centroids,
+      		     num_centroids,
+      		     num_points
+      		     );
 
       calCentroidsSum(q,
-		      h_points,
-		      h_centroids,
-		      num_centroids,
-		      num_points
-		      );
+      		      h_points,
+      		      h_centroids,
+      		      num_centroids,
+      		      num_points
+      		      );
 
       updateCentroids(q,
-		      h_centroids,
-		      num_centroids
-		      );
+      		      h_centroids,
+      		      num_centroids
+      		      );
     }
 }
 
@@ -138,7 +135,7 @@ void printCentroids(Centroid* centroids,
 		    size_t NUMBER_OF_CENTROIDS
 ) {
     for (size_t i = 0; i < NUMBER_OF_CENTROIDS; i++) {
-        printf("[x=%lf, y=%lf, x_sum=%lf, y_sum=%lf, num_points=%lu]\n",
+        printf("[x=%lf, y=%lf, x_sum=%lf, y_sum=%lf, num_points=%d]\n",
                centroids[i].x, centroids[i].y, centroids[i].x_sum,
                centroids[i].y_sum, centroids[i].num_points);
     }
@@ -167,6 +164,4 @@ void runKmeans(queue* q,
 
     kmeans(q, points, centroids, NUMBER_OF_POINTS, NUMBER_OF_CENTROIDS);
   }
-
-  q->wait();
 }

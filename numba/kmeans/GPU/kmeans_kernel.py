@@ -10,15 +10,14 @@ ITERATIONS = 30
 @numba_dppy.kernel
 def groupByCluster(arrayP,arrayPcluster,arrayC,num_points,num_centroids):
     idx = numba_dppy.get_global_id(0)
-    if idx < num_points:
-        minor_distance = -1
-        for i in range(num_centroids):
-            dx = arrayP[idx, 0] - arrayC[i, 0]
-            dy = arrayP[idx, 1] - arrayC[i, 1]
-            my_distance = numpy.sqrt(dx * dx + dy * dy)
-            if minor_distance > my_distance or minor_distance == -1:
-                minor_distance = my_distance
-                arrayPcluster[idx] = i
+    minor_distance = -1
+    for i in range(num_centroids):
+        dx = arrayP[idx, 0] - arrayC[i, 0]
+        dy = arrayP[idx, 1] - arrayC[i, 1]
+        my_distance = numpy.sqrt(dx * dx + dy * dy)
+        if minor_distance > my_distance or minor_distance == -1:
+            minor_distance = my_distance
+            arrayPcluster[idx] = i
 
 @numba_dppy.kernel
 def calCentroidsSum1(arrayCsum, arrayCnumpoint):

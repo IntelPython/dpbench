@@ -1,10 +1,8 @@
 import numpy as np
 try:
     import numpy.random_intel as rnd
-    numpy_ver="Intel"
 except:
     import numpy.random as rnd
-    numpy_ver="regular"
 
 #constants used for input data generation
 SEED = 777777

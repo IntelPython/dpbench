@@ -73,7 +73,7 @@ def run(name, alg, sizes=5, step=2, nopt=2**10):
     parser.add_argument('-d', type=int, default=3, help='Dimensions')
     parser.add_argument('--json',  required=False, default=__file__.replace('py','json'), help="output json data filename")
     parser.add_argument('--usm',   required=False, action='store_true',  help="Use USM Shared or pure numpy")
-    parser.add_argument('--test',  required=False, action='store_true', help="Check for correctness by comparing output with naieve Python version")    
+    parser.add_argument('--test',  required=False, action='store_true', help="Check for correctness by comparing output with naieve Python version")
 
     args = parser.parse_args()
     sizes= int(args.steps)
@@ -109,7 +109,7 @@ def run(name, alg, sizes=5, step=2, nopt=2**10):
         else:
             print("Test failed\n")
         return
-    
+
 
     f=open("perf_output.csv",'w',1)
     f2 = open("runtimes.csv",'w',1)
@@ -119,7 +119,7 @@ def run(name, alg, sizes=5, step=2, nopt=2**10):
             X, Y, D = gen_data_usm(nopt, dims)
         else:
             X, Y, D = gen_data(nopt,dims)
-            
+
         iterations = xrange(repeat)
 
         alg(X,Y,D) #warmup

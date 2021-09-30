@@ -39,14 +39,14 @@ int main(int argc, char * argv[])
     }
 
     FILE *fptr;
-    fptr = fopen("perf_output.csv", "w");
+    fptr = fopen("perf_output.csv", "a");
     if(fptr == NULL) {
       printf("Error!");
       exit(1);
     }
 
     FILE *fptr1;
-    fptr1 = fopen("runtimes.csv", "w");
+    fptr1 = fopen("runtimes.csv", "a");
     if(fptr1 == NULL) {
       printf("Error!");
       exit(1);

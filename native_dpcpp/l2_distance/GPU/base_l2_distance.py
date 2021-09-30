@@ -17,7 +17,7 @@ except NameError:
     xrange = range
 
 
-def run(name, alg, sizes=10, step=2, nopt=2 ** 16):
+def run(name, sizes=10, step=2, nopt=2 ** 16):
     import argparse
     parser = argparse.ArgumentParser()
     parser.add_argument('--steps', required=False, default=sizes, help="Number of steps")
@@ -59,8 +59,17 @@ def run(name, alg, sizes=10, step=2, nopt=2 ** 16):
         run_cmd = [exec_name, str(nopt), str(1), "-t"]
         utils.run_command(run_cmd, verbose=True)
 
+        # TODO: controll dtype
+
         # read output of dpcpp
-        n_dis = np.fromfile("distance.bin", np.float32)
+        # Dtype depends on native data!!!!!!!!!!!
+        n_dis = np.fromfile("distance.bin", np.float64)
+
+        import pdb
+        pdb.set_trace()
+
+        if os.path.isfile('distance.bin'):
+            os.remove('distance.bin')
 
         if np.allclose(n_dis, p_dis):
             print("Test succeeded. Python dis: ", p_dis, " Numba dis: ", n_dis, "\n")

@@ -17,7 +17,7 @@
   #   define SQRT(x)     sqrt(x)
   #endif
 
-  void l2_distance( queue* q, size_t nopt, tfloat * x1, tfloat * x2, tfloat* distance_op ) {
+  void l2_distance( queue* q, size_t nopt, tfloat* x1, tfloat* x2, tfloat* distance_op) {
     tfloat sum = 0.0;
 
     tfloat* d_x1, *d_x2, *d_sum;

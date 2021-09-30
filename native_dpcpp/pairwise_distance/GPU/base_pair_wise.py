@@ -21,7 +21,7 @@ except NameError:
 
 def gen_data(nopt,dims):
     X,Y = gen_rand_data(nopt,dims)
-    return ( X, Y, np.empty((nopt, nopt)) )    
+    return ( X, Y, np.empty((nopt, nopt)) )
 
 def run(name, sizes=5, step=2, nopt=2**10):
     import argparse
@@ -53,7 +53,7 @@ def run(name, sizes=5, step=2, nopt=2**10):
         build_string = ['make']
         utils.run_command(build_string, verbose=True)
         exec_name = "./pairwise_distance"
-    
+
     if args.test:
         X, Y, p_D = gen_data(nopt, dims)
         pairwise_distance_python(X, Y, p_D)
@@ -75,7 +75,7 @@ def run(name, sizes=5, step=2, nopt=2**10):
 
     if os.path.isfile('runtimes.csv'):
         os.remove('runtimes.csv')
-    
+
     for i in xrange(sizes):
         gen_data_to_file(nopt, dims)
 

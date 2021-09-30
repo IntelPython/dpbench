@@ -57,7 +57,7 @@ void InitData( queue* q, size_t nopt, struct point* *x1, struct point* *x2, tflo
   tx1 = (struct point*)_mm_malloc( nopt * sizeof(struct point), ALIGN_FACTOR);
   tx2 = (struct point*)_mm_malloc( nopt * sizeof(struct point), ALIGN_FACTOR);
   tfloat* distance = (tfloat*)_mm_malloc( nopt * nopt * sizeof(tfloat), ALIGN_FACTOR);
-  
+
   if ( (tx1 == NULL) || (tx2 == NULL) ) {
     printf("Memory allocation failure\n");
     exit(-1);

@@ -56,7 +56,7 @@ void InitData( queue* q, size_t nopt, struct point* *x1, struct point* *x2, tflo
   /* Allocate aligned memory */
   tx1 = (struct point*)_mm_malloc( nopt * sizeof(struct point), ALIGN_FACTOR);
   tx2 = (struct point*)_mm_malloc( nopt * sizeof(struct point), ALIGN_FACTOR);
-  
+
   if ( (tx1 == NULL) || (tx2 == NULL) ) {
     printf("Memory allocation failure\n");
     exit(-1);
@@ -80,7 +80,7 @@ void InitData( queue* q, size_t nopt, struct point* *x1, struct point* *x2, tflo
 
   /* Free memory */
   _mm_free(tx1);
-  _mm_free(tx2);  
+  _mm_free(tx2);
 }
 
 /* Deallocate arrays */

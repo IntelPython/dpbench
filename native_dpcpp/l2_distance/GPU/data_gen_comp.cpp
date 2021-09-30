@@ -15,45 +15,8 @@
 #include <CL/sycl.hpp>
 
 using namespace cl::sycl;
+using namespace std;
 
-tfloat RandRange( tfloat a, tfloat b, struct drand48_data *seed ) {
-    double r;
-    drand48_r(seed, &r);
-    return r*(b-a) + a;
-}
-
-// void InitData( queue* q, size_t nopt, tfloat* *x1, tfloat* *x2, tfloat* distance_op )
-// {
-//   tfloat *tx1, *tx2;
-//   size_t i;
-
-//   /* Allocate aligned memory */
-//   tx1 = (tfloat*)malloc_shared( nopt * sizeof(tfloat), *q);
-//   tx2 = (tfloat*)malloc_shared( nopt * sizeof(tfloat), *q);
-
-//     if ( (tx1 == NULL) || (tx2 == NULL) )
-//     {
-//         printf("Memory allocation failure\n");
-//         exit(-1);
-//     }
-
-//     /* NUMA-friendly data init */
-// #pragma omp parallel
-//     {
-//         struct drand48_data seed;
-//         srand48_r(omp_get_thread_num()+SEED, &seed);
-// 	#pragma omp for simd
-//         for ( i = 0; i < nopt; i++ )
-//         {
-//             tx1[i] = RandRange( XL, XH, &seed );
-//             tx2[i] = RandRange( XL, XH, &seed );
-//         }
-//     }
-
-//     *x1 = tx1;
-//     *x2 = tx2;
-//     *distance_op = 0;
-// }
 
 void InitData( queue* q, size_t nopt, tfloat* *x1, tfloat* *x2, tfloat* distance_op)
 {
@@ -101,6 +64,7 @@ void InitData( queue* q, size_t nopt, tfloat* *x1, tfloat* *x2, tfloat* distance
   // copy data host to device
   q->memcpy(d_tx1, tx1, nopt * sizeof(tfloat));
   q->memcpy(d_tx2, tx2, nopt * sizeof(tfloat));
+
   q->wait();
 
   *x1 = d_tx1;
@@ -108,8 +72,8 @@ void InitData( queue* q, size_t nopt, tfloat* *x1, tfloat* *x2, tfloat* distance
   *distance_op = 0;
 
   /* Free memory */
-  _mm_free(tx1);
-  _mm_free(tx2);
+//   _mm_free(tx1);
+//   _mm_free(tx2);
 }
 
 

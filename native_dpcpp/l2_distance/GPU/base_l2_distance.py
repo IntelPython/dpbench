@@ -28,6 +28,7 @@ def run(name, sizes=10, step=2, nopt=2 ** 16):
     parser.add_argument('--test', required=False, action='store_true',
                         help="Check for correctness by comparing output with naieve Python version")
     parser.add_argument('--usm', required=False, action='store_true', help="Use USM Shared or pure numpy")
+    parser.add_argument('--atomic', required=False, action='store_true', help="Use atomic based version or reduction")
 
     args = parser.parse_args()
     sizes = int(args.steps)
@@ -39,14 +40,26 @@ def run(name, sizes=10, step=2, nopt=2 ** 16):
     clean_string = ['make', 'clean']
     utils.run_command(clean_string, verbose=True)
 
-    if args.usm:
-        build_string = ['make', 'comp']
+    is_usm = args.usm
+    is_atomic = args.atomic
+
+    if is_usm & is_atomic:
+        build_string = ['make', 'atomic_comp']
         utils.run_command(build_string, verbose=True)
-        exec_name = "./l2_distance_comp"
+        exec_name = "./l2_distance_atomic_comp"
     else:
-        build_string = ['make']
-        utils.run_command(build_string, verbose=True)
-        exec_name = "./l2_distance"
+        if is_usm:
+            build_string = ['make', 'comp']
+            utils.run_command(build_string, verbose=True)
+            exec_name = "./l2_distance_comp"
+        elif is_atomic:
+            build_string = ['make', 'atomic']
+            utils.run_command(build_string, verbose=True)
+            exec_name = "./l2_distance_atomic"
+        else:
+            build_string = ['make']
+            utils.run_command(build_string, verbose=True)
+            exec_name = "./l2_distance"
 
     if args.test:
         X, Y = gen_data(nopt, dims)
@@ -65,16 +78,13 @@ def run(name, sizes=10, step=2, nopt=2 ** 16):
         # Dtype depends on native data!!!!!!!!!!!
         n_dis = np.fromfile("distance.bin", np.float64)
 
-        import pdb
-        pdb.set_trace()
-
         if os.path.isfile('distance.bin'):
             os.remove('distance.bin')
 
         if np.allclose(n_dis, p_dis):
-            print("Test succeeded. Python dis: ", p_dis, " Numba dis: ", n_dis, "\n")
+            print("Test succeeded. Python dis: ", p_dis, " Native dis: ", n_dis, "\n")
         else:
-            print("Test failed. Python dis: ", p_dis, " Numba dis: ", n_dis, "\n")
+            print("Test failed. Python dis: ", p_dis, " Native dis: ", n_dis, "\n")
         return
 
     if os.path.isfile('runtimes.csv'):

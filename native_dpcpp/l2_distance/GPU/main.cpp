@@ -115,5 +115,7 @@
 
     fclose(fptr1);
 
+    FreeData(q, x1, x2);
+
     return 0;
   }

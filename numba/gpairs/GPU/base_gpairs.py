@@ -81,7 +81,7 @@ def gen_data_usm(npoints):
 
 ##############################################
 
-def run(name, alg, sizes=5, step=2, nopt=2**10):
+def run(name, alg, sizes=5, step=2, nopt=2**16):
     import argparse
     parser = argparse.ArgumentParser()
     parser.add_argument('--steps', required=False, default=sizes,  help="Number of steps")

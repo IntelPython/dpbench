@@ -23,7 +23,7 @@ void l2_distance( queue* q, size_t nopt, tfloat * x1, tfloat * x2, tfloat* dista
   *sum = 0;
 
   q->submit([&](handler& h) {
-      auto sumr = sycl::ext::oneapi::reduction(sum, sycl::ext::oneapi::plus<>());
+      auto sumr = sycl::ONEAPI::reduction(sum, sycl::ONEAPI::plus<>());
 
       h.parallel_for<class theKernel>(sycl::nd_range<1>{nopt,256}, sumr, [=](sycl::nd_item<1> item, auto& sumr_arg) {
 	  size_t i = item.get_global_id(0);

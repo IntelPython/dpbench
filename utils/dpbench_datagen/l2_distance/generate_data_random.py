@@ -3,12 +3,14 @@ import numpy.random as rnd
 
 # constants used for input data generation
 SEED = 777777
-DTYPE = np.float64
+DTYPE = np.float32
+
 
 #write input data to a file in binary format
 def __dump_binary__(data_array, file_name):
     with open(file_name, 'w') as fd:
         data_array.tofile(fd)
+
 
 #write input data to a file in text format
 def __dump_text__(data_array, file_name):

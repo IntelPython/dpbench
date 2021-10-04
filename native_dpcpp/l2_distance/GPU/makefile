@@ -34,7 +34,7 @@ CFLAGS      += -fsycl
 CFLAGS      += -I./
 CFLAGS      += -DSYCL_USE_NATIVE_FP_ATOMICS
 
-PREC ?= d
+PREC ?= f
 ifeq ($(PREC),d)
 else
     CFLAGS += -D__DO_FLOAT__

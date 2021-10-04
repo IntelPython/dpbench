@@ -73,10 +73,9 @@ def run(name, sizes=10, step=2, nopt=2 ** 16):
         utils.run_command(run_cmd, verbose=True)
 
         # TODO: controll dtype
-
         # read output of dpcpp
         # Dtype depends on native data!!!!!!!!!!!
-        n_dis = np.fromfile("distance.bin", np.float64)
+        n_dis = np.fromfile("distance.bin", np.float32)
 
         if os.path.isfile('distance.bin'):
             os.remove('distance.bin')

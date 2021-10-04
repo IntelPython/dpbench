@@ -68,7 +68,7 @@ void InitData( queue* q, size_t nopt, tfloat* *x1, tfloat* *x2, tfloat* distance
 
   *x1 = d_tx1;
   *x2 = d_tx2;
-  *distance_op = 0;
+  *distance_op = 0.0;
 
   /* Free memory */
 //   _mm_free(tx1);

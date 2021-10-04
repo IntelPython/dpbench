@@ -37,13 +37,13 @@ def run(name, alg, sizes=6, step=2, nopt=2**13):
     parser.add_argument('--repeat',required=False, default=1,    help="Iterations inside measured region")
     parser.add_argument('--text',  required=False, default="",     help="Print with each result")
     parser.add_argument('--json',  required=False, default=__file__.replace('py','json'), help="output json data filename")
-    
+
     args = parser.parse_args()
     sizes= int(args.steps)
     step = int(args.step)
     nopt = int(args.size)
     repeat=int(args.repeat)
- 
+
     output = {}
     output['name']      = name
     output['sizes']     = sizes
@@ -56,7 +56,7 @@ def run(name, alg, sizes=6, step=2, nopt=2**13):
 
     f=open("perf_output.csv",'w',1)
     f2 = open("runtimes.csv",'w',1)
-    
+
     for i in xrange(sizes):
         iterations = xrange(repeat)
 

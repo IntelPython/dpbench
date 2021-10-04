@@ -5,7 +5,7 @@
  */
 
 #define _XOPEN_SOURCE
-#define _DEFAULT_SOURCE 
+#define _DEFAULT_SOURCE
 #include <stdlib.h>
 #include <stdio.h>
 #include <omp.h>

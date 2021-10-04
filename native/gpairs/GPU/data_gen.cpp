@@ -27,10 +27,10 @@ void InitRbins_Results(tfloat **rbins, tfloat **results_test) {
   *rbins = (tfloat*)_mm_malloc(DEFAULT_NBINS * sizeof(tfloat), ALIGN_FACTOR);
   //result = (tfloat*)_mm_malloc(DEFAULT_NBINS * sizeof(tfloat), ALIGN_FACTOR);
   *results_test = (tfloat*)_mm_malloc((DEFAULT_NBINS-1) * sizeof(tfloat), ALIGN_FACTOR);
-  
+
   tfloat start = log10(DEFAULT_RMIN);
   tfloat stop = log10(DEFAULT_RMAX);
-  
+
   tfloat curval = pow(10, start);
   tfloat baseval = pow(10, ((stop-start)/DEFAULT_NBINS));
 

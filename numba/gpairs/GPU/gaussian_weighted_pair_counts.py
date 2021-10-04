@@ -293,10 +293,6 @@ def count_weighted_pairs_3d_intel(
 
             k = nbins-1
             while dsq <= rbins_squared[k]:
-                # disabled for now since it's not supported currently
-                # - could reenable later when it's supported (~April 2020)
-                # - could work around this to avoid atomics, which would perform better anyway
-                #cuda.atomic.add(result, k-1, wprod)
                 numba_dppy.atomic.add(result, k-1, wprod)
                 k = k-1
                 if k <= 0:
@@ -312,7 +308,7 @@ def count_weighted_pairs_3d_intel_ver2(
     i = numba_dppy.get_global_id(0)
     nbins = rbins_squared.shape[0]
     n2 = x2.shape[0]
-    
+
     px = x1[i]
     py = y1[i]
     pz = z1[i]
@@ -338,7 +334,7 @@ def count_weighted_pairs_3d_intel_ver2(
             k = k-1
             if k <= 0:
                 break
-                
+
 # def count_weighted_pairs_3d_cpu_mp(
 #         x1, y1, z1, w1, x2, y2, z2, w2, rbins_squared, result):
 

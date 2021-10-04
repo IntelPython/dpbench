@@ -29,21 +29,11 @@ import numba
 import base_knn
 
 
-DATA_DIM = 16
-
-# Define the number of nearest neighbors
-k = 5
-
-# @numba.jit(nopython=True)
-# def euclidean_dist(x1, x2):
-#     return np.linalg.norm(x1-x2)
-
-
 @numba.jit(nopython=True)
 def euclidean_dist(x1, x2):
     distance = 0
 
-    for i in range(DATA_DIM):
+    for i in range(len(x1)):
         diff = x1[i] - x2[i]
         distance += diff * diff
 
@@ -109,7 +99,7 @@ def run_knn(train, train_labels, test, k=5, classes_num=3):
                 queue_neighbors[k - 1] = new_neighbor
                 push_queue(queue_neighbors, new_neighbor)
 
-        predictions[i] = simple_vote(queue_neighbors)
+        predictions[i] = simple_vote(queue_neighbors, classes_num)
 
     return predictions
 

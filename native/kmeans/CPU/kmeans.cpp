@@ -19,7 +19,7 @@ float distance(Point* p, Centroid* c) {
 void groupByCluster(
     Point* points,
     Centroid* centroids,
-    size_t num_centroids, 
+    size_t num_centroids,
     size_t num_points
 ) {
 #pragma omp parallel for simd
@@ -38,9 +38,9 @@ void groupByCluster(
 
 
 void calCentroidsSum(
-    Point* points, 
+    Point* points,
     Centroid* centroids,
-    size_t num_centroids, 
+    size_t num_centroids,
     size_t num_points
 ) {
 #pragma omp parallel for simd
@@ -60,7 +60,7 @@ void calCentroidsSum(
 
 
 void updateCentroids(
-    Centroid* centroids, 
+    Centroid* centroids,
     size_t num_centroids
 ) {
 #pragma omp parallel for simd
@@ -75,27 +75,27 @@ void updateCentroids(
 
 void kmeans(
     Point* h_points,
-    Centroid* h_centroids, 
+    Centroid* h_centroids,
     size_t num_points,
     size_t num_centroids
 ) {
     for(size_t i = 0; i < ITERATIONS; i++) {
         groupByCluster(
-            h_points, 
+            h_points,
             h_centroids,
-            num_centroids, 
+            num_centroids,
             num_points
         );
-        
+
         calCentroidsSum(
-            h_points, 
+            h_points,
             h_centroids,
-            num_centroids, 
+            num_centroids,
             num_points
         );
 
         updateCentroids(
-            h_centroids, 
+            h_centroids,
             num_centroids
         );
     }
@@ -106,7 +106,7 @@ void printCentroids(
 		    size_t NUMBER_OF_CENTROIDS
 ) {
     for (size_t i = 0; i < NUMBER_OF_CENTROIDS; i++) {
-        printf("[x=%lf, y=%lf, x_sum=%lf, y_sum=%lf, num_points=%i]\n", 
+        printf("[x=%lf, y=%lf, x_sum=%lf, y_sum=%lf, num_points=%i]\n",
                centroids[i].x, centroids[i].y, centroids[i].x_sum,
                centroids[i].y_sum, centroids[i].num_points);
     }
@@ -116,7 +116,7 @@ void printCentroids(
 
 
 void runKmeans(
-    Point* points, 
+    Point* points,
     Centroid* centroids,
     size_t NUMBER_OF_POINTS,
     size_t NUMBER_OF_CENTROIDS
@@ -129,7 +129,7 @@ void runKmeans(
         }
 
         kmeans(points, centroids, NUMBER_OF_POINTS, NUMBER_OF_CENTROIDS);
-        
+
         //if (i + 1 == REPEAT) {
 	//   printCentroids(centroids);
         //}

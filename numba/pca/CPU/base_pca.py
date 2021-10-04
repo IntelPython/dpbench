@@ -67,7 +67,7 @@ def run(name, alg, sizes=10, step=2, nopt=2**10):
     repeat = int(args.repeat)
     dims = int(args.dims)
     rand = args.rand
- 
+
     output = {}
     output['name']      = name
     output['sizes']     = sizes

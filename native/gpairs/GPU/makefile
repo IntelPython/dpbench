@@ -5,11 +5,6 @@
 # ==============================================================================
 # Makefile for GNU make
 
-SRC:=                      \
-       data_gen.cpp          \
-       main.cpp
-
-
 # ==============================================================================
 # ############## Configure CFLAGS  #############################################
 # ==============================================================================
@@ -48,7 +43,7 @@ ifeq ($(TARGET_ARCH),host)
     CFLAGS += -xhost
 endif
 ifeq ($(TARGET_ARCH),auto)
-    CFLAGS += -xCORE-AVX2 -axCOMMON-AVX512
+    CFLAGS += -xCORE-AVX2 #-axCOMMON-AVX512
 endif
 
 #TARGET := $(TARGET)
@@ -59,10 +54,15 @@ endif
 
 all: $(TARGET)
 
-$(TARGET): $(SRC) gpairs.cpp
+comp: $(TARGET)_comp
+
+$(TARGET): data_gen.cpp main.cpp gpairs.cpp
 	$(CC) $(CPPFLAGS) $(CFLAGS) $^ -o $(TARGET)
 
+$(TARGET)_comp: data_gen.cpp main_comp.cpp gpairs_comp.cpp
+	$(CC) $(CPPFLAGS) $(CFLAGS) $^ -o $(TARGET)_comp
+
 clean:
-	rm -rf *.o *.out *.optrpt *.yaml *~ gpairs
+	rm -rf *.o *.out *.optrpt *.yaml *~ gpairs gpairs_comp
 
 .PHONY: all clean

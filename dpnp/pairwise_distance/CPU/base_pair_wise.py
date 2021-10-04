@@ -35,7 +35,7 @@ def gen_data(nopt,dims):
         np.empty((nopt, nopt))
     )
 
-##############################################	
+##############################################
 
 def run(name, alg, sizes=5, step=2, nopt=2**10):
     import argparse
@@ -46,18 +46,18 @@ def run(name, alg, sizes=5, step=2, nopt=2**10):
     parser.add_argument('--repeat',required=False, default=100,    help="Iterations inside measured region")
     parser.add_argument('--text',  required=False, default="",     help="Print with each result")
     parser.add_argument('-d', type=int, default=3, help='Dimensions')
-    
+
     args = parser.parse_args()
     sizes= int(args.steps)
     step = int(args.step)
     nopt = int(args.size)
     repeat=int(args.repeat)
     dims = int(args.d)
-    
+
     rnd.seed(SEED)
     f=open("perf_output.csv",'w',1)
     f2 = open("runtimes.csv",'w',1)
-    
+
     for i in xrange(sizes):
         X,Y,D = gen_data(nopt,dims)
         iterations = xrange(repeat)

@@ -20,9 +20,6 @@
 #      ACC=ha, la, ep <default> : meaning math function accuracy level
 # ==============================================================================
 
-SRC:= main.cpp
-
-
 # ==============================================================================
 # ############## Configure CFLAGS  #############################################
 # ==============================================================================
@@ -34,8 +31,6 @@ TARGET      := knn
 
 CFLAGS      += -g -O3
 CFLAGS      += -qopt-report
-CFLAGS      += -qopt-report-phase$(EQCOLON)vec
-CFLAGS      += -$(QOPT)restrict
 CFLAGS      += -fiopenmp -fopenmp-targets=spir64
 CFLAGS      += -I./
 
@@ -63,7 +58,7 @@ ifeq ($(TARGET_ARCH),host)
     CFLAGS += -xhost
 endif
 ifeq ($(TARGET_ARCH),auto)
-    CFLAGS += -xCORE-AVX2 -axCOMMON-AVX512
+    CFLAGS += -xCORE-AVX2 #-axCOMMON-AVX512
 endif
 
 ACC ?= ha
@@ -83,12 +78,17 @@ endif
 
 all: knn
 
-dbscan: $(TARGET)
+knn: $(TARGET)
 
-$(TARGET): $(SRC)
+comp: $(TARGET)_comp
+
+$(TARGET): main.cpp knn.cpp
 	$(CC) $(CPPFLAGS) $(CFLAGS) $^ -o $(TARGET)
 
+$(TARGET)_comp: main_comp.cpp knn_comp.cpp
+	$(CC) $(CPPFLAGS) $(CFLAGS) $^ -o $(TARGET)_comp
+
 clean:
-	rm -rf *.o *.out *.optrpt *.yaml *~ $(foreach acc,ha la ep,knn)
+	rm -rf *.o *.out *.optrpt *.yaml *~ $(foreach acc,ha la ep,knn) knn_comp
 
 .PHONY: all clean

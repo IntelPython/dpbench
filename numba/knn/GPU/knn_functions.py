@@ -95,13 +95,13 @@ def run_knn_kernel(train, train_labels, test, k, classes_num):
         queue_neighbors = queue_neighbors_lst[i]
 
         for j in range(k):
-            dist = euclidean_dist(train[j], test[i])            
+            dist = euclidean_dist(train[j], test[i])
             # queue_neighbors[j] = (dist, train_labels[j])
             queue_neighbors[j,0] = dist
             queue_neighbors[j,1] = train_labels[j]
             #queue_neighbors.append((dist, train_labels[j]))
 
-        sort_queue(queue_neighbors)        
+        sort_queue(queue_neighbors)
 
         for j in range(k, train_size):
             dist = euclidean_dist(train[j], test[i])
@@ -110,7 +110,7 @@ def run_knn_kernel(train, train_labels, test, k, classes_num):
                 #queue_neighbors[k - 1] = new_neighbor
                 queue_neighbors[k - 1][0] = dist
                 queue_neighbors[k - 1][1] = train_labels[j]
-                push_queue(queue_neighbors, queue_neighbors[k - 1])                
+                push_queue(queue_neighbors, queue_neighbors[k - 1])
 
         predictions[i] = simple_vote(queue_neighbors, classes_num)
 

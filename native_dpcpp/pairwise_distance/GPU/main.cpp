@@ -16,7 +16,7 @@ using namespace cl::sycl;
 int main(int argc, char * argv[])
 {
   size_t nopt = 1 << 10;
-  int repeat = 100;
+  int repeat = 1;
   struct point *x1, *x2;
   tfloat* distance_op;
 
@@ -34,20 +34,20 @@ int main(int argc, char * argv[])
       sscanf(argv[1], "%d", &STEPS);
       if (argc == 3) {
 	sscanf(argv[2], "%lu", &nopt);
-      }	
+      }
     }
 
     FILE *fptr;
     fptr = fopen("perf_output.csv", "w");
     if(fptr == NULL) {
-      printf("Error!");   
-      exit(1);             
+      printf("Error!");
+      exit(1);
     }
 
     FILE *fptr1;
     fptr1 = fopen("runtimes.csv", "w");
     if(fptr1 == NULL) {
-      printf("Error!");   
+      printf("Error!");
       exit(1);
     }
 
@@ -61,10 +61,10 @@ int main(int argc, char * argv[])
 
     int i, j;
     for(i = 0; i < STEPS; i++) {
-    
+
       /* Allocate arrays, generate input data */
       InitData( q, nopt, &x1, &x2, &distance_op );
-        
+
       /* Warm up cycle */
       for(j = 0; j < 1; j++) {
 	pairwise_distance( q, nopt, x1, x2, distance_op );
@@ -72,7 +72,7 @@ int main(int argc, char * argv[])
 
       /* Compute call and put prices using compiler math libraries */
       printf("Pairwise Distance: Native-C-SVML: Size: %lu MOPS: ", nopt);
-	
+
       t1 = timer_rdtsc();
       for(j = 0; j < repeat; j++) {
 	pairwise_distance( q, nopt, x1, x2, distance_op );
@@ -99,7 +99,6 @@ int main(int argc, char * argv[])
       FreeData( q, x1, x2 );
 
       nopt = nopt * 2;
-      repeat -= 2;
     }
     fclose(fptr);
     fclose(fptr1);

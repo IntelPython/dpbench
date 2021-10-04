@@ -14,7 +14,7 @@ typedef struct {
   tfloat y;
   tfloat x_sum;
   tfloat y_sum;
-  size_t num_points;
+  tint num_points;
 } Centroid;
 
 #endif

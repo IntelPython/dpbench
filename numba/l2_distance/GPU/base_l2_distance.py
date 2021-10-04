@@ -52,8 +52,8 @@ def get_device_selector(is_gpu=True):
 
 
 def gen_data_usm(nopt, dims):
-    x, y = gen_data(nopt, dims)
-    distance = np.asarray([0.0])
+    x, y = gen_data(nopt, dims, np.float64)
+    distance = np.asarray([0.0]).astype(np.float64)
 
     with dpctl.device_context(get_device_selector()) as gpu_queue:
         x_usm = dpt.usm_ndarray(x.shape, dtype=x.dtype, buffer="device",
@@ -72,7 +72,7 @@ def gen_data_usm(nopt, dims):
 
 ##############################################
 
-def run(name, alg, sizes=10, step=2, nopt=2 ** 16):
+def run(name, alg, sizes=5, step=2, nopt=2 ** 16):
     import argparse
     parser = argparse.ArgumentParser()
     parser.add_argument('--steps', required=False, default=sizes, help="Number of steps")
@@ -106,7 +106,7 @@ def run(name, alg, sizes=10, step=2, nopt=2 ** 16):
     output['metrics'] = []
 
     if args.test:
-        X, Y = gen_data(nopt, dims)
+        X, Y = gen_data(nopt, dims, np.float64)
         p_dis = l2_distance_python(X, Y)
 
         if args.usm is True:  # test usm feature
@@ -114,7 +114,7 @@ def run(name, alg, sizes=10, step=2, nopt=2 ** 16):
             n_dis = alg(X_usm, Y_usm, distance)
 
         else:
-            distance = np.asarray([0.0])
+            distance = np.asarray([0.0]).astype(np.float64)
             n_dis = alg(X, Y, distance)
 
         if np.allclose(n_dis, p_dis):
@@ -127,8 +127,8 @@ def run(name, alg, sizes=10, step=2, nopt=2 ** 16):
         if args.usm is True:
             X, Y, distance = gen_data_usm(nopt, dims)
         else:
-            X, Y = gen_data(nopt, dims)
-            distance = np.asarray([0.0])
+            X, Y = gen_data(nopt, dims, np.float64)
+            distance = np.asarray([0.0]).astype(np.float64)
 
         iterations = xrange(repeat)
         # print("ERF: {}: Size: {}".format(name, nopt), end=' ', flush=True)

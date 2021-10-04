@@ -21,7 +21,6 @@ using namespace std;
 void InitData( queue* q, size_t nopt, tfloat* *x1, tfloat* *x2, tfloat* distance_op)
 {
   tfloat *tx1, *tx2;
-  size_t i;
 
   /* Allocate aligned memory */
 

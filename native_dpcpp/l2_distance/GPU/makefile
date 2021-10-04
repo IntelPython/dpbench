@@ -29,46 +29,15 @@ FQOPT       :=f
 EQCOLON     :="="
 TARGET      := l2_distance
 
-CFLAGS      += -g -O0
+CFLAGS      += -g -O3
 CFLAGS      += -fsycl
 CFLAGS      += -I./
+CFLAGS      += -DSYCL_USE_NATIVE_FP_ATOMICS
 
 PREC ?= d
 ifeq ($(PREC),d)
 else
     CFLAGS += -D__DO_FLOAT__
-endif
-
-TARGET_ARCH ?= auto
-
-ifeq ($(TARGET_ARCH),SSE)
-    CFLAGS += -$(QOPT)xSSE4.2
-endif
-ifeq ($(TARGET_ARCH),AVX)
-    CFLAGS += -$(QOPT)xAVX
-endif
-ifeq ($(TARGET_ARCH),AVX2)
-    CFLAGS += -$(QOPT)xCORE_AVX2
-endif
-ifeq ($(TARGET_ARCH),MIC)
-    CFLAGS += -mmic -opt-streaming-stores always
-endif
-ifeq ($(TARGET_ARCH),host)
-    CFLAGS += -xhost
-endif
-ifeq ($(TARGET_ARCH),auto)
-    CFLAGS += -xCORE-AVX2 #-axCOMMON-AVX512
-endif
-
-ACC ?= ha
-ifeq ($(ACC),ha)
-    CFLAGS += -$(FQOPT)imf-precision$(EQCOLON)high -D_VML_ACCURACY_HA_
-endif
-ifeq ($(ACC),la)
-    CFLAGS += -$(FQOPT)imf-precision$(EQCOLON)medium -D_VML_ACCURACY_LA_
-endif
-ifeq ($(ACC),ep)
-    CFLAGS += -$(FQOPT)imf-precision$(EQCOLON)low -$(FQOPT)imf-domain-exclusion$(EQCOLON)31 -D_VML_ACCURACY_EP_
 endif
 
 # ==============================================================================
@@ -99,6 +68,6 @@ $(TARGET)_atomic_comp: main.cpp data_gen_comp.cpp l2_distance_atomic_comp.cpp
 
 
 clean:
-	rm -rf *.o *.out *.optrpt *.yaml *~ l2_distance l2_distance_comp l2_distance_atomic
+	rm -rf *.o *.out *.optrpt *.yaml *~ l2_distance l2_distance_comp l2_distance_atomic l2_distance_atomic_comp *.bin
 
 .PHONY: all clean

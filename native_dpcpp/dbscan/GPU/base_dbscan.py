@@ -50,38 +50,53 @@ def gen_data_np(nopt, dims, a_minpts, a_eps):
 
     return (data, assignments, eps, minpts)
 
+
 #################################################
 
-def run(name, sizes=5, step=2, nopt=2**10):
+
+def run(name, sizes=5, step=2, nopt=2 ** 10):
     import argparse
+
     parser = argparse.ArgumentParser()
-    parser.add_argument('--steps', type=int, default=sizes,
-                        help='Number of steps')
-    parser.add_argument('--step', type=int, default=step,
-                        help='Factor for each step')
-    parser.add_argument('--size', type=int, default=nopt,
-                        help='Initial data size')
-    parser.add_argument('--repeat', type=int, default=1,
-                        help='Iterations inside measured region')
-    parser.add_argument('--dims', type=int, default=10, help='Dimensions')
-    parser.add_argument('--eps', type=float, default=0.6, help='Neighborhood value')
-    parser.add_argument('--minpts', type=int, default=20, help='minPts')
-    parser.add_argument('--usm',   required=False, action='store_true',  help="Use USM Shared or pure numpy")
-    parser.add_argument('--test',  required=False, action='store_true', help="Check for correctness by comparing output with naieve Python version")
+    parser.add_argument("--steps", type=int, default=sizes, help="Number of steps")
+    parser.add_argument("--step", type=int, default=step, help="Factor for each step")
+    parser.add_argument("--size", type=int, default=nopt, help="Initial data size")
+    parser.add_argument(
+        "--repeat", type=int, default=1, help="Iterations inside measured region"
+    )
+    parser.add_argument("--dims", type=int, default=10, help="Dimensions")
+    parser.add_argument("--eps", type=float, default=0.6, help="Neighborhood value")
+    parser.add_argument("--minpts", type=int, default=20, help="minPts")
+    parser.add_argument(
+        "--usm",
+        required=False,
+        action="store_true",
+        help="Use USM Shared or pure numpy",
+    )
+    parser.add_argument(
+        "--test",
+        required=False,
+        action="store_true",
+        help="Check for correctness by comparing output with naieve Python version",
+    )
 
     args = parser.parse_args()
     nopt = args.size
     repeat = args.repeat
 
     if args.usm:
-        print("Warn: Compute only measurement not available for DBSCAN since it executes both on host and device\n")
+        print(
+            "Warn: Compute only measurement not available for DBSCAN since it executes both on host and device\n"
+        )
 
-    build_string = ['make']
+    build_string = ["make"]
     utils.run_command(build_string, verbose=True)
     exec_name = "./dbscan"
 
     if args.test:
-        data, p_assignments, eps, minpts = gen_data_np(nopt, args.dims, args.minpts, args.eps)
+        data, p_assignments, eps, minpts = gen_data_np(
+            nopt, args.dims, args.minpts, args.eps
+        )
         p_nclusters = dbscan_python(nopt, args.dims, data, eps, minpts, p_assignments)
 
         # if args.usm is True:
@@ -89,36 +104,55 @@ def run(name, sizes=5, step=2, nopt=2**10):
         #     n_nclusters = alg(nopt, args.dims, data, eps, minpts, assignments)
         # else:
         eps, minpts = gen_data_to_file(nopt, args.dims)
-        run_cmd = [exec_name, str(nopt), str(args.dims), str(minpts), str(eps), str(1), "-t"]
+        run_cmd = [
+            exec_name,
+            str(nopt),
+            str(args.dims),
+            str(minpts),
+            str(eps),
+            str(1),
+            "-t",
+        ]
         utils.run_command(run_cmd, verbose=True)
 
         n_assignments = np.fromfile("assignments.bin", np.int64)
 
         if np.allclose(n_assignments, p_assignments):
             print("Test succeeded.\n")
-            print("n_assignments = ", n_assignments, "\n p_assignments = ", p_assignments)
+            print(
+                "n_assignments = ", n_assignments, "\n p_assignments = ", p_assignments
+            )
         else:
             print("Test failed.\n")
-            print("n_assignments = ", n_assignments, "\n p_assignments = ", p_assignments)
+            print(
+                "n_assignments = ", n_assignments, "\n p_assignments = ", p_assignments
+            )
         return
 
     # delete perf_output csv and runtimes csv
-    if os.path.isfile('runtimes.csv'):
-        os.remove('runtimes.csv')
+    if os.path.isfile("runtimes.csv"):
+        os.remove("runtimes.csv")
 
-    if os.path.isfile('perf_output.csv'):
-        os.remove('perf_output.csv')
+    if os.path.isfile("perf_output.csv"):
+        os.remove("perf_output.csv")
 
     for _ in xrange(args.steps):
         eps, minpts = gen_data_to_file(nopt, args.dims)
 
         # run the C program
-        run_cmd = [exec_name, str(nopt), str(args.dims), str(minpts), str(eps), str(repeat)]
+        run_cmd = [
+            exec_name,
+            str(nopt),
+            str(args.dims),
+            str(minpts),
+            str(eps),
+            str(repeat),
+        ]
         utils.run_command(run_cmd, verbose=True)
 
         nopt *= args.step
         repeat = max(repeat - args.step, 1)
 
 
-if __name__ == '__main__':
-    run('DBSCAN native')
+if __name__ == "__main__":
+    run("DBSCAN native")

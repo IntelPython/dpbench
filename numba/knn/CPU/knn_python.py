@@ -43,8 +43,9 @@ def euclidean_dist(x1, x2):
     # result = np.sqrt(distance)
     return result
 
+
 def push_queue(queue_neighbors, new_distance, index=4):
-    while (index > 0 and new_distance[0] < queue_neighbors[index - 1][0]):
+    while index > 0 and new_distance[0] < queue_neighbors[index - 1][0]:
         queue_neighbors[index] = queue_neighbors[index - 1]
         index = index - 1
         queue_neighbors[index] = new_distance
@@ -65,7 +66,7 @@ def simple_vote(neighbors, classes_num):
     max_value = 0
 
     for i in range(classes_num):
-        if (votes_to_classes[i] > max_value):
+        if votes_to_classes[i] > max_value:
             max_value = votes_to_classes[i]
             max_ind = i
 
@@ -92,7 +93,7 @@ def knn_python(train, train_labels, test, k, classes_num):
             dist = euclidean_dist(train[j], test[i])
             new_neighbor = (dist, train_labels[j])
 
-            if (dist < queue_neighbors[k - 1][0]):
+            if dist < queue_neighbors[k - 1][0]:
                 queue_neighbors[k - 1] = new_neighbor
                 push_queue(queue_neighbors, new_neighbor)
 

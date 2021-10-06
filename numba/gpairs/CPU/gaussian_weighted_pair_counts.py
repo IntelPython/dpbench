@@ -1,6 +1,8 @@
 import numpy as np
-#from numba import njit
+
+# from numba import njit
 from numba import njit
+
 try:
     import numba_dppy
 except:
@@ -11,22 +13,22 @@ except:
     #         def decorator(func):
     #             return func
     #         return decorator
-#from numba.dppy.dppy_driver import driver as drv
-#import joblib
-#import multiprocessing
+# from numba.dppy.dppy_driver import driver as drv
+# import joblib
+# import multiprocessing
 import math
 from numba import cuda
 
 __all__ = (
-    'count_weighted_pairs_3d_cuda',
-    'count_weighted_pairs_3d_cuda_fix',
-    'count_weighted_pairs_3d_cuda_mesh',
+    "count_weighted_pairs_3d_cuda",
+    "count_weighted_pairs_3d_cuda_fix",
+    "count_weighted_pairs_3d_cuda_mesh",
     # 'count_weighted_pairs_3d_cpu_corrfunc',
     # 'count_weighted_pairs_3d_cpu_mp',
     # 'count_weighted_pairs_3d_cpu',
     # 'count_weighted_pairs_3d_cpu_noncuml_pairsonly',
     # 'count_weighted_pairs_3d_cpu_test_for_max',
-    'count_weighted_pairs_3d_intel',
+    "count_weighted_pairs_3d_intel",
 )
 
 # def count_weighted_pairs_3d_cpu_corrfunc(
@@ -43,10 +45,24 @@ __all__ = (
 #         periodic=False)
 #     result[:] = result + np.cumsum(_result['weightavg'] * _result['npairs'])
 
+
 @cuda.jit
 def count_weighted_pairs_3d_cuda_mesh(
-        x1, y1, z1, w1, x2, y2, z2, w2, rbins_squared, result,
-        ndivs, cell_id_indices, cell_id2_indices, num_cell2_steps):
+    x1,
+    y1,
+    z1,
+    w1,
+    x2,
+    y2,
+    z2,
+    w2,
+    rbins_squared,
+    result,
+    ndivs,
+    cell_id_indices,
+    cell_id2_indices,
+    num_cell2_steps,
+):
     """Naive pair counting with mesh in cuda. Note x/y/z/w are
     the sorted array output by calculate_chained_mesh.
     nx, ny, nz = mesh dimensions
@@ -61,10 +77,10 @@ def count_weighted_pairs_3d_cuda_mesh(
     nsteps_x = num_cell2_steps[0]
     nsteps_y = num_cell2_steps[1]
     nsteps_z = num_cell2_steps[2]
-    numcells = nx*ny*nz
+    numcells = nx * ny * nz
     for icell1 in range(start, numcells, stride):
         ifirst1 = cell_id_indices[icell1]
-        ilast1 = cell_id_indices[icell1+1]
+        ilast1 = cell_id_indices[icell1 + 1]
 
         x_icell1 = x1[ifirst1:ilast1]
         y_icell1 = y1[ifirst1:ilast1]
@@ -72,25 +88,25 @@ def count_weighted_pairs_3d_cuda_mesh(
         w_icell1 = w1[ifirst1:ilast1]
         Ni = ilast1 - ifirst1
         if Ni > 0:
-            ix1 = icell1 // (ny*nz)
-            iy1 = (icell1 - ix1*ny*nz) // nz
-            iz1 = icell1 - (ix1*ny*nz) - (iy1*nz)
+            ix1 = icell1 // (ny * nz)
+            iy1 = (icell1 - ix1 * ny * nz) // nz
+            iz1 = icell1 - (ix1 * ny * nz) - (iy1 * nz)
 
-            leftmost_ix2 = max(0, ix1-nsteps_x)
-            leftmost_iy2 = max(0, iy1-nsteps_y)
-            leftmost_iz2 = max(0, iz1-nsteps_z)
+            leftmost_ix2 = max(0, ix1 - nsteps_x)
+            leftmost_iy2 = max(0, iy1 - nsteps_y)
+            leftmost_iz2 = max(0, iz1 - nsteps_z)
 
-            rightmost_ix2 = min(ix1+nsteps_x+1, nx)
-            rightmost_iy2 = min(iy1+nsteps_y+1, ny)
-            rightmost_iz2 = min(iz1+nsteps_z+1, nz)
+            rightmost_ix2 = min(ix1 + nsteps_x + 1, nx)
+            rightmost_iy2 = min(iy1 + nsteps_y + 1, ny)
+            rightmost_iz2 = min(iz1 + nsteps_z + 1, nz)
 
             for icell2_ix in range(leftmost_ix2, rightmost_ix2):
                 for icell2_iy in range(leftmost_iy2, rightmost_iy2):
                     for icell2_iz in range(leftmost_iz2, rightmost_iz2):
 
-                        icell2 = icell2_ix*(ny*nz) + icell2_iy*nz + icell2_iz
+                        icell2 = icell2_ix * (ny * nz) + icell2_iy * nz + icell2_iz
                         ifirst2 = cell_id2_indices[icell2]
-                        ilast2 = cell_id2_indices[icell2+1]
+                        ilast2 = cell_id2_indices[icell2 + 1]
 
                         x_icell2 = x2[ifirst2:ilast2]
                         y_icell2 = y2[ifirst2:ilast2]
@@ -109,20 +125,34 @@ def count_weighted_pairs_3d_cuda_mesh(
                                     dx = x1tmp - x_icell2[j]
                                     dy = y1tmp - y_icell2[j]
                                     dz = z1tmp - z_icell2[j]
-                                    wprod = w1tmp*w_icell2[j]
-                                    dsq = dx*dx + dy*dy + dz*dz
+                                    wprod = w1tmp * w_icell2[j]
+                                    dsq = dx * dx + dy * dy + dz * dz
 
-                                    k = nbins-1
+                                    k = nbins - 1
                                     while dsq <= rbins_squared[k]:
-                                        cuda.atomic.add(result, k-1, wprod)
-                                        k = k-1
+                                        cuda.atomic.add(result, k - 1, wprod)
+                                        k = k - 1
                                         if k < 0:
                                             break
+
 
 @cuda.jit
 def count_weighted_pairs_3d_cuda_mesh_old(
-        x1, y1, z1, w1, x2, y2, z2, w2, rbins_squared, result,
-        ndivs, cell_id_indices, cell_id2_indices, num_cell2_steps):
+    x1,
+    y1,
+    z1,
+    w1,
+    x2,
+    y2,
+    z2,
+    w2,
+    rbins_squared,
+    result,
+    ndivs,
+    cell_id_indices,
+    cell_id2_indices,
+    num_cell2_steps,
+):
     """Naive pair counting with mesh in cuda. Note x/y/z/w are
     the sorted array output by calculate_chained_mesh.
     nx, ny, nz = mesh dimensions
@@ -137,10 +167,10 @@ def count_weighted_pairs_3d_cuda_mesh_old(
     nsteps_x = num_cell2_steps[0]
     nsteps_y = num_cell2_steps[1]
     nsteps_z = num_cell2_steps[2]
-    numcells = nx*ny*nz
+    numcells = nx * ny * nz
     for icell1 in range(start, numcells, stride):
         ifirst1 = cell_id_indices[icell1]
-        ilast1 = cell_id_indices[icell1+1]
+        ilast1 = cell_id_indices[icell1 + 1]
 
         x_icell1 = x1[ifirst1:ilast1]
         y_icell1 = y1[ifirst1:ilast1]
@@ -148,25 +178,25 @@ def count_weighted_pairs_3d_cuda_mesh_old(
         w_icell1 = w1[ifirst1:ilast1]
         Ni = ilast1 - ifirst1
         if Ni > 0:
-            ix1 = icell1 // (ny*nz)
-            iy1 = (icell1 - ix1*ny*nz) // nz
-            iz1 = icell1 - (ix1*ny*nz) - (iy1*nz)
+            ix1 = icell1 // (ny * nz)
+            iy1 = (icell1 - ix1 * ny * nz) // nz
+            iz1 = icell1 - (ix1 * ny * nz) - (iy1 * nz)
 
-            leftmost_ix2 = max(0, ix1-nsteps_x)
-            leftmost_iy2 = max(0, iy1-nsteps_y)
-            leftmost_iz2 = max(0, iz1-nsteps_z)
+            leftmost_ix2 = max(0, ix1 - nsteps_x)
+            leftmost_iy2 = max(0, iy1 - nsteps_y)
+            leftmost_iz2 = max(0, iz1 - nsteps_z)
 
-            rightmost_ix2 = min(ix1+nsteps_x+1, nx)
-            rightmost_iy2 = min(iy1+nsteps_y+1, ny)
-            rightmost_iz2 = min(iz1+nsteps_z+1, nz)
+            rightmost_ix2 = min(ix1 + nsteps_x + 1, nx)
+            rightmost_iy2 = min(iy1 + nsteps_y + 1, ny)
+            rightmost_iz2 = min(iz1 + nsteps_z + 1, nz)
 
             for icell2_ix in range(leftmost_ix2, rightmost_ix2):
                 for icell2_iy in range(leftmost_iy2, rightmost_iy2):
                     for icell2_iz in range(leftmost_iz2, rightmost_iz2):
 
-                        icell2 = icell2_ix*(ny*nz) + icell2_iy*nz + icell2_iz
+                        icell2 = icell2_ix * (ny * nz) + icell2_iy * nz + icell2_iz
                         ifirst2 = cell_id2_indices[icell2]
-                        ilast2 = cell_id2_indices[icell2+1]
+                        ilast2 = cell_id2_indices[icell2 + 1]
 
                         x_icell2 = x2[ifirst2:ilast2]
                         y_icell2 = y2[ifirst2:ilast2]
@@ -185,20 +215,19 @@ def count_weighted_pairs_3d_cuda_mesh_old(
                                     dx = x1tmp - x_icell2[j]
                                     dy = y1tmp - y_icell2[j]
                                     dz = z1tmp - z_icell2[j]
-                                    wprod = w1tmp*w_icell2[j]
-                                    dsq = dx*dx + dy*dy + dz*dz
+                                    wprod = w1tmp * w_icell2[j]
+                                    dsq = dx * dx + dy * dy + dz * dz
 
-                                    k = nbins-1
+                                    k = nbins - 1
                                     while dsq <= rbins_squared[k]:
-                                        cuda.atomic.add(result, k-1, wprod)
-                                        k = k-1
+                                        cuda.atomic.add(result, k - 1, wprod)
+                                        k = k - 1
                                         if k < 0:
                                             break
 
 
 @cuda.jit
-def count_weighted_pairs_3d_cuda(
-        x1, y1, z1, w1, x2, y2, z2, w2, rbins_squared, result):
+def count_weighted_pairs_3d_cuda(x1, y1, z1, w1, x2, y2, z2, w2, rbins_squared, result):
     """Naively count Npairs(<r), the total number of pairs that are separated
     by a distance less than r, for each r**2 in the input rbins_squared.
     """
@@ -219,22 +248,24 @@ def count_weighted_pairs_3d_cuda(
             qy = y2[j]
             qz = z2[j]
             qw = w2[j]
-            dx = px-qx
-            dy = py-qy
-            dz = pz-qz
-            wprod = pw*qw
-            dsq = dx*dx + dy*dy + dz*dz
+            dx = px - qx
+            dy = py - qy
+            dz = pz - qz
+            wprod = pw * qw
+            dsq = dx * dx + dy * dy + dz * dz
 
-            k = nbins-1
+            k = nbins - 1
             while dsq <= rbins_squared[k]:
-                cuda.atomic.add(result, k-1, wprod)
-                k = k-1
+                cuda.atomic.add(result, k - 1, wprod)
+                k = k - 1
                 if k <= 0:
                     break
 
+
 @cuda.jit
 def count_weighted_pairs_3d_cuda_fix(
-        x1, y1, z1, w1, x2, y2, z2, w2, rbins_squared, result):
+    x1, y1, z1, w1, x2, y2, z2, w2, rbins_squared, result
+):
     """Naively count Npairs(<r), the total number of pairs that are separated
     by a distance less than r, for each r**2 in the input rbins_squared.
     """
@@ -256,25 +287,28 @@ def count_weighted_pairs_3d_cuda_fix(
             qy = y2[j]
             qz = z2[j]
             qw = w2[j]
-            dx = px-qx
-            dy = py-qy
-            dz = pz-qz
-            wprod = pw*qw
-            dsq = dx*dx + dy*dy + dz*dz
+            dx = px - qx
+            dy = py - qy
+            dz = pz - qz
+            wprod = pw * qw
+            dsq = dx * dx + dy * dy + dz * dz
 
-            k = nbins-1
+            k = nbins - 1
             while dsq <= rbins_squared[k]:
-                cuda.atomic.add(result, k-1, wprod)
-                k = k-1
+                cuda.atomic.add(result, k - 1, wprod)
+                k = k - 1
                 if k <= 0:
                     break
-            j+=1
-        i+=stride
+            j += 1
+        i += stride
+
 
 if numba_dppy is not None:
+
     @numba_dppy.kernel
     def count_weighted_pairs_3d_intel(
-            x1, y1, z1, w1, x2, y2, z2, w2, rbins_squared, result):
+        x1, y1, z1, w1, x2, y2, z2, w2, rbins_squared, result
+    ):
         """Naively count Npairs(<r), the total number of pairs that are separated
         by a distance less than r, for each r**2 in the input rbins_squared.
         """
@@ -296,21 +330,22 @@ if numba_dppy is not None:
                 qy = y2[j]
                 qz = z2[j]
                 qw = w2[j]
-                dx = px-qx
-                dy = py-qy
-                dz = pz-qz
-                wprod = pw*qw
-                dsq = dx*dx + dy*dy + dz*dz
+                dx = px - qx
+                dy = py - qy
+                dz = pz - qz
+                wprod = pw * qw
+                dsq = dx * dx + dy * dy + dz * dz
 
-                k = nbins-1
+                k = nbins - 1
                 while dsq <= rbins_squared[k]:
                     # disabled for now since it's not supported currently
                     # - could reenable later when it's supported (~April 2020)
                     # - could work around this to avoid atomics, which would perform better anyway
-                    #cuda.atomic.add(result, k-1, wprod)
-                    k = k-1
+                    # cuda.atomic.add(result, k-1, wprod)
+                    k = k - 1
                     if k <= 0:
                         break
+
 
 # def count_weighted_pairs_3d_cpu_mp(
 #         x1, y1, z1, w1, x2, y2, z2, w2, rbins_squared, result):
@@ -342,8 +377,7 @@ if numba_dppy is not None:
 
 
 @njit()
-def count_weighted_pairs_3d_cpu(
-        x1, y1, z1, w1, x2, y2, z2, w2, rbins_squared, result):
+def count_weighted_pairs_3d_cpu(x1, y1, z1, w1, x2, y2, z2, w2, rbins_squared, result):
 
     n1 = x1.shape[0]
     n2 = x2.shape[0]
@@ -359,16 +393,16 @@ def count_weighted_pairs_3d_cpu(
             qy = y2[j]
             qz = z2[j]
             qw = w2[j]
-            dx = px-qx
-            dy = py-qy
-            dz = pz-qz
-            wprod = pw*qw
-            dsq = dx*dx + dy*dy + dz*dz
+            dx = px - qx
+            dy = py - qy
+            dz = pz - qz
+            wprod = pw * qw
+            dsq = dx * dx + dy * dy + dz * dz
 
-            k = nbins-1
+            k = nbins - 1
             while dsq <= rbins_squared[k]:
-                result[k-1] += wprod
-                k = k-1
+                result[k - 1] += wprod
+                k = k - 1
                 if k <= 0:
                     break
 

@@ -8,9 +8,9 @@ import numpy as np
 import numba
 
 
-@numba.njit(parallel=True,fastmath=True)
+@numba.njit(parallel=True, fastmath=True)
 def l2_distance_kernel(a, b):
-    sub = a-b
+    sub = a - b
     sq = np.square(sub)
     sum = np.sum(sq)
     d = np.sqrt(sum)

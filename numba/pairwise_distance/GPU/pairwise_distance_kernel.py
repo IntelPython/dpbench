@@ -7,6 +7,7 @@ import base_pair_wise
 import numpy as np
 import numba_dppy
 
+
 @numba_dppy.kernel
 def pairwise_python(X1, X2, D):
     i = numba_dppy.get_global_id(0)
@@ -20,9 +21,11 @@ def pairwise_python(X1, X2, D):
             d += tmp * tmp
         D[i, j] = np.sqrt(d)
 
-def pw_distance(X1,X2,D):
+
+def pw_distance(X1, X2, D):
     with dpctl.device_context(base_pair_wise.get_device_selector()):
-        #pairwise_python[X1.shape[0],numba_dppy.DEFAULT_LOCAL_SIZE](X1, X2, D)
-        pairwise_python[X1.shape[0],128](X1, X2, D)
+        # pairwise_python[X1.shape[0],numba_dppy.DEFAULT_LOCAL_SIZE](X1, X2, D)
+        pairwise_python[X1.shape[0], 128](X1, X2, D)
+
 
 base_pair_wise.run("Pairwise Distance Kernel", pw_distance)

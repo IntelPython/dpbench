@@ -31,6 +31,7 @@ NOISE = -1
 UNDEFINED = -2
 DEFAULT_QUEUE_CAPACITY = 10
 
+
 def get_neighborhood(n, dim, data, eps, ind_lst, sz_lst, assignments):
     block_size = 1
     nblocks = n // block_size + int(n % block_size > 0)
@@ -48,7 +49,7 @@ def get_neighborhood(n, dim, data, eps, ind_lst, sz_lst, assignments):
             i2 = n if ii + 1 == nblocks1 else i1 + block_size1
             for j in range(start, stop):
                 for k in range(i1, i2):
-                    dist = 0.
+                    dist = 0.0
                     for m in range(dim):
                         diff = data[k * dim + m] - data[j * dim + m]
                         dist += diff * diff
@@ -56,6 +57,7 @@ def get_neighborhood(n, dim, data, eps, ind_lst, sz_lst, assignments):
                         size = sz_lst[j]
                         ind_lst[j * n + size] = k
                         sz_lst[j] = size + 1
+
 
 def compute_clusters(n, min_pts, assignments, sizes, indices_list):
     nclusters = 0
@@ -101,7 +103,7 @@ def compute_clusters(n, min_pts, assignments, sizes, indices_list):
 
 
 def dbscan(n, dim, data, eps, min_pts, assignments):
-    indices_list = np.empty(n*n, dtype=np.int64)
+    indices_list = np.empty(n * n, dtype=np.int64)
     sizes = np.zeros(n, dtype=np.int64)
 
     get_neighborhood(n, dim, data, eps, indices_list, sizes, assignments)

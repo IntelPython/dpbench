@@ -10,7 +10,7 @@ import numba
 
 @numba.jit(nopython=True, parallel=True, fastmath=True)
 def l2_distance(a, b):
-    sub = a-b
+    sub = a - b
     sq = np.square(sub)
     sum = np.sum(sq)
     d = np.sqrt(sum)

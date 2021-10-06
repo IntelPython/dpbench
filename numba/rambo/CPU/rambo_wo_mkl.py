@@ -3,34 +3,40 @@ import base_rambo
 import numpy
 import numba
 
+
 @numba.jit(nopython=True, fastmath=True)
 def vectmultiply(a, b):
     c = a * b
     return c[..., 0] - c[..., 1] - c[..., 2] - c[..., 3]
 
+
 def get_inputs(ecms, nevts):
-    pa = numpy.array([ecms / 2., 0., 0., ecms / 2])
-    pb = numpy.array([ecms / 2., 0., 0., -ecms / 2])
+    pa = numpy.array([ecms / 2.0, 0.0, 0.0, ecms / 2])
+    pb = numpy.array([ecms / 2.0, 0.0, 0.0, -ecms / 2])
 
     input_particles = numpy.array([pa, pb])
     input_particles = numpy.repeat(input_particles[numpy.newaxis, ...], nevts, axis=0)
 
     return input_particles
 
+
 @numba.jit(nopython=True, fastmath=True)
 def get_momentum_sum(inarray):
     return numpy.sum(inarray, axis=1)
+
 
 @numba.jit(nopython=True)
 def get_combined_mass(inarray):
     sum = get_momentum_sum(inarray)
     return get_mass(sum)
 
+
 @numba.jit(nopython=True, fastmath=True)
 def get_mass(inarray):
-    mom2 = numpy.sum(inarray[..., 1:4]**2, axis=1)
-    mass = numpy.sqrt(inarray[..., 0]**2 - mom2)
+    mom2 = numpy.sum(inarray[..., 1:4] ** 2, axis=1)
+    mass = numpy.sqrt(inarray[..., 0] ** 2 - mom2)
     return mass
+
 
 @numba.jit(nopython=True)
 def gen_rand_data(nevts, nout):
@@ -43,28 +49,29 @@ def gen_rand_data(nevts, nout):
         for j in range(nout):
             C1[i, j] = numpy.random.rand()
             F1[i, j] = numpy.random.rand()
-            Q1[i, j] = numpy.random.rand()*numpy.random.rand()
+            Q1[i, j] = numpy.random.rand() * numpy.random.rand()
 
     return C1, F1, Q1
 
 
-@numba.jit(nopython=True, parallel=True,fastmath=True)
+@numba.jit(nopython=True, parallel=True, fastmath=True)
 def get_output_mom2(C1, F1, Q1, nevts, nout):
     output = numpy.empty((nevts, nout, 4))
 
     for i in numba.prange(nevts):
         for j in range(nout):
-            C = 2.*C1[i, j]-1.
-            S = numpy.sqrt(1 - C**2)
-            F = 2.*numpy.pi*F1[i, j]
+            C = 2.0 * C1[i, j] - 1.0
+            S = numpy.sqrt(1 - C ** 2)
+            F = 2.0 * numpy.pi * F1[i, j]
             Q = -numpy.log(Q1[i, j])
 
             output[i, j, 0] = Q
-            output[i, j, 1] = Q*S*numpy.sin(F)
-            output[i, j, 2] = Q*S*numpy.cos(F)
-            output[i, j, 3] = Q*C
+            output[i, j, 1] = Q * S * numpy.sin(F)
+            output[i, j, 2] = Q * S * numpy.cos(F)
+            output[i, j, 3] = Q * C
 
     return output
+
 
 def generate_points(ecms, nevts, nout):
     input_particles = get_inputs(ecms, nevts)
@@ -88,18 +95,20 @@ def generate_points(ecms, nevts, nout):
     B[..., 1:4] = -output_mom_sum[..., 1:4] / output_mass
     B = numpy.repeat(B[:, numpy.newaxis, :], nout, axis=1)
 
-    A = 1. / (1. + G)
+    A = 1.0 / (1.0 + G)
 
     E = output_particles[..., 0]
-    BQ = -1. * vectmultiply(B, output_particles)
+    BQ = -1.0 * vectmultiply(B, output_particles)
     C1 = E + A * BQ
     C1 = numpy.repeat(C1[..., numpy.newaxis], 4, axis=2)
     C = output_particles + B * C1
     D = G * E + BQ
     output_particles[..., 0] = X * D
-    output_particles[..., 1:4] = numpy.repeat(X[..., numpy.newaxis], 3, axis=2) * C[..., 1:4]
+    output_particles[..., 1:4] = (
+        numpy.repeat(X[..., numpy.newaxis], 3, axis=2) * C[..., 1:4]
+    )
 
-    return numpy.concatenate((input_particles,output_particles), axis=1)
+    return numpy.concatenate((input_particles, output_particles), axis=1)
 
 
 def rambo(evt_per_calc):
@@ -114,5 +123,6 @@ def rambo(evt_per_calc):
             tmp = numpy.max(e[:, 2:5, x], axis=1)
             for entry in tmp:
                 h[x].append(entry)
+
 
 base_rambo.run("Rambo Numba", rambo)

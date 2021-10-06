@@ -25,11 +25,13 @@
 # *****************************************************************************
 
 import numpy as np
-#import utils
+
+# import utils
 
 NOISE = -1
 UNDEFINED = -2
 DEFAULT_QUEUE_CAPACITY = 10
+
 
 def get_neighborhood(n, dim, data, eps, ind_lst, sz_lst, assignments):
     block_size = 1
@@ -48,7 +50,7 @@ def get_neighborhood(n, dim, data, eps, ind_lst, sz_lst, assignments):
             i2 = n if ii + 1 == nblocks1 else i1 + block_size1
             for j in range(start, stop):
                 for k in range(i1, i2):
-                    dist = 0.
+                    dist = 0.0
                     for m in range(dim):
                         diff = data[k * dim + m] - data[j * dim + m]
                         dist += diff * diff
@@ -56,6 +58,7 @@ def get_neighborhood(n, dim, data, eps, ind_lst, sz_lst, assignments):
                         size = sz_lst[j]
                         ind_lst[j * n + size] = k
                         sz_lst[j] = size + 1
+
 
 def compute_clusters(n, min_pts, assignments, sizes, indices_list):
     nclusters = 0
@@ -99,6 +102,7 @@ def compute_clusters(n, min_pts, assignments, sizes, indices_list):
 
     return nclusters
 
+
 def dbscan_python(n, dim, data, eps, min_pts, assignments):
     # indices_list = np.empty(n*n, dtype=np.int64)
     # sizes = np.zeros(n, dtype=np.int64)
@@ -108,8 +112,9 @@ def dbscan_python(n, dim, data, eps, min_pts, assignments):
     # return compute_clusters(n, min_pts, assignments, sizes, indices_list)
 
     # Scikit learn implementation
-    data = np.reshape(data,(n,dim))
+    data = np.reshape(data, (n, dim))
     from sklearn.cluster import DBSCAN
+
     labels = DBSCAN(eps=eps, min_samples=min_pts).fit_predict(data)
     np.copyto(assignments, labels)
     return len(set(assignments)) - (1 if -1 in labels else 0)

@@ -42,13 +42,16 @@ def get_device_selector(is_gpu=True):
     else:
         device_selector = "cpu"
 
-    if os.environ.get('SYCL_DEVICE_FILTER') is None or os.environ.get('SYCL_DEVICE_FILTER') == "opencl":
+    if (
+        os.environ.get("SYCL_DEVICE_FILTER") is None
+        or os.environ.get("SYCL_DEVICE_FILTER") == "opencl"
+    ):
         return "opencl:" + device_selector
 
-    if os.environ.get('SYCL_DEVICE_FILTER') == "level_zero":
+    if os.environ.get("SYCL_DEVICE_FILTER") == "level_zero":
         return "level_zero:" + device_selector
 
-    return os.environ.get('SYCL_DEVICE_FILTER')
+    return os.environ.get("SYCL_DEVICE_FILTER")
 
 
 def gen_data_usm(nopt, dims):
@@ -56,12 +59,24 @@ def gen_data_usm(nopt, dims):
     distance = np.asarray([0.0]).astype(np.float32)
 
     with dpctl.device_context(get_device_selector()) as gpu_queue:
-        x_usm = dpt.usm_ndarray(x.shape, dtype=x.dtype, buffer="device",
-                                buffer_ctor_kwargs={"queue": gpu_queue})
-        y_usm = dpt.usm_ndarray(y.shape, dtype=y.dtype, buffer="device",
-                                buffer_ctor_kwargs={"queue": gpu_queue})
-        distance_usm = dpt.usm_ndarray(distance.shape, dtype=distance.dtype,
-                                       buffer="device", buffer_ctor_kwargs={"queue": gpu_queue})
+        x_usm = dpt.usm_ndarray(
+            x.shape,
+            dtype=x.dtype,
+            buffer="device",
+            buffer_ctor_kwargs={"queue": gpu_queue},
+        )
+        y_usm = dpt.usm_ndarray(
+            y.shape,
+            dtype=y.dtype,
+            buffer="device",
+            buffer_ctor_kwargs={"queue": gpu_queue},
+        )
+        distance_usm = dpt.usm_ndarray(
+            distance.shape,
+            dtype=distance.dtype,
+            buffer="device",
+            buffer_ctor_kwargs={"queue": gpu_queue},
+        )
 
     x_usm.usm_data.copy_from_host(x.reshape((-1)).view("|u1"))
     y_usm.usm_data.copy_from_host(y.reshape((-1)).view("|u1"))
@@ -72,20 +87,45 @@ def gen_data_usm(nopt, dims):
 
 ##############################################
 
+
 def run(name, alg, sizes=10, step=2, nopt=2 ** 20):
     import argparse
+
     parser = argparse.ArgumentParser()
-    parser.add_argument('--steps', required=False, default=sizes, help="Number of steps")
-    parser.add_argument('--step', required=False, default=step, help="Factor for each step")
-    parser.add_argument('--size', required=False, default=nopt, help="Initial data size")
-    parser.add_argument('--repeat', required=False, default=1, help="Iterations inside measured region")
-    parser.add_argument('--text', required=False, default="", help="Print with each result")
-    parser.add_argument('--json', required=False, default=__file__.replace('py', 'json'),
-                        help="output json data filename")
-    parser.add_argument('-d', type=int, default=1, help='Dimensions')
-    parser.add_argument('--test', required=False, action='store_true',
-                        help="Check for correctness by comparing output with naieve Python version")
-    parser.add_argument('--usm', required=False, action='store_true', help="Use USM Shared or pure numpy")
+    parser.add_argument(
+        "--steps", required=False, default=sizes, help="Number of steps"
+    )
+    parser.add_argument(
+        "--step", required=False, default=step, help="Factor for each step"
+    )
+    parser.add_argument(
+        "--size", required=False, default=nopt, help="Initial data size"
+    )
+    parser.add_argument(
+        "--repeat", required=False, default=1, help="Iterations inside measured region"
+    )
+    parser.add_argument(
+        "--text", required=False, default="", help="Print with each result"
+    )
+    parser.add_argument(
+        "--json",
+        required=False,
+        default=__file__.replace("py", "json"),
+        help="output json data filename",
+    )
+    parser.add_argument("-d", type=int, default=1, help="Dimensions")
+    parser.add_argument(
+        "--test",
+        required=False,
+        action="store_true",
+        help="Check for correctness by comparing output with naieve Python version",
+    )
+    parser.add_argument(
+        "--usm",
+        required=False,
+        action="store_true",
+        help="Use USM Shared or pure numpy",
+    )
 
     args = parser.parse_args()
     sizes = int(args.steps)
@@ -94,16 +134,16 @@ def run(name, alg, sizes=10, step=2, nopt=2 ** 20):
     repeat = int(args.repeat)
     dims = int(args.d)
 
-    f = open("perf_output.csv", 'w', 1)
-    f2 = open("runtimes.csv", 'w', 1)
+    f = open("perf_output.csv", "w", 1)
+    f2 = open("runtimes.csv", "w", 1)
 
     output = {}
-    output['name'] = name
-    output['sizes'] = sizes
-    output['step'] = step
-    output['repeat'] = repeat
-    output['dims'] = dims
-    output['metrics'] = []
+    output["name"] = name
+    output["sizes"] = sizes
+    output["step"] = step
+    output["repeat"] = repeat
+    output["dims"] = dims
+    output["metrics"] = []
 
     if args.test:
         X, Y = gen_data(nopt, dims, np.float32)
@@ -141,8 +181,13 @@ def run(name, alg, sizes=10, step=2, nopt=2 ** 20):
             alg(X, Y, distance)
 
         mops, time = get_mops(t0, now(), nopt)
-        print("ERF: {:15s} | Size: {:10d} | MOPS: {:15.2f} | TIME: {:10.6f}".format(name, nopt, mops, time), flush=True)
-        output['metrics'].append((nopt, mops, time))
+        print(
+            "ERF: {:15s} | Size: {:10d} | MOPS: {:15.2f} | TIME: {:10.6f}".format(
+                name, nopt, mops, time
+            ),
+            flush=True,
+        )
+        output["metrics"].append((nopt, mops, time))
         f.write(str(nopt) + "," + str(mops * 2 * repeat) + "\n")
         f2.write(str(nopt) + "," + str(time) + "\n")
 
@@ -151,6 +196,6 @@ def run(name, alg, sizes=10, step=2, nopt=2 ** 20):
         if repeat < 1:
             repeat = 1
 
-    json.dump(output, open(args.json, 'w'), indent=2, sort_keys=True)
+    json.dump(output, open(args.json, "w"), indent=2, sort_keys=True)
     f.close()
     f2.close()

@@ -50,9 +50,10 @@ def euclidean_dist(x1, x2):
     # result = np.sqrt(distance)
     return result
 
+
 @numba.jit(nopython=True)
 def push_queue(queue_neighbors, new_distance, index=4):
-    while (index > 0 and new_distance[0] < queue_neighbors[index - 1,0]):
+    while index > 0 and new_distance[0] < queue_neighbors[index - 1, 0]:
         queue_neighbors[index] = queue_neighbors[index - 1]
         index = index - 1
         queue_neighbors[index] = new_distance
@@ -64,19 +65,18 @@ def sort_queue(queue_neighbors):
         push_queue(queue_neighbors, queue_neighbors[i], i)
 
 
-
 @numba.jit(nopython=True)
 def simple_vote(neighbors, classes_num):
     votes_to_classes = np.zeros(classes_num)
 
     for i in range(len(neighbors)):
-        votes_to_classes[int(neighbors[i,1])] += 1
+        votes_to_classes[int(neighbors[i, 1])] += 1
 
     max_ind = 0
     max_value = 0
 
     for i in range(classes_num):
-        if (votes_to_classes[i] > max_value):
+        if votes_to_classes[i] > max_value:
             max_value = votes_to_classes[i]
             max_ind = i
 
@@ -89,7 +89,7 @@ def run_knn_kernel(train, train_labels, test, k, classes_num):
     train_size = len(train)
 
     predictions = np.empty(test_size)
-    queue_neighbors_lst = np.empty((test_size,k,2))
+    queue_neighbors_lst = np.empty((test_size, k, 2))
 
     for i in numba.prange(test_size):
         queue_neighbors = queue_neighbors_lst[i]
@@ -97,17 +97,17 @@ def run_knn_kernel(train, train_labels, test, k, classes_num):
         for j in range(k):
             dist = euclidean_dist(train[j], test[i])
             # queue_neighbors[j] = (dist, train_labels[j])
-            queue_neighbors[j,0] = dist
-            queue_neighbors[j,1] = train_labels[j]
-            #queue_neighbors.append((dist, train_labels[j]))
+            queue_neighbors[j, 0] = dist
+            queue_neighbors[j, 1] = train_labels[j]
+            # queue_neighbors.append((dist, train_labels[j]))
 
         sort_queue(queue_neighbors)
 
         for j in range(k, train_size):
             dist = euclidean_dist(train[j], test[i])
 
-            if (dist < queue_neighbors[k - 1][0]):
-                #queue_neighbors[k - 1] = new_neighbor
+            if dist < queue_neighbors[k - 1][0]:
+                # queue_neighbors[k - 1] = new_neighbor
                 queue_neighbors[k - 1][0] = dist
                 queue_neighbors[k - 1][1] = train_labels[j]
                 push_queue(queue_neighbors, queue_neighbors[k - 1])
@@ -116,7 +116,9 @@ def run_knn_kernel(train, train_labels, test, k, classes_num):
 
     return predictions
 
+
 def run_knn(train, train_labels, test, k=5, classes_num=3):
-        run_knn_kernel(train, train_labels, test, k, classes_num)
+    run_knn_kernel(train, train_labels, test, k, classes_num)
+
 
 base_knn.run("K-Nearest-Neighbors Numba", run_knn)

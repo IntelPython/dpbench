@@ -7,34 +7,37 @@ import base_bs_erf
 from dpnp import log, exp
 from base_bs_erf import erf, invsqrt
 
-def black_scholes ( nopt, price, strike, t, rate, vol, call, put ):
-	mr = -rate
-	sig_sig_two = vol * vol * 2
 
-	P = price
-	S = strike
-	T = t
+def black_scholes(nopt, price, strike, t, rate, vol, call, put):
+    mr = -rate
+    sig_sig_two = vol * vol * 2
 
-	a = log(P / S)
-	b = T * mr
+    P = price
+    S = strike
+    T = t
 
-	z = T * sig_sig_two
-	c = 0.25 * z
-	y = invsqrt(z)
+    a = log(P / S)
+    b = T * mr
 
-	w1 = (a - b + c) * y
-	w2 = (a - b - c) * y
+    z = T * sig_sig_two
+    c = 0.25 * z
+    y = invsqrt(z)
 
-	d1 = 0.5 + 0.5 * erf(w1)
-	d2 = 0.5 + 0.5 * erf(w2)
+    w1 = (a - b + c) * y
+    w2 = (a - b - c) * y
 
-	Se = exp(b) * S
+    d1 = 0.5 + 0.5 * erf(w1)
+    d2 = 0.5 + 0.5 * erf(w2)
 
-	call[:] = P * d1 - Se * d2
-	put[:] = call - P + Se
+    Se = exp(b) * S
+
+    call[:] = P * d1 - Se * d2
+    put[:] = call - P + Se
+
 
 def black_scholes_dpctl(nopt, price, strike, t, rate, vol, call, put):
-        with dpctl.device_context("opencl:cpu"):
-                black_scholes( nopt, price, strike, t, rate, vol, call, put )
+    with dpctl.device_context("opencl:cpu"):
+        black_scholes(nopt, price, strike, t, rate, vol, call, put)
+
 
 base_bs_erf.run("Numba@jit-numpy", black_scholes_dpctl, nparr=True, pass_args=True)

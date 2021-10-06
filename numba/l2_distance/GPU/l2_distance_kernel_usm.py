@@ -23,7 +23,10 @@ def l2_distance(*args):
     with dpctl.device_context(base_l2_distance.get_device_selector()):
         l2_distance_kernel[(a.shape[0], a.shape[1]), numba_dppy.DEFAULT_LOCAL_SIZE](a, b, distance)
 
-    return math.sqrt(distance)
+    distance_np = np.asarray([0.0])
+    distance.usm_data.copy_to_host(distance_np.view("u1"))
+
+    return math.sqrt(distance_np)
 
 
 base_l2_distance.run("l2 distance", l2_distance)

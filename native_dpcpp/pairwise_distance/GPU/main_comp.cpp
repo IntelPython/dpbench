@@ -40,14 +40,14 @@ int main(int argc, char * argv[])
   }
 
   FILE *fptr;
-  fptr = fopen("perf_output.csv", "w");
+  fptr = fopen("perf_output.csv", "a");
   if(fptr == NULL) {
     printf("Error!");
     exit(1);
   }
 
   FILE *fptr1;
-  fptr1 = fopen("runtimes.csv", "w");
+  fptr1 = fopen("runtimes.csv", "a");
   if(fptr1 == NULL) {
     printf("Error!");
     exit(1);
@@ -84,15 +84,20 @@ int main(int argc, char * argv[])
     ofstream file;
     file.open("D.bin", ios::out|ios::binary);
     if (file) {
-      file.write(reinterpret_cast<char *>(distance_op), nopt*nopt*sizeof(tfloat));
+      tfloat* tdistance_op = (tfloat*)_mm_malloc( nopt*nopt*sizeof(tfloat), ALIGN_FACTOR);
+      q->memcpy(tdistance_op, distance_op, nopt*nopt*sizeof(tfloat));
+      q->wait();
+
+      file.write(reinterpret_cast<char *>(tdistance_op), nopt*nopt*sizeof(tfloat));
       file.close();
+      _mm_free(tdistance_op);
     } else {
       std::cout << "Unable to open output file.\n";
     }
   }
 
   /* Deallocate arrays */
-  FreeData( q, x1, x2 );
+  FreeData( q, x1, x2, distance_op );
 
   nopt = nopt * 2;
 

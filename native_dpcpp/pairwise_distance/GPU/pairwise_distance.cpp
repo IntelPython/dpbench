@@ -20,9 +20,9 @@ void pairwise_distance( queue* q, size_t nopt, struct point * p1, struct point *
   // allocate GPU data using malloc_device
   struct point* d_p1, *d_p2;
   tfloat* d_distance_op;
-  d_p1 = (struct point*)malloc_device( nopt * sizeof(struct point), *q);
-  d_p2 = (struct point*)malloc_device( nopt * sizeof(struct point), *q);
-  d_distance_op = (tfloat*)malloc_device( nopt * nopt * sizeof(tfloat), *q);
+  d_p1 = (struct point*)malloc_shared( nopt * sizeof(struct point), *q);
+  d_p2 = (struct point*)malloc_shared( nopt * sizeof(struct point), *q);
+  d_distance_op = (tfloat*)malloc_shared( nopt * nopt * sizeof(tfloat), *q);
 
   // copy data host to device
   q->memcpy(d_p1, p1, nopt * sizeof(struct point));
@@ -48,10 +48,10 @@ void pairwise_distance( queue* q, size_t nopt, struct point * p1, struct point *
 	    }
 	  }
 	});
-    }).wait();
+    });
 
-  q->memcpy(p1, d_p1, nopt * sizeof(struct point));
-  q->memcpy(p2, d_p2, nopt * sizeof(struct point));
+  q->wait();
+
   q->memcpy(distance_op, d_distance_op, nopt * nopt * sizeof(tfloat));
 
   q->wait();

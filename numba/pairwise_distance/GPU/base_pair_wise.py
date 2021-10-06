@@ -5,7 +5,9 @@
 
 import numpy as np
 import sys,json,os
-import numpy.random as rnd
+import dpctl, dpctl.tensor as dpt
+from dpbench_python.pairwise_distance.pairwise_distance_python import pairwise_distance_python
+from dpbench_datagen.pairwise_distance import gen_rand_data
 
 try:
     import itimer as it
@@ -19,7 +21,7 @@ except:
 ######################################################
 # GLOBAL DECLARATIONS THAT WILL BE USED IN ALL FILES #
 ######################################################
-SEED = 7777777
+
 # make xrange available in python 3
 try:
     xrange
@@ -42,11 +44,21 @@ def get_device_selector (is_gpu = True):
     return os.environ.get('SYCL_DEVICE_FILTER')
 
 def gen_data(nopt,dims):
-    return (
-        rnd.random((nopt, dims)),
-        rnd.random((nopt, dims)),
-        np.empty((nopt, nopt))
-    )
+    X,Y = gen_rand_data(nopt,dims)
+    return ( X, Y, np.empty((nopt, nopt)) )
+
+def gen_data_usm(nopt,dims):
+    X, Y, D = gen_data(nopt, dims)
+
+    with dpctl.device_context(get_device_selector()) as gpu_queue:
+        X_usm = dpt.usm_ndarray(X.shape, dtype=X.dtype, buffer="device", buffer_ctor_kwargs={"queue":gpu_queue})
+        Y_usm = dpt.usm_ndarray(Y.shape, dtype=Y.dtype, buffer="device", buffer_ctor_kwargs={"queue":gpu_queue})
+        D_usm = dpt.usm_ndarray(D.shape, dtype=D.dtype, buffer="device", buffer_ctor_kwargs={"queue":gpu_queue})
+
+    X_usm.usm_data.copy_from_host(X.reshape((-1)).view("u1"))
+    Y_usm.usm_data.copy_from_host(Y.reshape((-1)).view("u1"))
+
+    return (X_usm, Y_usm, D_usm)
 
 ##############################################
 
@@ -60,6 +72,8 @@ def run(name, alg, sizes=5, step=2, nopt=2**10):
     parser.add_argument('--text',  required=False, default="",     help="Print with each result")
     parser.add_argument('-d', type=int, default=3, help='Dimensions')
     parser.add_argument('--json',  required=False, default=__file__.replace('py','json'), help="output json data filename")
+    parser.add_argument('--usm',   required=False, action='store_true',  help="Use USM Shared or pure numpy")
+    parser.add_argument('--test',  required=False, action='store_true', help="Check for correctness by comparing output with naieve Python version")
 
     args = parser.parse_args()
     sizes= int(args.steps)
@@ -73,15 +87,39 @@ def run(name, alg, sizes=5, step=2, nopt=2**10):
     output['sizes']     = sizes
     output['step']      = step
     output['repeat']    = repeat
-    output['randseed']  = SEED
     output['metrics']   = []
 
-    rnd.seed(SEED)
+    if args.test:
+        X, Y, p_D = gen_data(nopt, dims)
+        pairwise_distance_python(X, Y, p_D)
+
+        if args.usm is True: #test usm feature
+            X, Y, D_usm = gen_data_usm(nopt, dims)
+            #pass usm input data to kernel
+            alg(X, Y, D_usm)
+            n_D = np.empty((nopt, nopt))
+            D_usm.usm_data.copy_to_host(n_D.reshape((-1)).view("u1"))
+        else:
+            X, Y, n_D = gen_data(nopt, dims)
+            #pass numpy generated data to kernel
+            alg(X, Y, n_D)
+
+        if np.allclose(n_D, p_D):
+            print("Test succeeded\n")
+        else:
+            print("Test failed\n")
+        return
+
+
     f=open("perf_output.csv",'w',1)
     f2 = open("runtimes.csv",'w',1)
 
     for i in xrange(sizes):
-        X,Y,D = gen_data(nopt,dims)
+        if args.usm is True:
+            X, Y, D = gen_data_usm(nopt, dims)
+        else:
+            X, Y, D = gen_data(nopt,dims)
+
         iterations = xrange(repeat)
 
         alg(X,Y,D) #warmup

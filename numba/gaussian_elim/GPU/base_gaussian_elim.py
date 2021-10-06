@@ -19,19 +19,22 @@ except NameError:
 ###############################################
 
 
-def get_device_selector (is_gpu = True):
+def get_device_selector(is_gpu=True):
     if is_gpu is True:
         device_selector = "gpu"
     else:
         device_selector = "cpu"
 
-    if os.environ.get('SYCL_DEVICE_FILTER') is None or os.environ.get('SYCL_DEVICE_FILTER') == "opencl":
+    if (
+        os.environ.get("SYCL_DEVICE_FILTER") is None
+        or os.environ.get("SYCL_DEVICE_FILTER") == "opencl"
+    ):
         return "opencl:" + device_selector
 
-    if os.environ.get('SYCL_DEVICE_FILTER') == "level_zero":
+    if os.environ.get("SYCL_DEVICE_FILTER") == "level_zero":
         return "level_zero:" + device_selector
 
-    return os.environ.get('SYCL_DEVICE_FILTER')
+    return os.environ.get("SYCL_DEVICE_FILTER")
 
 
 def gen_matrix(size):
@@ -68,10 +71,10 @@ def gen_matrix_usm(size):
     m_buf = gen_matrix(size)
 
     with dpctl.device_context(get_device_selector()):
-        m_usm = dpmem.MemoryUSMShared(size * size * np.dtype('float').itemsize)
+        m_usm = dpmem.MemoryUSMShared(size * size * np.dtype("float").itemsize)
         m_usm.copy_from_host(m_buf.view("u1"))
 
-    return np.array(size * size, buffer=m_usm, dtype='i4')
+    return np.array(size * size, buffer=m_usm, dtype="i4")
 
 
 def gen_vec(size, value):
@@ -82,34 +85,55 @@ def gen_vec_usm(size, value):
     v_buf = gen_vec(size, value)
 
     with dpctl.device_context(get_device_selector()):
-        v_usm = dpmem.MemoryUSMShared(size * np.dtype('float').itemsize)
+        v_usm = dpmem.MemoryUSMShared(size * np.dtype("float").itemsize)
         v_usm.copy_from_host(v_buf.view("u1"))
 
-    return np.array(size, buffer=v_usm, dtype='float')
+    return np.array(size, buffer=v_usm, dtype="float")
 
 
 # Return result from a solved matrix
 def backward_sub(a, b, x, size):
-    x[size-1] = b[size-1] / a[(size-1)*size + size - 1]
-    for i in range(size-2, -1, -1):
+    x[size - 1] = b[size - 1] / a[(size - 1) * size + size - 1]
+    for i in range(size - 2, -1, -1):
         x[i] = b[i]
 
-        for j in range(i+1, size):
-            x[i] -= a[i*size + j] * x[j]
+        for j in range(i + 1, size):
+            x[i] -= a[i * size + j] * x[j]
 
         x[i] = x[i] / a[i * size + i]
 
 
 def run(name, alg, steps=5, step=2, size=10):
     import argparse
+
     parser = argparse.ArgumentParser()
-    parser.add_argument('--steps',  required=False, default=steps, help="Number of steps")
-    parser.add_argument('--step',   required=False, default=step, help="Factor for each step")
-    parser.add_argument('--size',   required=False, default=size, help="Matrix size: rows or columns number")
-    parser.add_argument('--usm',    required=False, action='store_true', help="Use USM Shared or pure numpy")
-    parser.add_argument('--repeat', required=False, default=1, help="Iterations inside measured region")
-    parser.add_argument('--json',  required=False, default=__file__.replace('py', 'json'),
-                        help="Output json data filename")
+    parser.add_argument(
+        "--steps", required=False, default=steps, help="Number of steps"
+    )
+    parser.add_argument(
+        "--step", required=False, default=step, help="Factor for each step"
+    )
+    parser.add_argument(
+        "--size",
+        required=False,
+        default=size,
+        help="Matrix size: rows or columns number",
+    )
+    parser.add_argument(
+        "--usm",
+        required=False,
+        action="store_true",
+        help="Use USM Shared or pure numpy",
+    )
+    parser.add_argument(
+        "--repeat", required=False, default=1, help="Iterations inside measured region"
+    )
+    parser.add_argument(
+        "--json",
+        required=False,
+        default=__file__.replace("py", "json"),
+        help="Output json data filename",
+    )
 
     args = parser.parse_args()
     steps = int(args.steps)
@@ -118,13 +142,13 @@ def run(name, alg, steps=5, step=2, size=10):
     repeat = int(args.repeat)
 
     output = {}
-    output['name']      = name
-    output['sizes']     = steps
-    output['step']      = step
-    output['repeat']    = repeat
-    output['metrics']   = []
+    output["name"] = name
+    output["sizes"] = steps
+    output["step"] = step
+    output["repeat"] = repeat
+    output["metrics"] = []
 
-    f2 = open("runtimes.csv",'w',1)
+    f2 = open("runtimes.csv", "w", 1)
 
     def gen_data():
         if args.usm is True:
@@ -162,13 +186,18 @@ def run(name, alg, steps=5, step=2, size=10):
         f2.write(str(size) + "," + str(time) + "\n")
 
         size *= step
-        mops = 0.
+        mops = 0.0
         nopt = 0
-        print("ERF: {:15s} | Size: {:10d} | MOPS: {:15.2f} | TIME: {:10.6f}".format(name, nopt, mops, time),flush=True)
-        output['metrics'].append((nopt, mops, time))
+        print(
+            "ERF: {:15s} | Size: {:10d} | MOPS: {:15.2f} | TIME: {:10.6f}".format(
+                name, nopt, mops, time
+            ),
+            flush=True,
+        )
+        output["metrics"].append((nopt, mops, time))
         repeat -= step
         if repeat < 1:
             repeat = 1
-    json.dump(output, open(args.json, 'w'), indent=2, sort_keys=True)
+    json.dump(output, open(args.json, "w"), indent=2, sort_keys=True)
 
     f2.close()

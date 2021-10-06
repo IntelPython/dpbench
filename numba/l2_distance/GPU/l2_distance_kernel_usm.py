@@ -21,7 +21,9 @@ def l2_distance_kernel(a, b, c):
 def l2_distance(*args):
     a, b, distance = args
     with dpctl.device_context(base_l2_distance.get_device_selector()):
-        l2_distance_kernel[(a.shape[0], a.shape[1]), numba_dppy.DEFAULT_LOCAL_SIZE](a, b, distance)
+        l2_distance_kernel[(a.shape[0], a.shape[1]), numba_dppy.DEFAULT_LOCAL_SIZE](
+            a, b, distance
+        )
 
     distance_np = np.asarray([0.0])
     distance.usm_data.copy_to_host(distance_np.view("u1"))

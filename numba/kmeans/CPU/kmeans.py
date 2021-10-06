@@ -6,10 +6,9 @@ REPEAT = 1
 
 ITERATIONS = 30
 
-@numba.jit(nopython=True,parallel=True,fastmath=True)
-def groupByCluster(arrayP, arrayPcluster,
-                   arrayC,
-                   num_points, num_centroids):
+
+@numba.jit(nopython=True, parallel=True, fastmath=True)
+def groupByCluster(arrayP, arrayPcluster, arrayC, num_points, num_centroids):
     for i0 in numba.prange(num_points):
         minor_distance = -1
         for i1 in range(num_centroids):
@@ -22,10 +21,10 @@ def groupByCluster(arrayP, arrayPcluster,
     return arrayPcluster
 
 
-@numba.jit(nopython=True,parallel=True,fastmath=True)
-def calCentroidsSum(arrayP, arrayPcluster,
-                    arrayCsum, arrayCnumpoint,
-                    num_points, num_centroids):
+@numba.jit(nopython=True, parallel=True, fastmath=True)
+def calCentroidsSum(
+    arrayP, arrayPcluster, arrayCsum, arrayCnumpoint, num_points, num_centroids
+):
     for i in numba.prange(num_centroids):
         arrayCsum[i, 0] = 0
         arrayCsum[i, 1] = 0
@@ -40,47 +39,53 @@ def calCentroidsSum(arrayP, arrayPcluster,
     return arrayCsum, arrayCnumpoint
 
 
-@numba.jit(nopython=True,parallel=True,fastmath=True)
-def updateCentroids(arrayC, arrayCsum, arrayCnumpoint,
-                    num_centroids):
+@numba.jit(nopython=True, parallel=True, fastmath=True)
+def updateCentroids(arrayC, arrayCsum, arrayCnumpoint, num_centroids):
     for i in numba.prange(num_centroids):
         arrayC[i, 0] = arrayCsum[i, 0] / arrayCnumpoint[i]
         arrayC[i, 1] = arrayCsum[i, 1] / arrayCnumpoint[i]
 
 
-def kmeans(arrayP, arrayPcluster,
-           arrayC, arrayCsum, arrayCnumpoint,
-           num_points, num_centroids):
+def kmeans(
+    arrayP, arrayPcluster, arrayC, arrayCsum, arrayCnumpoint, num_points, num_centroids
+):
 
     for i in range(ITERATIONS):
-        groupByCluster(
-            arrayP, arrayPcluster,
-            arrayC,
-            num_points, num_centroids
-        )
+        groupByCluster(arrayP, arrayPcluster, arrayC, num_points, num_centroids)
 
         calCentroidsSum(
-            arrayP, arrayPcluster,
-            arrayCsum, arrayCnumpoint,
-            num_points, num_centroids
+            arrayP, arrayPcluster, arrayCsum, arrayCnumpoint, num_points, num_centroids
         )
 
-        updateCentroids(
-            arrayC, arrayCsum, arrayCnumpoint,
-            num_centroids
-        )
+        updateCentroids(arrayC, arrayCsum, arrayCnumpoint, num_centroids)
 
     return arrayC, arrayCsum, arrayCnumpoint
 
+
 def printCentroid(arrayC, arrayCsum, arrayCnumpoint):
     for i in range(NUMBER_OF_CENTROIDS):
-        print("[x={:6f}, y={:6f}, x_sum={:6f}, y_sum={:6f}, num_points={:d}]".format(
-            arrayC[i, 0], arrayC[i, 1], arrayCsum[i, 0], arrayCsum[i, 1], arrayCnumpoint[i])
+        print(
+            "[x={:6f}, y={:6f}, x_sum={:6f}, y_sum={:6f}, num_points={:d}]".format(
+                arrayC[i, 0],
+                arrayC[i, 1],
+                arrayCsum[i, 0],
+                arrayCsum[i, 1],
+                arrayCnumpoint[i],
+            )
         )
 
-    print('--------------------------------------------------')
+    print("--------------------------------------------------")
 
-def run_kmeans(arrayP, arrayPclusters,arrayC,arrayCsum,arrayCnumpoint, NUMBER_OF_POINTS, NUMBER_OF_CENTROIDS):
+
+def run_kmeans(
+    arrayP,
+    arrayPclusters,
+    arrayC,
+    arrayCsum,
+    arrayCnumpoint,
+    NUMBER_OF_POINTS,
+    NUMBER_OF_CENTROIDS,
+):
 
     for i in range(REPEAT):
         for i1 in range(NUMBER_OF_CENTROIDS):
@@ -88,9 +93,13 @@ def run_kmeans(arrayP, arrayPclusters,arrayC,arrayCsum,arrayCnumpoint, NUMBER_OF
             arrayC[i1, 1] = arrayP[i1, 1]
 
         arrayC, arrayCsum, arrayCnumpoint = kmeans(
-            arrayP, arrayPclusters,
-            arrayC, arrayCsum, arrayCnumpoint,
-            NUMBER_OF_POINTS, NUMBER_OF_CENTROIDS
+            arrayP,
+            arrayPclusters,
+            arrayC,
+            arrayCsum,
+            arrayCnumpoint,
+            NUMBER_OF_POINTS,
+            NUMBER_OF_CENTROIDS,
         )
 
     #     if i + 1 == REPEAT:
@@ -98,5 +107,6 @@ def run_kmeans(arrayP, arrayPclusters,arrayC,arrayCsum,arrayCnumpoint, NUMBER_OF
 
     # print("Iterations: {:d}".format(ITERATIONS))
     # print("Average Time: {:.4f} ms".format(total))
+
 
 base_kmeans.run("Kmeans Numba", run_kmeans)

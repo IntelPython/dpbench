@@ -19,16 +19,39 @@ except NameError:
 
 def run(name, sizes=10, step=2, nopt=2 ** 20):
     import argparse
+
     parser = argparse.ArgumentParser()
-    parser.add_argument('--steps', required=False, default=sizes, help="Number of steps")
-    parser.add_argument('--step', required=False, default=step, help="Factor for each step")
-    parser.add_argument('--size', required=False, default=nopt, help="Initial data size")
-    parser.add_argument('--repeat', required=False, default=1, help="Iterations inside measured region")
-    parser.add_argument('-d', type=int, default=1, help='Dimensions')
-    parser.add_argument('--test', required=False, action='store_true',
-                        help="Check for correctness by comparing output with naieve Python version")
-    parser.add_argument('--usm', required=False, action='store_true', help="Use USM Shared or pure numpy")
-    parser.add_argument('--atomic', required=False, action='store_true', help="Use atomic based version or reduction")
+    parser.add_argument(
+        "--steps", required=False, default=sizes, help="Number of steps"
+    )
+    parser.add_argument(
+        "--step", required=False, default=step, help="Factor for each step"
+    )
+    parser.add_argument(
+        "--size", required=False, default=nopt, help="Initial data size"
+    )
+    parser.add_argument(
+        "--repeat", required=False, default=1, help="Iterations inside measured region"
+    )
+    parser.add_argument("-d", type=int, default=1, help="Dimensions")
+    parser.add_argument(
+        "--test",
+        required=False,
+        action="store_true",
+        help="Check for correctness by comparing output with naieve Python version",
+    )
+    parser.add_argument(
+        "--usm",
+        required=False,
+        action="store_true",
+        help="Use USM Shared or pure numpy",
+    )
+    parser.add_argument(
+        "--atomic",
+        required=False,
+        action="store_true",
+        help="Use atomic based version or reduction",
+    )
 
     args = parser.parse_args()
     sizes = int(args.steps)
@@ -37,27 +60,27 @@ def run(name, sizes=10, step=2, nopt=2 ** 20):
     repeat = int(args.repeat)
     dims = int(args.d)
 
-    clean_string = ['make', 'clean']
+    clean_string = ["make", "clean"]
     utils.run_command(clean_string, verbose=True)
 
     is_usm = args.usm
     is_atomic = args.atomic
 
     if is_usm & is_atomic:
-        build_string = ['make', 'atomic_comp']
+        build_string = ["make", "atomic_comp"]
         utils.run_command(build_string, verbose=True)
         exec_name = "./l2_distance_atomic_comp"
     else:
         if is_usm:
-            build_string = ['make', 'comp']
+            build_string = ["make", "comp"]
             utils.run_command(build_string, verbose=True)
             exec_name = "./l2_distance_comp"
         elif is_atomic:
-            build_string = ['make', 'atomic']
+            build_string = ["make", "atomic"]
             utils.run_command(build_string, verbose=True)
             exec_name = "./l2_distance_atomic"
         else:
-            build_string = ['make']
+            build_string = ["make"]
             utils.run_command(build_string, verbose=True)
             exec_name = "./l2_distance"
 
@@ -77,8 +100,8 @@ def run(name, sizes=10, step=2, nopt=2 ** 20):
         # Dtype depends on native data!!!!!!!!!!!
         n_dis = np.fromfile("distance.bin", np.float32)
 
-        if os.path.isfile('distance.bin'):
-            os.remove('distance.bin')
+        if os.path.isfile("distance.bin"):
+            os.remove("distance.bin")
 
         if np.allclose(n_dis, p_dis):
             print("Test succeeded. Python dis: ", p_dis, " Native dis: ", n_dis, "\n")
@@ -86,8 +109,8 @@ def run(name, sizes=10, step=2, nopt=2 ** 20):
             print("Test failed. Python dis: ", p_dis, " Native dis: ", n_dis, "\n")
         return
 
-    if os.path.isfile('runtimes.csv'):
-        os.remove('runtimes.csv')
+    if os.path.isfile("runtimes.csv"):
+        os.remove("runtimes.csv")
 
     for _ in xrange(sizes):
         # generate input data
@@ -102,5 +125,5 @@ def run(name, sizes=10, step=2, nopt=2 ** 20):
             repeat = 1
 
 
-if __name__ == '__main__':
-    run('l2_distance dpcpp')
+if __name__ == "__main__":
+    run("l2_distance dpcpp")

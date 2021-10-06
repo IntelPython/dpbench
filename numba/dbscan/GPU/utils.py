@@ -4,10 +4,10 @@ from numba import int64
 
 
 queue_spec = [
-    ('capacity', int64),
-    ('head', int64),
-    ('tail', int64),
-    ('values', int64[:]),
+    ("capacity", int64),
+    ("head", int64),
+    ("tail", int64),
+    ("values", int64[:]),
 ]
 
 
@@ -23,7 +23,7 @@ class Queue:
         self.tail = min(self.tail, new_capacity)
 
         new_values = np.empty(new_capacity, dtype=np.int64)
-        new_values[:self.tail] = self.values[:self.tail]
+        new_values[: self.tail] = self.values[: self.tail]
         self.values = new_values
 
     def push(self, value):

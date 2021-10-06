@@ -36,6 +36,7 @@ import dpctl.tensor as dpt
 # def euclidean_dist(x1, x2):
 #     return np.linalg.norm(x1-x2)
 
+
 @numba_dppy.func
 def euclidean_dist(x1, x2, data_dim):
     distance = 0
@@ -47,9 +48,10 @@ def euclidean_dist(x1, x2, data_dim):
     result = distance ** 0.5
     return result
 
+
 @numba_dppy.func
 def push_queue(queue_neighbors, new_distance, index=4):  # 4: k-1
-    while (index > 0 and new_distance[0] < queue_neighbors[index - 1, 0]):
+    while index > 0 and new_distance[0] < queue_neighbors[index - 1, 0]:
         queue_neighbors[index] = queue_neighbors[index - 1]
         index = index - 1
         queue_neighbors[index] = new_distance
@@ -61,9 +63,30 @@ def sort_queue(queue_neighbors):
         push_queue(queue_neighbors, queue_neighbors[i], i)
 
 
-@numba_dppy.kernel(access_types={"read_only": ["train", "train_labels", "test","votes_to_classes_lst", "queue_neighbors_lst"], "write_only": ["predictions"]})
-def run_knn_kernel(train, train_labels, test, k, classes_num, train_size, predictions, queue_neighbors_lst,
-                   votes_to_classes_lst, data_dim):
+@numba_dppy.kernel(
+    access_types={
+        "read_only": [
+            "train",
+            "train_labels",
+            "test",
+            "votes_to_classes_lst",
+            "queue_neighbors_lst",
+        ],
+        "write_only": ["predictions"],
+    }
+)
+def run_knn_kernel(
+    train,
+    train_labels,
+    test,
+    k,
+    classes_num,
+    train_size,
+    predictions,
+    queue_neighbors_lst,
+    votes_to_classes_lst,
+    data_dim,
+):
     i = numba_dppy.get_global_id(0)
     queue_neighbors = queue_neighbors_lst[i]
 
@@ -81,14 +104,14 @@ def run_knn_kernel(train, train_labels, test, k, classes_num, train_size, predic
         queue_neighbors[j, 1] = train_labels[j]
 
     # sort_queue(queue_neighbors)
-    #for j in range(len(queue_neighbors)):
+    # for j in range(len(queue_neighbors)):
     for j in range(k):
         # push_queue(queue_neighbors, queue_neighbors[i], i)
         new_distance = queue_neighbors[j, 0]
         new_neighbor_label = queue_neighbors[j, 1]
         index = j
 
-        while (index > 0 and new_distance < queue_neighbors[index - 1, 0]):
+        while index > 0 and new_distance < queue_neighbors[index - 1, 0]:
             queue_neighbors[index, 0] = queue_neighbors[index - 1, 0]
             queue_neighbors[index, 1] = queue_neighbors[index - 1, 1]
 
@@ -108,15 +131,15 @@ def run_knn_kernel(train, train_labels, test, k, classes_num, train_size, predic
             distance += diff * diff
         dist = math.sqrt(distance)
 
-        if (dist < queue_neighbors[k - 1][0]):
+        if dist < queue_neighbors[k - 1][0]:
             queue_neighbors[k - 1][0] = dist
             queue_neighbors[k - 1][1] = train_labels[j]
             # push_queue(queue_neighbors, queue_neighbors[k - 1])
             new_distance = queue_neighbors[k - 1, 0]
             new_neighbor_label = queue_neighbors[k - 1, 1]
-            index = k-1
+            index = k - 1
 
-            while (index > 0 and new_distance < queue_neighbors[index - 1, 0]):
+            while index > 0 and new_distance < queue_neighbors[index - 1, 0]:
                 queue_neighbors[index, 0] = queue_neighbors[index - 1, 0]
                 queue_neighbors[index, 1] = queue_neighbors[index - 1, 1]
 
@@ -134,19 +157,39 @@ def run_knn_kernel(train, train_labels, test, k, classes_num, train_size, predic
     max_value = 0
 
     for j in range(classes_num):
-        if (votes_to_classes[j] > max_value):
+        if votes_to_classes[j] > max_value:
             max_value = votes_to_classes[j]
             max_ind = j
 
     predictions[i] = max_ind
 
 
-def run_knn(train, train_labels, test, k, classes_num, test_size, train_size, predictions, queue_neighbors_lst,
-            votes_to_classes_lst, data_dim):
+def run_knn(
+    train,
+    train_labels,
+    test,
+    k,
+    classes_num,
+    test_size,
+    train_size,
+    predictions,
+    queue_neighbors_lst,
+    votes_to_classes_lst,
+    data_dim,
+):
     with dpctl.device_context(base_knn.get_device_selector()) as gpu_queue:
-        run_knn_kernel[test_size, numba_dppy.DEFAULT_LOCAL_SIZE](train, train_labels, test, k, classes_num, train_size,
-                                                                 predictions, queue_neighbors_lst, votes_to_classes_lst,
-                                                                 data_dim)
+        run_knn_kernel[test_size, numba_dppy.DEFAULT_LOCAL_SIZE](
+            train,
+            train_labels,
+            test,
+            k,
+            classes_num,
+            train_size,
+            predictions,
+            queue_neighbors_lst,
+            votes_to_classes_lst,
+            data_dim,
+        )
 
 
 base_knn.run("K-Nearest-Neighbors Numba", run_knn)

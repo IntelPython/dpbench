@@ -24,13 +24,25 @@
 # EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 # *****************************************************************************
 
-def knn_python(train, train_labels, test, k, classes_num, train_size, test_size, predictions,
-               queue_neighbors_lst, votes_to_classes_lst, data_dim):
+
+def knn_python(
+    train,
+    train_labels,
+    test,
+    k,
+    classes_num,
+    train_size,
+    test_size,
+    predictions,
+    queue_neighbors_lst,
+    votes_to_classes_lst,
+    data_dim,
+):
     for i in range(test_size):
         queue_neighbors = queue_neighbors_lst[i]
 
         for j in range(k):
-            #dist = euclidean_dist(train[j], test[i])
+            # dist = euclidean_dist(train[j], test[i])
             x1 = train[j]
             x2 = test[i]
 
@@ -43,14 +55,14 @@ def knn_python(train, train_labels, test, k, classes_num, train_size, test_size,
             queue_neighbors[j, 0] = dist
             queue_neighbors[j, 1] = train_labels[j]
 
-        #sort_queue(queue_neighbors)
+        # sort_queue(queue_neighbors)
         for j in range(len(queue_neighbors)):
-            #push_queue(queue_neighbors, queue_neighbors[i], i)
+            # push_queue(queue_neighbors, queue_neighbors[i], i)
             new_distance = queue_neighbors[j, 0]
             new_neighbor_label = queue_neighbors[j, 1]
             index = j
 
-            while (index > 0 and new_distance < queue_neighbors[index - 1, 0]):
+            while index > 0 and new_distance < queue_neighbors[index - 1, 0]:
                 queue_neighbors[index, 0] = queue_neighbors[index - 1, 0]
                 queue_neighbors[index, 1] = queue_neighbors[index - 1, 1]
 
@@ -60,7 +72,7 @@ def knn_python(train, train_labels, test, k, classes_num, train_size, test_size,
                 queue_neighbors[index, 1] = new_neighbor_label
 
         for j in range(k, train_size):
-            #dist = euclidean_dist(train[j], test[i])
+            # dist = euclidean_dist(train[j], test[i])
             x1 = train[j]
             x2 = test[i]
 
@@ -70,16 +82,16 @@ def knn_python(train, train_labels, test, k, classes_num, train_size, test_size,
                 distance += diff * diff
             dist = distance ** 0.5
 
-            if (dist < queue_neighbors[k - 1][0]):
-                #queue_neighbors[k - 1] = new_neighbor
+            if dist < queue_neighbors[k - 1][0]:
+                # queue_neighbors[k - 1] = new_neighbor
                 queue_neighbors[k - 1][0] = dist
                 queue_neighbors[k - 1][1] = train_labels[j]
-                #push_queue(queue_neighbors, queue_neighbors[k - 1])
+                # push_queue(queue_neighbors, queue_neighbors[k - 1])
                 new_distance = queue_neighbors[k - 1, 0]
                 new_neighbor_label = queue_neighbors[k - 1, 1]
-                index = k-1
+                index = k - 1
 
-                while (index > 0 and new_distance < queue_neighbors[index - 1, 0]):
+                while index > 0 and new_distance < queue_neighbors[index - 1, 0]:
                     queue_neighbors[index, 0] = queue_neighbors[index - 1, 0]
                     queue_neighbors[index, 1] = queue_neighbors[index - 1, 1]
 
@@ -97,7 +109,7 @@ def knn_python(train, train_labels, test, k, classes_num, train_size, test_size,
         max_value = 0
 
         for j in range(classes_num):
-            if (votes_to_classes[j] > max_value):
+            if votes_to_classes[j] > max_value:
                 max_value = votes_to_classes[j]
                 max_ind = j
 

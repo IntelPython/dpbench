@@ -28,4 +28,4 @@ import numpy as np
 
 
 def l2_distance_python(a, b):
-    return np.linalg.norm(a-b)
+    return np.linalg.norm(a - b)

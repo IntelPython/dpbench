@@ -47,7 +47,7 @@ int main(int argc, char * argv[])
     }
 
   FILE *fptr1;
-  fptr1 = fopen("runtimes.csv", "w");
+  fptr1 = fopen("runtimes.csv", "a");
   if(fptr1 == NULL) {
     printf("Error!");
     exit(1);
@@ -92,7 +92,7 @@ int main(int argc, char * argv[])
 
   fflush(stdout);
   // fprintf(fptr, "%lu,%.6lf\n",nopt,(2.0 * nopt * 100 )/((double) (t2 - t1) / getHz()));
-  fprintf(fptr1, "%lu,%.6lf\n",nopt,((double) (t2 - t1) / getHz()));
+  fprintf(fptr1, "%lu,%.6lf\n",nopt,time);
 
   /**************************/
 

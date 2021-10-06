@@ -17,7 +17,7 @@ except NameError:
     xrange = range
 
 
-def run(name, sizes=10, step=2, nopt=2 ** 16):
+def run(name, sizes=10, step=2, nopt=2 ** 20):
     import argparse
     parser = argparse.ArgumentParser()
     parser.add_argument('--steps', required=False, default=sizes, help="Number of steps")

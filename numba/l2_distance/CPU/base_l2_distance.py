@@ -90,7 +90,9 @@ def run(name, alg, sizes=10, step=2, nopt=2 ** 16):
         p_dis = l2_distance_python(X, Y)
         n_dis = alg(X, Y)
 
-        if np.allclose(n_dis, p_dis):
+        # RMS error grows proportional to sqrt(n)
+        # absolute(a - b) <= (atol + rtol * absolute(b))
+        if np.allclose(n_dis, p_dis, rtol=1e-05 * np.sqrt(nopt)):
             print("Test succeeded. Python dis: ", p_dis, " Numba dis: ", n_dis, "\n")
         else:
             print("Test failed. Python dis: ", p_dis, " Numba dis: ", n_dis, "\n")

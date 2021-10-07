@@ -103,7 +103,9 @@ def run(name, sizes=10, step=2, nopt=2 ** 20):
         if os.path.isfile("distance.bin"):
             os.remove("distance.bin")
 
-        if np.allclose(n_dis, p_dis):
+        # RMS error grows proportional to sqrt(n)
+        # absolute(a - b) <= (atol + rtol * absolute(b))
+        if np.allclose(n_dis, p_dis, rtol=1e-05 * np.sqrt(nopt)):
             print("Test succeeded. Python dis: ", p_dis, " Native dis: ", n_dis, "\n")
         else:
             print("Test failed. Python dis: ", p_dis, " Native dis: ", n_dis, "\n")

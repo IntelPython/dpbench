@@ -43,18 +43,13 @@ def run_gaussian_elim(size, solve_matrix, coef_vec, extra_matrix):
     global_work_size_1 = [size]
     global_work_size_2 = [size, size]
 
-    local_work_size_1 = []
-    local_work_size_2 = []
-
     if local_work_size_buf_1[0]:
-        local_work_size_1 = local_work_size_buf_1
         global_work_size_1[0] = (
             int(np.ceil(global_work_size_1[0] / local_work_size_buf_1[0]))
             * local_work_size_buf_1[0]
         )
 
     if local_work_size_buf_2[0]:
-        local_work_size_2 = local_work_size_buf_2
         global_work_size_2[0] = (
             int(np.ceil(global_work_size_2[0] / local_work_size_buf_2[0]))
             * local_work_size_buf_2[0]

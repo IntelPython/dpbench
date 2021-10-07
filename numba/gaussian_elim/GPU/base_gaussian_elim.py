@@ -2,6 +2,7 @@ import numpy as np
 import os
 import json
 from timeit import default_timer as now
+from dpbench_datagen.gaussian_elim import gen_matrix, gen_vec
 
 import dpctl, dpctl.memory as dpmem
 
@@ -37,36 +38,6 @@ def get_device_selector(is_gpu=True):
     return os.environ.get("SYCL_DEVICE_FILTER")
 
 
-def gen_matrix(size):
-    """
-    Example of target matrix m with size = 4
-
-    10.0 9.9 9.8 9.7
-    9.9 10.0 9.9 9.8
-    9.8 9.9 10.0 9.9
-    9.7 9.8 9.9 10.0
-
-    """
-
-    m = np.empty(size * size, dtype=float)
-
-    lamda = -0.01
-    coef = np.empty(2 * size - 1)
-
-    for i in range(size):
-        coef_i = 10 * np.exp(lamda * i)
-        j = size - 1 + i
-        coef[j] = coef_i
-        j = size - 1 - i
-        coef[j] = coef_i
-
-    for i in range(size):
-        for j in range(size):
-            m[i * size + j] = coef[size - 1 - i + j]
-
-    return m
-
-
 def gen_matrix_usm(size):
     m_buf = gen_matrix(size)
 
@@ -75,10 +46,6 @@ def gen_matrix_usm(size):
         m_usm.copy_from_host(m_buf.view("u1"))
 
     return np.array(size * size, buffer=m_usm, dtype="i4")
-
-
-def gen_vec(size, value):
-    return np.full(size, value, dtype=float)
 
 
 def gen_vec_usm(size, value):
@@ -162,7 +129,7 @@ def run(name, alg, steps=5, step=2, size=10):
 
         return solve_matrix, coef_vec, extra_matrix
 
-    for i in xrange(steps):
+    for _ in xrange(steps):
         solution_vec = gen_vec(size, 0.0)
 
         solve_matrix, coef_vec, extra_matrix = gen_data()

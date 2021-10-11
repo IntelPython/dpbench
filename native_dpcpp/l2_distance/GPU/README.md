@@ -12,8 +12,8 @@ python base_l2_distane.py
 
 ## Arguments
 
-| Argument | Default value     | Description     | 
-| ---------| ------------------| --------------- | 
+|Argument |Default value     |Description     |
+|---------|------------------|--------------- |
 |--steps|10|Number of workload runs|
 |--step|2|Data growth factor on each iteration|
 |--size|2 ** 20|Initial data size|

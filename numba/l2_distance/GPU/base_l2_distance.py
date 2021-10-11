@@ -118,7 +118,7 @@ def run(name, alg, sizes=10, step=2, nopt=2 ** 20):
         "--test",
         required=False,
         action="store_true",
-        help="Check for correctness by comparing output with naieve Python version",
+        help="Validation",
     )
     parser.add_argument(
         "--usm",

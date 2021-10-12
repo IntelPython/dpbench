@@ -129,9 +129,6 @@ def run(name, alg, steps=5, step=2, size=10):
 
     f2 = open("runtimes.csv", "a", 1)
 
-    import pdb
-    pdb.set_trace()
-
     for _ in xrange(steps):
         solution_vec = gen_vec(size, 0.0)
 

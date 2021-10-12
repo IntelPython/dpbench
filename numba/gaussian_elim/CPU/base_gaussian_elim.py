@@ -19,6 +19,10 @@ except NameError:
 
 ###############################################
 
+BLOCK_SIZE_0 = 256
+BLOCK_SIZE_1_X = 16
+BLOCK_SIZE_1_Y = 16
+
 
 def get_device_selector(is_gpu=True):
     if is_gpu is True:
@@ -38,25 +42,39 @@ def get_device_selector(is_gpu=True):
     return os.environ.get("SYCL_DEVICE_FILTER")
 
 
-def gen_matrix_usm(size):
-    m_buf = gen_matrix(size)
+def set_block_size(size):
+    # Determine block sizes
+    local_work_size_buf_1 = [BLOCK_SIZE_0]
+    local_work_size_buf_2 = [BLOCK_SIZE_1_X, BLOCK_SIZE_1_Y]
 
-    with dpctl.device_context(get_device_selector()):
-        m_usm = dpmem.MemoryUSMShared(size * size * np.dtype("float").itemsize)
-        m_usm.copy_from_host(m_buf.view("u1"))
+    global_work_size_1 = [size]
+    global_work_size_2 = [size, size]
 
-    return np.array(size * size, buffer=m_usm, dtype="i4")
+    if local_work_size_buf_1[0]:
+        global_work_size_1[0] = (
+            int(np.ceil(global_work_size_1[0] / local_work_size_buf_1[0]))
+            * local_work_size_buf_1[0]
+        )
+
+    if local_work_size_buf_2[0]:
+        global_work_size_2[0] = (
+            int(np.ceil(global_work_size_2[0] / local_work_size_buf_2[0]))
+            * local_work_size_buf_2[0]
+        )
+        global_work_size_2[1] = (
+            int(np.ceil(global_work_size_2[1] / local_work_size_buf_2[1]))
+            * local_work_size_buf_2[1]
+        )
+
+    return global_work_size_1, local_work_size_buf_1, global_work_size_2, local_work_size_buf_2
 
 
-def gen_vec_usm(size, value):
-    v_buf = gen_vec(size, value)
+def gen_data(size):
+        solve_matrix = gen_matrix(size)
+        coef_vec = gen_vec(size, 1.0)
+        extra_matrix = gen_vec(size, 0.0)
 
-    with dpctl.device_context(get_device_selector()):
-        v_usm = dpmem.MemoryUSMShared(size * np.dtype("float").itemsize)
-        v_usm.copy_from_host(v_buf.view("u1"))
-
-    return np.array(size, buffer=v_usm, dtype="float")
-
+        return solve_matrix, coef_vec, extra_matrix
 
 # Return result from a solved matrix
 def backward_sub(a, b, x, size):
@@ -87,12 +105,6 @@ def run(name, alg, steps=5, step=2, size=10):
         help="Matrix size: rows or columns number",
     )
     parser.add_argument(
-        "--usm",
-        required=False,
-        action="store_true",
-        help="Use USM Shared or pure numpy",
-    )
-    parser.add_argument(
         "--repeat", required=False, default=1, help="Iterations inside measured region"
     )
     parser.add_argument(
@@ -115,56 +127,50 @@ def run(name, alg, steps=5, step=2, size=10):
     output["repeat"] = repeat
     output["metrics"] = []
 
-    f2 = open("runtimes.csv", "w", 1)
+    f2 = open("runtimes.csv", "a", 1)
 
-    def gen_data():
-        if args.usm is True:
-            solve_matrix = gen_matrix_usm(size)
-            coef_vec = gen_vec_usm(size, 1.0)
-            extra_matrix = gen_vec_usm(size, 0.0)
-        else:
-            solve_matrix = gen_matrix(size)
-            coef_vec = gen_vec(size, 1.0)
-            extra_matrix = gen_vec(size, 0.0)
+    import pdb
+    pdb.set_trace()
 
-        return solve_matrix, coef_vec, extra_matrix
-
-    for i in xrange(steps):
+    for _ in xrange(steps):
         solution_vec = gen_vec(size, 0.0)
 
-        solve_matrix, coef_vec, extra_matrix = gen_data()
+        solve_matrix, coef_vec, extra_matrix = gen_data(size)
+
+        global_work_size_1, local_work_size_buf_1, global_work_size_2, local_work_size_buf_2 = set_block_size(size)
 
         # Compilation
-        alg(size, solve_matrix, coef_vec, extra_matrix)
+        alg(size, solve_matrix, coef_vec, extra_matrix, global_work_size_1, local_work_size_buf_1, global_work_size_2, local_work_size_buf_2)
 
-        solve_matrix, coef_vec, extra_matrix = gen_data()
+        solve_matrix, coef_vec, extra_matrix = gen_data(size)
 
         iterations = xrange(repeat)
-        t0 = now()
-        for _ in iterations:
-            alg(size, solve_matrix, coef_vec, extra_matrix)
-        time = now() - t0
+        times = np.empty(repeat)
 
+        for i in iterations:
+            t0 = now()
+            # alg(size, solve_matrix, coef_vec, extra_matrix, global_work_size_1, local_work_size_buf_1, global_work_size_2, local_work_size_buf_2)
+            time = now() - t0
+            times[i] = time
         backward_sub(solve_matrix, coef_vec, solution_vec, size)
 
         print("SOLUTION: ")
         print(solution_vec)
 
-        f2.write(str(size) + "," + str(time) + "\n")
+        result_time = np.median(times)
+
+        f2.write(str(size) + "," + str(result_time) + "\n")
 
         size *= step
         mops = 0.0
-        nopt = 0
         print(
             "ERF: {:15s} | Size: {:10d} | MOPS: {:15.2f} | TIME: {:10.6f}".format(
-                name, nopt, mops, time
+                name, size, mops, result_time
             ),
             flush=True,
         )
-        output["metrics"].append((nopt, mops, time))
-        repeat -= step
-        if repeat < 1:
-            repeat = 1
-    json.dump(output, open(args.json, "w"), indent=2, sort_keys=True)
+        output["metrics"].append((size, mops, time))
+
+    json.dump(output, open(args.json, "a"), indent=2, sort_keys=True)
 
     f2.close()

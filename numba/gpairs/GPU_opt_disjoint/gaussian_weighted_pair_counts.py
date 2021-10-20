@@ -331,11 +331,12 @@ def count_weighted_pairs_3d_intel(
                 if k <= 0:
                     break
 
+
 @numba_dppy.kernel
 def merge_results(result_mtx, global_size):
-    col_id =  numba_dppy.get_global_id(0)
+    col_id = numba_dppy.get_global_id(0)
 
-    for i in range(1,global_size):
+    for i in range(1, global_size):
         result_mtx[0, col_id] += result_mtx[i, col_id]
 
 
@@ -377,6 +378,7 @@ def count_weighted_pairs_3d_intel_ver2(
             if k <= 0:
                 break
 
+
 @numba_dppy.kernel
 def count_weighted_pairs_3d_intel_ver2_dis_atomics(
     x1, y1, z1, w1, x2, y2, z2, w2, rbins_squared, result
@@ -416,6 +418,7 @@ def count_weighted_pairs_3d_intel_ver2_dis_atomics(
         #     if k <= 0:
         #         break
     x1[i] = dsq
+
 
 # def count_weighted_pairs_3d_cpu_mp(
 #         x1, y1, z1, w1, x2, y2, z2, w2, rbins_squared, result):

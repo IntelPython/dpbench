@@ -36,7 +36,7 @@ void InitData(queue* q, size_t npoints, tfloat **x1, tfloat **y1, tfloat **z1, t
 	      tfloat **x2, tfloat **y2, tfloat **z2, tfloat **w2, tfloat **rbins, tfloat **results_test) {
 
   tfloat *t_x1, *t_y1, *t_z1, *t_w1, *t_x2, *t_y2, *t_z2, *t_w2, *t_rbins, *t_results_test;
-  
+
   /* Allocate aligned memory */
   t_x1 = (tfloat*)_mm_malloc(npoints * sizeof(tfloat), ALIGN_FACTOR);
   t_y1 = (tfloat*)_mm_malloc(npoints * sizeof(tfloat), ALIGN_FACTOR);

@@ -54,14 +54,16 @@ def gen_data_np(npoints, dtype=np.float32):
     x1, y1, z1, w1, x2, y2, z2, w2, DEFAULT_RBINS_SQUARED = gen_rand_data(
         npoints, dtype
     )
-    #result = np.zeros_like(DEFAULT_RBINS_SQUARED)[:-1].astype(dtype)
-    result = np.zeros((npoints, DEFAULT_RBINS_SQUARED.shape[0]-1)).astype(dtype)
+    # result = np.zeros_like(DEFAULT_RBINS_SQUARED)[:-1].astype(dtype)
+    result = np.zeros((npoints, DEFAULT_RBINS_SQUARED.shape[0] - 1)).astype(dtype)
     return (x1, y1, z1, w1, x2, y2, z2, w2, DEFAULT_RBINS_SQUARED, result)
 
 
 def gen_data_usm(npoints, dtype=np.float32):
     # init numpy obj
-    x1, y1, z1, w1, x2, y2, z2, w2, DEFAULT_RBINS_SQUARED, result = gen_data_np(npoints, dtype)
+    x1, y1, z1, w1, x2, y2, z2, w2, DEFAULT_RBINS_SQUARED, result = gen_data_np(
+        npoints, dtype
+    )
 
     with dpctl.device_context(get_device_selector()) as gpu_queue:
         # init usmdevice memory
@@ -209,7 +211,9 @@ def run(name, alg, sizes=5, step=2, nopt=2 ** 16):
         x1, y1, z1, w1, x2, y2, z2, w2, DEFAULT_RBINS_SQUARED, result_p = gen_data_np(
             nopt
         )
-        gpairs_python(x1, y1, z1, w1, x2, y2, z2, w2, DEFAULT_RBINS_SQUARED, result_p[0])
+        gpairs_python(
+            x1, y1, z1, w1, x2, y2, z2, w2, DEFAULT_RBINS_SQUARED, result_p[0]
+        )
 
         if args.usm is True:  # test usm feature
             (
@@ -225,7 +229,7 @@ def run(name, alg, sizes=5, step=2, nopt=2 ** 16):
                 result_usm,
             ) = gen_data_usm(nopt)
             alg(x1, y1, z1, w1, x2, y2, z2, w2, DEFAULT_RBINS_SQUARED, result_usm)
-            result_n = np.empty((nopt,DEFAULT_NBINS - 1), dtype=np.float32)
+            result_n = np.empty((nopt, DEFAULT_NBINS - 1), dtype=np.float32)
             result_usm.usm_data.copy_to_host(result_n.reshape((-1)).view("u1"))
         else:
             (

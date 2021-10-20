@@ -101,7 +101,7 @@ void call_gpairs_opt( queue* q, size_t npoints, tfloat* x1, tfloat* y1, tfloat* 
   	    tfloat dsq = dx*dx + dy*dy + dz*dz;
 
   	    int k = nbins - 1;
-  	    while(dsq <= rbins[k]) {	      
+  	    while(dsq <= rbins[k]) {
   	      results_test[i*(nbins-1)+(k-1)] += wprod;
   	      k = k-1;
   	      if (k <=0) break;
@@ -124,7 +124,7 @@ void call_gpairs_opt( queue* q, size_t npoints, tfloat* x1, tfloat* y1, tfloat* 
     });
 
   q->wait();
-	
+
 }
 
 // void call_gpairs_naieve_opt( queue* q, size_t npoints, tfloat* x1, tfloat* y1, tfloat* z1, tfloat* w1, tfloat* x2,tfloat* y2,tfloat* z2, tfloat* w2,tfloat* rbins,tfloat* results_test) {
@@ -154,9 +154,9 @@ void call_gpairs_opt( queue* q, size_t npoints, tfloat* x1, tfloat* y1, tfloat* 
 //     }
 //   }
 
-//   for (int col_id = 0; col_id < nbins; col_id++) {    
+//   for (int col_id = 0; col_id < nbins; col_id++) {
 //     for (size_t i = 1; i < npoints; i++) {
 //       results_test[col_id] += results_test[i*(nbins-1)+col_id];
 //     }
-//   }    
+//   }
 // }

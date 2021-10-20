@@ -100,7 +100,7 @@ int main(int argc, char * argv[])
 
     /* Deallocate arrays */
     FreeData( q, x1, y1, z1, w1, x2, y2, z2, w2, rbins, results_test );
-    
+
     fclose(fptr);
     fclose(fptr1);
 

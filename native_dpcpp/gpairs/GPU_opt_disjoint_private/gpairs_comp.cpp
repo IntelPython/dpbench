@@ -84,7 +84,7 @@ void call_gpairs_opt( queue* q, size_t npoints, tfloat* x1, tfloat* y1, tfloat* 
   int nbins = DEFAULT_NBINS;
 
   q->submit([&](handler& h) {
-      
+
       h.parallel_for<class ComputeKernel>(sycl::nd_range(sycl::range{npoints}, sycl::range{LWS}), [=](sycl::nd_item<1> myID) {
 	  //h.parallel_for<class ComputeKernel>(range<1>{npoints}, [=](id<1> myID) {
   	  size_t i = myID.get_global_id(0);
@@ -135,7 +135,7 @@ void call_gpairs_opt( queue* q, size_t npoints, tfloat* x1, tfloat* y1, tfloat* 
     });
 
   q->wait();
-	
+
 }
 
 // void call_gpairs_naieve_opt( queue* q, size_t npoints, tfloat* x1, tfloat* y1, tfloat* z1, tfloat* w1, tfloat* x2,tfloat* y2,tfloat* z2, tfloat* w2,tfloat* rbins,tfloat* results_test) {
@@ -165,9 +165,9 @@ void call_gpairs_opt( queue* q, size_t npoints, tfloat* x1, tfloat* y1, tfloat* 
 //     }
 //   }
 
-//   for (int col_id = 0; col_id < nbins; col_id++) {    
+//   for (int col_id = 0; col_id < nbins; col_id++) {
 //     for (size_t i = 1; i < npoints; i++) {
 //       results_test[col_id] += results_test[i*(nbins-1)+col_id];
 //     }
-//   }    
+//   }
 // }

@@ -7,7 +7,7 @@
 
 # ==============================================================================
 #  Content:
-#      Black-Scholes formula example makefile
+#      L2_distance formula example makefile
 # ==============================================================================
 #
 #    Parameters of this makefile:

@@ -33,6 +33,8 @@ import dpctl, dpctl.tensor as dpt
 from dpbench_python.dbscan.dbscan_python import dbscan_python
 from dpbench_datagen.dbscan import gen_rand_data
 
+SEED = 7777777
+
 try:
     import itimer as it
 

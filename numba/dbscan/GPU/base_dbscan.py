@@ -28,6 +28,7 @@ import argparse
 import sys, os, json
 import datetime
 import numpy as np
+import numpy.random as rnd
 import dpctl, dpctl.tensor as dpt
 from dpbench_python.dbscan.dbscan_python import dbscan_python
 from dpbench_datagen.dbscan import gen_rand_data

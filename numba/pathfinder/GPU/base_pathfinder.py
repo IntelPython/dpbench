@@ -1,11 +1,6 @@
 import numpy as np
-<<<<<<< HEAD
-import sys,json,os
-import datetime
-=======
-import sys, json, os
->>>>>>> upstream/main
 import numpy.random as rnd
+import sys, json, os, datetime
 from timeit import default_timer as now
 import dpctl, dpctl.memory as dpmem
 

@@ -27,7 +27,7 @@ except:
 ######################################################
 # GLOBAL DECLARATIONS THAT WILL BE USED IN ALL FILES #
 ######################################################
-
+SEED = 7777777
 # make xrange available in python 3
 try:
     xrange

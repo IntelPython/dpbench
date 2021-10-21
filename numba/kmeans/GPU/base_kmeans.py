@@ -31,6 +31,7 @@ except NameError:
     xrange = range
 
 NUMBER_OF_CENTROIDS = 10
+SEED = 7777777
 
 ###############################################
 def get_device_selector(is_gpu=True):

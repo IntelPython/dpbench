@@ -4,6 +4,7 @@
 
 import os, json, datetime
 import numpy as np
+import numpy.random as rnd
 import dpctl, dpctl.tensor as dpt
 
 from dpbench_python.gpairs.gpairs_python import gpairs_python
@@ -24,6 +25,7 @@ except:
 # GLOBAL DECLARATIONS THAT WILL BE USED IN ALL FILES #
 ######################################################
 DEFAULT_NBINS = 20
+SEED = 7777777
 
 # make xrange available in python 3
 try:

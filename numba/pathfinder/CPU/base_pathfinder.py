@@ -1,4 +1,5 @@
 import numpy as np
+import numpy.random as rnd
 import sys, json, datetime
 import numpy.random as rnd
 from timeit import default_timer as now

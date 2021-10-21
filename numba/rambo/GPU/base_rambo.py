@@ -27,6 +27,9 @@ try:
 except NameError:
     xrange = range
 
+SEED = 7777777
+
+###############################################
 
 def get_device_selector(is_gpu=True):
     if is_gpu is True:

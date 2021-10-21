@@ -37,6 +37,7 @@ from dpbench_datagen.knn import (
     TRAIN_DATA_SIZE,
     N_NEIGHBORS,
 )
+SEED = 7777777
 from dpbench_python.knn.knn_python import knn_python
 import dpctl
 import dpctl.tensor as dpt

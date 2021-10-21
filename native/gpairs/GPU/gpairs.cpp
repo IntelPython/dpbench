@@ -7,10 +7,10 @@
 #include <omp.h>
 #include "euro_opt.h"
 
-void call_gpairs( int npoints, tfloat* x1, tfloat* y1, tfloat* z1, tfloat* w1, tfloat* x2,tfloat* y2,tfloat* z2, tfloat* w2,tfloat* rbins,tfloat* results_test) {
+void call_gpairs( size_t npoints, tfloat* x1, tfloat* y1, tfloat* z1, tfloat* w1, tfloat* x2,tfloat* y2,tfloat* z2, tfloat* w2,tfloat* rbins,tfloat* results_test) {
 
   int nbins = DEFAULT_NBINS;
-  
+
 #pragma omp target teams distribute					\
   parallel for simd map(to:x1[0:npoints],y1[0:npoints],z1[0:npoints],w1[0:npoints],x2[0:npoints],y2[0:npoints],z2[0:npoints],w2[0:npoints],rbins[0:DEFAULT_NBINS]) map(tofrom:results_test[0:(DEFAULT_NBINS-1)])
   for (unsigned int i = 0; i < npoints; i++) {

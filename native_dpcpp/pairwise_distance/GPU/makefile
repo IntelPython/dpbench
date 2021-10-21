@@ -30,7 +30,7 @@ EQCOLON     :="="
 TARGET      := pairwise_distance
 
 CFLAGS      += -g -O3
-CFLAGS      += -fsycl -qopenmp
+CFLAGS      += -fsycl
 CFLAGS      += -I./
 
 PREC ?= d
@@ -52,10 +52,10 @@ comp: $(TARGET)_comp
 $(TARGET): data_gen.cpp main.cpp pairwise_distance.cpp
 	$(CC) $(CPPFLAGS) $(CFLAGS) $^ -o $(TARGET)
 
-$(TARGET)_comp: data_gen_comp.cpp main.cpp pairwise_distance_comp.cpp
+$(TARGET)_comp: data_gen_comp.cpp main_comp.cpp pairwise_distance_comp.cpp
 	$(CC) $(CPPFLAGS) $(CFLAGS) $^ -o $(TARGET)_comp
 
 clean:
-	rm -rf *.o *.out *.optrpt *.yaml *~ pairwise_distance pairwise_distance_comp
+	rm -rf *.o *.out *.optrpt *.yaml *~ pairwise_distance pairwise_distance_comp *.bin
 
 .PHONY: all clean

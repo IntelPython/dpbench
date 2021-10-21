@@ -30,6 +30,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "rdtsc.h"
 #include <sstream>
 
+#define SEED 7777777
+
 int stoi(char* h) {
     std::stringstream in(h);
     int res;
@@ -49,14 +51,13 @@ double rand32(double a, double b) {
 }
 
 
-double** gen_data_x(size_t data_size)
+double* gen_data_x(size_t data_size)
 {
-    double** data = new double*[data_size];
+    double* data = new double[data_size*DATADIM];
 
     for (size_t i = 0; i < data_size; ++i) {
-      data[i] = new double[DATADIM];
       for (size_t j = 0; j < DATADIM; ++j){
-	data[i][j] = rand32(0, 1);
+	data[i*DATADIM + j] = rand32(0, 1);
       }
     }
 
@@ -76,13 +77,10 @@ std::vector<size_t> gen_data_y(size_t data_size)
 
 int main(int argc, char* argv[]) {
     int STEPS = 10;
+    int repeat = 1;
 
     size_t nPoints_train = pow(2, 10);
     size_t nPoints = pow(2, 10);
-
-    size_t nFeatures = 1;
-    size_t minPts = 5;
-    double eps = 1.0;
 
     if (argc < 2) {
         printf("Usage: expect STEPS input integer parameter, defaulting to %d\n", STEPS);
@@ -92,22 +90,9 @@ int main(int argc, char* argv[]) {
         if (argc > 2) {
             nPoints = stoi(argv[2]);
         }
-        if (argc > 3) {
-            nFeatures = stoi(argv[3]);
-        }
-        if (argc > 4) {
-            minPts = stoi(argv[4]);
-        }
-        if (argc > 5) {
-            eps = stof(argv[5]);
-        }
     }
 
     double* data;
-    double lBound = 0.0;
-    double rBound = 10.0;
-
-    int repeat = 1;
     double t1 = 0, t2 = 0;
 
     FILE* fptr;
@@ -124,27 +109,38 @@ int main(int argc, char* argv[]) {
         exit(1);
     }
 
+    srand(SEED);
+
     int i, j;
     double MOPS = 0.0;
     double time;
     for (i = 0; i < STEPS; i++) {
 
-        double** data_train = gen_data_x(nPoints_train);
+        double* data_train = gen_data_x(nPoints_train);
         std::vector<size_t> labels = gen_data_y(nPoints_train);
 
-        double** data_test = gen_data_x(nPoints);
+        double* data_test = gen_data_x(nPoints);
+
+	size_t* predictions = new size_t[nPoints];
+	size_t* train_labels = labels.data();
 
         /* Warm up cycle */
-        size_t* predictions = run_knn(data_train, labels, data_test, nPoints_train, nPoints);
+        run_knn(data_train, train_labels, data_test, nPoints_train, nPoints, predictions);
 
         t1 = timer_rdtsc();
         for (j = 0; j < repeat; j++) {
-	  predictions = run_knn(data_train, labels, data_test, nPoints_train, nPoints);
+	  run_knn(data_train, train_labels, data_test, nPoints_train, nPoints, predictions);
         }
         t2 = timer_rdtsc();
 
         MOPS = (nPoints * repeat / 1e6) / ((double)(t2 - t1) / getHz());
         time = ((double)(t2 - t1) / getHz());
+
+#if 0
+	for (size_t j = 0; j < nPoints; ++j) {
+	  printf("%lu\n", predictions[j]);
+	}
+#endif
 
         printf("ERF: Native-C-VML: Size: %ld Time: %.6lf\n", nPoints, time);
         fflush(stdout);

@@ -5,7 +5,7 @@
  */
 
 #define _XOPEN_SOURCE
-#define _DEFAULT_SOURCE 
+#define _DEFAULT_SOURCE
 #include <stdlib.h>
 #include <stdio.h>
 #include <omp.h>
@@ -24,7 +24,7 @@ void InitData( size_t nopt, int ncentroids, Point** points, Centroid** centroids
   Point *pts;
   Centroid *cents;
   int i;
-  
+
   /* Allocate aligned memory */
   pts = (Point*)_mm_malloc( nopt * sizeof(Point), ALIGN_FACTOR);
   cents = (Centroid*)_mm_malloc( ncentroids * sizeof(Centroid), ALIGN_FACTOR);

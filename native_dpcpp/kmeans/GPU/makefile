@@ -35,10 +35,11 @@ EQCOLON     :="="
 TARGET      := kmeans
 
 CFLAGS      += -g -O3
-CFLAGS      += -fsycl -qopenmp
+CFLAGS      += -fsycl
 CFLAGS      += -I./
+CFLAGS      += -DSYCL_USE_NATIVE_FP_ATOMICS
 
-PREC ?= d
+PREC ?= f
 ifeq ($(PREC),d)
 else
     CFLAGS += -D__DO_FLOAT__
@@ -57,10 +58,10 @@ comp:$(TARGET)_comp
 $(TARGET): data_gen.cpp main.cpp kmeans.cpp
 	$(CC) $(CPPFLAGS) $(CFLAGS) $^ -o $(TARGET)
 
-$(TARGET)_comp: data_gen_comp.cpp main.cpp kmeans_comp.cpp
+$(TARGET)_comp: data_gen_comp.cpp main_comp.cpp kmeans_comp.cpp
 	$(CC) $(CPPFLAGS) $(CFLAGS) $^ -o $(TARGET)_comp
 
 clean:
-	rm -rf *.o *.out *.optrpt *.yaml *~ kmeans kmeans_comp
+	rm -rf *.o *.out *.optrpt *.yaml *~ kmeans kmeans_comp *.bin
 
 .PHONY: all clean

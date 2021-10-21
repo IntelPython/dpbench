@@ -5,13 +5,14 @@
  */
 
 #define _XOPEN_SOURCE
-#define _DEFAULT_SOURCE 
+#define _DEFAULT_SOURCE
 #include <stdlib.h>
 #include <stdio.h>
-#include <omp.h>
 #include <ia32intrin.h>
 
 #include "constants_header.h"
+
+using namespace std;
 
 using namespace cl::sycl;
 
@@ -21,43 +22,53 @@ tfloat RandRange( tfloat a, tfloat b, struct drand48_data *seed ) {
     return r*(b-a) + a;
 }
 
+template <typename T>
+void ReadInputFromBinFile (char const * filename, char* data_ptr, size_t data_size) {
+    ifstream file;
+    file.open(filename, ios::in|ios::binary);
+    if (file) {
+      file.read(data_ptr, data_size*sizeof(T));
+      file.close();
+    } else {
+      std::cout << "Input file - " << filename << " not found.\n";
+      exit(0);
+    }
+}
+
+void WriteOutputToTextFile (char const * filename, tfloat* data_ptr, size_t data_size) {
+    ofstream file;
+    file.open(filename, ios::out);
+    if (file) {
+      for (size_t i = 0; i < data_size; i++) {
+	file << *data_ptr << std::endl;
+      }
+      file.close();
+    } else {
+      std::cout << "Input file - " << filename << " not found.\n";
+      exit(0);
+    }
+}
+
 void InitData( queue* q, size_t nopt, struct point* *x1, struct point* *x2, tfloat** distance_op )
 {
   struct point *tx1, *tx2;
-  size_t i;
-  
+
   /* Allocate aligned memory */
   tx1 = (struct point*)_mm_malloc( nopt * sizeof(struct point), ALIGN_FACTOR);
   tx2 = (struct point*)_mm_malloc( nopt * sizeof(struct point), ALIGN_FACTOR);
+  tfloat* distance = (tfloat*)_mm_malloc( nopt * nopt * sizeof(tfloat), ALIGN_FACTOR);
 
-  if ( (tx1 == NULL) || (tx2 == NULL) )
-    {
-      printf("Memory allocation failure\n");
-      exit(-1);
-    }
-
-  /* NUMA-friendly data init */
-#pragma omp parallel
-  {
-    struct drand48_data seed;
-    srand48_r(omp_get_thread_num()+SEED, &seed);
-    for ( i = 0; i < nopt; i++ )
-      {
-	tx1[i].x = RandRange( XL, XH, &seed );
-	tx1[i].y = RandRange( XL, XH, &seed );
-	tx1[i].z = RandRange( XL, XH, &seed );
-	tx2[i].x = RandRange( XL, XH, &seed );
-	tx2[i].y = RandRange( XL, XH, &seed );
-	tx2[i].z = RandRange( XL, XH, &seed );
-      }
+  if ( (tx1 == NULL) || (tx2 == NULL) ) {
+    printf("Memory allocation failure\n");
+    exit(-1);
   }
+
+  ReadInputFromBinFile<tfloat> ("X.bin", reinterpret_cast<char *>(tx1), nopt*3);
+  ReadInputFromBinFile<tfloat> ("Y.bin", reinterpret_cast<char *>(tx2), nopt*3);
 
   *x1 = tx1;
   *x2 = tx2;
-
-  tfloat* distance = (tfloat*)_mm_malloc( nopt * nopt * sizeof(tfloat), ALIGN_FACTOR);
   *distance_op = distance;
-
 }
 
 /* Deallocate arrays */

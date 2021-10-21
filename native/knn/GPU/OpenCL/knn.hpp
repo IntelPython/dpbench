@@ -33,7 +33,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <string>
 
 #include <cl2.hpp>
- 
+
 
 //using dtype = double;
 const int classesNum = 3;

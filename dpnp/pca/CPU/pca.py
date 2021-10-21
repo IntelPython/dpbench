@@ -6,12 +6,13 @@ import dpctl
 import base_pca
 import dpnp as np
 
+
 def pca_impl(data):
     tdata = data.T
     m = np.empty(tdata.shape[0])
     # for i in range(tdata.shape[0]):
     #     m[i] = np.mean(tdata[i])
-    m = np.mean(tdata,axis=1)
+    m = np.mean(tdata, axis=1)
     c = data - m
     v = np.cov(c.T)
 
@@ -24,8 +25,10 @@ def pca_impl(data):
 
     return arr.T
 
+
 def pca_dpctl(data):
     with dpctl.device_context("opencl:cpu"):
         pca_impl(data)
+
 
 base_pca.run("Numba", pca_dpctl)

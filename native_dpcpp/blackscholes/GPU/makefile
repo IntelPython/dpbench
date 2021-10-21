@@ -30,7 +30,7 @@ EQCOLON     :="="
 TARGET      := black_scholes
 
 CFLAGS      += -g -O3
-CFLAGS      += -fsycl -qopenmp
+CFLAGS      += -fsycl
 CFLAGS      += -I./
 
 PREC ?= d
@@ -52,10 +52,10 @@ comp: $(TARGET)_comp
 $(TARGET): data_gen.cpp main.cpp black-scholes.cpp
 	$(CC) $(CPPFLAGS) $(CFLAGS) $^ -o $(TARGET)
 
-$(TARGET)_comp: main.cpp data_gen_comp.cpp black-scholes_comp.cpp
+$(TARGET)_comp: main_comp.cpp data_gen_comp.cpp black-scholes_comp.cpp
 	$(CC) $(CPPFLAGS) $(CFLAGS) $^ -o $(TARGET)_comp
 
 clean:
-	rm -rf *.o *.out *.optrpt *.yaml *~ $(foreach acc,ha la ep,black_scholes black_scholes_comp)
+	rm -rf *.o *.out *.optrpt *.yaml *.bin *~ $(foreach acc,ha la ep,black_scholes black_scholes_comp)
 
 .PHONY: all clean comp black_scholes

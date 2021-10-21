@@ -11,7 +11,7 @@ import dppy.core as ocldrv
 import numpy
 
 
-@numba.njit(parallel={'spirv': True}, fastmath=True)
+@numba.njit(parallel={"spirv": True}, fastmath=True)
 def matmul(X, Y):
     result = np.zeros((X.shape[0], Y.shape[1]))
     for i in range(X.shape[0]):
@@ -31,7 +31,7 @@ def compute_mean_axis_0(tdata, m):
     return m
 
 
-@numba.njit(parallel={'spirv': True}, fastmath=True)
+@numba.njit(parallel={"spirv": True}, fastmath=True)
 def gen_rand_data(data):
     tdata = data.T
     m = np.empty(tdata.shape[0])
@@ -77,7 +77,7 @@ def pca_impl(data):
 base_pca.run("Numba", pca_impl)
 
 
-@jit(nopython=True, parallel={'spirv': True})
+@jit(nopython=True, parallel={"spirv": True})
 def gen_rand_data(nevts, nout):
     C1 = numpy.empty((nevts, nout))
     F1 = numpy.empty((nevts, nout))
@@ -88,6 +88,6 @@ def gen_rand_data(nevts, nout):
         for j in range(nout):
             C1[i, j] = numpy.random.rand()
             F1[i, j] = numpy.random.rand()
-            Q1[i, j] = numpy.random.rand()*numpy.random.rand()
+            Q1[i, j] = numpy.random.rand() * numpy.random.rand()
 
     return C1, F1, Q1

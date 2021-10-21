@@ -42,9 +42,9 @@ void calCentroidsSum(Point* points,Centroid* centroids,size_t num_centroids,size
     }
 
 #pragma omp taskwait
-    
+
 #pragma omp target teams distribute		\
-  parallel for simd    
+  parallel for simd
     for(size_t i = 0; i < num_points; i++) {
         size_t ci = points[i].cluster;
 #pragma omp atomic update
@@ -70,28 +70,28 @@ void updateCentroids(Centroid* centroids,size_t num_centroids) {
 
 void kmeans(
     Point* h_points,
-    Centroid* h_centroids, 
+    Centroid* h_centroids,
     size_t num_points,
     size_t num_centroids
 	    ) {
-  
+
     for(size_t i = 0; i < ITERATIONS; i++) {
       groupByCluster(
-		     h_points, 
+		     h_points,
 		     h_centroids,
-		     num_centroids, 
+		     num_centroids,
 		     num_points
 		     );
-        
+
       calCentroidsSum(
-		      h_points, 
+		      h_points,
 		      h_centroids,
-		      num_centroids, 
+		      num_centroids,
 		      num_points
 		      );
 
       updateCentroids(
-		      h_centroids, 
+		      h_centroids,
 		      num_centroids
 		      );
     }
@@ -102,7 +102,7 @@ void printCentroids(
 		    size_t NUMBER_OF_CENTROIDS
 ) {
     for (size_t i = 0; i < NUMBER_OF_CENTROIDS; i++) {
-        printf("[x=%lf, y=%lf, x_sum=%lf, y_sum=%lf, num_points=%lu]\n", 
+        printf("[x=%lf, y=%lf, x_sum=%lf, y_sum=%lf, num_points=%lu]\n",
                centroids[i].x, centroids[i].y, centroids[i].x_sum,
                centroids[i].y_sum, centroids[i].num_points);
     }
@@ -112,14 +112,14 @@ void printCentroids(
 
 
 void runKmeans(
-    Point* points, 
+    Point* points,
     Centroid* centroids,
     size_t NUMBER_OF_POINTS,
     size_t NUMBER_OF_CENTROIDS
 ) {
     for (size_t i = 0; i < REPEAT; i++) {
 #pragma omp target teams distribute		\
-  parallel for simd      
+  parallel for simd
         for (size_t ci = 0; ci < NUMBER_OF_CENTROIDS; ci++) {
             centroids[ci].x = points[ci].x;
             centroids[ci].y = points[ci].y;

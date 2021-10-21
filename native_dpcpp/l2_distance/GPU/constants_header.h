@@ -10,16 +10,12 @@
 #include <CL/sycl.hpp>
 
 #ifdef __DO_FLOAT__
-    typedef float tfloat; 
+    typedef float tfloat;
 #else
     typedef double  tfloat;
 #endif
 
 #define ALIGN_FACTOR 64
-#define SEED 7777777
-
-#define XL      0.0f
-#define XH      1.0f
 
 void InitData( cl::sycl::queue* q, size_t nopt, tfloat* *x1, tfloat* *x2, tfloat* distance_op );
 void FreeData( cl::sycl::queue* q, tfloat *x1, tfloat *x2 );

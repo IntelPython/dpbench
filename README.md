@@ -1,3 +1,6 @@
+[![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
+[![pre-commit](https://github.com/IntelPython/dpbench/actions/workflows/pre-commit.yml/badge.svg)](https://github.com/IntelPython/dpbench/actions/workflows/pre-commit.yml)
+
 # DPBench - Numba/Native Benchmarks
 
 This repository contains a set of benchmarks that are used for evaluating the performance Numba's JIT compilation functionality for Intel GPUs. The repository is structured as follows.
@@ -25,7 +28,7 @@ Note: To obtain GPU roofline graph using Intel Advisor, set the value of the _de
 1. To generate performance data, plot graph, VTune profile and Advisor roofline graph for CPU and GPU implementations of all benchmarks
 
         $ python automate_run.py
-    
+
 2. To generate performance data for numba implementations only (CPU and GPU)
 
         $ python automate_run.py -r execute -i numba -a perf
@@ -33,9 +36,9 @@ Note: To obtain GPU roofline graph using Intel Advisor, set the value of the _de
 3. To generate advisor roofline graph for native GPU implementations of all benchmarks
 
         $ python automate_run.py -a advisor -i native -p gpu
-        
+
    Roofline graph for each benchmark can be found at `<path/to/native/benchmark/directory>/GPU/roofline/roofline.html`.
-   
+
    Note: To obtain GPU roofline graph using Intel Advisor, ensure the value of _dev.i915.perf_stream_paranoid_ sysctl option is set to 0. If not set to 0, use `sudo sysctl -w dev.i915.perf_stream_paranoid=0` to set it to 0
 
 4. Generate VTune profile for kmeans and pairwise_distance benchmarks numba CPU implementations

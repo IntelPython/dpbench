@@ -36,20 +36,20 @@ int main(int argc, char * argv[])
     FILE *fptr;
     fptr = fopen("perf_output.csv", "w");
     if(fptr == NULL) {
-      printf("Error!");   
-      exit(1);             
+      printf("Error!");
+      exit(1);
     }
 
     FILE *fptr1;
     fptr1 = fopen("runtimes.csv", "w");
     if(fptr1 == NULL) {
-      printf("Error!");   
-      exit(1);             
+      printf("Error!");
+      exit(1);
     }
-    
+
     int i, j;
     for(i = 0; i < STEPS; i++) {
-    
+
         /* Allocate arrays, generate input data */
         InitData( nopt, &s0, &x, &t, &vcall_compiler, &vput_compiler, &vcall_mkl, &vput_mkl );
 

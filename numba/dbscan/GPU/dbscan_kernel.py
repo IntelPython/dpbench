@@ -36,9 +36,16 @@ UNDEFINED = -2
 DEFAULT_QUEUE_CAPACITY = 10
 
 
-@numba_dppy.kernel
-def get_neighborhood(n, dim, data, eps, ind_lst, sz_lst, assignments,
-                     block_size, nblocks):
+@numba_dppy.kernel(
+    access_types={
+        "read_only": ["data"],
+        "write_only": ["assignments", "ind_lst"],
+        "read_write": ["sz_lst"],
+    }
+)
+def get_neighborhood(
+    n, dim, data, eps, ind_lst, sz_lst, assignments, block_size, nblocks
+):
     i = numba_dppy.get_global_id(0)
 
     start = i * block_size
@@ -54,14 +61,14 @@ def get_neighborhood(n, dim, data, eps, ind_lst, sz_lst, assignments,
         i2 = n if ii + 1 == nblocks1 else i1 + block_size1
         for j in range(start, stop):
             for k in range(i1, i2):
-                dist = 0.
+                dist = 0.0
                 for m in range(dim):
                     diff = data[k * dim + m] - data[j * dim + m]
                     dist += diff * diff
                 if dist <= eps2:
                     size = sz_lst[j]
                     ind_lst[j * n + size] = k
-                    #dist_lst[j * n + size] = dist
+                    # dist_lst[j * n + size] = dist
                     sz_lst[j] = size + 1
 
 
@@ -131,17 +138,18 @@ def compute_clusters(n, min_pts, assignments, sizes, indices_list):
 
 
 def dbscan(n, dim, data, eps, min_pts, assignments):
-    indices_list = np.empty(n*n, dtype=np.int64)
-    #distances_list = np.empty(n*n)
+    indices_list = np.empty(n * n, dtype=np.int64)
+    # distances_list = np.empty(n*n)
     sizes = np.zeros(n, dtype=np.int64)
 
     with dpctl.device_context(base_dbscan.get_device_selector()):
-        get_neighborhood[n,numba_dppy.DEFAULT_LOCAL_SIZE](n, dim, data, eps, indices_list,
-                                                          sizes, assignments, 1, n)
+        get_neighborhood[n, numba_dppy.DEFAULT_LOCAL_SIZE](
+            n, dim, data, eps, indices_list, sizes, assignments, 1, n
+        )
 
-    #call_ocl(n, dim, data, eps, indices_list, distances_list, sizes, assignments)
+    # call_ocl(n, dim, data, eps, indices_list, distances_list, sizes, assignments)
 
     return compute_clusters(n, min_pts, assignments, sizes, indices_list)
 
 
-base_dbscan.run('dbscan', dbscan)
+base_dbscan.run("dbscan", dbscan)

@@ -8,6 +8,7 @@ import numba
 import numpy as np
 import dpctl
 
+
 @numba.njit(parallel=True, fastmath=True)
 def pca_impl(data):
     tdata = data.T
@@ -26,8 +27,10 @@ def pca_impl(data):
 
     return arr.T
 
+
 def call_pca(data):
     with dpctl.device_context(base_pca.get_device_selector()):
         pca_impl(data)
-        
+
+
 base_pca.run("Numba", pca_impl)

@@ -8,7 +8,7 @@
 #define __EURO_OPT_BENCH_H
 
 #ifdef __DO_FLOAT__
-    typedef float tfloat; 
+    typedef float tfloat;
 #else
     typedef double  tfloat;
 #endif
@@ -21,13 +21,13 @@
 #define LBOX    500.0f
 #define DEFAULT_NBINS 20
 
-void InitData( int npoints, tfloat **x1, tfloat **y1, tfloat **z1, tfloat **w1,
+void InitData( size_t npoints, tfloat **x1, tfloat **y1, tfloat **z1, tfloat **w1,
 	      tfloat **x2, tfloat **y2, tfloat **z2, tfloat **w2, tfloat **rbins, tfloat **results_test );
 
 void FreeData( tfloat *x1, tfloat *y1, tfloat *z1, tfloat *w1,
 	       tfloat *x2, tfloat *y2, tfloat *z2, tfloat *w2, tfloat *rbins, tfloat *results_test);
 
-void call_gpairs(int nopt, tfloat *x1, tfloat *y1, tfloat *z1, tfloat *w1,
+void call_gpairs(size_t nopt, tfloat *x1, tfloat *y1, tfloat *z1, tfloat *w1,
 		 tfloat *x2, tfloat *y2, tfloat *z2, tfloat *w2, tfloat *rbins, tfloat *results_test);
 
 #endif // #ifndef __EURO_OPT_BENCH_H

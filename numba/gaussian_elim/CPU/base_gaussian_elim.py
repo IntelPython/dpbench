@@ -30,8 +30,8 @@ def get_device_selector(is_gpu=True):
         device_selector = "cpu"
 
     if (
-            os.environ.get("SYCL_DEVICE_FILTER") is None
-            or os.environ.get("SYCL_DEVICE_FILTER") == "opencl"
+        os.environ.get("SYCL_DEVICE_FILTER") is None
+        or os.environ.get("SYCL_DEVICE_FILTER") == "opencl"
     ):
         return "opencl:" + device_selector
 
@@ -71,21 +71,26 @@ def set_block_size(size):
 
     if local_work_size_buf_1[0]:
         global_work_size_1[0] = (
-                int(np.ceil(global_work_size_1[0] / local_work_size_buf_1[0]))
-                * local_work_size_buf_1[0]
+            int(np.ceil(global_work_size_1[0] / local_work_size_buf_1[0]))
+            * local_work_size_buf_1[0]
         )
 
     if local_work_size_buf_2[0]:
         global_work_size_2[0] = (
-                int(np.ceil(global_work_size_2[0] / local_work_size_buf_2[0]))
-                * local_work_size_buf_2[0]
+            int(np.ceil(global_work_size_2[0] / local_work_size_buf_2[0]))
+            * local_work_size_buf_2[0]
         )
         global_work_size_2[1] = (
-                int(np.ceil(global_work_size_2[1] / local_work_size_buf_2[1]))
-                * local_work_size_buf_2[1]
+            int(np.ceil(global_work_size_2[1] / local_work_size_buf_2[1]))
+            * local_work_size_buf_2[1]
         )
 
-    return global_work_size_1, local_work_size_buf_1, global_work_size_2, local_work_size_buf_2
+    return (
+        global_work_size_1,
+        local_work_size_buf_1,
+        global_work_size_2,
+        local_work_size_buf_2,
+    )
 
 
 # Return result from a solved matrix
@@ -169,16 +174,29 @@ def run(name, alg, steps=5, step=2, size=10):
         reference_result = [5.02e-02, 5.00e-04, 5.00e-04, 5.02e-02]
         ref_size = 4
 
-        global_work_size_1, local_work_size_buf_1, global_work_size_2, local_work_size_buf_2 = set_block_size(ref_size)
+        (
+            global_work_size_1,
+            local_work_size_buf_1,
+            global_work_size_2,
+            local_work_size_buf_2,
+        ) = set_block_size(ref_size)
         solution_vec = gen_vec(ref_size, 0.0)
         solve_matrix, coef_vec, extra_matrix = gen_data(ref_size)
 
         import pdb
+
         pdb.set_trace()
 
-        alg(ref_size, solve_matrix, coef_vec, extra_matrix, global_work_size_1, local_work_size_buf_1,
+        alg(
+            ref_size,
+            solve_matrix,
+            coef_vec,
+            extra_matrix,
+            global_work_size_1,
+            local_work_size_buf_1,
             global_work_size_2,
-            local_work_size_buf_2)
+            local_work_size_buf_2,
+        )
 
         backward_sub(solve_matrix, coef_vec, solution_vec, ref_size)
 
@@ -201,14 +219,27 @@ def run(name, alg, steps=5, step=2, size=10):
         return
 
     for _ in xrange(steps):
-        global_work_size_1, local_work_size_buf_1, global_work_size_2, local_work_size_buf_2 = set_block_size(size)
+        (
+            global_work_size_1,
+            local_work_size_buf_1,
+            global_work_size_2,
+            local_work_size_buf_2,
+        ) = set_block_size(size)
 
         solution_vec = gen_vec(size, 0.0)
 
         solve_matrix, coef_vec, extra_matrix = gen_data(size)
         # Warm up
-        alg(size, solve_matrix, coef_vec, extra_matrix, global_work_size_1, local_work_size_buf_1, global_work_size_2,
-            local_work_size_buf_2)
+        alg(
+            size,
+            solve_matrix,
+            coef_vec,
+            extra_matrix,
+            global_work_size_1,
+            local_work_size_buf_1,
+            global_work_size_2,
+            local_work_size_buf_2,
+        )
 
         solve_matrix, coef_vec, extra_matrix = gen_data(size)
 
@@ -217,8 +248,16 @@ def run(name, alg, steps=5, step=2, size=10):
 
         for i in iterations:
             t0 = now()
-            alg(size, solve_matrix, coef_vec, extra_matrix, global_work_size_1, local_work_size_buf_1,
-                global_work_size_2, local_work_size_buf_2)
+            alg(
+                size,
+                solve_matrix,
+                coef_vec,
+                extra_matrix,
+                global_work_size_1,
+                local_work_size_buf_1,
+                global_work_size_2,
+                local_work_size_buf_2,
+            )
             time = now() - t0
             times[i] = time
 

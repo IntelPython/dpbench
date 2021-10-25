@@ -30,7 +30,16 @@ def forward_sub_kernel(m, a, b, size, t):
             )
 
 
-def run_gaussian_elim(size, solve_matrix, coef_vec, extra_matrix, global_work_size_1, local_work_size_buf_1, global_work_size_2, local_work_size_buf_2):
+def run_gaussian_elim(
+    size,
+    solve_matrix,
+    coef_vec,
+    extra_matrix,
+    global_work_size_1,
+    local_work_size_buf_1,
+    global_work_size_2,
+    local_work_size_buf_2,
+):
     # Setup and Run kernels
     for t in range(size - 1):
         with dpctl.device_context("opencl:cpu"):

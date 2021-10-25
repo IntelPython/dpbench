@@ -6,11 +6,7 @@ import os
 import run_utils as utils
 import numpy as np
 import argparse
-from dpbench_datagen.gaussian_elim import (
-    gen_matrix,
-    gen_vec,
-    gen_data_to_file
-)
+from dpbench_datagen.gaussian_elim import gen_matrix, gen_vec, gen_data_to_file
 
 
 def run(name, sizes=1, step=2, nopt=2 ** 2):
@@ -107,10 +103,10 @@ def run(name, sizes=1, step=2, nopt=2 ** 2):
         os.remove("./gaussian_comp")
 
     if os.path.isfile("m_data.bin"):
-    os.remove("m_data.bin")
+        os.remove("m_data.bin")
 
     if os.path.isfile("v_data.bin"):
-    os.remove("m_data.bin")
+        os.remove("m_data.bin")
 
 
 if __name__ == "__main__":

@@ -47,69 +47,14 @@ def run(name, sizes=1, step=2, nopt=2 ** 2):
     clean_string = ["make", "clean"]
     utils.run_command(clean_string, verbose=True)
 
-    # if args.usm:
-    #     build_string = ["make", "comp"]
-    #     utils.run_command(build_string, verbose=True)
-    #     exec_name = "./knn_comp"
-    # else:
-    #     build_string = ["make"]
-    #     utils.run_command(build_string, verbose=True)
-    #     exec_name = "./knn"
-
-    build_string = ["make"]
-    utils.run_command(build_string, verbose=True)
-    exec_name = "./gaussian"
-
-    # if args.test:
-    #     x_train, y_train = gen_train_data()
-    #     x_test = gen_test_data(nopt)
-    #     p_predictions = np.empty(nopt)
-    #     p_queue_neighbors_lst = np.empty((nopt, N_NEIGHBORS, 2))
-    #     p_votes_to_classes_lst = np.zeros((nopt, CLASSES_NUM))
-
-    #     knn_python(
-    #         x_train,
-    #         y_train,
-    #         x_test,
-    #         N_NEIGHBORS,
-    #         CLASSES_NUM,
-    #         TRAIN_DATA_SIZE,
-    #         nopt,
-    #         p_predictions,
-    #         p_queue_neighbors_lst,
-    #         p_votes_to_classes_lst,
-    #         DATA_DIM,
-    #     )
-
-    #     # run dpcpp
-    #     gen_data_to_file(nopt)
-    #     # run the C program
-    #     run_cmd = [exec_name, str(nopt), str(1), "-t"]
-    #     utils.run_command(run_cmd, verbose=True)
-
-    #     # read output of dpcpp
-    #     n_predictions = np.fromfile("predictions.bin", np.int64)
-
-    #     if np.allclose(n_predictions, p_predictions):
-    #         print(
-    #             "Test succeeded. Python predictions: ",
-    #             p_predictions,
-    #             " DPC++ predictions: ",
-    #             n_predictions,
-    #             "\n",
-    #         )
-    #     else:
-    #         print(
-    #             "Test failed. Python predictions: ",
-    #             p_predictions,
-    #             " DPC++ predictions: ",
-    #             n_predictions,
-    #             "\n",
-    #         )
-    #     return
-
-    if os.path.isfile("runtimes.csv"):
-        os.remove("runtimes.csv")
+    if args.usm:
+        build_string = ["make", "comp"]
+        utils.run_command(build_string, verbose=True)
+        exec_name = "./gaussian_comp"
+    else:
+        build_string = ["make"]
+        utils.run_command(build_string, verbose=True)
+        exec_name = "./gaussian"
 
     for _ in range(sizes):
         # generate input data
@@ -123,6 +68,12 @@ def run(name, sizes=1, step=2, nopt=2 ** 2):
         repeat -= step
         if repeat < 1:
             repeat = 1
+
+    if os.path.isfile("./gaussian"):
+        os.remove("./gaussian")
+
+    if os.path.isfile("./gaussian_comp"):
+        os.remove("./gaussian_comp")
 
 
 if __name__ == "__main__":

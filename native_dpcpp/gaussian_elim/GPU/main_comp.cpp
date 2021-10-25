@@ -125,6 +125,8 @@ int main(int argc, char *argv[])
         exit(1);
     }
 
+    ///////////////////////
+    /* Data allocation on the device*/
     auto matrix_ptr = InitData(matrix_size*matrix_size, "m_data.bin");
     tfloat *m = matrix_ptr.get();
 
@@ -136,6 +138,17 @@ int main(int argc, char *argv[])
 
     auto final_vec_ptr = std::make_unique<tfloat[]>(matrix_size);
     tfloat *final_vec = final_vec_ptr.get();
+
+    tfloat *d_m = (tfloat *)malloc_device(matrix_size * matrix_size * sizeof(tfloat), *q);
+    tfloat *d_b = (tfloat *)malloc_device(matrix_size * sizeof(tfloat), *q);
+    tfloat *d_extra_matrix = (tfloat *)malloc_device(matrix_size * matrix_size * sizeof(tfloat), *q);
+
+    // copy data from host to device
+    q->memcpy(d_m, m, matrix_size * matrix_size * sizeof(tfloat));
+    q->memcpy(d_b, b, matrix_size * sizeof(tfloat));
+
+    q->wait();
+    ///////////////////////
 
     ///////////////////////
     /* Determine block size */
@@ -171,16 +184,35 @@ int main(int argc, char *argv[])
     std::cout << " " << std::endl;
 
     /* Warm up cycle */
-    ForwardSub(q, m, b, extra_matrix, matrix_size, globalWorksizeFan1, localWorksizeFan1Buf, globalWorksizeFan2, localWorksizeFan2Buf);
+    ForwardSub(q, d_m, d_b, d_extra_matrix, matrix_size, globalWorksizeFan1, localWorksizeFan1Buf, globalWorksizeFan2, localWorksizeFan2Buf);
 
-    for (int i = 0; i < matrix_size* matrix_size; i++)
+    for (int i = 0; i < matrix_size * matrix_size; i++)
     {
       std::cout << m[i] << " ";
     }
 
-    std::cout << " " << std::endl;
+    auto t1 = std::chrono::high_resolution_clock::now();
+    for (int j = 0; j < repeat; j++)
+    {
+    //   ForwardSub(q, d_m, d_b, d_extra_matrix, matrix_size, globalWorksizeFan1, localWorksizeFan1Buf, globalWorksizeFan2, localWorksizeFan2Buf);
+    }
+    auto t2 = std::chrono::high_resolution_clock::now();
+    std::chrono::duration<double> elapsed_seconds = t2 - t1;
 
-    /* Compute the result */
+    time = elapsed_seconds.count() / repeat;
+
+    double MOPS = (matrix_size * repeat / 1e6) / ((double)time / getHz());
+
+    // copy result device to host
+    q->memcpy(m, d_m, matrix_size * matrix_size * sizeof(tfloat));
+    q->wait();
+
+    free(d_m, q->get_context());
+    free(d_b, q->get_context());
+    free(d_extra_matrix, q->get_context());
+
+    ///////////////////////
+    /* Get result */
     BackSub(m, b, final_vec, matrix_size);
 
     for (int i = 0; i < matrix_size; i++)
@@ -188,20 +220,9 @@ int main(int argc, char *argv[])
       std::cout << final_vec[i] << " ";
     }
 
-    std::cout << " " << std::endl;
+    std::cout << " ";
+    ///////////////////////
 
-    auto t1 = std::chrono::high_resolution_clock::now();
-    for (int j = 0; j < repeat; j++)
-    {
-      ForwardSub(q, m, b, extra_matrix, matrix_size, globalWorksizeFan1, localWorksizeFan1Buf, globalWorksizeFan2, localWorksizeFan2Buf);
-    }
-
-    auto t2 = std::chrono::high_resolution_clock::now();
-    std::chrono::duration<double> elapsed_seconds = t2 - t1;
-
-    time = elapsed_seconds.count() / repeat;
-
-    double MOPS = (matrix_size * repeat / 1e6) / ((double)time / getHz());
 
     printf("ERF: Native-C-VML: Size: %ld Time: %.6lf\n", matrix_size, time);
     fflush(stdout);

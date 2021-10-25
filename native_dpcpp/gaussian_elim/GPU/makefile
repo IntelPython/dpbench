@@ -29,7 +29,7 @@ FQOPT       :=f
 EQCOLON     :="="
 TARGET      := gaussian
 
-CFLAGS      += -g -O3
+CFLAGS      += -g -O0
 CFLAGS      += -fsycl
 CFLAGS      += -I./
 # CFLAGS      += -DSYCL_USE_NATIVE_FP_ATOMICS
@@ -54,7 +54,7 @@ comp: $(TARGET)_comp
 $(TARGET): main.cpp gaussianElim.cpp
 	$(CC) $(CPPFLAGS) $(CFLAGS) $^ -o $(TARGET)
 
-$(TARGET)_comp: data_gen_comp.cpp main.cpp gaussianElimComp.cpp
+$(TARGET)_comp: main_comp.cpp gaussianElimComp.cpp
 	$(CC) $(CPPFLAGS) $(CFLAGS) $^ -o $(TARGET)_comp
 
 clean:

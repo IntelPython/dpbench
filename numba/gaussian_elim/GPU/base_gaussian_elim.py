@@ -131,6 +131,12 @@ def run(name, alg, steps=5, step=2, size=10):
         default=__file__.replace("py", "json"),
         help="Output json data filename",
     )
+    parser.add_argument(
+        "--test",
+        required=False,
+        action="store_true",
+        help="Check for correctness by comparing output with naieve Python version",
+    )
 
     args = parser.parse_args()
     steps = int(args.steps)
@@ -158,6 +164,41 @@ def run(name, alg, steps=5, step=2, size=10):
             extra_matrix = gen_vec(n, 0.0)
 
         return solve_matrix, coef_vec, extra_matrix
+
+    if args.test:
+        reference_result = [5.02e-02, 5.00e-04, 5.00e-04, 5.02e-02]
+        ref_size = 4
+
+        global_work_size_1, local_work_size_buf_1, global_work_size_2, local_work_size_buf_2 = set_block_size(ref_size)
+        solution_vec = gen_vec(ref_size, 0.0)
+        solve_matrix, coef_vec, extra_matrix = gen_data(ref_size)
+
+        import pdb
+        pdb.set_trace()
+
+        alg(ref_size, solve_matrix, coef_vec, extra_matrix, global_work_size_1, local_work_size_buf_1,
+            global_work_size_2,
+            local_work_size_buf_2)
+
+        backward_sub(solve_matrix, coef_vec, solution_vec, ref_size)
+
+        if np.allclose(solution_vec, reference_result):
+            print(
+                "Test succeeded. Python result: ",
+                reference_result,
+                "Numba result: ",
+                solution_vec,
+                "\n",
+            )
+        else:
+            print(
+                "Test failed. Python result: ",
+                reference_result,
+                "Numba result: ",
+                solution_vec,
+                "\n",
+            )
+        return
 
     for _ in xrange(steps):
         global_work_size_1, local_work_size_buf_1, global_work_size_2, local_work_size_buf_2 = set_block_size(size)

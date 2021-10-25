@@ -24,9 +24,9 @@ void ForwardSub(queue* q, tfloat *a, tfloat *b, tfloat *m, int size, int *global
   // 2. set up memory on device and send ipts data to device
 
   tfloat *d_a, *d_b, *d_m;
-  d_a = (tfloat*)malloc_shared( size * size * sizeof(tfloat), *q);
-  d_b = (tfloat*)malloc_shared( size * sizeof(tfloat), *q);
-  d_m = (tfloat*)malloc_shared( size * size * sizeof(tfloat), *q);
+  d_a = (tfloat*)malloc_shared(size * size * sizeof(tfloat), *q);
+  d_b = (tfloat*)malloc_shared(size * sizeof(tfloat), *q);
+  d_m = (tfloat*)malloc_shared(size * size * sizeof(tfloat), *q);
 
   q->memcpy(d_a, a, size * size * sizeof(tfloat));
   q->memcpy(d_b, b, size * sizeof(tfloat));
@@ -44,7 +44,7 @@ void ForwardSub(queue* q, tfloat *a, tfloat *b, tfloat *m, int size, int *global
                       range<1>(localWorksizeFan1Buf[0])), [=] (nd_item<1> item) {
           int globalId = item.get_global_id(0);
           if (globalId < size-1-t) {
-            d_m[size * (globalId + t + 1)+t] =
+            d_m[size * (globalId + t + 1) + t] =
             d_a[size * (globalId + t + 1) + t] / d_a[size * t + t];
             }
           });
@@ -70,7 +70,6 @@ void ForwardSub(queue* q, tfloat *a, tfloat *b, tfloat *m, int size, int *global
           }
           });
     });
-
   }
 
   q->memcpy(a, d_a, size * size * sizeof(tfloat));

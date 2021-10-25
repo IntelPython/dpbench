@@ -56,6 +56,37 @@ def run(name, sizes=1, step=2, nopt=2 ** 2):
         utils.run_command(build_string, verbose=True)
         exec_name = "./gaussian"
 
+    if args.test:
+        reference_result = [5.02e-02, 5.00e-04, 5.00e-04, 5.02e-02]
+        ref_size = 4
+
+        # run dpcpp
+        gen_data_to_file(ref_size, 1.0)
+        # run the C program
+        run_cmd = [exec_name, str(ref_size), str(1), "-t"]
+        utils.run_command(run_cmd, verbose=True)
+
+        # read output of dpcpp
+        result = np.fromfile("result.bin", np.float32)
+
+        if np.allclose(result, reference_result):
+            print(
+                "Test succeeded. Python result: ",
+                reference_result,
+                " DPC++ result: ",
+                result,
+                "\n",
+            )
+        else:
+            print(
+                "Test failed. Python result: ",
+                reference_result,
+                " DPC++ result: ",
+                result,
+                "\n",
+            )
+        return
+
     for _ in range(sizes):
         # generate input data
         # value = 1.0 for the vector of coefficients (b)
@@ -74,6 +105,12 @@ def run(name, sizes=1, step=2, nopt=2 ** 2):
 
     if os.path.isfile("./gaussian_comp"):
         os.remove("./gaussian_comp")
+
+    if os.path.isfile("m_data.bin"):
+    os.remove("m_data.bin")
+
+    if os.path.isfile("v_data.bin"):
+    os.remove("m_data.bin")
 
 
 if __name__ == "__main__":

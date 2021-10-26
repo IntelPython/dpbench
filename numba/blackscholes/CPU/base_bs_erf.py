@@ -7,7 +7,7 @@ from __future__ import print_function
 import numpy as np
 import sys,json,os
 import dpctl, dpctl.memory as dpmem, dpctl.tensor as dpt
-from utils.dpbench_python.blackscholes.bs_python import black_scholes_python
+from dpbench_python.blackscholes.bs_python import black_scholes_python
 
 try:
     from numpy import erf

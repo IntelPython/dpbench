@@ -15,5 +15,6 @@ jobs:
     - name: Run tests
       run: |
         conda create -y -n test_env python=3.7 -c conda-forge -c intel
-        conda activate build_env
+        conda info
+        $CONDA/bin/activate activate test_env
         python automate_run.py -r execute -i numba -ws blackscholes -a test -p cpu

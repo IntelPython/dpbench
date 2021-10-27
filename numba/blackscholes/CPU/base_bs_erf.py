@@ -6,7 +6,10 @@
 from __future__ import print_function
 import numpy as np
 import sys, json, os
-import dpctl, dpctl.memory as dpmem, dpctl.tensor as dpt
+try:
+    import dpctl, dpctl.memory as dpmem, dpctl.tensor as dpt
+except ImportError:
+    pass
 from dpbench_python.blackscholes.bs_python import black_scholes_python
 
 try:
@@ -215,16 +218,17 @@ def run(name, alg, sizes=14, step=2, nopt=2 ** 15):
         if args.usm is True:  # test usm feature
             price_usm, strike_usm, t_usm, call_usm, put_usm = gen_data_usm(nopt)
             # pass usm input data to kernel
-            alg(
-                nopt,
-                price_usm,
-                strike_usm,
-                t_usm,
-                RISK_FREE,
-                VOLATILITY,
-                call_usm,
-                put_usm,
-            )
+            with dpctl.device_context(base_bs_erf.get_device_selector()):
+                alg(
+                    nopt,
+                    price_usm,
+                    strike_usm,
+                    t_usm,
+                    RISK_FREE,
+                    VOLATILITY,
+                    call_usm,
+                    put_usm,
+                )
             n_call = np.empty(nopt, dtype=np.float64)
             n_put = np.empty(nopt, dtype=np.float64)
             call_usm.usm_data.copy_to_host(n_call.view("u1"))

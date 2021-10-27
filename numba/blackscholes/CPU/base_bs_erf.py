@@ -6,6 +6,7 @@
 from __future__ import print_function
 import numpy as np
 import sys, json, os
+
 try:
     import dpctl, dpctl.memory as dpmem, dpctl.tensor as dpt
 except ImportError:

@@ -15,7 +15,7 @@ jobs:
     - name: Run tests
       run: |
         conda info
-        conda create -y -n test_env python=3.7 -c conda-forge -c intel
+        conda create -y -n test_env python=3.7 numpy scikit-learn -c conda-forge -c intel
         source $CONDA/bin/activate test_env
         cd ./utils
         python setup.py develop

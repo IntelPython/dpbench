@@ -14,7 +14,9 @@ jobs:
     - uses: pre-commit/action@v2.0.0
     - name: Run tests
       run: |
-        conda create -y -n test_env python=3.7 -c conda-forge -c intel
         conda info
-        $CONDA/bin/activate activate test_env
+        conda create -y -n test_env python=3.7 -c conda-forge -c intel
+        source $CONDA/bin/activate test_env
+        python ./utils/setup.py develop
+        conda list
         python automate_run.py -r execute -i numba -ws blackscholes -a test -p cpu

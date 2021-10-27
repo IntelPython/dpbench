@@ -132,6 +132,6 @@ def run_command(
             print(output)
     except subprocess.CalledProcessError as e:
         if throw_exception:
-            raise ExperimentError(command_string, repr(e.output) + repr(e.stderr))
+            raise ExperimentError(command_string, repr(e.output))
     else:
         return output

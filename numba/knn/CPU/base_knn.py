@@ -27,7 +27,6 @@
 import argparse
 import sys, os, json
 import numpy as np
-import numpy.random as rnd
 
 from knn_python import knn_python
 from dpbench_datagen.knn import (
@@ -96,10 +95,8 @@ def run(name, alg, sizes=10, step=2, nopt=2 ** 10):
     output["sizes"] = sizes
     output["step"] = step
     output["repeat"] = repeat
-    output["randseed"] = SEED
+    # output["randseed"] = SEED
     output["metrics"] = []
-
-    rnd.seed(SEED)
 
     if args.test:
         x_train, y_train = gen_train_data()

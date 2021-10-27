@@ -106,9 +106,9 @@ def run(name, alg, sizes=10, step=2, nopt=2 ** 10):
         print(y_train[:10])
         print(x_test[:10])
 
-        predictions_p = knn_python(x_train, y_train, x_test, n_neighbors, CLASSES_NUM)
+        predictions_p = knn_python(x_train, y_train, x_test, N_NEIGHBORS, CLASSES_NUM)
 
-        predictions_n = alg(x_train, y_train, x_test, n_neighbors, CLASSES_NUM)
+        predictions_n = alg(x_train, y_train, x_test, N_NEIGHBORS, CLASSES_NUM)
 
         if np.allclose(predictions_n, predictions_p):
             print("Test succeeded\n")
@@ -124,11 +124,11 @@ def run(name, alg, sizes=10, step=2, nopt=2 ** 10):
 
             sys.stdout.flush()
 
-            alg(x_train, y_train, x_test, n_neighbors, CLASSES_NUM)  # warmup
+            alg(x_train, y_train, x_test, N_NEIGHBORS, CLASSES_NUM)  # warmup
 
             t0 = now()
             for _ in xrange(repeat):
-                alg(x_train, y_train, x_test, n_neighbors, CLASSES_NUM)
+                alg(x_train, y_train, x_test, N_NEIGHBORS, CLASSES_NUM)
             mops, time = get_mops(t0, now(), nopt)
 
             result_mops = mops * repeat

@@ -17,6 +17,8 @@ jobs:
         conda info
         conda create -y -n test_env python=3.7 -c conda-forge -c intel
         source $CONDA/bin/activate test_env
-        python ./utils/setup.py develop
+        cd ./utils
+        python setup.py develop
+        cd ..
         conda list
         python automate_run.py -r execute -i numba -ws blackscholes -a test -p cpu

@@ -12,3 +12,8 @@ jobs:
     - uses: actions/checkout@v2
     - uses: actions/setup-python@v2
     - uses: pre-commit/action@v2.0.0
+    - name: Run tests
+      run: |
+        conda create -y -n test_env python=3.7 -c conda-forge -c intel
+        conda activate build_env
+        python automate_run.py -r execute -i numba -ws blackscholes -a test -p cpu

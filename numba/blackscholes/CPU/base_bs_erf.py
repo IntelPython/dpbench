@@ -219,7 +219,7 @@ def run(name, alg, sizes=14, step=2, nopt=2 ** 15):
         if args.usm is True:  # test usm feature
             price_usm, strike_usm, t_usm, call_usm, put_usm = gen_data_usm(nopt)
             # pass usm input data to kernel
-            with dpctl.device_context(base_bs_erf.get_device_selector()):
+            with dpctl.device_context(get_device_selector()):
                 alg(
                     nopt,
                     price_usm,

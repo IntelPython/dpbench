@@ -187,9 +187,7 @@ def run(name, alg, sizes=10, step=2, nopt=2 ** 20):
         time = np.median(times)
 
         print(
-            "ERF: {:15s} | Size: {:10d} | TIME: {:10.6f}".format(
-                name, nopt, time
-            ),
+            "ERF: {:15s} | Size: {:10d} | TIME: {:10.6f}".format(name, nopt, time),
             flush=True,
         )
         output["metrics"].append((nopt, time))

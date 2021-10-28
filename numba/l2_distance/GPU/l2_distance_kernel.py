@@ -20,9 +20,9 @@ def l2_distance_kernel(a, b, c):
 
 def l2_distance(*args):
     with dpctl.device_context(base_l2_distance.get_device_selector()):
-        l2_distance_kernel[(args[0].shape[0], args[0].shape[1]), numba_dppy.DEFAULT_LOCAL_SIZE](
-            args[0], args[1], args[2]
-        )
+        l2_distance_kernel[
+            (args[0].shape[0], args[0].shape[1]), numba_dppy.DEFAULT_LOCAL_SIZE
+        ](args[0], args[1], args[2])
 
 
 base_l2_distance.run("l2 distance", l2_distance)

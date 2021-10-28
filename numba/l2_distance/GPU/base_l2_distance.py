@@ -9,7 +9,6 @@ import sys, os, json
 import numpy.random as rnd
 import dpctl
 import dpctl.tensor as dpt
-import math
 
 from dpbench_python.l2_distance.l2_distance_python import l2_distance_python
 from dpbench_datagen.l2_distance import gen_data
@@ -149,13 +148,11 @@ def run(name, alg, sizes=10, step=2, nopt=2 ** 20):
 
         if args.usm is True:  # test usm feature
             X_usm, Y_usm, distance = gen_data_usm(nopt, dims)
-            alg(X_usm, Y_usm, distance)
-            n_dis = math.sqrt(distance)
+            n_dis = alg(X_usm, Y_usm, distance)
 
         else:
             distance = np.asarray([0.0]).astype(np.float32)
-            alg(X, Y, distance)
-            n_dis = math.sqrt(distance)
+            n_dis = alg(X, Y, distance)
 
         # RMS error grows proportional to sqrt(n)
         # absolute(a - b) <= (atol + rtol * absolute(b))

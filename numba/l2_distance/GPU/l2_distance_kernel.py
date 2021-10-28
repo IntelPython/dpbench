@@ -18,11 +18,13 @@ def l2_distance_kernel(a, b, c):
     numba_dppy.atomic.add(c, 0, sq)
 
 
-def l2_distance(*args):
+def l2_distance(a, b, distance):
     with dpctl.device_context(base_l2_distance.get_device_selector()):
-        l2_distance_kernel[
-            (args[0].shape[0], args[0].shape[1]), numba_dppy.DEFAULT_LOCAL_SIZE
-        ](args[0], args[1], args[2])
+        l2_distance_kernel[(a.shape[0], a.shape[1]), numba_dppy.DEFAULT_LOCAL_SIZE](
+            a, b, distance
+        )
+
+    return math.sqrt(distance)
 
 
 base_l2_distance.run("l2 distance", l2_distance)

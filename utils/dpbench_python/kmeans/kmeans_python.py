@@ -2,14 +2,12 @@ import numpy
 
 REPEAT = 1
 
-#defines total number of iterations for kmeans accuracy
+# defines total number of iterations for kmeans accuracy
 ITERATIONS = 30
 
-#determine the euclidean distance from the cluster center to each point
-def groupByCluster(arrayP, arrayPcluster,
-                   arrayC,
-                   num_points, num_centroids):
-    #parallel for loop
+# determine the euclidean distance from the cluster center to each point
+def groupByCluster(arrayP, arrayPcluster, arrayC, num_points, num_centroids):
+    # parallel for loop
     for i0 in range(num_points):
         minor_distance = -1
         for i1 in range(num_centroids):
@@ -22,11 +20,11 @@ def groupByCluster(arrayP, arrayPcluster,
     return arrayPcluster
 
 
-#assign points to cluster
-def calCentroidsSum(arrayP, arrayPcluster,
-                    arrayCsum, arrayCnumpoint,
-                    num_points, num_centroids):
-    #parallel for loop
+# assign points to cluster
+def calCentroidsSum(
+    arrayP, arrayPcluster, arrayCsum, arrayCnumpoint, num_points, num_centroids
+):
+    # parallel for loop
     for i in range(num_centroids):
         arrayCsum[i, 0] = 0
         arrayCsum[i, 1] = 0
@@ -41,47 +39,53 @@ def calCentroidsSum(arrayP, arrayPcluster,
     return arrayCsum, arrayCnumpoint
 
 
-#update the centriods array after computation
-def updateCentroids(arrayC, arrayCsum, arrayCnumpoint,
-                    num_centroids):
+# update the centriods array after computation
+def updateCentroids(arrayC, arrayCsum, arrayCnumpoint, num_centroids):
     for i in range(num_centroids):
         arrayC[i, 0] = arrayCsum[i, 0] / arrayCnumpoint[i]
         arrayC[i, 1] = arrayCsum[i, 1] / arrayCnumpoint[i]
 
 
-def kmeans(arrayP, arrayPcluster,
-           arrayC, arrayCsum, arrayCnumpoint,
-           num_points, num_centroids):
+def kmeans(
+    arrayP, arrayPcluster, arrayC, arrayCsum, arrayCnumpoint, num_points, num_centroids
+):
 
     for i in range(ITERATIONS):
-        groupByCluster(
-            arrayP, arrayPcluster,
-            arrayC,
-            num_points, num_centroids
-        )
+        groupByCluster(arrayP, arrayPcluster, arrayC, num_points, num_centroids)
 
         calCentroidsSum(
-            arrayP, arrayPcluster,
-            arrayCsum, arrayCnumpoint,
-            num_points, num_centroids
+            arrayP, arrayPcluster, arrayCsum, arrayCnumpoint, num_points, num_centroids
         )
 
-        updateCentroids(
-            arrayC, arrayCsum, arrayCnumpoint,
-            num_centroids
-        )
+        updateCentroids(arrayC, arrayCsum, arrayCnumpoint, num_centroids)
 
     return arrayC, arrayCsum, arrayCnumpoint
 
+
 def printCentroid(arrayC, arrayCsum, arrayCnumpoint):
     for i in range(NUMBER_OF_CENTROIDS):
-        print("[x={:6f}, y={:6f}, x_sum={:6f}, y_sum={:6f}, num_points={:d}]".format(
-            arrayC[i, 0], arrayC[i, 1], arrayCsum[i, 0], arrayCsum[i, 1], arrayCnumpoint[i])
+        print(
+            "[x={:6f}, y={:6f}, x_sum={:6f}, y_sum={:6f}, num_points={:d}]".format(
+                arrayC[i, 0],
+                arrayC[i, 1],
+                arrayCsum[i, 0],
+                arrayCsum[i, 1],
+                arrayCnumpoint[i],
+            )
         )
 
-    print('--------------------------------------------------')
+    print("--------------------------------------------------")
 
-def kmeans_python(arrayP, arrayPclusters,arrayC,arrayCsum,arrayCnumpoint, NUMBER_OF_POINTS, NUMBER_OF_CENTROIDS):
+
+def kmeans_python(
+    arrayP,
+    arrayPclusters,
+    arrayC,
+    arrayCsum,
+    arrayCnumpoint,
+    NUMBER_OF_POINTS,
+    NUMBER_OF_CENTROIDS,
+):
 
     for i in range(REPEAT):
         for i1 in range(NUMBER_OF_CENTROIDS):
@@ -89,7 +93,11 @@ def kmeans_python(arrayP, arrayPclusters,arrayC,arrayCsum,arrayCnumpoint, NUMBER
             arrayC[i1, 1] = arrayP[i1, 1]
 
         arrayC, arrayCsum, arrayCnumpoint = kmeans(
-            arrayP, arrayPclusters,
-            arrayC, arrayCsum, arrayCnumpoint,
-            NUMBER_OF_POINTS, NUMBER_OF_CENTROIDS
+            arrayP,
+            arrayPclusters,
+            arrayC,
+            arrayCsum,
+            arrayCnumpoint,
+            NUMBER_OF_POINTS,
+            NUMBER_OF_CENTROIDS,
         )

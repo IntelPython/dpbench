@@ -10,6 +10,6 @@ setup(
     version=VERSION,
     description="Utils package for dpbench applications.",
     long_description="Utils package for dpbench applications containing common data generation scripts and python scripts.",
-    #install_requires=["numpy", "scikit-learn"],
-    packages=find_packages()
+    # install_requires=["numpy", "scikit-learn"],
+    packages=find_packages(),
 )

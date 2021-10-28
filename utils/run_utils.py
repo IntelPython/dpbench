@@ -32,7 +32,7 @@ import time
 
 
 def mydate():
-    return time.strftime('%b-%d-%Y-%H-%M-%S', time.localtime(time.time()))
+    return time.strftime("%b-%d-%Y-%H-%M-%S", time.localtime(time.time()))
 
 
 def parse_time(s):
@@ -44,7 +44,7 @@ def parse_time(s):
     """
 
     obj = re.compile(regex, re.VERBOSE).search(s)
-    assert(obj)
+    assert obj
 
     user, system, elapsed = obj.groups()
     return float(user)
@@ -55,7 +55,7 @@ def parse_time(s):
 
 def mkdir(path):
     if not os.path.exists(path):
-        print('Creating directory `{}`'.format(path))
+        print("Creating directory `{}`".format(path))
         os.mkdir(path)
 
 
@@ -67,32 +67,33 @@ def chdir(path):
     else:
         return False
 
+
 ########## Log file code ##########
 
 
-message_log_string = ''
+message_log_string = ""
 error_counter = 0
 
 
-def log_message(s='', newline=True):
+def log_message(s="", newline=True):
     global message_log_string
     if newline:
-        s += '\n'
+        s += "\n"
     message_log_string += s
     sys.stdout.write(s)
     sys.stdout.flush()
 
 
-def log_error(s=''):
+def log_error(s=""):
     global error_counter
     log_message(s)
     error_counter += 1
 
 
-def log_heading(s='', character='-'):
+def log_heading(s="", character="-"):
     log_message()
     log_message(s)
-    log_message(character*len(s))
+    log_message(character * len(s))
     log_message()
 
 
@@ -104,21 +105,25 @@ class ExperimentError(Exception):
         self.command = command
         limit = 10000
         if len(output) > limit:
-            self.output = output[:limit/2] + '\n\n...TRUNCATED...\n\n' + output[-limit/2:]
+            self.output = (
+                output[: limit / 2] + "\n\n...TRUNCATED...\n\n" + output[-limit / 2 :]
+            )
         else:
             self.output = output
 
     def __str__(self):
-        return 'ExperimentError:' + repr(self.command)
+        return "ExperimentError:" + repr(self.command)
 
 
-def run_command(command_string, verbose=False, echo=True, throw_exception=True, dry_run=False):
+def run_command(
+    command_string, verbose=False, echo=True, throw_exception=True, dry_run=False
+):
     if dry_run:
-        print('dry-run executing:', subprocess.list2cmdline(command_string))
+        print("dry-run executing:", subprocess.list2cmdline(command_string))
         return None
 
     if echo:
-        print('executing:', subprocess.list2cmdline(command_string))
+        print("executing:", subprocess.list2cmdline(command_string))
 
     try:
         output = subprocess.check_output(command_string)

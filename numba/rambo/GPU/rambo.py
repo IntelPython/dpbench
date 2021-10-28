@@ -1,14 +1,16 @@
 #!/usr/bin/env python
-#import matplotlib.pyplot as plt
+# import matplotlib.pyplot as plt
 import numpy
 import numba
 import base_rambo
 import dpctl
 
+
 @numba.jit(nopython=True, fastmath=True)
 def vectmultiply(a, b):
     c = a * b
     return c[..., 0] - c[..., 1] - c[..., 2] - c[..., 3]
+
 
 # def __init__(nevts,nin,nout,ecms):
 #     self.nevts = nevts
@@ -26,12 +28,12 @@ def vectmultiply(a, b):
 #     self.Z_N = Z[nout]
 
 
-def get_inputs(ecms,nevts):
+def get_inputs(ecms, nevts):
     # input_particles = numpy.zeros([self.nevts,self.nin,4])
-    pa = numpy.array([ecms / 2.,0.,0.,ecms / 2])
-    pb = numpy.array([ecms / 2.,0.,0.,-ecms / 2])
+    pa = numpy.array([ecms / 2.0, 0.0, 0.0, ecms / 2])
+    pb = numpy.array([ecms / 2.0, 0.0, 0.0, -ecms / 2])
 
-    input_particles = numpy.array([pa,pb])
+    input_particles = numpy.array([pa, pb])
     input_particles = numpy.repeat(input_particles[numpy.newaxis, ...], nevts, axis=0)
 
     return input_particles
@@ -50,8 +52,8 @@ def get_combined_mass(inarray):
 
 @numba.jit(nopython=True, fastmath=True)
 def get_mass(inarray):
-    mom2 = numpy.sum(inarray[..., 1:4]**2, axis=1)
-    mass = numpy.sqrt(inarray[..., 0]**2 - mom2)
+    mom2 = numpy.sum(inarray[..., 1:4] ** 2, axis=1)
+    mass = numpy.sqrt(inarray[..., 0] ** 2 - mom2)
     return mass
 
 
@@ -66,7 +68,7 @@ def gen_rand_data(nevts, nout):
         for j in range(nout):
             C1[i, j] = numpy.random.rand()
             F1[i, j] = numpy.random.rand()
-            Q1[i, j] = numpy.random.rand()*numpy.random.rand()
+            Q1[i, j] = numpy.random.rand() * numpy.random.rand()
 
     return C1, F1, Q1
 
@@ -77,17 +79,18 @@ def get_output_mom2(C1, F1, Q1, nevts, nout):
 
     for i in numba.prange(nevts):
         for j in range(nout):
-            C = 2.*C1[i, j]-1.
+            C = 2.0 * C1[i, j] - 1.0
             S = numpy.sqrt(1 - numpy.square(C))
-            F = 2.*numpy.pi*F1[i, j]
+            F = 2.0 * numpy.pi * F1[i, j]
             Q = -numpy.log(Q1[i, j])
 
             output[i, j, 0] = Q
-            output[i, j, 1] = Q*S*numpy.sin(F)
-            output[i, j, 2] = Q*S*numpy.cos(F)
-            output[i, j, 3] = Q*C
+            output[i, j, 1] = Q * S * numpy.sin(F)
+            output[i, j, 2] = Q * S * numpy.cos(F)
+            output[i, j, 3] = Q * C
 
     return output
+
 
 # def get_output_mom(self):
 #     C = 2.*numpy.random.rand(self.nevts,self.nout)-1.
@@ -150,10 +153,10 @@ def rambo(evt_per_calc):
         e = generate_points(100, evt_per_calc, ng)
 
     return e
-        # for x in range(4):
-        #     tmp = numpy.max(e[:, 2:5, x], axis=1)
-        #     for entry in tmp:
-        #         h[x].append(entry)
+    # for x in range(4):
+    #     tmp = numpy.max(e[:, 2:5, x], axis=1)
+    #     for entry in tmp:
+    #         h[x].append(entry)
 
     # fig,ax = plt.subplots(2,2,figsize=(10,12),dpi=80)
     # for i in range(len(ax)):

@@ -26,4 +26,5 @@ def pca_impl(data):
 
     return arr.T
 
+
 base_pca.run("Numba", pca_impl)

@@ -1,0 +1,30 @@
+name: tests
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+    - name: Run tests
+      run: |
+        conda info
+        conda create -y -n test_env python=3.7 numba=0.54 numpy=1.20 scikit-learn mkl_random -c conda-forge
+        source $CONDA/bin/activate test_env
+        cd ./utils
+        python setup.py develop
+        cd ..
+        conda list
+        python automate_run.py -r execute -i numba -ws blackscholes -a test -p cpu
+        python automate_run.py -r execute -i numba -ws dbscan -a test -p cpu
+        python automate_run.py -r execute -i numba -ws gpairs -a test -p cpu
+        python automate_run.py -r execute -i numba -ws kmeans -a test -p cpu
+        python automate_run.py -r execute -i numba -ws knn -a test -p cpu
+        python automate_run.py -r execute -i numba -ws l2_distance -a test -p cpu
+        python automate_run.py -r execute -i numba -ws pairwise_distance -a test -p cpu
+        python automate_run.py -r execute -i numba -ws pca -a test -p cpu
+        python automate_run.py -r execute -i numba -ws rambo -a test -p cpu

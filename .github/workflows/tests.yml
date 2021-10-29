@@ -19,12 +19,4 @@ jobs:
         python setup.py develop
         cd ..
         conda list
-        python automate_run.py -r execute -i numba -ws blackscholes -a test -p cpu
-        python automate_run.py -r execute -i numba -ws dbscan -a test -p cpu
-        python automate_run.py -r execute -i numba -ws gpairs -a test -p cpu
-        python automate_run.py -r execute -i numba -ws kmeans -a test -p cpu
-        python automate_run.py -r execute -i numba -ws knn -a test -p cpu
-        python automate_run.py -r execute -i numba -ws l2_distance -a test -p cpu
-        python automate_run.py -r execute -i numba -ws pairwise_distance -a test -p cpu
-        python automate_run.py -r execute -i numba -ws pca -a test -p cpu
-        python automate_run.py -r execute -i numba -ws rambo -a test -p cpu
+        python automate_run.py -r execute -i numba -a test -p cpu

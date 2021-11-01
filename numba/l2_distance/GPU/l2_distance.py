@@ -17,8 +17,7 @@ def l2_distance_kernel(a, b):
     return d
 
 
-def l2_distance(*args):
-    a, b, _ = args
+def l2_distance(a, b, distance):
     with dpctl.device_context(base_l2_distance.get_device_selector()):
         l2_distance_kernel(a, b)
 

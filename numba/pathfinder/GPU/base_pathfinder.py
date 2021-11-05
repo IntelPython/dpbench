@@ -111,7 +111,6 @@ def run(name, alg, sizes=5, step=2, rows=2 ** 10, cols=2 ** 6, pyramid_height=20
     kwargs = {}
 
     output = {}
-<<<<<<< HEAD
     output['name']      = name
     output['datetime']  = datetime.datetime.strftime(datetime.datetime.now(),'%Y-%m-%d %H:%M:%S')
     output['sizes']     = sizes
@@ -119,14 +118,7 @@ def run(name, alg, sizes=5, step=2, rows=2 ** 10, cols=2 ** 6, pyramid_height=20
     output['repeat']    = repeat
     output['randseed']  = SEED
     output['metrics']   = []
-=======
-    output["name"] = name
-    output["sizes"] = sizes
-    output["step"] = step
-    output["repeat"] = repeat
-    output["randseed"] = SEED
-    output["metrics"] = []
->>>>>>> upstream/main
+
 
     rnd.seed(SEED)
     f2 = open("runtimes.csv", "w", 1)

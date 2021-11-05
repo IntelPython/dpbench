@@ -112,7 +112,7 @@ class ExperimentError(Exception):
             self.output = output
 
     def __str__(self):
-        return "ExperimentError:" + repr(self.command)
+        return "ExperimentError:" + repr(self.command) + "\n\n" + self.output
 
 
 def run_command(

@@ -4,6 +4,7 @@ import numpy
 import numba
 from dpbench_decorators import jit
 
+
 @jit(nopython=True, fastmath=True)
 def vectmultiply(a, b):
     c = a * b

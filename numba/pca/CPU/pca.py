@@ -8,6 +8,7 @@ import numba
 import numpy as np
 from dpbench_decorators import jit
 
+
 @jit(nopython=True, parallel=True, fastmath=True)
 def pca_impl(data):
     tdata = data.T

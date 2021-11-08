@@ -7,6 +7,7 @@ import base_l2_distance
 import numpy as np
 from dpbench_decorators import jit
 
+
 @jit(nopython=True, parallel=True, fastmath=True)
 def l2_distance(a, b):
     sub = a - b

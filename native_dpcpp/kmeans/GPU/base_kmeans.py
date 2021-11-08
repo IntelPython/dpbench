@@ -3,11 +3,11 @@
 # SPDX-License-Identifier: MIT
 
 import os
-import run_utils as utils
+import utils.run_utils as utils
 import numpy as np
 import argparse
-from dpbench_datagen.kmeans import gen_data_to_file, gen_rand_data
-from dpbench_python.kmeans.kmeans_python import kmeans_python
+from utils.dpbench_datagen.kmeans import gen_data_to_file, gen_rand_data
+from utils.dpbench_python.kmeans.kmeans_python import kmeans_python
 
 # make xrange available in python 3
 try:

@@ -5,7 +5,7 @@
 import os
 import run_utils as utils
 import numpy as np
-from dpbench_python.rambo.rambo_python import rambo_python
+from utils.dpbench_python.rambo.rambo_python import rambo_python
 
 # make xrange available in python 3
 try:

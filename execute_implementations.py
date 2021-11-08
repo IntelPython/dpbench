@@ -3,7 +3,7 @@ import shutil
 import sys
 
 import options
-import run_utils as util
+import utils.run_utils as util
 
 
 def run_native_optimised_CPU(app_name, cmds, analysis):

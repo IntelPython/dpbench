@@ -10,9 +10,9 @@ import numpy.random as rnd
 import dpctl
 import dpctl.tensor as dpt
 
-from dpbench_python.l2_distance.l2_distance_python import l2_distance_python
-from dpbench_datagen.l2_distance import gen_data
-from dpbench_datagen.l2_distance.generate_data_random import SEED
+from ..utilsdpbench_datagen.l2_distance.generate_data_random import SEED
+from ..utils.dpbench_python.l2_distance.l2_distance_python import l2_distance_python
+from ..utils.dpbench_datagen.l2_distance import gen_data
 
 from device_selector import get_device_selector
 

@@ -7,13 +7,13 @@ import numpy as np
 import numpy.random as rnd
 import sys, json, os, datetime
 import dpctl, dpctl.tensor as dpt
-from dpbench_python.pairwise_distance.pairwise_distance_python import (
+from ..utils.dpbench_python.pairwise_distance.pairwise_distance_python import (
     pairwise_distance_python,
 )
-from dpbench_datagen.pairwise_distance import gen_rand_data
-from dpbench_datagen.pairwise_distance.generate_data_random import SEED
+from ..utils.dpbench_datagen.pairwise_distance.generate_data_random import SEED
 
 from device_selector import get_device_selector
+from ..utils.dpbench_datagen.pairwise_distance import gen_rand_data
 
 try:
     import itimer as it

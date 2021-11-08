@@ -3,10 +3,10 @@
 # SPDX-License-Identifier: MIT
 
 import os
-import run_utils as utils
+import utils.run_utils as utils
 import numpy as np
 import argparse
-from dpbench_datagen.knn import (
+from utils.dpbench_datagen.knn import (
     gen_data_to_file,
     gen_train_data,
     gen_test_data,
@@ -15,7 +15,7 @@ from dpbench_datagen.knn import (
     TRAIN_DATA_SIZE,
     DATA_DIM,
 )
-from dpbench_python.knn.knn_python import knn_python
+from utils.dpbench_python.knn.knn_python import knn_python
 
 # make xrange available in python 3
 try:

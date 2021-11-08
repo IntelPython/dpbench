@@ -26,9 +26,9 @@
 
 import os
 import numpy as np
-import run_utils as utils
-from dpbench_python.dbscan.dbscan_python import dbscan_python
-from dpbench_datagen.dbscan import gen_rand_data, gen_data_to_file
+import utils.run_utils as utils
+from utils.dpbench_python.dbscan.dbscan_python import dbscan_python
+from utils.dpbench_datagen.dbscan import gen_rand_data, gen_data_to_file
 
 ######################################################
 # GLOBAL DECLARATIONS THAT WILL BE USED IN ALL FILES #

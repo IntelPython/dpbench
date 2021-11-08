@@ -8,8 +8,8 @@ import numpy as np
 import sys, json, os, datetime
 from device_selector import get_device_selector
 import dpctl, dpctl.tensor as dpt  # , dpctl.memory as dpmem
-from dpbench_python.blackscholes.bs_python import black_scholes_python
 from dpbench_datagen.blackscholes.generate_data_random import SEED
+from ..utils.dpbench_python.blackscholes.bs_python import black_scholes_python
 
 try:
     from numpy import erf
@@ -38,7 +38,7 @@ except:
     now = default_timer
     get_mops = lambda t0, t1, n: (n / (t1 - t0), t1 - t0)
 
-from dpbench_datagen.blackscholes import gen_rand_data
+from utils.dpbench_datagen.blackscholes import gen_rand_data
 
 ######################################################
 # GLOBAL DECLARATIONS THAT WILL BE USED IN ALL FILES #

@@ -29,7 +29,7 @@ import sys, os, json
 import numpy as np
 
 from knn_python import knn_python
-from dpbench_datagen.knn import (
+from utils.dpbench_datagen.knn import (
     gen_train_data,
     gen_test_data,
     CLASSES_NUM,

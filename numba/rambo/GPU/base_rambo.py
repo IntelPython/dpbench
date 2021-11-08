@@ -4,7 +4,7 @@
 
 import json, os
 import numpy as np
-from dpbench_python.rambo.rambo_python import rambo_python
+from utils.dpbench_python.rambo.rambo_python import rambo_python
 
 try:
     import itimer as it

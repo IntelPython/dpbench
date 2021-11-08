@@ -6,9 +6,9 @@ import os
 import numpy as np
 import numpy.random as rnd
 import dpctl, dpctl.tensor as dpt
-import run_utils as utils
-from dpbench_python.gpairs.gpairs_python import gpairs_python
-from dpbench_datagen.gpairs import gen_rand_data, gen_data_to_file
+import utils.run_utils as utils
+from utils.dpbench_python.gpairs.gpairs_python import gpairs_python
+from utils.dpbench_datagen.gpairs import gen_rand_data, gen_data_to_file
 
 try:
     import itimer as it

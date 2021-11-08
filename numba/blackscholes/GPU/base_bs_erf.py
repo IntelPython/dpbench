@@ -7,7 +7,7 @@ from __future__ import print_function
 import numpy as np
 import sys, json, os
 import dpctl, dpctl.tensor as dpt  # , dpctl.memory as dpmem
-from dpbench_python.blackscholes.bs_python import black_scholes_python
+from utils.dpbench_python.blackscholes.bs_python import black_scholes_python
 
 try:
     from numpy import erf
@@ -36,7 +36,7 @@ except:
     now = default_timer
     get_mops = lambda t0, t1, n: (n / (t1 - t0), t1 - t0)
 
-from dpbench_datagen.blackscholes import gen_rand_data
+from utils.dpbench_datagen.blackscholes import gen_rand_data
 
 ######################################################
 # GLOBAL DECLARATIONS THAT WILL BE USED IN ALL FILES #

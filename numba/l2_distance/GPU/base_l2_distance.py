@@ -10,8 +10,8 @@ import numpy.random as rnd
 import dpctl
 import dpctl.tensor as dpt
 
-from dpbench_python.l2_distance.l2_distance_python import l2_distance_python
-from dpbench_datagen.l2_distance import gen_data
+from utils.dpbench_python.l2_distance.l2_distance_python import l2_distance_python
+from utils.dpbench_datagen.l2_distance import gen_data
 
 
 from timeit import default_timer

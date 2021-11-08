@@ -28,8 +28,8 @@ import argparse
 import sys, os, json
 import numpy as np
 import dpctl, dpctl.tensor as dpt
-from dpbench_python.dbscan.dbscan_python import dbscan_python
-from dpbench_datagen.dbscan import gen_rand_data
+from utils.dpbench_python.dbscan.dbscan_python import dbscan_python
+from utils.dpbench_datagen.dbscan import gen_rand_data
 
 try:
     import itimer as it

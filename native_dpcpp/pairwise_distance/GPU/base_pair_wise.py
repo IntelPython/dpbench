@@ -2,14 +2,14 @@
 #
 # SPDX-License-Identifier: MIT
 
-import run_utils as utils
+import utils.run_utils as utils
 import numpy as np
 import sys, os
 import dpctl, dpctl.tensor as dpt
-from dpbench_python.pairwise_distance.pairwise_distance_python import (
+from utils.dpbench_python.pairwise_distance.pairwise_distance_python import (
     pairwise_distance_python,
 )
-from dpbench_datagen.pairwise_distance import gen_rand_data, gen_data_to_file
+from utils.dpbench_datagen.pairwise_distance import gen_rand_data, gen_data_to_file
 
 ######################################################
 # GLOBAL DECLARATIONS THAT WILL BE USED IN ALL FILES #

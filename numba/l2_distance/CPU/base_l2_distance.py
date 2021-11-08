@@ -8,8 +8,8 @@ import json
 # import numpy.random_intel as rnd
 import numpy.random as rnd
 
-from dpbench_python.l2_distance.l2_distance_python import l2_distance_python
-from dpbench_datagen.l2_distance import gen_data
+from utils.dpbench_python.l2_distance.l2_distance_python import l2_distance_python
+from utils.dpbench_datagen.l2_distance import gen_data
 
 try:
     import itimer as it

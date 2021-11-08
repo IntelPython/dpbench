@@ -3,10 +3,10 @@
 # SPDX-License-Identifier: MIT
 
 import os
-import run_utils as utils
+import utils.run_utils as utils
 import numpy as np
-from dpbench_datagen.blackscholes import gen_data_to_file, gen_rand_data
-from dpbench_python.blackscholes.bs_python import black_scholes_python
+from utils.dpbench_datagen.blackscholes import gen_data_to_file, gen_rand_data
+from utils.dpbench_python.blackscholes.bs_python import black_scholes_python
 
 # make xrange available in python 3
 try:

@@ -6,8 +6,8 @@ import os, json
 import numpy as np
 import dpctl, dpctl.tensor as dpt
 
-from dpbench_python.gpairs.gpairs_python import gpairs_python
-from dpbench_datagen.gpairs import gen_rand_data
+from utils.dpbench_python.gpairs.gpairs_python import gpairs_python
+from utils.dpbench_datagen.gpairs import gen_rand_data
 
 try:
     import itimer as it

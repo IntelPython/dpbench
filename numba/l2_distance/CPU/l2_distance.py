@@ -5,10 +5,9 @@
 
 import base_l2_distance
 import numpy as np
-import numba
+from dpbench_decorators import jit
 
-
-@numba.jit(nopython=True, parallel=True, fastmath=True)
+@jit(nopython=True, parallel=True, fastmath=True)
 def l2_distance(a, b):
     sub = a - b
     sq = np.square(sub)

@@ -6,9 +6,10 @@
 import base_pair_wise
 import numpy as np
 import numba
+from dpbench_decorators import jit
 
 
-@numba.jit(nopython=True, parallel=True, fastmath=True)
+@jit(nopython=True, parallel=True, fastmath=True)
 def pw_distance(X1, X2, D):
     M = X1.shape[0]
     N = X2.shape[0]

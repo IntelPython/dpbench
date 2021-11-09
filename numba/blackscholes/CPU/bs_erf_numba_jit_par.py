@@ -6,9 +6,10 @@ import dpctl
 import base_bs_erf
 import numba as nb
 from math import log, sqrt, exp, erf
+from dpbench_decorators import njit
 
 # blackscholes implemented as a parallel loop using numba.prange
-@nb.njit(parallel=True, fastmath=True)
+@njit(parallel=True, fastmath=True)
 def black_scholes_kernel(nopt, price, strike, t, rate, vol, call, put):
     mr = -rate
     sig_sig_two = vol * vol * 2

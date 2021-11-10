@@ -3,19 +3,19 @@
 # SPDX-License-Identifier: MIT
 
 import base_bs_erf
-import numba as nb
 import numpy as np
 from numpy import log, exp, sqrt
 from math import erf
+from dpbench_decorators import jit, vectorize
 
 # Numba does know erf function from numpy or scipy
-@nb.vectorize(nopython=True)
+@vectorize(nopython=True)
 def nberf(x):
     return erf(x)
 
 
 # blackscholes implemented using numpy function calls
-@nb.jit(nopython=True, parallel=True, fastmath=True)
+@jit(nopython=True, parallel=True, fastmath=True)
 def black_scholes_kernel(nopt, price, strike, t, rate, vol, call, put):
     mr = -rate
     sig_sig_two = vol * vol * 2

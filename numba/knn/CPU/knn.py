@@ -27,9 +27,10 @@
 import numpy as np
 import numba
 import base_knn
+from dpbench_decorators import jit
 
 
-@numba.jit(nopython=True)
+@jit(nopython=True)
 def euclidean_dist(x1, x2):
     distance = 0
 
@@ -42,7 +43,7 @@ def euclidean_dist(x1, x2):
     return result
 
 
-@numba.jit(nopython=True)
+@jit(nopython=True)
 def push_queue(queue_neighbors, new_distance, index=4):
     while index > 0 and new_distance[0] < queue_neighbors[index - 1][0]:
         queue_neighbors[index] = queue_neighbors[index - 1]
@@ -50,13 +51,13 @@ def push_queue(queue_neighbors, new_distance, index=4):
         queue_neighbors[index] = new_distance
 
 
-@numba.jit(nopython=True)
+@jit(nopython=True)
 def sort_queue(queue_neighbors):
     for i in range(len(queue_neighbors)):
         push_queue(queue_neighbors, queue_neighbors[i], i)
 
 
-@numba.jit(nopython=True)
+@jit(nopython=True)
 def simple_vote(neighbors, classes_num=3):
     votes_to_classes = np.zeros(classes_num)
 
@@ -74,7 +75,7 @@ def simple_vote(neighbors, classes_num=3):
     return max_ind
 
 
-@numba.jit(nopython=True, parallel=True)
+@jit(nopython=True, parallel=True)
 def run_knn(train, train_labels, test, k=5, classes_num=3):
     test_size = len(test)
     train_size = len(train)

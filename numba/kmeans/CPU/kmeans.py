@@ -1,13 +1,14 @@
 import base_kmeans
 import numpy
 import numba
+from dpbench_decorators import jit
 
 REPEAT = 1
 
 ITERATIONS = 30
 
 
-@numba.jit(nopython=True, parallel=True, fastmath=True)
+@jit(nopython=True, parallel=True, fastmath=True)
 def groupByCluster(arrayP, arrayPcluster, arrayC, num_points, num_centroids):
     for i0 in numba.prange(num_points):
         minor_distance = -1
@@ -21,7 +22,7 @@ def groupByCluster(arrayP, arrayPcluster, arrayC, num_points, num_centroids):
     return arrayPcluster
 
 
-@numba.jit(nopython=True, parallel=True, fastmath=True)
+@jit(nopython=True, parallel=True, fastmath=True)
 def calCentroidsSum(
     arrayP, arrayPcluster, arrayCsum, arrayCnumpoint, num_points, num_centroids
 ):
@@ -39,7 +40,7 @@ def calCentroidsSum(
     return arrayCsum, arrayCnumpoint
 
 
-@numba.jit(nopython=True, parallel=True, fastmath=True)
+@jit(nopython=True, parallel=True, fastmath=True)
 def updateCentroids(arrayC, arrayCsum, arrayCnumpoint, num_centroids):
     for i in numba.prange(num_centroids):
         arrayC[i, 0] = arrayCsum[i, 0] / arrayCnumpoint[i]

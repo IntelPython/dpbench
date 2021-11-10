@@ -6,9 +6,10 @@
 import base_pca
 import numba
 import numpy as np
+from dpbench_decorators import jit
 
 
-@numba.jit(nopython=True, parallel=True, fastmath=True)
+@jit(nopython=True, parallel=True, fastmath=True)
 def pca_impl(data):
     tdata = data.T
     m = np.empty(tdata.shape[0])

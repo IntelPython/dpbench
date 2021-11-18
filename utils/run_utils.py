@@ -118,6 +118,7 @@ class ExperimentError(Exception):
 def run_command(
     command_string, verbose=False, echo=True, throw_exception=True, dry_run=False
 ):
+    command_string = [x for x in command_string if x is not None]
     if dry_run:
         print("dry-run executing:", subprocess.list2cmdline(command_string))
         return None

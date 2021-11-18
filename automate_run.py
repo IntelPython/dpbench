@@ -39,6 +39,7 @@ if __name__ == "__main__":
         choices=list(options.analysis),
     )
     parser.add_argument("-k", "--kernel", required=False, action="store_true")
+    parser.add_argument("-c", "--comp_only", required=False, action="store_true")
     parser.add_argument(
         "-ws",
         "--workloads",
@@ -57,7 +58,8 @@ if __name__ == "__main__":
     opts.platform = args.platform
     opts.analysis = args.analysis
     opts.kernel = args.kernel
-    opts.wls = options.workloads(args.workloads, opts.kernel)
+    opts.comp_only = args.comp_only
+    opts.wls = options.workloads(args.workloads, opts.kernel, opts.comp_only)
 
     # print log of execution configuration
     # ****************************************

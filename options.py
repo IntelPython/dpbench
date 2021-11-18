@@ -150,7 +150,7 @@ class analysis(enum.Enum):
 
 
 class workloads:
-    def __init__(self, input_wls=[], kernel_mode=False):
+    def __init__(self, input_wls=[], kernel_mode=False, comp_only_mode=False):
         print(input_wls)
 
         wl_names = {
@@ -197,6 +197,7 @@ class workloads:
                     wl_names[all_workloads.blackscholes.value]["numba"]
                     if not kernel_mode
                     else wl_names[all_workloads.blackscholes.value]["kernel"],
+                    "--usm" if comp_only_mode else None,
                     "--test",
                 ],
                 "NUMBA_PERF_CMD": [
@@ -204,12 +205,14 @@ class workloads:
                     wl_names[all_workloads.blackscholes.value]["numba"]
                     if not kernel_mode
                     else wl_names[all_workloads.blackscholes.value]["kernel"],
+                    "--usm" if comp_only_mode else None,
                 ],
                 "NUMBA_VTUNE_CMD": [
                     "python",
                     wl_names[all_workloads.blackscholes.value]["numba"]
                     if not kernel_mode
                     else wl_names[all_workloads.blackscholes.value]["kernel"],
+                    "--usm" if comp_only_mode else None,
                     "--steps",
                     "1",
                     "--size",
@@ -220,49 +223,25 @@ class workloads:
                     wl_names[all_workloads.blackscholes.value]["numba"]
                     if not kernel_mode
                     else wl_names[all_workloads.blackscholes.value]["kernel"],
+                    "--usm" if comp_only_mode else None,
                     "--steps",
                     "1",
                     "--size",
                     str(2 ** 28),
                 ],
-                "NUMBA_CPU_TEST_CMD": [
-                    "python",
-                    wl_names[all_workloads.blackscholes.value]["numba"],
-                    "--steps",
-                    "1",
-                ],
-                "NUMBA_CPU_PERF_CMD": [
-                    "python",
-                    wl_names[all_workloads.blackscholes.value]["numba"],
-                ],
-                "NUMBA_CPU_VTUNE_CMD": [
-                    "python",
-                    wl_names[all_workloads.blackscholes.value]["numba"],
-                    "--steps",
-                    "1",
-                    "--size",
-                    str(2 ** 28),
-                ],
-                "NUMBA_CPU_ADVISOR_CMD": [
-                    "python",
-                    wl_names[all_workloads.blackscholes.value]["numba"],
-                    "--steps",
-                    "1",
-                    "--size",
-                    str(2 ** 28),
-                ],
-                "NATIVE_TEST_CMD": ["python", "base_bs_erf.py", "--test"],
-                "NATIVE_PERF_CMD": ["python", "base_bs_erf.py"],
+                "NATIVE_TEST_CMD": ["python", "base_bs_erf.py", "--usm" if comp_only_mode else None, "--test"],
+                "NATIVE_PERF_CMD": ["python", "base_bs_erf.py", "--usm" if comp_only_mode else None,],
                 "NATIVE_PERF_REF_CMD": [
                     "python",
                     "base_bs_erf.py",
+                    "--usm" if comp_only_mode else None,
                     "--steps",
                     "1",
                     "--size",
                     str(2 ** 28),
                 ],
-                "NATIVE_VTUNE_CMD": ["./black_scholes", str(2 ** 28)],
-                "NATIVE_ADVISOR_CMD": ["./black_scholes", str(2 ** 28)],
+                "NATIVE_VTUNE_CMD": ["./black_scholes_comp" if comp_only_mode else "./black_scholes_comp", str(2 ** 28)],
+                "NATIVE_ADVISOR_CMD": ["./black_scholes_comp" if comp_only_mode else "./black_scholes_comp", str(2 ** 28)],
             },
             all_workloads.dbscan.value: {
                 "execute": False,

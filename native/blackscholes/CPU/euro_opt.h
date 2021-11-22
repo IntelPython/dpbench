@@ -28,20 +28,18 @@
 #define RISK_FREE  0.1f
 #define VOLATILITY 0.2f
 
-void InitData( int nopt, tfloat* *s0, tfloat* *x, tfloat* *t,
-                   tfloat* *vcall_compiler, tfloat* *vput_compiler,
-                   tfloat* *vcall_mkl, tfloat* *vput_mkl
+void InitData( size_t nopt, tfloat* *s0, tfloat* *x, tfloat* *t,
+                   tfloat* *vcall_compiler, tfloat* *vput_compiler
              );
 
 void FreeData( tfloat *s0, tfloat *x, tfloat *t,
-                   tfloat *vcall_compiler, tfloat *vput_compiler,
-                   tfloat *vcall_mkl, tfloat *vput_mkl
+                   tfloat *vcall_compiler, tfloat *vput_compiler
              );
 
 void BlackScholesNaive( int nopt, tfloat r, tfloat sig, const tfloat so[],
     const tfloat x[], const tfloat t[], tfloat vcall[], tfloat vput[] );
 
-void BlackScholesFormula_Compiler( int nopt,
+void BlackScholesFormula_Compiler( size_t nopt,
     tfloat r, tfloat sig, tfloat *  s0, tfloat *  x,
     tfloat *  t, tfloat *  vcall, tfloat *  vput );
 

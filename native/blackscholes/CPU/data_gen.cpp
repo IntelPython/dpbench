@@ -7,11 +7,14 @@
 #define _XOPEN_SOURCE
 #define _DEFAULT_SOURCE
 #include <stdlib.h>
-#include <stdio.h>
+#include <iostream>
 #include <omp.h>
 #include <ia32intrin.h>
+#include <fstream>
 
 #include "euro_opt.h"
+
+using namespace std;
 
 tfloat RandRange( tfloat a, tfloat b, struct drand48_data *seed ) {
     double r;
@@ -28,16 +31,14 @@ tfloat RandRange( tfloat a, tfloat b, struct drand48_data *seed ) {
 //     x    - strike price
 //     t    - maturity
 // Output arrays for call and put prices
-//     vcall_compiler, vcall_mkl
-//     vput_compiler, vput_mkl
+//     vcall_compiler
+//     vput_compiler
 */
-void InitData( int nopt, tfloat* *s0, tfloat* *x, tfloat* *t,
-                   tfloat* *vcall_compiler, tfloat* *vput_compiler,
-                   tfloat* *vcall_mkl, tfloat* *vput_mkl
-             )
+void InitData( size_t nopt, tfloat* *s0, tfloat* *x, tfloat* *t,
+                   tfloat* *vcall_compiler, tfloat* *vput_compiler)
 {
-    tfloat *ts0, *tx, *tt, *tvcall_compiler, *tvput_compiler, *tvcall_mkl, *tvput_mkl;
-    int i;
+    tfloat *ts0, *tx, *tt, *tvcall_compiler, *tvput_compiler;
+    size_t i;
 
     /* Allocate aligned memory */
     ts0             = (tfloat*)_mm_malloc( nopt * sizeof(tfloat), ALIGN_FACTOR);
@@ -45,34 +46,45 @@ void InitData( int nopt, tfloat* *s0, tfloat* *x, tfloat* *t,
     tt              = (tfloat*)_mm_malloc( nopt * sizeof(tfloat), ALIGN_FACTOR);
     tvcall_compiler = (tfloat*)_mm_malloc( nopt * sizeof(tfloat), ALIGN_FACTOR);
     tvput_compiler  = (tfloat*)_mm_malloc( nopt * sizeof(tfloat), ALIGN_FACTOR);
-    tvcall_mkl      = (tfloat*)_mm_malloc( nopt * sizeof(tfloat), ALIGN_FACTOR);
-    tvput_mkl       = (tfloat*)_mm_malloc( nopt * sizeof(tfloat), ALIGN_FACTOR);
 
     if ( (ts0 == NULL) || (tx == NULL) || (tt == NULL) ||
-         (tvcall_compiler == NULL) || (tvput_compiler == NULL) ||
-         (tvcall_mkl == NULL) || (tvput_mkl == NULL) )
+         (tvcall_compiler == NULL) || (tvput_compiler == NULL) )
     {
         printf("Memory allocation failure\n");
         exit(-1);
     }
 
-    /* NUMA-friendly data init */
-    #pragma omp parallel
-    {
-        struct drand48_data seed;
-        srand48_r(omp_get_thread_num()+SEED, &seed);
-        #pragma omp for simd
-        for ( i = 0; i < nopt; i++ )
-        {
-            ts0[i] = RandRange( S0L, S0H, &seed );
-            tx[i]  = RandRange( XL, XH, &seed );
-            tt[i]  = RandRange( TL, TH, &seed );
+    ifstream file;
+    file.open("price.bin", ios::in|ios::binary);
+    if (file) {
+      file.read(reinterpret_cast<char *>(ts0), nopt*sizeof(tfloat));
+      file.close();
+    } else {
+      std::cout << "Input file not found.\n";
+      exit(0);
+    }
 
-            tvcall_compiler[i] = 0.0;
-            tvput_compiler[i]  = 0.0;
-            tvcall_mkl[i] = 0.0;
-            tvput_mkl[i]  = 0.0;
-        }
+    file.open("strike.bin", ios::in|ios::binary);
+    if (file) {
+      file.read(reinterpret_cast<char *>(tx), nopt*sizeof(tfloat));
+      file.close();
+    } else {
+      std::cout << "Input file not found.\n";
+      exit(0);
+    }
+
+    file.open("t.bin", ios::in|ios::binary);
+    if (file) {
+      file.read(reinterpret_cast<char *>(tt), nopt*sizeof(tfloat));
+      file.close();
+    } else {
+      std::cout << "Input file not found.\n";
+      exit(0);
+    }
+
+    for ( i = 0; i < nopt; i++ ){
+      tvcall_compiler[i] = 0.0;
+      tvput_compiler[i]  = 0.0;
     }
 
     *s0 = ts0;
@@ -80,15 +92,11 @@ void InitData( int nopt, tfloat* *s0, tfloat* *x, tfloat* *t,
     *t  = tt;
     *vcall_compiler = tvcall_compiler;
     *vput_compiler  = tvput_compiler;
-    *vcall_mkl = tvcall_mkl;
-    *vput_mkl  = tvput_mkl;
 }
 
 /* Deallocate arrays */
 void FreeData( tfloat *s0, tfloat *x, tfloat *t,
-                   tfloat *vcall_compiler, tfloat *vput_compiler,
-                   tfloat *vcall_mkl, tfloat *vput_mkl
-             )
+                   tfloat *vcall_compiler, tfloat *vput_compiler)
 {
     /* Free memory */
     _mm_free(s0);
@@ -96,6 +104,4 @@ void FreeData( tfloat *s0, tfloat *x, tfloat *t,
     _mm_free(t);
     _mm_free(vcall_compiler);
     _mm_free(vput_compiler);
-    _mm_free(vcall_mkl);
-    _mm_free(vput_mkl);
 }

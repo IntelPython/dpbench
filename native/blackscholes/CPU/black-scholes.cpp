@@ -48,7 +48,7 @@
 // Note: the restrict keyword here tells the compiler
 //       that none of the arrays overlap in memory.
 */
-void BlackScholesFormula_Compiler( int nopt,
+void BlackScholesFormula_Compiler( size_t nopt,
     tfloat r, tfloat sig, tfloat *  s0, tfloat *  x,
     tfloat *  t, tfloat *  vcall, tfloat *  vput )
 {

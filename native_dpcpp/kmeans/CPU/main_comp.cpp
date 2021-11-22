@@ -90,19 +90,23 @@ int main(int argc, char * argv[])
   fprintf(fptr1, "%lu,%.6lf\n",nopt,((double) (t2 - t1) / getHz()));
 
   if (test) {
+    Centroid* t_centroids = (Centroid*)_mm_malloc( NUMBER_OF_CENTROIDS * sizeof(Centroid), ALIGN_FACTOR);
+    q->memcpy(t_centroids, centroids, NUMBER_OF_CENTROIDS * sizeof(Centroid));
+    q->wait();
+
     ofstream file1, file2, file3;
     file1.open("arrayC.bin", ios::out|ios::binary|ios::app);
     file2.open("arrayCsum.bin", ios::out|ios::binary|ios::app);
     file3.open("arrayCnumpoint.bin", ios::out|ios::binary|ios::app);
     if (file1 && file2 && file3) {
       for (int i = 0; i < NUMBER_OF_CENTROIDS; i++) {
-	file1.write(reinterpret_cast<char *>(&centroids[i].x), sizeof(tfloat));
-	file1.write(reinterpret_cast<char *>(&centroids[i].y), sizeof(tfloat));
+  	file1.write(reinterpret_cast<char *>(&t_centroids[i].x), sizeof(tfloat));
+  	file1.write(reinterpret_cast<char *>(&t_centroids[i].y), sizeof(tfloat));
 
-	file2.write(reinterpret_cast<char *>(&centroids[i].x_sum), sizeof(tfloat));
-	file2.write(reinterpret_cast<char *>(&centroids[i].y_sum), sizeof(tfloat));
+  	file2.write(reinterpret_cast<char *>(&t_centroids[i].x_sum), sizeof(tfloat));
+  	file2.write(reinterpret_cast<char *>(&t_centroids[i].y_sum), sizeof(tfloat));
 
-	file3.write(reinterpret_cast<char *>(&centroids[i].num_points), sizeof(tint));
+  	file3.write(reinterpret_cast<char *>(&t_centroids[i].num_points), sizeof(tint));
       }
       file1.close();
       file2.close();
@@ -113,7 +117,7 @@ int main(int argc, char * argv[])
   }
 
   /**************************/
-  printCentroids (centroids, NUMBER_OF_CENTROIDS);
+  //printCentroids (centroids, NUMBER_OF_CENTROIDS);
 
   /* Deallocate arrays */
   FreeData( q, points, centroids );

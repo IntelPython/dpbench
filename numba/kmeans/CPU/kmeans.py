@@ -1,15 +1,17 @@
+#import dpctl
 import base_kmeans
 import numpy
 import numba
-from dpbench_decorators import jit
 
 REPEAT = 1
 
+# defines total number of iterations for kmeans accuracy
 ITERATIONS = 30
 
-
-@jit(nopython=True, parallel=True, fastmath=True)
+# determine the euclidean distance from the cluster center to each point
+@numba.jit(nopython=True, parallel=True, fastmath=True)
 def groupByCluster(arrayP, arrayPcluster, arrayC, num_points, num_centroids):
+    # parallel for loop
     for i0 in numba.prange(num_points):
         minor_distance = -1
         for i1 in range(num_centroids):
@@ -22,10 +24,12 @@ def groupByCluster(arrayP, arrayPcluster, arrayC, num_points, num_centroids):
     return arrayPcluster
 
 
-@jit(nopython=True, parallel=True, fastmath=True)
+# assign points to cluster
+@numba.jit(nopython=True, parallel=True, fastmath=True)
 def calCentroidsSum(
     arrayP, arrayPcluster, arrayCsum, arrayCnumpoint, num_points, num_centroids
 ):
+    # parallel for loop
     for i in numba.prange(num_centroids):
         arrayCsum[i, 0] = 0
         arrayCsum[i, 1] = 0
@@ -40,7 +44,8 @@ def calCentroidsSum(
     return arrayCsum, arrayCnumpoint
 
 
-@jit(nopython=True, parallel=True, fastmath=True)
+# update the centriods array after computation
+@numba.jit(nopython=True, parallel=True, fastmath=True)
 def updateCentroids(arrayC, arrayCsum, arrayCnumpoint, num_centroids):
     for i in numba.prange(num_centroids):
         arrayC[i, 0] = arrayCsum[i, 0] / arrayCnumpoint[i]
@@ -52,6 +57,7 @@ def kmeans(
 ):
 
     for i in range(ITERATIONS):
+        #with dpctl.device_context(base_kmeans.get_device_selector()):
         groupByCluster(arrayP, arrayPcluster, arrayC, num_points, num_centroids)
 
         calCentroidsSum(

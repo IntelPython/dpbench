@@ -1,6 +1,5 @@
 #include <stdio.h>
 #include <stdlib.h>
-#include <omp.h>
 #include <math.h>
 #include <CL/sycl.hpp>
 
@@ -112,23 +111,23 @@ void kmeans(queue* q,
 ) {
     for(size_t i = 0; i < ITERATIONS; i++) {
       groupByCluster(q,
-		     h_points,
-		     h_centroids,
-		     num_centroids,
-		     num_points
-		     );
+      		     h_points,
+      		     h_centroids,
+      		     num_centroids,
+      		     num_points
+      		     );
 
       calCentroidsSum(q,
-		      h_points,
-		      h_centroids,
-		      num_centroids,
-		      num_points
-		      );
+      		      h_points,
+      		      h_centroids,
+      		      num_centroids,
+      		      num_points
+      		      );
 
       updateCentroids(q,
-		      h_centroids,
-		      num_centroids
-		      );
+      		      h_centroids,
+      		      num_centroids
+      		      );
     }
 }
 
@@ -149,38 +148,20 @@ void runKmeans(queue* q,
 	       Point* points,
 	       Centroid* centroids,
 	       size_t NUMBER_OF_POINTS,
-	       size_t NUMBER_OF_CENTROIDS
-) {
-
-  Centroid* d_centroids = (Centroid*)malloc_shared(NUMBER_OF_CENTROIDS * sizeof(Centroid), *q);
-  Point* d_points = (Point*)malloc_shared(NUMBER_OF_POINTS * sizeof(Point), *q);
-
-  q->memcpy(d_centroids, centroids, NUMBER_OF_CENTROIDS * sizeof(Centroid));
-  q->memcpy(d_points, points, NUMBER_OF_POINTS * sizeof(Point));
-
-  q->wait();
-
+	       size_t NUMBER_OF_CENTROIDS) {
   for (size_t i = 0; i < REPEAT; i++) {
 
     q->submit([&](handler& h) {
     	h.parallel_for<class theKernel_km>(range<1>{NUMBER_OF_CENTROIDS}, [=](id<1> myID) {
 
     	    size_t ci = myID[0];
-    	    d_centroids[ci].x = d_points[ci].x;
-    	    d_centroids[ci].y = d_points[ci].y;
+    	    centroids[ci].x = points[ci].x;
+    	    centroids[ci].y = points[ci].y;
 
     	  });
       });
     q->wait();
 
-    kmeans(q, d_points, d_centroids, NUMBER_OF_POINTS, NUMBER_OF_CENTROIDS);
+    kmeans(q, points, centroids, NUMBER_OF_POINTS, NUMBER_OF_CENTROIDS);
   }
-
-  q->memcpy(centroids, d_centroids, NUMBER_OF_CENTROIDS * sizeof(Centroid));
-
-  q->wait();
-
-  free(d_centroids,q->get_context());
-  free(d_points,q->get_context());
-
 }

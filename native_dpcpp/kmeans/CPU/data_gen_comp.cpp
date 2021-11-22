@@ -56,15 +56,26 @@ void InitData( queue *q, size_t nopt, int ncentroids, Point** points, Centroid**
 
   file.close();
 
+  Centroid* d_centroids = (Centroid*)malloc_device(ncentroids * sizeof(Centroid), *q);
+  Point* d_points = (Point*)malloc_device(nopt * sizeof(Point), *q);
+
+  q->memcpy(d_centroids, cents, ncentroids * sizeof(Centroid));
+  q->memcpy(d_points, pts, nopt * sizeof(Point));
+
+  q->wait();
+
   //WriteOutputToTextFile("X_dpcpp.txt", pts, nopt);
-  *points = pts;
-  *centroids = cents;
+  *points = d_points;
+  *centroids = d_centroids;
+
+  _mm_free(pts);
+  _mm_free(cents);
 }
 
 /* Deallocate arrays */
 void FreeData( queue *q, Point *pts, Centroid * cents)
 {
-    /* Free memory */
-    _mm_free(pts);
-    _mm_free(cents);
+  /* Free memory */
+  free(pts,q->get_context());
+  free(cents,q->get_context());
 }

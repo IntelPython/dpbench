@@ -35,48 +35,15 @@ EQCOLON     :="="
 TARGET      := kmeans
 
 CFLAGS      += -g -O3
-CFLAGS      += -fsycl -qopenmp
+CFLAGS      += -fsycl
 CFLAGS      += -I./
+CFLAGS      += -DSYCL_USE_NATIVE_FP_ATOMICS
 
-PREC ?= d
+PREC ?= f
 ifeq ($(PREC),d)
 else
     CFLAGS += -D__DO_FLOAT__
 endif
-
-# TARGET_ARCH ?= auto
-
-# ifeq ($(TARGET_ARCH),SSE)
-#     CFLAGS += -$(QOPT)xSSE4.2
-# endif
-# ifeq ($(TARGET_ARCH),AVX)
-#     CFLAGS += -$(QOPT)xAVX
-# endif
-# ifeq ($(TARGET_ARCH),AVX2)
-#     CFLAGS += -$(QOPT)xCORE_AVX2
-# endif
-# ifeq ($(TARGET_ARCH),MIC)
-#     CFLAGS += -mmic -opt-streaming-stores always
-# endif
-# ifeq ($(TARGET_ARCH),host)
-#     CFLAGS += -xhost
-# endif
-# ifeq ($(TARGET_ARCH),auto)
-#     CFLAGS += -xCORE-AVX2 #-axCOMMON-AVX512
-# endif
-
-# ACC ?= ha
-# ifeq ($(ACC),ha)
-#     CFLAGS += -$(FQOPT)imf-precision$(EQCOLON)high -D_VML_ACCURACY_HA_
-# endif
-# ifeq ($(ACC),la)
-#     CFLAGS += -$(FQOPT)imf-precision$(EQCOLON)medium -D_VML_ACCURACY_LA_
-# endif
-# ifeq ($(ACC),ep)
-#     CFLAGS += -$(FQOPT)imf-precision$(EQCOLON)low -$(FQOPT)imf-domain-exclusion$(EQCOLON)31 -D_VML_ACCURACY_EP_
-# endif
-
-#TARGET := $(TARGET)_$(ACC)
 
 # ==============================================================================
 # ############## Define make rules #############################################
@@ -86,10 +53,15 @@ all: kmeans-gpu
 
 kmeans-gpu: $(TARGET)
 
-$(TARGET): $(SRC) kmeans.cpp
+comp:$(TARGET)_comp
+
+$(TARGET): data_gen.cpp main.cpp kmeans.cpp
 	$(CC) $(CPPFLAGS) $(CFLAGS) $^ -o $(TARGET)
 
+$(TARGET)_comp: data_gen_comp.cpp main_comp.cpp kmeans_comp.cpp
+	$(CC) $(CPPFLAGS) $(CFLAGS) $^ -o $(TARGET)_comp
+
 clean:
-	rm -rf *.o *.out *.optrpt *.yaml *~ kmeans
+	rm -rf *.o *.out *.optrpt *.yaml *~ kmeans kmeans_comp *.bin
 
 .PHONY: all clean

@@ -2,7 +2,7 @@
 #
 # SPDX-License-Identifier: MIT
 
-import dpctl
+#import dpctl
 import base_bs_erf
 import numba as nb
 from math import log, sqrt, exp, erf
@@ -41,8 +41,8 @@ def black_scholes_kernel(nopt, price, strike, t, rate, vol, call, put):
 
 def black_scholes(nopt, price, strike, t, rate, vol, call, put):
     # offload blackscholes computation to CPU (toggle level0 or opencl driver).
-    with dpctl.device_context(base_bs_erf.get_device_selector()):
-        black_scholes_kernel(nopt, price, strike, t, rate, vol, call, put)
+    #with dpctl.device_context(base_bs_erf.get_device_selector()):
+    black_scholes_kernel(nopt, price, strike, t, rate, vol, call, put)
 
 
 # call the run function to setup input data and performance data infrastructure

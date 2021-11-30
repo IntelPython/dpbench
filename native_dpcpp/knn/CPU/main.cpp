@@ -31,8 +31,6 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <sstream>
 #include <fstream>
 
-#define SEED 7777777
-
 int stoi(char *h)
 {
     std::stringstream in(h);
@@ -69,6 +67,17 @@ double *gen_data_x(size_t data_size)
     return data;
 }
 
+std::vector<size_t> gen_data_y(size_t data_size)
+{
+    std::vector<size_t> labels;
+    for (size_t i = 0; i < data_size; ++i)
+    {
+        labels.push_back((size_t)rand() % NUM_CLASSES);
+    }
+
+    return labels;
+}
+
 auto read_data_x(size_t data_size, std::string filename)
 {
 
@@ -89,17 +98,6 @@ auto read_data_x(size_t data_size, std::string filename)
     }
 
     return data;
-}
-
-std::vector<size_t> gen_data_y(size_t data_size)
-{
-    std::vector<size_t> labels;
-    for (size_t i = 0; i < data_size; ++i)
-    {
-        labels.push_back((size_t)rand() % NUM_CLASSES);
-    }
-
-    return labels;
 }
 
 auto read_data_y(size_t data_size, std::string filename)
@@ -126,17 +124,13 @@ auto read_data_y(size_t data_size, std::string filename)
 
 int main(int argc, char *argv[])
 {
-    int STEPS = 10;
-
     int repeat = 1;
     double t1 = 0, t2 = 0;
 
     size_t nPoints_train = pow(2, 10);
-    size_t nPoints = pow(2, 10);
+    size_t nPoints = pow(2, 20);
 
-    size_t nFeatures = 1;
-    size_t minPts = 5;
-    double eps = 1.0;
+    bool test = false;
 
     /* Read number of options parameter from command line */
     if (argc >= 2)
@@ -147,9 +141,15 @@ int main(int argc, char *argv[])
     {
         sscanf(argv[2], "%d", &repeat);
     }
+    if (argc == 4) {
+      char test_str[] = "-t";
+      if (strcmp(test_str, argv[3]) == 0) {
+	test = true;
+      }
+    }
 
     FILE *fptr;
-    fptr = fopen("perf_output.csv", "w");
+    fptr = fopen("perf_output.csv", "a");
     if (fptr == NULL)
     {
         printf("Error!");
@@ -157,73 +157,72 @@ int main(int argc, char *argv[])
     }
 
     FILE *fptr1;
-    fptr1 = fopen("runtimes.csv", "w");
+    fptr1 = fopen("runtimes.csv", "a");
     if (fptr1 == NULL)
     {
         printf("Error!");
         exit(1);
     }
 
-    srand(SEED);
-
     queue *q = nullptr;
     try
     {
-        q = new queue{gpu_selector()};
+        q = new queue{cpu_selector()};
     }
-    catch (runtime_error &re)
+    catch (sycl::exception &re)
     {
-        std::cerr << "No GPU device found\n";
+        std::cerr << "No CPU device found\n";
         exit(1);
     }
 
-    int i, j;
-    double MOPS = 0.0;
-    double time;
+    auto data_train_ptr = read_data_x(nPoints_train, "x_train.bin");
+    double *data_train = data_train_ptr.get();
 
-    double *data_train = read_data_x(nPoints_train, "x_train.bin").get();
-    size_t *train_labels = read_data_y(nPoints_train, "y_train.bin").get();
+    auto train_labels_ptr = read_data_y(nPoints_train, "y_train.bin");
+    size_t *train_labels = train_labels_ptr.get();
 
-    double *data_test = read_data_x(nPoints, "x_test.bin").get();
+    auto data_test_ptr = read_data_x(nPoints, "x_test.bin");
+    double *data_test = data_test_ptr.get();
+
     size_t *predictions = new size_t[nPoints];
 
+    double *votes_to_classes = new double[nPoints * NUM_CLASSES]();
+
     /* Warm up cycle */
-    run_knn(q, data_train, train_labels, data_test, nPoints_train, nPoints, predictions);
+    run_knn(q, data_train, train_labels, data_test, nPoints_train, nPoints, predictions, votes_to_classes);
 
-    for (i = 0; i < STEPS; i++)
+    t1 = timer_rdtsc();
+    for (int j = 0; j < repeat; j++)
     {
-
-        double *data_train = read_data_x(nPoints_train, "x_train.bin").get();
-        size_t *train_labels = read_data_y(nPoints_train, "y_train.bin").get();
-        double *data_test = read_data_x(nPoints, "x_test.bin").get();
-        size_t *predictions = new size_t[nPoints];
-
-        t1 = timer_rdtsc();
-        for (j = 0; j < repeat; j++)
-        {
-            run_knn(q, data_train, train_labels, data_test, nPoints_train, nPoints, predictions);
-        }
-        t2 = timer_rdtsc();
-
-        MOPS = (nPoints * repeat / 1e6) / ((double)(t2 - t1) / getHz());
-        time = ((double)(t2 - t1) / getHz());
-
-#if 0
-	for (size_t j = 0; j < nPoints; j++) {
-	  printf("%lu\n", predictions[i]);
-	}
-#endif
-
-        printf("ERF: Native-C-VML: Size: %ld Time: %.6lf\n", nPoints, time);
-        fflush(stdout);
-        fprintf(fptr, "%ld,%.6lf\n", nPoints, MOPS);
-        fprintf(fptr1, "%ld,%.6lf\n", nPoints, time);
-
-        if (repeat > 2)
-            repeat -= 2;
+      run_knn(q, data_train, train_labels, data_test, nPoints_train, nPoints, predictions, votes_to_classes);
     }
+    t2 = timer_rdtsc();
+
+    double MOPS = (nPoints * repeat / 1e6) / ((double)(t2 - t1) / getHz());
+    double time = ((double)(t2 - t1) / getHz());
+
+    printf("ERF: Native-C-VML: Size: %ld Time: %.6lf\n", nPoints, time);
+    fflush(stdout);
+    fprintf(fptr, "%ld,%.6lf\n", nPoints, MOPS);
+    fprintf(fptr1, "%ld,%.6lf\n", nPoints, time);
+
     fclose(fptr);
     fclose(fptr1);
+
+    if (test) {
+      std::ofstream file;
+      file.open("predictions.bin", std::ios::out|std::ios::binary);
+      if (file) {
+	file.write(reinterpret_cast<char *>(predictions), nPoints*sizeof(double));
+	file.close();
+      } else {
+	std::cout << "Unable to open output file.\n";
+      }
+    }
+
+    delete[] predictions;
+
+    delete[] votes_to_classes;
 
     return 0;
 }

@@ -56,7 +56,6 @@ void InitData( queue* q, size_t nopt, struct point* *x1, struct point* *x2, tflo
   /* Allocate aligned memory */
   tx1 = (struct point*)_mm_malloc( nopt * sizeof(struct point), ALIGN_FACTOR);
   tx2 = (struct point*)_mm_malloc( nopt * sizeof(struct point), ALIGN_FACTOR);
-  tfloat* distance = (tfloat*)_mm_malloc( nopt * nopt * sizeof(tfloat), ALIGN_FACTOR);
 
   if ( (tx1 == NULL) || (tx2 == NULL) ) {
     printf("Memory allocation failure\n");
@@ -66,15 +65,27 @@ void InitData( queue* q, size_t nopt, struct point* *x1, struct point* *x2, tflo
   ReadInputFromBinFile<tfloat> ("X.bin", reinterpret_cast<char *>(tx1), nopt*3);
   ReadInputFromBinFile<tfloat> ("Y.bin", reinterpret_cast<char *>(tx2), nopt*3);
 
-  *x1 = tx1;
-  *x2 = tx2;
+  struct point *d_tx1 = (struct point*)malloc_device( nopt * sizeof(struct point), *q);
+  struct point *d_tx2 = (struct point*)malloc_device( nopt * sizeof(struct point), *q);
+  tfloat* distance = (tfloat*)malloc_device( nopt * nopt * sizeof(tfloat), *q);
+
+  q->memcpy(d_tx1,tx1,nopt * sizeof(struct point));
+  q->memcpy(d_tx2,tx2,nopt * sizeof(struct point));
+
+  q->wait();
+
+  *x1 = d_tx1;
+  *x2 = d_tx2;
   *distance_op = distance;
+
+  /* Free memory */
+  _mm_free(tx1);
+  _mm_free(tx2);
 }
 
 /* Deallocate arrays */
-void FreeData( queue* q, struct point *x1, struct point *x2 )
-{
-    /* Free memory */
-    _mm_free(x1);
-    _mm_free(x2);
+void FreeData( queue* q, struct point *x1, struct point *x2, tfloat* distance ) {
+  free(x1, q->get_context());
+  free(x2, q->get_context());
+  free(distance, q->get_context());
 }

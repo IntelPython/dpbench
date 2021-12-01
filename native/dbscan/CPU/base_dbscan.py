@@ -25,14 +25,10 @@
 # *****************************************************************************
 
 import os
-from typing import NamedTuple
-
 import numpy as np
-import pandas as pd
-from sklearn.datasets import make_blobs
-from sklearn.preprocessing import StandardScaler
-
 import run_utils as utils
+from dpbench_python.dbscan.dbscan_python import dbscan_python
+from dpbench_datagen.dbscan import gen_rand_data, gen_data_to_file
 
 ######################################################
 # GLOBAL DECLARATIONS THAT WILL BE USED IN ALL FILES #
@@ -45,57 +41,14 @@ except NameError:
     xrange = range
 
 #################################################
+def gen_data_np(nopt, dims, a_minpts, a_eps):
+    data, p_eps, p_minpts = gen_rand_data(nopt, dims)
+    assignments = np.empty(nopt, dtype=np.int64)
 
+    minpts = p_minpts or a_minpts
+    eps = p_eps or a_eps
 
-class DataSize(NamedTuple):
-    n_samples: int
-    n_features: int
-
-
-class Params(NamedTuple):
-    eps: float
-    minpts: int
-
-
-SEED = 7777777
-OPTIMAL_PARAMS = {
-    DataSize(n_samples=2 ** 8, n_features=2): Params(eps=0.173, minpts=4),
-    DataSize(n_samples=2 ** 8, n_features=3): Params(eps=0.35, minpts=6),
-    DataSize(n_samples=2 ** 8, n_features=10): Params(eps=0.8, minpts=20),
-    DataSize(n_samples=2 ** 9, n_features=2): Params(eps=0.15, minpts=4),
-    DataSize(n_samples=2 ** 9, n_features=3): Params(eps=0.1545, minpts=6),
-    DataSize(n_samples=2 ** 9, n_features=10): Params(eps=0.7, minpts=20),
-    DataSize(n_samples=2 ** 10, n_features=2): Params(eps=0.1066, minpts=4),
-    DataSize(n_samples=2 ** 10, n_features=3): Params(eps=0.26, minpts=6),
-    DataSize(n_samples=2 ** 10, n_features=10): Params(eps=0.6, minpts=20),
-    DataSize(n_samples=2 ** 11, n_features=2): Params(eps=0.095, minpts=4),
-    DataSize(n_samples=2 ** 11, n_features=3): Params(eps=0.18, minpts=6),
-    DataSize(n_samples=2 ** 11, n_features=10): Params(eps=0.6, minpts=20),
-    DataSize(n_samples=2 ** 12, n_features=2): Params(eps=0.0715, minpts=4),
-    DataSize(n_samples=2 ** 12, n_features=3): Params(eps=0.17, minpts=6),
-    DataSize(n_samples=2 ** 12, n_features=10): Params(eps=0.6, minpts=20),
-    DataSize(n_samples=2 ** 13, n_features=2): Params(eps=0.073, minpts=4),
-    DataSize(n_samples=2 ** 13, n_features=3): Params(eps=0.149, minpts=6),
-    DataSize(n_samples=2 ** 13, n_features=10): Params(eps=0.6, minpts=20),
-    DataSize(n_samples=2 ** 14, n_features=2): Params(eps=0.0695, minpts=4),
-    DataSize(n_samples=2 ** 14, n_features=3): Params(eps=0.108, minpts=6),
-    DataSize(n_samples=2 ** 14, n_features=10): Params(eps=0.6, minpts=20),
-    DataSize(n_samples=2 ** 15, n_features=2): Params(eps=0.0695, minpts=4),
-    DataSize(n_samples=2 ** 15, n_features=3): Params(eps=0.108, minpts=6),
-    DataSize(n_samples=2 ** 15, n_features=10): Params(eps=0.6, minpts=20),
-    DataSize(n_samples=2 ** 16, n_features=2): Params(eps=0.0695, minpts=4),
-    DataSize(n_samples=2 ** 16, n_features=3): Params(eps=0.108, minpts=6),
-    DataSize(n_samples=2 ** 16, n_features=10): Params(eps=0.6, minpts=20),
-}
-
-
-def gen_data(n_samples, n_features, centers=10, random_state=SEED):
-    X, *_ = make_blobs(
-        n_samples=n_samples, n_features=n_features, centers=centers, random_state=SEED
-    )
-    X = StandardScaler().fit_transform(X)
-
-    return X.flatten()
+    return (data, assignments, eps, minpts)
 
 
 #################################################
@@ -114,14 +67,70 @@ def run(name, sizes=5, step=2, nopt=2 ** 10):
     parser.add_argument("--dims", type=int, default=10, help="Dimensions")
     parser.add_argument("--eps", type=float, default=0.6, help="Neighborhood value")
     parser.add_argument("--minpts", type=int, default=20, help="minPts")
-    parser.add_argument("--skip-compile", action="store_true", help="Skip compilation")
     parser.add_argument(
-        "--dry-run", action="store_true", help="Generate data and compile C code"
+        "--usm",
+        required=False,
+        action="store_true",
+        help="Use USM Shared or pure numpy",
+    )
+    parser.add_argument(
+        "--test",
+        required=False,
+        action="store_true",
+        help="Check for correctness by comparing output with naieve Python version",
     )
 
     args = parser.parse_args()
     nopt = args.size
     repeat = args.repeat
+
+    if args.usm:
+        print(
+            "Warn: Compute only measurement not available for DBSCAN since it executes both on host and device\n"
+        )
+
+    clean_string = ["make", "clean"]
+    utils.run_command(clean_string, verbose=True)
+
+    build_string = ["make"]
+    utils.run_command(build_string, verbose=True)
+    exec_name = "./dbscan"
+
+    if args.test:
+        data, p_assignments, eps, minpts = gen_data_np(
+            nopt, args.dims, args.minpts, args.eps
+        )
+        p_nclusters = dbscan_python(nopt, args.dims, data, eps, minpts, p_assignments)
+
+        # if args.usm is True:
+        #     data, assignments, eps, minpts = gen_data_usm(nopt, args.dims, args.minpts, args.eps)
+        #     n_nclusters = alg(nopt, args.dims, data, eps, minpts, assignments)
+        # else:
+        eps, minpts = gen_data_to_file(nopt, args.dims)
+        run_cmd = [
+            exec_name,
+            str(nopt),
+            str(args.dims),
+            str(minpts),
+            str(eps),
+            str(1),
+            "-t",
+        ]
+        utils.run_command(run_cmd, verbose=True)
+
+        n_assignments = np.fromfile("assignments.bin", np.int64)
+
+        if np.allclose(n_assignments, p_assignments):
+            print("Test succeeded.\n")
+            print(
+                "n_assignments = ", n_assignments, "\n p_assignments = ", p_assignments
+            )
+        else:
+            print("Test failed.\n")
+            print(
+                "n_assignments = ", n_assignments, "\n p_assignments = ", p_assignments
+            )
+        return
 
     # delete perf_output csv and runtimes csv
     if os.path.isfile("runtimes.csv"):
@@ -130,39 +139,19 @@ def run(name, sizes=5, step=2, nopt=2 ** 10):
     if os.path.isfile("perf_output.csv"):
         os.remove("perf_output.csv")
 
-    if not args.skip_compile:
-        clean_string = ["make", "clean"]
-        utils.run_command(clean_string, verbose=True)
-
-        build_string = ["make"]
-        utils.run_command(build_string, verbose=True)
-
     for _ in xrange(args.steps):
-        data = gen_data(nopt, args.dims)
-
-        # write data to csv file
-        pd.DataFrame(data).to_csv("data.csv", header=None, index=None)
-
-        data_size = DataSize(n_samples=nopt, n_features=args.dims)
-        params = OPTIMAL_PARAMS.get(data_size, Params(eps=args.eps, minpts=args.minpts))
-        # if params.eps is None or params.minpts is None:
-        #     err_msg_tmpl = 'ERF: {}: Size: {} Dim: {} Eps: {} minPts: {}'
-        #     raise ValueError(err_msg_tmpl.format(name, nopt, args.dims, params.eps, params.minpts))
-
-        minpts = params.minpts or args.minpts
-        eps = params.eps or args.eps
+        eps, minpts = gen_data_to_file(nopt, args.dims)
 
         # run the C program
         run_cmd = [
-            "./dbscan",
-            str(args.steps),
+            exec_name,
             str(nopt),
             str(args.dims),
             str(minpts),
             str(eps),
             str(repeat),
         ]
-        utils.run_command(run_cmd, verbose=True, dry_run=args.dry_run)
+        utils.run_command(run_cmd, verbose=True)
 
         nopt *= args.step
         repeat = max(repeat - args.step, 1)

@@ -87,6 +87,6 @@ $(TARGET): $(SRC)
 	$(CC) $(CPPFLAGS) $(CFLAGS) $^ -o $(TARGET)
 
 clean:
-	rm -rf *.o *.out *.optrpt *.yaml *~ $(foreach acc,ha la ep,dbscan)
+	rm -rf *.o *.out *.optrpt *.yaml *~ *.bin $(foreach acc,ha la ep,dbscan)
 
 .PHONY: all clean

@@ -92,7 +92,7 @@ int main(int argc, char * argv[])
   }
 
   /* Deallocate arrays */
-  FreeData( q, x1, x2 );
+  FreeData( q, x1, x2, distance_op );
 
   nopt = nopt * 2;
 

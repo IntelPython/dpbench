@@ -164,10 +164,7 @@ def run(name, alg, sizes=5, step=2, nopt=2 ** 10):
         data, p_assignments, eps, minpts = gen_data_np(
             nopt, args.dims, args.minpts, args.eps
         )
-        t0 = now()
         p_nclusters = dbscan_python(nopt, args.dims, data, eps, minpts, p_assignments)
-        mops, time = get_mops(t0, now(), nopt)
-        print("python time = ", time)
 
         # if args.usm is True:
         #     data, assignments, eps, minpts = gen_data_usm(nopt, args.dims, args.minpts, args.eps)
@@ -176,14 +173,7 @@ def run(name, alg, sizes=5, step=2, nopt=2 ** 10):
         data, n_assignments, eps, minpts = gen_data_np(
             nopt, args.dims, args.minpts, args.eps
         )
-        indices_list = np.empty(nopt * nopt, dtype=np.int64)
-        sizes = np.zeros(nopt, dtype=np.int64)
-        t0 = now()
-        n_nclusters = alg(
-            nopt, args.dims, data, eps, minpts, n_assignments, indices_list, sizes
-        )
-        mops, time = get_mops(t0, now(), nopt)
-        print("Numba time = ", time)
+        n_nclusters = alg(nopt, args.dims, data, eps, minpts, n_assignments)
 
         if np.allclose(n_nclusters, p_nclusters) and np.allclose(
             n_assignments, p_assignments
@@ -218,17 +208,11 @@ def run(name, alg, sizes=5, step=2, nopt=2 ** 10):
             data, assignments, eps, minpts = gen_data_np(
                 nopt, args.dims, args.minpts, args.eps
             )
-            indices_list = np.empty(nopt * nopt, dtype=np.int64)
-            sizes = np.zeros(nopt, dtype=np.int64)
-            nclusters = alg(
-                nopt, args.dims, data, eps, minpts, assignments, indices_list, sizes
-            )  # warmup
+            nclusters = alg(nopt, args.dims, data, eps, minpts, assignments)  # warmup
 
             t0 = now()
             for _ in xrange(repeat):
-                nclusters = alg(
-                    nopt, args.dims, data, eps, minpts, assignments, indices_list, sizes
-                )
+                nclusters = alg(nopt, args.dims, data, eps, minpts, assignments)
             mops, time = get_mops(t0, now(), nopt)
             result_mops = mops * repeat / 1e6
 

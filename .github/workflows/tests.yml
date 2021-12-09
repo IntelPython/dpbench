@@ -13,7 +13,7 @@ jobs:
     - name: Run tests
       run: |
         conda info
-        conda create -y -n test_env python=3.7 numba=0.54 numpy=1.20 scikit-learn mkl_random dpctl -c intel
+        conda create -y -n test_env python=3.7 numba=0.54 numpy=1.20 scikit-learn mkl_random -c conda-forge
         source $CONDA/bin/activate test_env
         cd ./utils
         python setup.py develop

@@ -26,6 +26,7 @@
 
 import numpy as np
 from numba import jit, prange
+import base_dbscan
 import utils
 
 NOISE = -1

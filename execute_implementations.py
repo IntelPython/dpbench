@@ -230,27 +230,27 @@ def run_numba_CPU(app_name, cmds, analysis):
         return
 
     if analysis == options.analysis.test:
-        run_cmd = cmds["NUMBA_TEST_CMD"]
+        run_cmd = cmds["NUMBA_CPU_TEST_CMD"]
         util.run_command(run_cmd, verbose=True)
 
     if analysis == options.analysis.vtune or analysis == options.analysis.all:
         shutil.rmtree("vtune_dir", ignore_errors=True)
-        run_cmd = options.VTUNE_THREADING_CMD + cmds["NUMBA_VTUNE_CMD"]
+        run_cmd = options.VTUNE_THREADING_CMD + cmds["NUMBA_CPU_VTUNE_CMD"]
         util.run_command(run_cmd, verbose=True)
 
     if analysis == options.analysis.advisor or analysis == options.analysis.all:
         shutil.rmtree("roofline", ignore_errors=True)
-        run_cmd = options.ADVISOR_SURVEY_CMD + cmds["NUMBA_ADVISOR_CMD"]
+        run_cmd = options.ADVISOR_SURVEY_CMD + cmds["NUMBA_CPU_ADVISOR_CMD"]
         util.run_command(run_cmd, verbose=True)
 
-        run_cmd = options.ADVISOR_FLOP_CMD + cmds["NUMBA_ADVISOR_CMD"]
+        run_cmd = options.ADVISOR_FLOP_CMD + cmds["NUMBA_CPU_ADVISOR_CMD"]
         util.run_command(run_cmd, verbose=True)
 
         run_cmd = options.ADVISOR_ROOFLINE_CMD
         util.run_command(run_cmd, verbose=True)
 
     if analysis == options.analysis.perf or analysis == options.analysis.all:
-        run_cmd = cmds["NUMBA_PERF_CMD"]
+        run_cmd = cmds["NUMBA_CPU_PERF_CMD"]
         util.run_command(run_cmd, verbose=True)
 
     shutil.rmtree("__pycache__", ignore_errors=True)

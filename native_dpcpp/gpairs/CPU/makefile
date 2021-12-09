@@ -5,6 +5,11 @@
 # ==============================================================================
 # Makefile for GNU make
 
+SRC:=                      \
+       data_gen.cpp          \
+       main.cpp
+
+
 # ==============================================================================
 # ############## Configure CFLAGS  #############################################
 # ==============================================================================
@@ -15,11 +20,10 @@ EQCOLON     :="="
 TARGET      := gpairs
 
 CFLAGS      += -g -O3
-CFLAGS      += -fsycl
+CFLAGS      += -fsycl -qopenmp
 CFLAGS      += -I./
-CFLAGS      += -DSYCL_USE_NATIVE_FP_ATOMICS
 
-PREC ?= f
+PREC ?= d
 ifeq ($(PREC),d)
 else
     CFLAGS += -D__DO_FLOAT__
@@ -31,15 +35,10 @@ endif
 
 all: $(TARGET)
 
-comp: $(TARGET)_comp
-
-$(TARGET): data_gen.cpp main.cpp gpairs.cpp
+$(TARGET): $(SRC) gpairs.cpp
 	$(CC) $(CPPFLAGS) $(CFLAGS) $^ -o $(TARGET)
 
-$(TARGET)_comp: data_gen_comp.cpp main_comp.cpp gpairs_comp.cpp
-	$(CC) $(CPPFLAGS) $(CFLAGS) $^ -o $(TARGET)_comp
-
 clean:
-	rm -rf *.o *.out *.optrpt *.yaml *~ gpairs gpairs_comp *.bin
+	rm -rf *.o *.out *.optrpt *.yaml *~ gpairs
 
 .PHONY: all clean

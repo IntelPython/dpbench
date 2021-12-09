@@ -72,10 +72,9 @@ void InitData( queue* q, size_t nopt, struct point* *x1, struct point* *x2, tflo
 }
 
 /* Deallocate arrays */
-void FreeData( queue* q, struct point *x1, struct point *x2 , tfloat* distance_op )
+void FreeData( queue* q, struct point *x1, struct point *x2 )
 {
     /* Free memory */
     _mm_free(x1);
     _mm_free(x2);
-    _mm_free(distance_op);
 }

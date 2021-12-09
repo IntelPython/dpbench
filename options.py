@@ -377,24 +377,19 @@ class workloads:
                     wl_names[all_workloads.knn.value]["numba"]
                     if not kernel_mode
                     else wl_names[all_workloads.knn.value]["kernel"],
-                    "--usm" if comp_only_mode else None,
                     "--test",
-                    "--size",
-                    "1024",
                 ],
                 "NUMBA_PERF_CMD": [
                     "python",
                     wl_names[all_workloads.knn.value]["numba"]
                     if not kernel_mode
                     else wl_names[all_workloads.knn.value]["kernel"],
-                    "--usm" if comp_only_mode else None,
                 ],
                 "NUMBA_VTUNE_CMD": [
                     "python",
                     wl_names[all_workloads.knn.value]["numba"]
                     if not kernel_mode
                     else wl_names[all_workloads.knn.value]["kernel"],
-                    "--usm" if comp_only_mode else None,
                     "--steps",
                     "1",
                     "--size",
@@ -405,33 +400,93 @@ class workloads:
                     wl_names[all_workloads.knn.value]["numba"]
                     if not kernel_mode
                     else wl_names[all_workloads.knn.value]["kernel"],
-                    "--usm" if comp_only_mode else None,
                     "--steps",
                     "1",
                     "--size",
                     str(2 ** 24),
                 ],
-                "NATIVE_TEST_CMD": [
+                "NUMBA_CPU_TEST_CMD": [
                     "python",
-                    "base_knn.py",
-                    "--usm" if comp_only_mode else None,
-                    "--test",
-                    "--size",
-                    "1024",
-                ],
-                "NATIVE_PERF_CMD": [
-                    "python",
-                    "base_knn.py",
-                    "--usm" if comp_only_mode else None,
-                ],
-                "NATIVE_VTUNE_CMD": [
-                    "./knn_comp" if comp_only_mode else "./knn",
+                    wl_names[all_workloads.knn.value]["numba"],
+                    "--steps",
                     "1",
+                ],
+                "NUMBA_CPU_PERF_CMD": [
+                    "python",
+                    wl_names[all_workloads.knn.value]["numba"],
+                ],
+                "NUMBA_CPU_VTUNE_CMD": [
+                    "python",
+                    wl_names[all_workloads.knn.value]["numba"],
+                    "--steps",
+                    "1",
+                    "--size",
                     str(2 ** 24),
                 ],
-                "NATIVE_ADVISOR_CMD": [
-                    "./knn_comp" if comp_only_mode else "./knn",
+                "NUMBA_CPU_ADVISOR_CMD": [
+                    "python",
+                    wl_names[all_workloads.knn.value]["numba"],
+                    "--steps",
                     "1",
+                    "--size",
+                    str(2 ** 24),
+                ],
+                "SCIKIT_LEARN_TEST_CMD": ["python", "knn.py", "--steps", "1"],
+                "SCIKIT_LEARN_PERF_CMD": ["python", "knn.py"],
+                "SCIKIT_LEARN_VTUNE_CMD": [
+                    "python",
+                    "knn.py",
+                    "--steps",
+                    "1",
+                    "--size",
+                    str(2 ** 24),
+                ],
+                "SCIKIT_LEARN_ADVISOR_CMD": [
+                    "python",
+                    "knn.py",
+                    "--steps",
+                    "1",
+                    "--size",
+                    str(2 ** 24),
+                ],
+                "DAAL4PY_TEST_CMD": ["python", "knn.py", "--steps", "1"],
+                "DAAL4PY_PERF_CMD": ["python", "knn.py"],
+                "DAAL4PY_VTUNE_CMD": [
+                    "python",
+                    "knn.py",
+                    "--steps",
+                    "1",
+                    "--size",
+                    str(2 ** 24),
+                ],
+                "DAAL4PY_ADVISOR_CMD": [
+                    "python",
+                    "knn.py",
+                    "--steps",
+                    "1",
+                    "--size",
+                    str(2 ** 24),
+                ],
+                "NATIVE_TEST_CMD": ["python", "base_knn.py", "--test"],
+                "NATIVE_PERF_CMD": ["python", "base_knn.py"],
+                "NATIVE_VTUNE_CMD": ["./knn", "1", str(2 ** 24)],
+                "NATIVE_ADVISOR_CMD": ["./knn", "1", str(2 ** 24)],
+                "NATIVE_OPTIMISED_TEST_CMD": ["python", "base_knn.py", "--steps", "1"],
+                "NATIVE_OPTIMISED_PERF_CMD": ["python", "base_knn.py"],
+                "NATIVE_OPTIMISED_VTUNE_CMD": [
+                    "python",
+                    "base_knn.py",
+                    "--steps",
+                    "1",
+                    "--size",
+                    str(2 ** 24),
+                ],
+                "NATIVE_OPTIMISED_ADVISOR_CMD": [
+                    "python",
+                    "base_knn.py",
+                    "--steps",
+                    "1",
+                    "--size",
                     str(2 ** 24),
                 ],
             },
@@ -443,22 +498,20 @@ class workloads:
                     wl_names[all_workloads.l2_distance.value]["numba"]
                     if not kernel_mode
                     else wl_names[all_workloads.l2_distance.value]["kernel"],
-                    "--usm" if comp_only_mode else None,
-                    "--test",
+                    "--steps",
+                    "1",
                 ],
                 "NUMBA_PERF_CMD": [
                     "python",
                     wl_names[all_workloads.l2_distance.value]["numba"]
                     if not kernel_mode
                     else wl_names[all_workloads.l2_distance.value]["kernel"],
-                    "--usm" if comp_only_mode else None,
                 ],
                 "NUMBA_VTUNE_CMD": [
                     "python",
                     wl_names[all_workloads.l2_distance.value]["numba"]
                     if not kernel_mode
                     else wl_names[all_workloads.l2_distance.value]["kernel"],
-                    "--usm" if comp_only_mode else None,
                     "--steps",
                     "1",
                     "--size",
@@ -469,36 +522,45 @@ class workloads:
                     wl_names[all_workloads.l2_distance.value]["numba"]
                     if not kernel_mode
                     else wl_names[all_workloads.l2_distance.value]["kernel"],
-                    "--usm" if comp_only_mode else None,
                     "--steps",
                     "1",
                     "--size",
                     str(2 ** 25),
                 ],
-                "NATIVE_TEST_CMD": [
+                "NUMBA_CPU_TEST_CMD": [
                     "python",
-                    "base_l2_distance.py",
-                    "--usm" if comp_only_mode else None,
-                    "--test",
-                ],
-                "NATIVE_PERF_CMD": [
-                    "python",
-                    "base_l2_distance.py",
-                    "--usm" if comp_only_mode else None,
-                ],
-                "NATIVE_PERF_REF_CMD": [
-                    "python",
-                    "base_l2_distance.py",
-                    "--usm" if comp_only_mode else None,
+                    wl_names[all_workloads.l2_distance.value]["numba"],
                     "--steps",
                     "1",
                 ],
-                "NATIVE_VTUNE_CMD": [
-                    "./l2_distance_comp" if comp_only_mode else "./l2_distance",
+                "NUMBA_CPU_PERF_CMD": [
+                    "python",
+                    wl_names[all_workloads.l2_distance.value]["numba"],
                 ],
-                "NATIVE_ADVISOR_CMD": [
-                    "./l2_distance_comp" if comp_only_mode else "./l2_distance",
+                "NUMBA_CPU_VTUNE_CMD": [
+                    "python",
+                    wl_names[all_workloads.l2_distance.value]["numba"],
+                    "--steps",
+                    "1",
+                    "--size",
+                    str(2 ** 25),
                 ],
+                "NUMBA_CPU_ADVISOR_CMD": [
+                    "python",
+                    wl_names[all_workloads.l2_distance.value]["numba"],
+                    "--steps",
+                    "1",
+                    "--size",
+                    str(2 ** 25),
+                ],
+                "NATIVE_TEST_CMD": ["./l2_distance", "1"],
+                "NATIVE_PERF_CMD": ["./l2_distance"],
+                "NATIVE_VTUNE_CMD": ["./l2_distance", "1", str(2 ** 25)],
+                "NATIVE_ADVISOR_CMD": ["./l2_distance", "1", str(2 ** 25)],
+                # 'NATIVE_OPTIMISED_TEST_CMD': ["./l2_distance", "1"],
+                # 'NATIVE_OPTIMISED_PERF_CMD': ["./l2_distance"],
+                # 'NATIVE_OPTIMISED_VTUNE_CMD': ["./l2_distance", "1", str(2**22)],
+                # 'NATIVE_OPTIMISED_ADVISOR_CMD': ["./l2_distance", "1", str(2**22)],
             },
             all_workloads.pairwise_distance.value: {
                 "execute": False,
@@ -508,22 +570,20 @@ class workloads:
                     wl_names[all_workloads.pairwise_distance.value]["numba"]
                     if not kernel_mode
                     else wl_names[all_workloads.pairwise_distance.value]["kernel"],
-                    "--usm" if comp_only_mode else None,
-                    "--test",
+                    "--steps",
+                    "1",
                 ],
                 "NUMBA_PERF_CMD": [
                     "python",
                     wl_names[all_workloads.pairwise_distance.value]["numba"]
                     if not kernel_mode
                     else wl_names[all_workloads.pairwise_distance.value]["kernel"],
-                    "--usm" if comp_only_mode else None,
                 ],
                 "NUMBA_VTUNE_CMD": [
                     "python",
                     wl_names[all_workloads.pairwise_distance.value]["numba"]
                     if not kernel_mode
                     else wl_names[all_workloads.pairwise_distance.value]["kernel"],
-                    "--usm" if comp_only_mode else None,
                     "--steps",
                     "1",
                     "--size",
@@ -534,42 +594,41 @@ class workloads:
                     wl_names[all_workloads.pairwise_distance.value]["numba"]
                     if not kernel_mode
                     else wl_names[all_workloads.pairwise_distance.value]["kernel"],
-                    "--usm" if comp_only_mode else None,
                     "--steps",
                     "1",
                     "--size",
                     str(2 ** 14),
                 ],
-                "NATIVE_TEST_CMD": [
+                "NUMBA_CPU_TEST_CMD": [
                     "python",
-                    "base_pair_wise.py",
-                    "--usm" if comp_only_mode else None,
-                    "--test",
-                ],
-                "NATIVE_PERF_CMD": [
-                    "python",
-                    "base_pair_wise.py",
-                    "--usm" if comp_only_mode else None,
-                ],
-                "NATIVE_PERF_REF_CMD": [
-                    "python",
-                    "base_pair_wise.py",
-                    "--usm" if comp_only_mode else None,
+                    wl_names[all_workloads.pairwise_distance.value]["numba"],
                     "--steps",
                     "1",
                 ],
-                "NATIVE_VTUNE_CMD": [
-                    "./pairwise_distance_comp"
-                    if comp_only_mode
-                    else "./pairwise_distance",
-                    str(2 ** 28),
+                "NUMBA_CPU_PERF_CMD": [
+                    "python",
+                    wl_names[all_workloads.pairwise_distance.value]["numba"],
                 ],
-                "NATIVE_ADVISOR_CMD": [
-                    "./pairwise_distance_comp"
-                    if comp_only_mode
-                    else "./pairwise_distance",
-                    str(2 ** 28),
+                "NUMBA_CPU_VTUNE_CMD": [
+                    "python",
+                    wl_names[all_workloads.pairwise_distance.value]["numba"],
+                    "--steps",
+                    "1",
+                    "--size",
+                    str(2 ** 13),
                 ],
+                "NUMBA_CPU_ADVISOR_CMD": [
+                    "python",
+                    wl_names[all_workloads.pairwise_distance.value]["numba"],
+                    "--steps",
+                    "1",
+                    "--size",
+                    str(2 ** 13),
+                ],
+                "NATIVE_TEST_CMD": ["./pairwise_distance", "1"],
+                "NATIVE_PERF_CMD": ["./pairwise_distance"],
+                "NATIVE_VTUNE_CMD": ["./pairwise_distance", "1", str(2 ** 14), "1"],
+                "NATIVE_ADVISOR_CMD": ["./pairwise_distance", "1", str(2 ** 14), "1"],
             },
             # all_workloads.pca.value: {
             #     "execute": False,
@@ -608,6 +667,68 @@ class workloads:
             #         "--size",
             #         str(2 ** 15),
             #     ],
+            #     "NUMBA_CPU_TEST_CMD": [
+            #         "python",
+            #         wl_names[all_workloads.pca.value]["numba"],
+            #         "--steps",
+            #         "1",
+            #     ],
+            #     "NUMBA_CPU_PERF_CMD": [
+            #         "python",
+            #         wl_names[all_workloads.pca.value]["numba"],
+            #     ],
+            #     "NUMBA_CPU_VTUNE_CMD": [
+            #         "python",
+            #         wl_names[all_workloads.pca.value]["numba"],
+            #         "--steps",
+            #         "1",
+            #         "--size",
+            #         str(2 ** 15),
+            #     ],
+            #     "NUMBA_CPU_ADVISOR_CMD": [
+            #         "python",
+            #         wl_names[all_workloads.pca.value]["numba"],
+            #         "--steps",
+            #         "1",
+            #         "--size",
+            #         str(2 ** 15),
+            #     ],
+            #     "SCIKIT_LEARN_TEST_CMD": ["python", "pca.py", "--steps", "1"],
+            #     "SCIKIT_LEARN_PERF_CMD": ["python", "pca.py"],
+            #     "SCIKIT_LEARN_VTUNE_CMD": [
+            #         "python",
+            #         "pca.py",
+            #         "--steps",
+            #         "1",
+            #         "--size",
+            #         str(2 ** 15),
+            #     ],
+            #     "SCIKIT_LEARN_ADVISOR_CMD": [
+            #         "python",
+            #         "pca.py",
+            #         "--steps",
+            #         "1",
+            #         "--size",
+            #         str(2 ** 15),
+            #     ],
+            #     "DAAL4PY_TEST_CMD": ["python", "pca.py", "--steps", "1"],
+            #     "DAAL4PY_PERF_CMD": ["python", "pca.py"],
+            #     "DAAL4PY_VTUNE_CMD": [
+            #         "python",
+            #         "pca.py",
+            #         "--steps",
+            #         "1",
+            #         "--size",
+            #         str(2 ** 15),
+            #     ],
+            #     "DAAL4PY_ADVISOR_CMD": [
+            #         "python",
+            #         "pca.py",
+            #         "--steps",
+            #         "1",
+            #         "--size",
+            #         str(2 ** 15),
+            #     ],
             #     "NATIVE_TEST_CMD": ["python", "base_pca.py", "--steps", "1"],
             #     "NATIVE_PERF_CMD": ["python", "base_pca.py"],
             #     "NATIVE_VTUNE_CMD": [
@@ -626,6 +747,24 @@ class workloads:
             #         "--size",
             #         str(2 ** 15),
             #     ],
+            #     "NATIVE_OPTIMISED_TEST_CMD": ["python", "base_pca.py", "--steps", "1"],
+            #     "NATIVE_OPTIMISED_PERF_CMD": ["python", "base_pca.py"],
+            #     "NATIVE_OPTIMISED_VTUNE_CMD": [
+            #         "python",
+            #         "base_pca.py",
+            #         "--steps",
+            #         "1",
+            #         "--size",
+            #         str(2 ** 15),
+            #     ],
+            #     "NATIVE_OPTIMISED_ADVISOR_CMD": [
+            #         "python",
+            #         "base_pca.py",
+            #         "--steps",
+            #         "1",
+            #         "--size",
+            #         str(2 ** 15),
+            #     ],
             # },
             all_workloads.rambo.value: {
                 "execute": False,
@@ -635,7 +774,6 @@ class workloads:
                     wl_names[all_workloads.rambo.value]["numba"]
                     if not kernel_mode
                     else wl_names[all_workloads.rambo.value]["kernel"],
-                    "--usm" if comp_only_mode else None,
                     "--steps",
                     "1",
                 ],
@@ -644,14 +782,12 @@ class workloads:
                     wl_names[all_workloads.rambo.value]["numba"]
                     if not kernel_mode
                     else wl_names[all_workloads.rambo.value]["kernel"],
-                    "--usm" if comp_only_mode else None,
                 ],
                 "NUMBA_VTUNE_CMD": [
                     "python",
                     wl_names[all_workloads.rambo.value]["numba"]
                     if not kernel_mode
                     else wl_names[all_workloads.rambo.value]["kernel"],
-                    "--usm" if comp_only_mode else None,
                     "--steps",
                     "1",
                     "--size",
@@ -662,36 +798,37 @@ class workloads:
                     wl_names[all_workloads.rambo.value]["numba"]
                     if not kernel_mode
                     else wl_names[all_workloads.rambo.value]["kernel"],
-                    "--usm" if comp_only_mode else None,
                     "--steps",
                     "1",
                     "--size",
                     "262144",
                 ],
-                "NATIVE_TEST_CMD": [
+                "NUMBA_CPU_TEST_CMD": [
                     "python",
-                    "base_rambo.py",
-                    "--usm" if comp_only_mode else None,
-                    "--test",
-                ],
-                "NATIVE_PERF_CMD": [
-                    "python",
-                    "base_rambo.py",
-                    "--usm" if comp_only_mode else None,
-                ],
-                "NATIVE_PERF_REF_CMD": [
-                    "python",
-                    "base_rambo.py",
-                    "--usm" if comp_only_mode else None,
+                    wl_names[all_workloads.rambo.value]["numba"],
                     "--steps",
                     "1",
                 ],
-                "NATIVE_VTUNE_CMD": [
-                    "./rambo" if comp_only_mode else "./rambo",
+                "NUMBA_CPU_PERF_CMD": [
+                    "python",
+                    wl_names[all_workloads.rambo.value]["numba"],
                 ],
-                "NATIVE_ADVISOR_CMD": [
-                    "./rambo" if comp_only_mode else "./rambo",
+                "NUMBA_CPU_VTUNE_CMD": [
+                    "python",
+                    wl_names[all_workloads.rambo.value]["numba"],
+                    "--steps",
+                    "1",
                 ],
+                "NUMBA_CPU_ADVISOR_CMD": [
+                    "python",
+                    wl_names[all_workloads.rambo.value]["numba"],
+                    "--steps",
+                    "1",
+                ],
+                "NATIVE_TEST_CMD": ["./rambo", "1"],
+                "NATIVE_PERF_CMD": ["./rambo"],
+                "NATIVE_VTUNE_CMD": ["./rambo", "1", "262144"],
+                "NATIVE_ADVISOR_CMD": ["./rambo", "1", "262144"],
             },
             all_workloads.gpairs.value: {
                 "execute": False,
@@ -701,25 +838,20 @@ class workloads:
                     wl_names[all_workloads.gpairs.value]["numba"]
                     if not kernel_mode
                     else wl_names[all_workloads.gpairs.value]["kernel"],
-                    "--usm" if comp_only_mode else None,
                     "--steps",
                     "1",
-                    "--size",
-                    "1024",
                 ],
                 "NUMBA_PERF_CMD": [
                     "python",
                     wl_names[all_workloads.gpairs.value]["numba"]
                     if not kernel_mode
                     else wl_names[all_workloads.gpairs.value]["kernel"],
-                    "--usm" if comp_only_mode else None,
                 ],
                 "NUMBA_VTUNE_CMD": [
                     "python",
                     wl_names[all_workloads.gpairs.value]["numba"]
                     if not kernel_mode
                     else wl_names[all_workloads.gpairs.value]["kernel"],
-                    "--usm" if comp_only_mode else None,
                     "--steps",
                     "1",
                     "--size",
@@ -730,38 +862,37 @@ class workloads:
                     wl_names[all_workloads.gpairs.value]["numba"]
                     if not kernel_mode
                     else wl_names[all_workloads.gpairs.value]["kernel"],
-                    "--usm" if comp_only_mode else None,
                     "--steps",
                     "1",
                     "--size",
                     "1048576",
                 ],
-                "NATIVE_TEST_CMD": [
+                "NUMBA_CPU_TEST_CMD": [
                     "python",
-                    "base_gpairs.py",
-                    "--usm" if comp_only_mode else None,
-                    "--test",
-                    "--size",
-                    "1024",
-                ],
-                "NATIVE_PERF_CMD": [
-                    "python",
-                    "base_gpairs.py",
-                    "--usm" if comp_only_mode else None,
-                ],
-                "NATIVE_PERF_REF_CMD": [
-                    "python",
-                    "base_gpairs.py",
-                    "--usm" if comp_only_mode else None,
+                    wl_names[all_workloads.gpairs.value]["numba"],
                     "--steps",
                     "1",
                 ],
-                "NATIVE_VTUNE_CMD": [
-                    "./gpairs_comp" if comp_only_mode else "./gpairs",
+                "NUMBA_CPU_PERF_CMD": [
+                    "python",
+                    wl_names[all_workloads.gpairs.value]["numba"],
                 ],
-                "NATIVE_ADVISOR_CMD": [
-                    "./gpairs_comp" if comp_only_mode else "./gpairs",
+                "NUMBA_CPU_VTUNE_CMD": [
+                    "python",
+                    wl_names[all_workloads.gpairs.value]["numba"],
+                    "--steps",
+                    "1",
                 ],
+                "NUMBA_CPU_ADVISOR_CMD": [
+                    "python",
+                    wl_names[all_workloads.gpairs.value]["numba"],
+                    "--steps",
+                    "1",
+                ],
+                "NATIVE_TEST_CMD": ["./gpairs", "1"],
+                "NATIVE_PERF_CMD": ["./gpairs"],
+                "NATIVE_VTUNE_CMD": ["./gpairs", "1048576", "1"],
+                "NATIVE_ADVISOR_CMD": ["./gpairs", "1048576", "1"],
             },
             # all_workloads.pathfinder.value: {
             #     'execute': False,

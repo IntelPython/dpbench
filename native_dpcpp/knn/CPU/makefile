@@ -30,7 +30,7 @@ EQCOLON     :="="
 TARGET      := knn
 
 CFLAGS      += -g -O3
-CFLAGS      += -fsycl
+CFLAGS      += -fsycl -qopenmp
 CFLAGS      += -I./
 
 PREC ?= d
@@ -54,6 +54,6 @@ $(TARGET)_comp: main_comp.cpp knn_comp.cpp
 	$(CC) $(CPPFLAGS) $(CFLAGS) $^ -o $(TARGET)_comp
 
 clean:
-	rm -rf *.o *.out *.optrpt *.yaml *~ $(foreach acc,ha la ep,knn) knn_comp *.bin
+	rm -rf *.o *.out *.optrpt *.yaml *~ $(foreach acc,ha la ep,knn) knn_comp
 
 .PHONY: all clean

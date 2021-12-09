@@ -32,152 +32,129 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <time.h>
 #include <stdexcept>
 #include <sstream>
-#include <iostream>
 
-#include "dbscan.hpp"
-#include "rdtsc.h"
+#include <dbscan.hpp>
+#include <rdtsc.h>
 
 using namespace std;
 
-template <typename T>
-void ReadInputFromBinFile (char const * filename, char* data_ptr, size_t data_size) {
-    ifstream file;
-    file.open(filename, ios::in|ios::binary);
-    if (file) {
-      file.read(data_ptr, data_size*sizeof(T));
-      file.close();
-    } else {
-      std::cout << "Input file - " << filename << " not found.\n";
-      exit(0);
-    }
+const string dataFileName = "data.csv";
+
+static int stoi(char *h) {
+    stringstream in (h);
+    int res;
+    in >> res;
+    return res;
 }
 
-void WriteOutputToTextFile (char const * filename, double* data_ptr, size_t data_size) {
-    ofstream file;
-    file.open(filename, ios::out);
-    if (file) {
-      for (size_t i = 0; i < data_size; i++) {
-	file << *data_ptr << std::endl;
-      }
-      file.close();
-    } else {
-      std::cout << "Input file - " << filename << " not found.\n";
-      exit(0);
-    }
+static double stof(char *h) {
+    stringstream in (h);
+    double res;
+    in >> res;
+    return res;
 }
 
 double* readData(int nPoints, int nFeatures) {
     int arrSize = nPoints * nFeatures;
     double *data = new double[arrSize];
 
-    ReadInputFromBinFile<double> ("X.bin", reinterpret_cast<char *>(data), arrSize);
+    ifstream dataFile(dataFileName);
+    if(!dataFile.is_open()) throw std::runtime_error("Could not open file");
 
-    // ifstream dataFile(dataFileName);
-    // if(!dataFile.is_open()) throw std::runtime_error("Could not open file");
-
-    // string line;
-    // double val;
-    // int idx = 0;
-    // while(getline(dataFile, line)) {
-    //     std::stringstream ss(line);
-    //     while(ss >> val) {
-    //         data[idx] = val;
-    //         if(ss.peek() == ',') ss.ignore();
-    //         idx++;
-    //     }
-    // }
-    // dataFile.close();
-    // if(idx != arrSize) throw std::runtime_error("File data size does not match array size");
+    string line;
+    double val;
+    int idx = 0;
+    while(getline(dataFile, line)) {
+        std::stringstream ss(line);
+        while(ss >> val) {
+            data[idx] = val;
+            if(ss.peek() == ',') ss.ignore();
+            idx++;
+        }
+    }
+    dataFile.close();
+    if(idx != arrSize) throw std::runtime_error("File data size does not match array size");
 
     return data;
 }
 
 int main(int argc, char * argv[]) {
-  size_t nPoints = pow(2, 9);
-  size_t nFeatures = 2;
-  size_t minPts = 3;
-  double eps = 1.0;
-  int repeat = 1;
+    int STEPS = 6;
+    int nPoints = pow(2, 9);
+    int nFeatures = 2;
+    int minPts = 3;
+    double eps = 1.0;
+    int repeat = 1;
 
-  bool test = false;
-
-  /* Read nopt number of options parameter from command line */
-  if (argc >= 2) {
-    sscanf(argv[1], "%lu", &nPoints);
-  }
-  if (argc >= 3) {
-    sscanf(argv[2], "%lu", &nFeatures);
-  }
-  if (argc >= 4) {
-    sscanf(argv[3], "%lu", &minPts);
-  }
-  if (argc >= 5) {
-    sscanf(argv[4], "%lf", &eps);
-  }
-  if (argc >= 6) {
-    sscanf(argv[5], "%d", &repeat);
-  }
-  if (argc == 7) {
-    char test_str[] = "-t";
-    if (strcmp(test_str, argv[6]) == 0) {
-      test = true;
+    if (argc < 2) {
+        printf("Usage: expect STEPS input integer parameter, defaulting to %d\n", STEPS);
     }
-  }
+    else {
+        STEPS = stoi(argv[1]);
+        if (argc > 2) {
+            nPoints = stoi(argv[2]);
+        }
+        if (argc > 3) {
+            nFeatures = stoi(argv[3]);
+            if (2 * nFeatures > minPts) {
+                minPts = 2 * nFeatures;
+            }
+        }
+        if (argc > 4) {
+            minPts = stoi(argv[4]);
+        }
+        if (argc > 5) {
+            eps = stof(argv[5]);
+        }
+        if (argc > 6) {
+            repeat = stof(argv[6]);
+        }
+    }
 
-  double lBound = 0.0;
-  double rBound = 10.0;
+    double lBound = 0.0;
+    double rBound = 10.0;
 
-  clock_t t1 = 0, t2 = 0;
+    clock_t t1 = 0, t2 = 0;
 
-  FILE *fptr;
-  fptr = fopen("perf_output.csv", "a");
-  if(fptr == NULL) {
-    printf("Error!");
-    exit(1);
-  }
+    FILE *fptr;
+    fptr = fopen("perf_output.csv", "a");
+    if(fptr == NULL) {
+      printf("Error!");
+      exit(1);
+    }
 
-  FILE *fptr1;
-  fptr1 = fopen("runtimes.csv", "a");
-  if(fptr1 == NULL) {
-    printf("Error!");
-    exit(1);
-  }
+    FILE *fptr1;
+    fptr1 = fopen("runtimes.csv", "a");
+    if(fptr1 == NULL) {
+      printf("Error!");
+      exit(1);
+    }
 
-  size_t *assignments = new size_t[nPoints];
-  double *data = readData(nPoints, nFeatures);
+    int nClusters;
+    double time, MOPS;
+    int *assignments = new int[nPoints];
+    double *data = readData(nPoints, nFeatures);
 
-  /* Warm up cycle */
-  size_t nClusters = dbscan_reference_no_mem_save(nPoints, nFeatures, data, eps, minPts, assignments);
-
-  t1 = timer_rdtsc();
-  for(int j = 0; j < repeat; j++) {
+    /* Warm up cycle */
     nClusters = dbscan_reference_no_mem_save(nPoints, nFeatures, data, eps, minPts, assignments);
-  }
-  t2 = timer_rdtsc();
 
-  double time = ((double) (t2 - t1) / getHz());
-  double MOPS = (nPoints * repeat / 1e6) / time;
-
-  printf("ERF: Native-C-VML: Size: %lu Dim: %lu Eps: %.4lf minPts: %lu NCluster: %lu TIME: %.6lf\n", nPoints, nFeatures, eps, minPts, nClusters, time);
-  fflush(stdout);
-  fprintf(fptr, "%lu,%lu,%.4lf,%lu,%lu,%.6lf\n", nPoints, nFeatures, eps, minPts, nClusters, MOPS);
-  fprintf(fptr1, "%lu,%.6lf\n", nPoints, time);
-
-  if (test) {
-    ofstream file;
-    file.open("assignments.bin", ios::out|ios::binary);
-    if (file) {
-      file.write(reinterpret_cast<char *>(assignments), nPoints*sizeof(size_t));
-      file.close();
-    } else {
-      std::cout << "Unable to open output file.\n";
+    t1 = timer_rdtsc();
+    for(int j = 0; j < repeat; j++) {
+        nClusters = dbscan_reference_no_mem_save(nPoints, nFeatures, data, eps, minPts, assignments);
     }
-  }
+    t2 = timer_rdtsc();
 
-  delete [] data;
-  delete [] assignments;
-  fclose(fptr);
-  fclose(fptr1);
+    time = ((double) (t2 - t1) / getHz());
+    MOPS = (nPoints * repeat / 1e6) / time;
 
-  return 0;
+    printf("ERF: Native-C-VML: Size: %d Dim: %d Eps: %.4lf minPts: %d NCluster: %d MOPS: %.6lf\n", nPoints, nFeatures, eps, minPts, nClusters, MOPS);
+    fflush(stdout);
+    fprintf(fptr, "%d,%d,%.4lf,%d,%d,%.6lf\n", nPoints, nFeatures, eps, minPts, nClusters, MOPS);
+    fprintf(fptr1, "%d,%d,%.4lf,%d,%d,%.6lf\n", nPoints, nFeatures, eps, minPts, nClusters, time);
+
+    delete [] data;
+    fclose(fptr);
+    fclose(fptr1);
+
+    return 0;
 }

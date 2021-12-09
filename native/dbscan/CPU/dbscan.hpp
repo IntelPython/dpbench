@@ -56,8 +56,8 @@ void getNeighborhood(size_t n, size_t dim, double* data, size_t nq, double* quer
         size_t j1 = block * blockSize;
         size_t j2 = (block + 1 == nBlocks ? n : j1 + blockSize);
 
-        for (size_t i = 0; i < nq; i++) {
-            for (size_t j = j1; j < j2; j++) {
+        for (int i = 0; i < nq; i++) {
+            for (int j = j1; j < j2; j++) {
                 double dist = distance2(data + j * dim, query + i * dim, dim);
                 if (dist <= eps2) {
                     size_t sz = sizes[i];
@@ -70,7 +70,7 @@ void getNeighborhood(size_t n, size_t dim, double* data, size_t nq, double* quer
     }
 }
 
-size_t dbscan_reference_no_mem_save(size_t n, size_t dim, double *data, double eps, size_t minPts, size_t *assignments) {
+int dbscan_reference_no_mem_save(size_t n, size_t dim, double *data, double eps, size_t minPts, int *assignments) {
     size_t n2 = n * n;
     size_t* indices = new size_t[n2];
     //double* distances = new double[n2];
@@ -82,20 +82,18 @@ size_t dbscan_reference_no_mem_save(size_t n, size_t dim, double *data, double e
     size_t blockSize = 1;
     size_t nBlocks = n / blockSize + (n % blockSize > 0);
 
-#pragma omp parallel for simd
+    #pragma omp parallel for simd
     for (size_t block = 0; block < nBlocks; block++) {
-      size_t i1 = block * blockSize;
-      size_t i2 = (block + 1 == nBlocks ? n : i1 + blockSize);
-      for (size_t i = i1; i < i2; i++) {
-	assignments[i] = UNDEFINED;
-      }
-      getNeighborhood(n, dim, data, i2 - i1, data + i1 * dim, eps, indices + i1 * n, sizes + i1); //, distances + i1 * n
+        int i1 = block * blockSize;
+        int i2 = (block + 1 == nBlocks ? n : i1 + blockSize);
+        for (size_t i = i1; i < i2; i++) {
+            assignments[i] = UNDEFINED;
+        }
+        getNeighborhood(n, dim, data, i2 - i1, data + i1 * dim, eps, indices + i1 * n, sizes + i1); //, distances + i1 * n
     }
 
-    //printf("Upper block: %lu, Lower block: %lu , stop_start: % lu, dim: %lu ", nBlocks, n / 256 + (n % 256 > 0), (1 == nBlocks ? n : 1), dim);
-
-    size_t nClusters = 0;
-    size_t nNoise = 0;
+    int nClusters = 0;
+    int nNoise = 0;
     for (size_t i = 0; i < n; i++) {
         if (assignments[i] != UNDEFINED) continue;
         size_t size = sizes[i];

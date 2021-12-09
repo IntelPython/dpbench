@@ -6,7 +6,7 @@
 typedef struct {
   tfloat x;
   tfloat y;
-  size_t cluster;
+  int cluster;
 } Point;
 
 typedef struct {
@@ -14,7 +14,7 @@ typedef struct {
   tfloat y;
   tfloat x_sum;
   tfloat y_sum;
-  tint num_points;
+  int num_points;
 } Centroid;
 
 #endif

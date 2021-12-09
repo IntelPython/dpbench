@@ -9,10 +9,8 @@
 
 #ifdef __DO_FLOAT__
     typedef float tfloat;
-    typedef unsigned int tint;
 #else
-    typedef double tfloat;
-    typedef size_t tint;
+    typedef double  tfloat;
 #endif
 
 #define ALIGN_FACTOR 64

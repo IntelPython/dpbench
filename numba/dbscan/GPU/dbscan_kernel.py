@@ -27,7 +27,8 @@
 import dpctl
 import numpy as np
 from numba import jit
-import numba_dppy
+# import numba_dppy
+from numba_dpcomp.mlir.kernel_impl import kernel, get_global_id, DEFAULT_LOCAL_SIZE
 import base_dbscan
 import utils
 
@@ -36,17 +37,18 @@ UNDEFINED = -2
 DEFAULT_QUEUE_CAPACITY = 10
 
 
-@numba_dppy.kernel(
-    access_types={
-        "read_only": ["data"],
-        "write_only": ["assignments", "ind_lst"],
-        "read_write": ["sz_lst"],
-    }
-)
+# @numba_dppy.kernel(
+#     access_types={
+#         "read_only": ["data"],
+#         "write_only": ["assignments", "ind_lst"],
+#         "read_write": ["sz_lst"],
+#     }
+# )
+@kernel
 def get_neighborhood(
     n, dim, data, eps, ind_lst, sz_lst, assignments, block_size, nblocks
 ):
-    i = numba_dppy.get_global_id(0)
+    i = get_global_id(0)
 
     start = i * block_size
     stop = n if i + 1 == nblocks else start + block_size
@@ -143,7 +145,7 @@ def dbscan(n, dim, data, eps, min_pts, assignments):
     sizes = np.zeros(n, dtype=np.int64)
 
     with dpctl.device_context(base_dbscan.get_device_selector()):
-        get_neighborhood[n, numba_dppy.DEFAULT_LOCAL_SIZE](
+        get_neighborhood[n, DEFAULT_LOCAL_SIZE](
             n, dim, data, eps, indices_list, sizes, assignments, 1, n
         )
 

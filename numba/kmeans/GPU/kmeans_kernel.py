@@ -1,16 +1,18 @@
 import dpctl
 import base_kmeans
 import numpy
-import numba_dppy
+# import numba_dppy
+from numba_dpcomp.mlir.kernel_impl import kernel, get_global_id, atomic, DEFAULT_LOCAL_SIZE
+atomic_add = atomic.add
 
 REPEAT = 1
 
 ITERATIONS = 30
 
 
-@numba_dppy.kernel
+@kernel
 def groupByCluster(arrayP, arrayPcluster, arrayC, num_points, num_centroids):
-    idx = numba_dppy.get_global_id(0)
+    idx = get_global_id(0)
     minor_distance = -1
     for i in range(num_centroids):
         dx = arrayP[idx, 0] - arrayC[i, 0]
@@ -21,33 +23,33 @@ def groupByCluster(arrayP, arrayPcluster, arrayC, num_points, num_centroids):
             arrayPcluster[idx] = i
 
 
-@numba_dppy.kernel
+@kernel
 def calCentroidsSum1(arrayCsum, arrayCnumpoint):
-    i = numba_dppy.get_global_id(0)
+    i = get_global_id(0)
     arrayCsum[i, 0] = 0
     arrayCsum[i, 1] = 0
     arrayCnumpoint[i] = 0
 
 
-@numba_dppy.kernel
+@kernel
 def calCentroidsSum2(arrayP, arrayPcluster, arrayCsum, arrayCnumpoint):
-    i = numba_dppy.get_global_id(0)
+    i = get_global_id(0)
     ci = arrayPcluster[i]
-    numba_dppy.atomic.add(arrayCsum, (ci, 0), arrayP[i, 0])
-    numba_dppy.atomic.add(arrayCsum, (ci, 1), arrayP[i, 1])
-    numba_dppy.atomic.add(arrayCnumpoint, ci, 1)
+    atomic_add(arrayCsum, (ci, 0), arrayP[i, 0])
+    atomic_add(arrayCsum, (ci, 1), arrayP[i, 1])
+    atomic_add(arrayCnumpoint, ci, 1)
 
 
-@numba_dppy.kernel
+@kernel
 def updateCentroids(arrayC, arrayCsum, arrayCnumpoint, num_centroids):
-    i = numba_dppy.get_global_id(0)
+    i = get_global_id(0)
     arrayC[i, 0] = arrayCsum[i, 0] / arrayCnumpoint[i]
     arrayC[i, 1] = arrayCsum[i, 1] / arrayCnumpoint[i]
 
 
-@numba_dppy.kernel
+@kernel
 def copy_arrayC(arrayC, arrayP):
-    i = numba_dppy.get_global_id(0)
+    i = get_global_id(0)
     arrayC[i, 0] = arrayP[i, 0]
     arrayC[i, 1] = arrayP[i, 1]
 
@@ -56,26 +58,26 @@ def kmeans(
     arrayP, arrayPcluster, arrayC, arrayCsum, arrayCnumpoint, num_points, num_centroids
 ):
 
-    copy_arrayC[num_centroids, numba_dppy.DEFAULT_LOCAL_SIZE](arrayC, arrayP)
+    copy_arrayC[num_centroids, DEFAULT_LOCAL_SIZE](arrayC, arrayP)
 
     for i in range(ITERATIONS):
-        groupByCluster[num_points, numba_dppy.DEFAULT_LOCAL_SIZE](
+        groupByCluster[num_points, DEFAULT_LOCAL_SIZE](
             arrayP, arrayPcluster, arrayC, num_points, num_centroids
         )
 
-        calCentroidsSum1[num_centroids, numba_dppy.DEFAULT_LOCAL_SIZE](
+        calCentroidsSum1[num_centroids, DEFAULT_LOCAL_SIZE](
             arrayCsum,
             arrayCnumpoint,
         )
 
-        calCentroidsSum2[num_points, numba_dppy.DEFAULT_LOCAL_SIZE](
+        calCentroidsSum2[num_points, DEFAULT_LOCAL_SIZE](
             arrayP,
             arrayPcluster,
             arrayCsum,
             arrayCnumpoint,
         )
 
-        updateCentroids[num_centroids, numba_dppy.DEFAULT_LOCAL_SIZE](
+        updateCentroids[num_centroids, DEFAULT_LOCAL_SIZE](
             arrayC, arrayCsum, arrayCnumpoint, num_centroids
         )
 

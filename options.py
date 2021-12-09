@@ -169,7 +169,7 @@ class workloads:
             all_workloads.knn.value: {"numba": "knn.py", "kernel": "knn.py"},
             all_workloads.l2_distance.value: {
                 "numba": "l2_distance.py",
-                "kernel": "l2_distance.py",
+                "kernel": "l2_distance_kernel.py",
             },
             all_workloads.pairwise_distance.value: {
                 "numba": "pairwise_distance.py",

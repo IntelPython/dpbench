@@ -2,8 +2,9 @@
 import base_rambo
 import numpy, math
 from numba import jit
-import numba_dppy
+# import numba_dppy
 import dpctl
+from numba_dpcomp.mlir.kernel_impl import kernel, get_global_id, DEFAULT_LOCAL_SIZE
 
 
 @jit(nopython=True, fastmath=True)
@@ -56,9 +57,9 @@ def gen_rand_data(nevts, nout):
     return C1, F1, Q1
 
 
-@numba_dppy.kernel
+@kernel
 def get_output_mom2(C1, F1, Q1, output, nout):
-    i = numba_dppy.get_global_id(0)
+    i = get_global_id(0)
     for j in range(nout):
         C = 2.0 * C1[i, j] - 1.0
         S = math.sqrt(1 - C * C)
@@ -76,7 +77,7 @@ def call_ocl(nevts, nout):
     output = numpy.empty((nevts, nout, 4))
 
     with dpctl.device_context(base_rambo.get_device_selector()):
-        get_output_mom2[nevts, numba_dppy.DEFAULT_LOCAL_SIZE](C1, F1, Q1, output, nout)
+        get_output_mom2[nevts, DEFAULT_LOCAL_SIZE](C1, F1, Q1, output, nout)
 
     return output
 

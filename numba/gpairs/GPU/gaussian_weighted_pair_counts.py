@@ -1,7 +1,9 @@
 import numpy as np
 
 # from numba import njit
-import numba_dppy
+# import numba_dppy
+from numba_dpcomp.mlir.kernel_impl import kernel, get_global_id, get_global_size, atomic, DEFAULT_LOCAL_SIZE
+atomic_add = atomic.add
 
 # from numba.dppy.dppy_driver import driver as drv
 # import joblib
@@ -293,7 +295,7 @@ def count_weighted_pairs_3d_cuda_fix(
         i += stride
 
 
-@numba_dppy.kernel
+@kernel
 def count_weighted_pairs_3d_intel(
     x1, y1, z1, w1, x2, y2, z2, w2, rbins_squared, result
 ):
@@ -301,8 +303,8 @@ def count_weighted_pairs_3d_intel(
     by a distance less than r, for each r**2 in the input rbins_squared.
     """
 
-    start = numba_dppy.get_global_id(0)
-    stride = numba_dppy.get_global_size(0)
+    start = get_global_id(0)
+    stride = get_global_size(0)
 
     n1 = x1.shape[0]
     n2 = x2.shape[0]
@@ -326,13 +328,13 @@ def count_weighted_pairs_3d_intel(
 
             k = nbins - 1
             while dsq <= rbins_squared[k]:
-                numba_dppy.atomic.add(result, k - 1, wprod)
+                atomic_add(result, k - 1, wprod)
                 k = k - 1
                 if k <= 0:
                     break
 
 
-@numba_dppy.kernel
+@kernel
 def count_weighted_pairs_3d_intel_ver2(
     x1, y1, z1, w1, x2, y2, z2, w2, rbins_squared, result
 ):
@@ -340,7 +342,7 @@ def count_weighted_pairs_3d_intel_ver2(
     by a distance less than r, for each r**2 in the input rbins_squared.
     """
 
-    i = numba_dppy.get_global_id(0)
+    i = get_global_id(0)
     nbins = rbins_squared.shape[0]
     n2 = x2.shape[0]
 
@@ -365,7 +367,7 @@ def count_weighted_pairs_3d_intel_ver2(
             # - could reenable later when it's supported (~April 2020)
             # - could work around this to avoid atomics, which would perform better anyway
             # cuda.atomic.add(result, k-1, wprod)
-            numba_dppy.atomic.add(result, k - 1, wprod)
+            atomic_add(result, k - 1, wprod)
             k = k - 1
             if k <= 0:
                 break

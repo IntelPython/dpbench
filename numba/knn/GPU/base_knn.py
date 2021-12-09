@@ -154,7 +154,7 @@ def gen_data_usm(nopt):
 ##############################################
 
 
-def run(name, alg, sizes=5, step=2, nopt=2 ** 20):
+def run(name, alg, sizes=5, step=2, nopt=2 ** 10):
     parser = argparse.ArgumentParser()
     parser.add_argument("--steps", type=int, default=sizes, help="Number of steps")
     parser.add_argument("--step", type=int, default=step, help="Factor for each step")

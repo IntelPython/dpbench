@@ -5,12 +5,13 @@
 import dpctl
 import base_pair_wise
 import numpy as np
-import numba_dppy
+# import numba_dppy
+from numba_dpcomp.mlir.kernel_impl import kernel, get_global_id
 
 
-@numba_dppy.kernel
+@kernel
 def pairwise_python(X1, X2, D):
-    i = numba_dppy.get_global_id(0)
+    i = get_global_id(0)
 
     N = X2.shape[0]
     O = X1.shape[1]

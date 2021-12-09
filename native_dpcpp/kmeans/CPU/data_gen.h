@@ -8,9 +8,8 @@
 #define __DATA_GEN_H
 
 #include "point.h"
-#include <CL/sycl.hpp>
 
-void InitData( cl::sycl::queue *q, size_t nopt, int ncentroids, Point** points, Centroid** centroids );
-void FreeData( cl::sycl::queue *q, Point *pts, Centroid * cents );
+void InitData( size_t nopt, int ncentroids, Point** points, Centroid** centroids );
+void FreeData( Point *pts, Centroid * cents );
 
 #endif // #ifndef __DATA_GEN_H

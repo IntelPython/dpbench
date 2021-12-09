@@ -24,11 +24,11 @@
 # EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 # *****************************************************************************
 
-import dpctl
 import numpy as np
-from numba import jit, prange
+from numba import prange
 import base_dbscan
 import utils
+from dpbench_decorators import jit
 
 NOISE = -1
 UNDEFINED = -2
@@ -113,8 +113,7 @@ def dbscan(n, dim, data, eps, min_pts, assignments):
     # distances_list = np.empty(n*n)
     sizes = np.zeros(n, dtype=np.int64)
 
-    with dpctl.device_context(base_dbscan.get_device_selector()):
-        get_neighborhood(n, dim, data, eps, indices_list, sizes, assignments)
+    get_neighborhood(n, dim, data, eps, indices_list, sizes, assignments)
 
     return compute_clusters(n, min_pts, assignments, sizes, indices_list)
 

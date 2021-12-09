@@ -15,11 +15,12 @@ void runKmeans(cl::sycl::queue* q,
 	       Point* points,
 	       Centroid* centroids,
 	       size_t NUMBER_OF_POINTS,
-	       size_t NUMBER_OF_CENTROIDS
+	       int NUMBER_OF_CENTROIDS
 	       );
 
-void printCentroids(Centroid* centroids,
-		    size_t NUMBER_OF_CENTROIDS
+void printCentroids(
+		    Centroid* centroids,
+		    int NUMBER_OF_CENTROIDS
 		    );
 
 #endif

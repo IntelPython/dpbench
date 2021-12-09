@@ -25,12 +25,13 @@
 # *****************************************************************************
 
 import numpy as np
-import numba
-import base_knn
-from dpbench_decorators import jit
 
 
-@jit(nopython=True)
+# @numba.jit(nopython=True)
+# def euclidean_dist(x1, x2):
+#     return np.linalg.norm(x1-x2)
+
+
 def euclidean_dist(x1, x2):
     distance = 0
 
@@ -43,7 +44,6 @@ def euclidean_dist(x1, x2):
     return result
 
 
-@jit(nopython=True)
 def push_queue(queue_neighbors, new_distance, index=4):
     while index > 0 and new_distance[0] < queue_neighbors[index - 1][0]:
         queue_neighbors[index] = queue_neighbors[index - 1]
@@ -51,14 +51,12 @@ def push_queue(queue_neighbors, new_distance, index=4):
         queue_neighbors[index] = new_distance
 
 
-@jit(nopython=True)
 def sort_queue(queue_neighbors):
     for i in range(len(queue_neighbors)):
         push_queue(queue_neighbors, queue_neighbors[i], i)
 
 
-@jit(nopython=True)
-def simple_vote(neighbors, classes_num=3):
+def simple_vote(neighbors, classes_num):
     votes_to_classes = np.zeros(classes_num)
 
     for neighbor in neighbors:
@@ -75,14 +73,13 @@ def simple_vote(neighbors, classes_num=3):
     return max_ind
 
 
-@jit(nopython=True, parallel=True)
-def run_knn(train, train_labels, test, k=5, classes_num=3):
+def knn_python(train, train_labels, test, k, classes_num):
     test_size = len(test)
     train_size = len(train)
 
     predictions = np.empty(test_size)
 
-    for i in numba.prange(test_size):
+    for i in range(test_size):
         queue_neighbors = []
 
         for j in range(k):
@@ -103,6 +100,3 @@ def run_knn(train, train_labels, test, k=5, classes_num=3):
         predictions[i] = simple_vote(queue_neighbors, classes_num)
 
     return predictions
-
-
-base_knn.run("K-Nearest-Neighbors Numba", run_knn)

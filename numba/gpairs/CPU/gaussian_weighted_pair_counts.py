@@ -1,8 +1,17 @@
 import numpy as np
 
-# from numba import njit
-import numba_dppy
+from dpbench_decorators import njit
 
+try:
+    import numba_dppy
+except:
+    numba_dppy = None
+    # class numba_dppy:
+    #     @staticmethod
+    #     def kernel(func):
+    #         def decorator(func):
+    #             return func
+    #         return decorator
 # from numba.dppy.dppy_driver import driver as drv
 # import joblib
 # import multiprocessing
@@ -293,82 +302,48 @@ def count_weighted_pairs_3d_cuda_fix(
         i += stride
 
 
-@numba_dppy.kernel
-def count_weighted_pairs_3d_intel(
-    x1, y1, z1, w1, x2, y2, z2, w2, rbins_squared, result
-):
-    """Naively count Npairs(<r), the total number of pairs that are separated
-    by a distance less than r, for each r**2 in the input rbins_squared.
-    """
+if numba_dppy is not None:
 
-    start = numba_dppy.get_global_id(0)
-    stride = numba_dppy.get_global_size(0)
+    @numba_dppy.kernel
+    def count_weighted_pairs_3d_intel(
+        x1, y1, z1, w1, x2, y2, z2, w2, rbins_squared, result
+    ):
+        """Naively count Npairs(<r), the total number of pairs that are separated
+        by a distance less than r, for each r**2 in the input rbins_squared.
+        """
 
-    n1 = x1.shape[0]
-    n2 = x2.shape[0]
-    nbins = rbins_squared.shape[0]
+        start = numba_dppy.get_global_id(0)
+        stride = numba_dppy.get_global_size(0)
 
-    for i in range(start, n1, stride):
-        px = x1[i]
-        py = y1[i]
-        pz = z1[i]
-        pw = w1[i]
-        for j in range(n2):
-            qx = x2[j]
-            qy = y2[j]
-            qz = z2[j]
-            qw = w2[j]
-            dx = px - qx
-            dy = py - qy
-            dz = pz - qz
-            wprod = pw * qw
-            dsq = dx * dx + dy * dy + dz * dz
+        n1 = x1.shape[0]
+        n2 = x2.shape[0]
+        nbins = rbins_squared.shape[0]
 
-            k = nbins - 1
-            while dsq <= rbins_squared[k]:
-                numba_dppy.atomic.add(result, k - 1, wprod)
-                k = k - 1
-                if k <= 0:
-                    break
+        for i in range(start, n1, stride):
+            px = x1[i]
+            py = y1[i]
+            pz = z1[i]
+            pw = w1[i]
+            for j in range(n2):
+                qx = x2[j]
+                qy = y2[j]
+                qz = z2[j]
+                qw = w2[j]
+                dx = px - qx
+                dy = py - qy
+                dz = pz - qz
+                wprod = pw * qw
+                dsq = dx * dx + dy * dy + dz * dz
 
-
-@numba_dppy.kernel
-def count_weighted_pairs_3d_intel_ver2(
-    x1, y1, z1, w1, x2, y2, z2, w2, rbins_squared, result
-):
-    """Naively count Npairs(<r), the total number of pairs that are separated
-    by a distance less than r, for each r**2 in the input rbins_squared.
-    """
-
-    i = numba_dppy.get_global_id(0)
-    nbins = rbins_squared.shape[0]
-    n2 = x2.shape[0]
-
-    px = x1[i]
-    py = y1[i]
-    pz = z1[i]
-    pw = w1[i]
-    for j in range(n2):
-        qx = x2[j]
-        qy = y2[j]
-        qz = z2[j]
-        qw = w2[j]
-        dx = px - qx
-        dy = py - qy
-        dz = pz - qz
-        wprod = pw * qw
-        dsq = dx * dx + dy * dy + dz * dz
-
-        k = nbins - 1
-        while dsq <= rbins_squared[k]:
-            # disabled for now since it's not supported currently
-            # - could reenable later when it's supported (~April 2020)
-            # - could work around this to avoid atomics, which would perform better anyway
-            # cuda.atomic.add(result, k-1, wprod)
-            numba_dppy.atomic.add(result, k - 1, wprod)
-            k = k - 1
-            if k <= 0:
-                break
+                k = nbins - 1
+                while dsq <= rbins_squared[k]:
+                    # disabled for now since it's not supported currently
+                    # - could reenable later when it's supported (~April 2020)
+                    # - could work around this to avoid atomics, which would perform better anyway
+                    # cuda.atomic.add(result, k-1, wprod)
+                    k = k - 1
+                    if k <= 0:
+                        break
 
 
 # def count_weighted_pairs_3d_cpu_mp(
@@ -400,38 +375,35 @@ def count_weighted_pairs_3d_intel_ver2(
 #     result[:] = result + np.sum(np.stack(res, axis=1), axis=1)
 
 
-# @njit()
-# def count_weighted_pairs_3d_cpu(
-#         x1, y1, z1, w1, x2, y2, z2, w2, rbins_squared, result):
+@njit()
+def count_weighted_pairs_3d_cpu(x1, y1, z1, w1, x2, y2, z2, w2, rbins_squared, result):
 
-#     n1 = x1.shape[0]
-#     n2 = x2.shape[0]
-#     nbins = rbins_squared.shape[0]
+    n1 = x1.shape[0]
+    n2 = x2.shape[0]
+    nbins = rbins_squared.shape[0]
 
-#     for i in range(n1):
-#         px = x1[i]
-#         py = y1[i]
-#         pz = z1[i]
-#         pw = w1[i]
-#         for j in range(n2):
-#             qx = x2[j]
-#             qy = y2[j]
-#             qz = z2[j]
-#             qw = w2[j]
-#             dx = px-qx
-#             dy = py-qy
-#             dz = pz-qz
-#             wprod = pw*qw
-#             dsq = dx*dx + dy*dy + dz*dz
+    for i in range(n1):
+        px = x1[i]
+        py = y1[i]
+        pz = z1[i]
+        pw = w1[i]
+        for j in range(n2):
+            qx = x2[j]
+            qy = y2[j]
+            qz = z2[j]
+            qw = w2[j]
+            dx = px - qx
+            dy = py - qy
+            dz = pz - qz
+            wprod = pw * qw
+            dsq = dx * dx + dy * dy + dz * dz
 
-#             k = nbins-1
-#             while dsq <= rbins_squared[k]:
-#                 result[k-1] += wprod
-#                 k = k-1
-#                 if k <= 0:
-#                     break
-
-#     return result
+            k = nbins - 1
+            while dsq <= rbins_squared[k]:
+                result[k - 1] += wprod
+                k = k - 1
+                if k <= 0:
+                    break
 
 
 # @njit()

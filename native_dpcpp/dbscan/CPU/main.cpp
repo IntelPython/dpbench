@@ -150,7 +150,7 @@ int main(int argc, char * argv[]) {
   try {
     q = new queue{cpu_selector()};
   } catch (sycl::exception &re) {
-    std::cerr << "No CPU device found\n";
+    std::cerr << "No GPU device found\n";
     exit(1);
   }
 

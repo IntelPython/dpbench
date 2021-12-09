@@ -27,8 +27,8 @@
 import argparse
 import sys, os, json
 import numpy as np
-import numpy.random as rnd
 
+from knn_python import knn_python
 from dpbench_datagen.knn import (
     gen_train_data,
     gen_test_data,
@@ -37,9 +37,6 @@ from dpbench_datagen.knn import (
     TRAIN_DATA_SIZE,
     N_NEIGHBORS,
 )
-from dpbench_python.knn.knn_python import knn_python
-import dpctl
-import dpctl.tensor as dpt
 
 try:
     import itimer as it
@@ -64,96 +61,9 @@ except NameError:
 
 
 ###############################################
-def get_device_selector(is_gpu=False):
-    if is_gpu is True:
-        device_selector = "gpu"
-    else:
-        device_selector = "cpu"
-
-    if (
-        os.environ.get("SYCL_DEVICE_FILTER") is None
-        or os.environ.get("SYCL_DEVICE_FILTER") == "opencl"
-    ):
-        return "opencl:" + device_selector
-
-    if os.environ.get("SYCL_DEVICE_FILTER") == "level_zero":
-        return "level_zero:" + device_selector
-
-    return os.environ.get("SYCL_DEVICE_FILTER")
 
 
-def gen_data_usm(nopt):
-    # init numpy obj
-    x_train, y_train = gen_train_data()
-    x_test = gen_test_data(nopt)
-
-    predictions = np.empty(nopt)
-    queue_neighbors_lst = np.empty((nopt, N_NEIGHBORS, 2))
-    votes_to_classes_lst = np.zeros((nopt, CLASSES_NUM))
-
-    with dpctl.device_context(get_device_selector()) as gpu_queue:
-        train_usm = dpt.usm_ndarray(
-            x_train.shape,
-            dtype=x_train.dtype,
-            buffer="device",
-            buffer_ctor_kwargs={"queue": gpu_queue},
-        )
-        train_labels_usm = dpt.usm_ndarray(
-            y_train.shape,
-            dtype=y_train.dtype,
-            buffer="device",
-            buffer_ctor_kwargs={"queue": gpu_queue},
-        )
-        test_usm = dpt.usm_ndarray(
-            x_test.shape,
-            dtype=x_test.dtype,
-            buffer="device",
-            buffer_ctor_kwargs={"queue": gpu_queue},
-        )
-        predictions_usm = dpt.usm_ndarray(
-            predictions.shape,
-            dtype=predictions.dtype,
-            buffer="device",
-            buffer_ctor_kwargs={"queue": gpu_queue},
-        )
-        queue_neighbors_lst_usm = dpt.usm_ndarray(
-            queue_neighbors_lst.shape,
-            dtype=queue_neighbors_lst.dtype,
-            buffer="device",
-            buffer_ctor_kwargs={"queue": gpu_queue},
-        )
-        votes_to_classes_lst_usm = dpt.usm_ndarray(
-            votes_to_classes_lst.shape,
-            dtype=votes_to_classes_lst.dtype,
-            buffer="device",
-            buffer_ctor_kwargs={"queue": gpu_queue},
-        )
-
-    train_usm.usm_data.copy_from_host(x_train.reshape((-1)).view("|u1"))
-    train_labels_usm.usm_data.copy_from_host(y_train.reshape((-1)).view("|u1"))
-    test_usm.usm_data.copy_from_host(x_test.reshape((-1)).view("|u1"))
-    predictions_usm.usm_data.copy_from_host(predictions.reshape((-1)).view("|u1"))
-    queue_neighbors_lst_usm.usm_data.copy_from_host(
-        queue_neighbors_lst.reshape((-1)).view("|u1")
-    )
-    votes_to_classes_lst_usm.usm_data.copy_from_host(
-        votes_to_classes_lst.reshape((-1)).view("|u1")
-    )
-
-    return (
-        train_usm,
-        train_labels_usm,
-        test_usm,
-        predictions_usm,
-        queue_neighbors_lst_usm,
-        votes_to_classes_lst_usm,
-    )
-
-
-##############################################
-
-
-def run(name, alg, sizes=5, step=2, nopt=2 ** 20):
+def run(name, alg, sizes=10, step=2, nopt=2 ** 10):
     parser = argparse.ArgumentParser()
     parser.add_argument("--steps", type=int, default=sizes, help="Number of steps")
     parser.add_argument("--step", type=int, default=step, help="Factor for each step")
@@ -174,158 +84,51 @@ def run(name, alg, sizes=5, step=2, nopt=2 ** 20):
         default=__file__.replace("py", "json"),
         help="output json data filename",
     )
-    parser.add_argument(
-        "--usm",
-        required=False,
-        action="store_true",
-        help="Use USM Shared or pure numpy",
-    )
 
     args = parser.parse_args()
     nopt = args.size
     repeat = args.repeat
+    train_data_size = TRAIN_DATA_SIZE
 
     output = {}
     output["name"] = name
     output["sizes"] = sizes
     output["step"] = step
     output["repeat"] = repeat
+    # output["randseed"] = SEED
     output["metrics"] = []
 
     if args.test:
         x_train, y_train = gen_train_data()
         x_test = gen_test_data(nopt)
-        p_predictions = np.empty(nopt)
-        p_queue_neighbors_lst = np.empty((nopt, N_NEIGHBORS, 2))
-        p_votes_to_classes_lst = np.zeros((nopt, CLASSES_NUM))
 
-        knn_python(
-            x_train,
-            y_train,
-            x_test,
-            N_NEIGHBORS,
-            CLASSES_NUM,
-            TRAIN_DATA_SIZE,
-            nopt,
-            p_predictions,
-            p_queue_neighbors_lst,
-            p_votes_to_classes_lst,
-            DATA_DIM,
-        )
+        print("TRAIN: ", x_train[:10])
+        print(y_train[:10])
+        print(x_test[:10])
 
-        if args.usm is True:  # test usm feature
-            (
-                train_usm,
-                train_labels_usm,
-                test_usm,
-                predictions_usm,
-                queue_neighbors_lst_usm,
-                votes_to_classes_lst_usm,
-            ) = gen_data_usm(nopt)
-            alg(
-                train_usm,
-                train_labels_usm,
-                test_usm,
-                N_NEIGHBORS,
-                CLASSES_NUM,
-                nopt,
-                TRAIN_DATA_SIZE,
-                predictions_usm,
-                queue_neighbors_lst_usm,
-                votes_to_classes_lst_usm,
-                DATA_DIM,
-            )
+        predictions_p = knn_python(x_train, y_train, x_test, N_NEIGHBORS, CLASSES_NUM)
 
-            n_predictions = np.empty(nopt)
-            predictions_usm.usm_data.copy_to_host(n_predictions.view("u1"))
+        predictions_n = alg(x_train, y_train, x_test, N_NEIGHBORS, CLASSES_NUM)
 
+        if np.allclose(predictions_n, predictions_p):
+            print("Test succeeded\n")
         else:
-            n_predictions = np.empty(nopt)
-            n_queue_neighbors_lst = np.empty((nopt, N_NEIGHBORS, 2))
-            n_votes_to_classes_lst = np.zeros((nopt, CLASSES_NUM))
-
-            alg(
-                x_train,
-                y_train,
-                x_test,
-                N_NEIGHBORS,
-                CLASSES_NUM,
-                TRAIN_DATA_SIZE,
-                nopt,
-                n_predictions,
-                n_queue_neighbors_lst,
-                n_votes_to_classes_lst,
-                DATA_DIM,
-            )
-
-        if np.allclose(n_predictions, p_predictions):
-            print(
-                "Test succeeded. Python predictions: ",
-                p_predictions,
-                " Numba predictions: ",
-                n_predictions,
-                "\n",
-            )
-        else:
-            print(
-                "Test failed. Python predictions: ",
-                p_predictions,
-                " Numba predictions: ",
-                n_predictions,
-                "\n",
-            )
+            print("Test failed\n")
         return
 
     with open("perf_output.csv", "w", 1) as fd, open("runtimes.csv", "w", 1) as fd2:
-
         for _ in xrange(args.steps):
+
+            x_train, y_train = gen_train_data()
+            x_test = gen_test_data(nopt)
+
             sys.stdout.flush()
 
-            if args.usm is True:
-                (
-                    x_train,
-                    y_train,
-                    x_test,
-                    predictions,
-                    queue_neighbors_lst,
-                    votes_to_classes_lst,
-                ) = gen_data_usm(nopt)
-            else:
-                x_train, y_train = gen_train_data()
-                x_test = gen_test_data(nopt)
-                predictions = np.empty(nopt)
-                queue_neighbors_lst = np.empty((nopt, N_NEIGHBORS, 2))
-                votes_to_classes_lst = np.zeros((nopt, CLASSES_NUM))
-
-            alg(
-                x_train,
-                y_train,
-                x_test,
-                N_NEIGHBORS,
-                CLASSES_NUM,
-                nopt,
-                TRAIN_DATA_SIZE,
-                predictions,
-                queue_neighbors_lst,
-                votes_to_classes_lst,
-                DATA_DIM,
-            )  # warmup
+            alg(x_train, y_train, x_test, N_NEIGHBORS, CLASSES_NUM)  # warmup
 
             t0 = now()
             for _ in xrange(repeat):
-                alg(
-                    x_train,
-                    y_train,
-                    x_test,
-                    N_NEIGHBORS,
-                    CLASSES_NUM,
-                    nopt,
-                    TRAIN_DATA_SIZE,
-                    predictions,
-                    queue_neighbors_lst,
-                    votes_to_classes_lst,
-                    DATA_DIM,
-                )
+                alg(x_train, y_train, x_test, N_NEIGHBORS, CLASSES_NUM)
             mops, time = get_mops(t0, now(), nopt)
 
             result_mops = mops * repeat

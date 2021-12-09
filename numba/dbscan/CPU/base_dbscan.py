@@ -27,9 +27,13 @@
 import argparse
 import sys, os, json
 import numpy as np
-import dpctl, dpctl.tensor as dpt
 from dpbench_python.dbscan.dbscan_python import dbscan_python
 from dpbench_datagen.dbscan import gen_rand_data
+
+try:
+    import dpctl, dpctl.tensor as dpt
+except ImportError:
+    pass
 
 try:
     import itimer as it

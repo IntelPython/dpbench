@@ -30,8 +30,8 @@ struct point {
   tfloat z;
 };
 
-void InitData( queue* q, size_t nopt, struct point* *x1, struct point* *x2, tfloat** distance_op );
-void FreeData( queue* q, struct point *x1, struct point *x2, tfloat* distance );
+void InitData( size_t nopt, struct point* *x1, struct point* *x2, tfloat** distance_op );
+void FreeData( struct point *x1, struct point *x2 );
 void pairwise_distance(queue* q, size_t nopt, struct point* x1, struct point* x2, tfloat* distance_op );
 
 #endif // #ifndef __CONSTANTS_HEADER_H

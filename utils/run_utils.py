@@ -112,7 +112,8 @@ class ExperimentError(Exception):
             self.output = output
 
     def __str__(self):
-        return "ExperimentError:" + repr(self.command) + "\n\n" + self.output
+        output = '' if len(self.output) == 0 else "\n\n" + self.output
+        return "ExperimentError:" + repr(self.command) + output
 
 
 def run_command(
@@ -133,6 +134,7 @@ def run_command(
             print(output)
     except subprocess.CalledProcessError as e:
         if throw_exception:
-            raise ExperimentError(command_string, e.output)
+            output = '' if len(e.output) == 0 else str(e.output)
+            raise ExperimentError(command_string, output)
     else:
         return output

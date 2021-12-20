@@ -12,6 +12,7 @@ import dpctl.tensor as dpt
 
 from dpbench_python.l2_distance.l2_distance_python import l2_distance_python
 from dpbench_datagen.l2_distance import gen_data
+from dpbench_datagen.l2_distance.generate_data_random import SEED
 
 
 from timeit import default_timer
@@ -22,7 +23,6 @@ get_mops = lambda t0, t1, n: (n / (t1 - t0), t1 - t0)
 ######################################################
 # GLOBAL DECLARATIONS THAT WILL BE USED IN ALL FILES #
 ######################################################
-SEED = 7777777
 # make xrange available in python 3
 try:
     xrange
@@ -142,7 +142,6 @@ def run(name, alg, sizes=10, step=2, nopt=2 ** 20):
     output['randseed']  = SEED
     output['metrics']   = []
 
-    rnd.seed(SEED)
 
     times = np.empty(repeat)
 

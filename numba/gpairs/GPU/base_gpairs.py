@@ -1,7 +1,6 @@
 # Copyright (C) 2017-2018 Intel Corporation
 #
 # SPDX-License-Identifier: MIT
-
 import os, json, datetime
 import numpy as np
 import numpy.random as rnd
@@ -25,7 +24,6 @@ except:
 # GLOBAL DECLARATIONS THAT WILL BE USED IN ALL FILES #
 ######################################################
 DEFAULT_NBINS = 20
-SEED = 7777777
 
 # make xrange available in python 3
 try:
@@ -205,10 +203,9 @@ def run(name, alg, sizes=5, step=2, nopt=2 ** 16):
     output['sizes']     = sizes
     output['step']      = step
     output['repeat']    = repeat
-    output['randseed']  = SEED
+    output['randseed']  = -1
     output['metrics']   = []
 
-    rnd.seed(SEED)
 
     if args.test:
         x1, y1, z1, w1, x2, y2, z2, w2, DEFAULT_RBINS_SQUARED, result_p = gen_data_np(

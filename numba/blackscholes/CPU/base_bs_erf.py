@@ -11,6 +11,7 @@ try:
 except ImportError:
     pass
 from dpbench_python.blackscholes.bs_python import black_scholes_python
+from dpbench_datagen.blackscholes.generate_data_random import SEED
 
 try:
     from numpy import erf
@@ -51,7 +52,6 @@ try:
 except NameError:
     xrange = range
 
-SEED = 7777777
 S0L = 10.0
 S0H = 50.0
 XL = 10.0

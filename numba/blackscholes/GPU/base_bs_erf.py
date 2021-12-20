@@ -5,17 +5,10 @@
 
 from __future__ import print_function
 import numpy as np
-
-# try:
-#     import numpy.random_intel as rnd
-#     numpy_ver="Intel"
-# except:
-#     import numpy.random as rnd
-#     numpy_ver="regular"
-
 import sys, json, os, datetime
 import dpctl, dpctl.tensor as dpt  # , dpctl.memory as dpmem
 from dpbench_python.blackscholes.bs_python import black_scholes_python
+from dpbench_datagen.blackscholes.generate_data_random import SEED
 
 try:
     from numpy import erf
@@ -210,6 +203,7 @@ def run(name, alg, sizes=14, step=2, nopt=2 ** 15):
     output["sizes"] = sizes
     output["step"] = step
     output["repeat"] = repeat
+    output["randseed"] = SEED
     output["metrics"] = []
     kwargs = {}
 

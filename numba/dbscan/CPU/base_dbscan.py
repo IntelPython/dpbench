@@ -25,9 +25,10 @@
 # *****************************************************************************
 
 import argparse
+import sys, os, json
+import datetime
 import numpy as np
 import numpy.random as rnd
-import sys, json, datetime
 from typing import NamedTuple
 from sklearn.datasets import make_blobs
 from sklearn.preprocessing import StandardScaler

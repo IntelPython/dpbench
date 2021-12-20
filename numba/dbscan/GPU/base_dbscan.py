@@ -28,12 +28,11 @@ import argparse
 import sys, os, json
 import datetime
 import numpy as np
-import numpy.random as rnd
 import dpctl, dpctl.tensor as dpt
 from dpbench_python.dbscan.dbscan_python import dbscan_python
 from dpbench_datagen.dbscan import gen_rand_data
+from dpbench_datagen.dbscan.generate_data_random import SEED
 
-SEED = 7777777
 
 try:
     import itimer as it
@@ -158,9 +157,8 @@ def run(name, alg, sizes=5, step=2, nopt=2 ** 10):
     output["sizes"] = sizes
     output["step"] = step
     output["repeat"] = repeat
+    output["randseed"] = SEED
     output["metrics"] = []
-
-    rnd.seed(SEED)
 
     if args.usm:
         print(

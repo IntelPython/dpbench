@@ -11,6 +11,7 @@ from dpbench_python.pairwise_distance.pairwise_distance_python import (
     pairwise_distance_python,
 )
 from dpbench_datagen.pairwise_distance import gen_rand_data
+from dpbench_datagen.pairwise_distance.generate_data_random import SEED
 
 try:
     import itimer as it
@@ -26,7 +27,6 @@ except:
 ######################################################
 # GLOBAL DECLARATIONS THAT WILL BE USED IN ALL FILES #
 ######################################################
-SEED = 7777777
 # make xrange available in python 3
 try:
     xrange
@@ -143,8 +143,6 @@ def run(name, alg, sizes=5, step=2, nopt=2 ** 10):
     output['repeat']    = repeat
     output['randseed']  = SEED
     output['metrics']   = []
-    
-    rnd.seed(SEED)
 
     if args.test:
         X, Y, p_D = gen_data(nopt, dims)

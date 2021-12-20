@@ -37,7 +37,7 @@ from dpbench_datagen.knn import (
     TRAIN_DATA_SIZE,
     N_NEIGHBORS,
 )
-SEED = 7777777
+from dpbench_datagen.knn.generate_data_random import SEED_TEST
 from dpbench_python.knn.knn_python import knn_python
 import dpctl
 import dpctl.tensor as dpt
@@ -192,10 +192,9 @@ def run(name, alg, sizes=5, step=2, nopt=2 ** 20):
     output['sizes']     = sizes
     output['step']      = step
     output['repeat']    = repeat
-    output['randseed']  = SEED
+    output['randseed']  = SEED_TEST
     output['metrics']   = []
 
-    rnd.seed(SEED)
 
     if args.test:
         x_train, y_train = gen_train_data()

@@ -8,6 +8,7 @@ import sys, json, os, datetime
 import dpctl, dpctl.memory as dpmem, dpctl.tensor as dpt
 from dpbench_python.kmeans.kmeans_python import kmeans_python
 from dpbench_datagen.kmeans import gen_rand_data
+from dpbench_datagen.kmeans.generate_data_random import SEED
 
 try:
     import itimer as it
@@ -31,7 +32,6 @@ except NameError:
     xrange = range
 
 NUMBER_OF_CENTROIDS = 10
-SEED = 7777777
 
 ###############################################
 def get_device_selector(is_gpu=True):

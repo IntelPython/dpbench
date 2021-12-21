@@ -190,7 +190,7 @@ def run(name, alg, sizes=10, step=2, nopt=2 ** 20):
             "ERF: {:15s} | Size: {:10d} | TIME: {:10.6f}".format(name, nopt, time),
             flush=True,
         )
-        output["metrics"].append((nopt, time))
+        output["metrics"].append((nopt, 0, time))  # zero placeholder for mops
         # f.write(str(nopt) + "," + str(mops * 2 * repeat) + "\n")
         f2.write(str(nopt) + "," + str(time) + "\n")
 

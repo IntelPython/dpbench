@@ -25,9 +25,10 @@
 # *****************************************************************************
 
 import numpy as np
-from numba import jit, prange
+from numba import prange
 import base_dbscan
 import utils
+from dpbench_decorators import jit
 
 NOISE = -1
 UNDEFINED = -2

@@ -26,6 +26,12 @@ SYCL_DEVICE_FILTER=level_zero \
 python l2_distance_kernel.py
 ```
 
+## USM version
+
+```bash
+python l2_distance_kernel.py --usm
+```
+
 ## Testing
 
 ```bash

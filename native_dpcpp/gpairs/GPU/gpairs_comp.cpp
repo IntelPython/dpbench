@@ -37,7 +37,7 @@ void call_gpairs_naieve( queue* q, size_t npoints, tfloat* x1, tfloat* y1, tfloa
   }
 }
 
-void call_gpairs( queue* q, size_t npoints, tfloat* x1, tfloat* y1, tfloat* z1, tfloat* w1, tfloat* x2,tfloat* y2,tfloat* z2, tfloat* w2,tfloat* rbins,tfloat* results_test) {
+void call_gpairs( queue* q, size_t npoints, tfloat* x1, tfloat* y1, tfloat* z1, tfloat* w1, tfloat* x2,tfloat* y2,tfloat* z2, tfloat* w2,tfloat* rbins,tfloat* results_test, tfloat* results_tmp) {
 
   int nbins = DEFAULT_NBINS;
 
@@ -60,19 +60,43 @@ void call_gpairs( queue* q, size_t npoints, tfloat* x1, tfloat* y1, tfloat* z1, 
   	    tfloat wprod = pw * qw;
   	    tfloat dsq = dx*dx + dy*dy + dz*dz;
 
-  	    int k = nbins - 1;
-  	    while(dsq <= rbins[k]) {
-  	      sycl::ext::oneapi::atomic_ref<tfloat, sycl::ext::oneapi::memory_order::relaxed,
-  	      			       sycl::ext::oneapi::memory_scope::device,
-  	      			       sycl::access::address_space::global_space>atomic_data(results_test[k-1]);
+	    if (dsq <= rbins[nbins-1]) {
+	      for (int k = nbins-1; k > 0; k--) {
+		if (dsq > rbins[k]) {
+		  sycl::ext::oneapi::atomic_ref<tfloat, sycl::ext::oneapi::memory_order::relaxed,
+						sycl::ext::oneapi::memory_scope::device,
+						sycl::access::address_space::global_space>atomic_data(results_tmp[k]);
+		  atomic_data += wprod;
+		  break;
+		}
+	      }
+	    }	    
+	    
+  	    // int k = nbins - 1;
+  	    // while(dsq <= rbins[k]) {
+  	    //   sycl::ext::oneapi::atomic_ref<tfloat, sycl::ext::oneapi::memory_order::relaxed,
+  	    //   			       sycl::ext::oneapi::memory_scope::device,
+  	    //   			       sycl::access::address_space::global_space>atomic_data(results_test[k-1]);
 
-  	      atomic_data += wprod;
-  	      k = k-1;
-  	      if (k <=0) break;
-  	    }
-  	  }
+  	    //   atomic_data += wprod;
+  	    //   k = k-1;
+  	    //   if (k <=0) break;
+  	    // }
+  	  }	  
   	});
     });
 
   q->wait();
+
+  q->submit([&](handler& h) {
+      h.parallel_for<class MergeKernel>(nbins, [=](id<1> myID) {
+  	  int id = myID[0];
+	  //results_test[i] += results_tmp[j]
+	  for (int j=0; j <= id; j++) {
+	    results_test[id] += results_tmp[j];
+	  }
+  	});
+    });
+
+  q->wait();  
 }

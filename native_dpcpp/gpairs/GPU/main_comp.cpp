@@ -56,19 +56,19 @@ int main(int argc, char * argv[])
       exit(1);
     }
 
-    tfloat *x1, *y1, *z1, *w1, *x2, *y2, *z2, *w2, *rbins, *results_test;
+    tfloat *x1, *y1, *z1, *w1, *x2, *y2, *z2, *w2, *rbins, *results_test, *results_tmp;
 
     /* Allocate arrays, generate input data */
-    InitData( q, nopt, &x1, &y1, &z1, &w1, &x2, &y2, &z2, &w2, &rbins, &results_test);
+    InitData( q, nopt, &x1, &y1, &z1, &w1, &x2, &y2, &z2, &w2, &rbins, &results_test, &results_tmp);
 
     /* Warm up cycle */
-    call_gpairs( q, nopt, x1, y1, z1, w1, x2, y2, z2, w2, rbins, results_test);
+    call_gpairs( q, nopt, x1, y1, z1, w1, x2, y2, z2, w2, rbins, results_test, results_tmp);
 
-    ResetResult(q, results_test);
+    ResetResult(q, results_test, results_tmp);
 
     t1 = timer_rdtsc();
     for(int j = 0; j < repeat; j++) {
-      call_gpairs( q, nopt, x1, y1, z1, w1, x2, y2, z2, w2, rbins, results_test );
+      call_gpairs( q, nopt, x1, y1, z1, w1, x2, y2, z2, w2, rbins, results_test, results_tmp );
     }
     t2 = timer_rdtsc();
 
@@ -99,7 +99,7 @@ int main(int argc, char * argv[])
 #endif
 
     /* Deallocate arrays */
-    FreeData( q, x1, y1, z1, w1, x2, y2, z2, w2, rbins, results_test );
+    FreeData( q, x1, y1, z1, w1, x2, y2, z2, w2, rbins, results_test, results_tmp );
 
     fclose(fptr);
     fclose(fptr1);

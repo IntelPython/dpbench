@@ -33,9 +33,9 @@ void ReadInputFromBinFile (char const * filename, char* data_ptr, size_t data_si
 }
 
 void InitData(queue* q, size_t npoints, tfloat **x1, tfloat **y1, tfloat **z1, tfloat **w1,
-	      tfloat **x2, tfloat **y2, tfloat **z2, tfloat **w2, tfloat **rbins, tfloat **results_test) {
+	      tfloat **x2, tfloat **y2, tfloat **z2, tfloat **w2, tfloat **rbins, tfloat **results_test, tfloat **results_tmp) {
 
-  tfloat *t_x1, *t_y1, *t_z1, *t_w1, *t_x2, *t_y2, *t_z2, *t_w2, *t_rbins, *t_results_test;
+  tfloat *t_x1, *t_y1, *t_z1, *t_w1, *t_x2, *t_y2, *t_z2, *t_w2, *t_rbins, *t_results_test, *t_results_tmp;
   /* Allocate aligned memory */
   t_x1 = (tfloat*)_mm_malloc(npoints * sizeof(tfloat), ALIGN_FACTOR);
   t_y1 = (tfloat*)_mm_malloc(npoints * sizeof(tfloat), ALIGN_FACTOR);
@@ -48,6 +48,7 @@ void InitData(queue* q, size_t npoints, tfloat **x1, tfloat **y1, tfloat **z1, t
 
   t_rbins = (tfloat*)_mm_malloc(DEFAULT_NBINS * sizeof(tfloat), ALIGN_FACTOR);
   t_results_test = (tfloat*)_mm_malloc((DEFAULT_NBINS-1) * sizeof(tfloat), ALIGN_FACTOR);
+  t_results_tmp = (tfloat*)_mm_malloc((DEFAULT_NBINS-1) * sizeof(tfloat), ALIGN_FACTOR);
 
   if ( (t_x1 == NULL) || (t_y1 == NULL) || (t_z1 == NULL) || (t_w1 == NULL) ||
        (t_x2 == NULL) || (t_y2 == NULL) || (t_z2 == NULL) || (t_w2 == NULL)) {
@@ -65,8 +66,9 @@ void InitData(queue* q, size_t npoints, tfloat **x1, tfloat **y1, tfloat **z1, t
   ReadInputFromBinFile<tfloat> ("w2.bin", reinterpret_cast<char *>(t_w2), npoints);
   ReadInputFromBinFile<tfloat> ("DEFAULT_RBINS_SQUARED.bin", reinterpret_cast<char *>(t_rbins), DEFAULT_NBINS);
   memset (t_results_test,0,(DEFAULT_NBINS-1) * sizeof(tfloat));
+  memset (t_results_tmp,0,(DEFAULT_NBINS-1) * sizeof(tfloat));
 
-  tfloat *d_x1, *d_y1, *d_z1, *d_w1, *d_x2, *d_y2, *d_z2, *d_w2, *d_rbins, *d_results_test;
+  tfloat *d_x1, *d_y1, *d_z1, *d_w1, *d_x2, *d_y2, *d_z2, *d_w2, *d_rbins, *d_results_test, *d_results_tmp;
 
   d_x1 = (tfloat*)malloc_device( npoints * sizeof(tfloat), *q);
   d_y1 = (tfloat*)malloc_device( npoints * sizeof(tfloat), *q);
@@ -78,6 +80,7 @@ void InitData(queue* q, size_t npoints, tfloat **x1, tfloat **y1, tfloat **z1, t
   d_w2 = (tfloat*)malloc_device( npoints * sizeof(tfloat), *q);
   d_rbins = (tfloat*)malloc_device( DEFAULT_NBINS * sizeof(tfloat), *q);
   d_results_test = (tfloat*)malloc_device( (DEFAULT_NBINS-1) * sizeof(tfloat), *q);
+  d_results_tmp = (tfloat*)malloc_device( (DEFAULT_NBINS-1) * sizeof(tfloat), *q);
 
   // copy data host to device
   q->memcpy(d_x1, t_x1, npoints * sizeof(tfloat));
@@ -90,6 +93,7 @@ void InitData(queue* q, size_t npoints, tfloat **x1, tfloat **y1, tfloat **z1, t
   q->memcpy(d_w2, t_w2, npoints * sizeof(tfloat));
   q->memcpy(d_rbins, t_rbins, DEFAULT_NBINS * sizeof(tfloat));
   q->memcpy(d_results_test, t_results_test, (DEFAULT_NBINS-1) * sizeof(tfloat));
+  q->memcpy(d_results_tmp, t_results_tmp, (DEFAULT_NBINS-1) * sizeof(tfloat));
 
   q->wait();
 
@@ -103,6 +107,7 @@ void InitData(queue* q, size_t npoints, tfloat **x1, tfloat **y1, tfloat **z1, t
   *w2 = d_w2;
   *rbins = d_rbins;
   *results_test = d_results_test;
+  *results_tmp = d_results_tmp;
 
   /* Free memory */
   _mm_free(t_x1);
@@ -115,19 +120,22 @@ void InitData(queue* q, size_t npoints, tfloat **x1, tfloat **y1, tfloat **z1, t
   _mm_free(t_w2);
   _mm_free(t_rbins);
   _mm_free(t_results_test);
+  _mm_free(t_results_tmp);
 }
 
-void ResetResult (queue* q, tfloat* results_test) {
+void ResetResult (queue* q, tfloat* results_test, tfloat* results_tmp) {
   tfloat* t_results_test = (tfloat*)_mm_malloc((DEFAULT_NBINS-1) * sizeof(tfloat), ALIGN_FACTOR);
   memset (t_results_test,0,(DEFAULT_NBINS-1) * sizeof(tfloat));
   q->memcpy(results_test, t_results_test, (DEFAULT_NBINS-1) * sizeof(tfloat));
+  q->wait();
+  q->memcpy(results_tmp, t_results_test, (DEFAULT_NBINS-1) * sizeof(tfloat));
   q->wait();
   _mm_free(t_results_test);
 }
 
 /* Deallocate arrays */
 void FreeData( queue* q, tfloat *x1, tfloat *y1, tfloat *z1, tfloat *w1,
-	       tfloat *x2, tfloat *y2, tfloat *z2, tfloat *w2, tfloat *rbins, tfloat *results_test )
+	       tfloat *x2, tfloat *y2, tfloat *z2, tfloat *w2, tfloat *rbins, tfloat *results_test, tfloat *results_tmp )
 {
   free(x1,q->get_context());
   free(y1,q->get_context());
@@ -139,4 +147,5 @@ void FreeData( queue* q, tfloat *x1, tfloat *y1, tfloat *z1, tfloat *w1,
   free(w2,q->get_context());
   free(rbins,q->get_context());
   free(results_test,q->get_context());
+  free(results_tmp,q->get_context());
 }

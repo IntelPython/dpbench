@@ -26,14 +26,14 @@ using namespace std;
 #define DEFAULT_NBINS 20
 
 void InitData( queue* q, size_t npoints, tfloat **x1, tfloat **y1, tfloat **z1, tfloat **w1,
-	      tfloat **x2, tfloat **y2, tfloat **z2, tfloat **w2, tfloat **rbins, tfloat **results_test );
+	      tfloat **x2, tfloat **y2, tfloat **z2, tfloat **w2, tfloat **rbins, tfloat **results_test, tfloat **results_tmp );
 
 void FreeData( queue* q, tfloat *x1, tfloat *y1, tfloat *z1, tfloat *w1,
-	       tfloat *x2, tfloat *y2, tfloat *z2, tfloat *w2, tfloat *rbins, tfloat *results_test);
+	       tfloat *x2, tfloat *y2, tfloat *z2, tfloat *w2, tfloat *rbins, tfloat *results_test, tfloat *results_tmp);
 
 void call_gpairs(queue* q, size_t nopt, tfloat *x1, tfloat *y1, tfloat *z1, tfloat *w1,
-		 tfloat *x2, tfloat *y2, tfloat *z2, tfloat *w2, tfloat *rbins, tfloat *results_test);
+		 tfloat *x2, tfloat *y2, tfloat *z2, tfloat *w2, tfloat *rbins, tfloat *results_test, tfloat *results_tmp);
 
-void ResetResult (queue* q, tfloat* results_test);
+void ResetResult (queue* q, tfloat* results_test, tfloat* results_tmp);
 
 #endif // #ifndef __EURO_OPT_BENCH_H

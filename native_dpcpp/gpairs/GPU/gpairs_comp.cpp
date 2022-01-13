@@ -70,8 +70,8 @@ void call_gpairs( queue* q, size_t npoints, tfloat* x1, tfloat* y1, tfloat* z1, 
 		  break;
 		}
 	      }
-	    }	    
-	    
+	    }
+
   	    // int k = nbins - 1;
   	    // while(dsq <= rbins[k]) {
   	    //   sycl::ext::oneapi::atomic_ref<tfloat, sycl::ext::oneapi::memory_order::relaxed,
@@ -82,7 +82,7 @@ void call_gpairs( queue* q, size_t npoints, tfloat* x1, tfloat* y1, tfloat* z1, 
   	    //   k = k-1;
   	    //   if (k <=0) break;
   	    // }
-  	  }	  
+  	  }
   	});
     });
 
@@ -98,5 +98,5 @@ void call_gpairs( queue* q, size_t npoints, tfloat* x1, tfloat* y1, tfloat* z1, 
   	});
     });
 
-  q->wait();  
+  q->wait();
 }

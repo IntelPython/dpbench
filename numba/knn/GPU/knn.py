@@ -89,8 +89,8 @@ def run_knn_kernel(
     data_dim,
 ):
     i = numba_dppy.get_global_id(0)
-    #queue_neighbors = queue_neighbors_lst[i]
-    queue_neighbors = numba_dppy.private.array(shape=(5,2), dtype=np.float64)
+    # queue_neighbors = queue_neighbors_lst[i]
+    queue_neighbors = numba_dppy.private.array(shape=(5, 2), dtype=np.float64)
 
     for j in range(k):
         x1 = train[j]

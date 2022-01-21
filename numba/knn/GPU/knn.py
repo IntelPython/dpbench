@@ -70,8 +70,7 @@ def sort_queue(queue_neighbors):
             "train",
             "train_labels",
             "test",
-            "votes_to_classes_lst",
-            "queue_neighbors_lst",
+            "votes_to_classes_lst"
         ],
         "write_only": ["predictions"],
     }
@@ -84,12 +83,10 @@ def run_knn_kernel(
     classes_num,
     train_size,
     predictions,
-    queue_neighbors_lst,
     votes_to_classes_lst,
     data_dim,
 ):
     i = numba_dppy.get_global_id(0)
-    # queue_neighbors = queue_neighbors_lst[i]
     queue_neighbors = numba_dppy.private.array(shape=(5, 2), dtype=np.float64)
 
     for j in range(k):
@@ -175,7 +172,6 @@ def run_knn(
     test_size,
     train_size,
     predictions,
-    queue_neighbors_lst,
     votes_to_classes_lst,
     data_dim,
 ):
@@ -188,7 +184,6 @@ def run_knn(
             classes_num,
             train_size,
             predictions,
-            queue_neighbors_lst,
             votes_to_classes_lst,
             data_dim,
         )

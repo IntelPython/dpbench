@@ -53,6 +53,7 @@ def run(name, sizes=5, step=2, nopt=2 ** 20):
 
     args = parser.parse_args()
     nopt = args.size
+    sizes = args.steps
     repeat = args.repeat
 
     clean_string = ["make", "clean"]
@@ -71,7 +72,7 @@ def run(name, sizes=5, step=2, nopt=2 ** 20):
         x_train, y_train = gen_train_data()
         x_test = gen_test_data(nopt)
         p_predictions = np.empty(nopt)
-        p_queue_neighbors_lst = np.empty((nopt, N_NEIGHBORS, 2))
+        #p_queue_neighbors_lst = np.empty((nopt, N_NEIGHBORS, 2))
         p_votes_to_classes_lst = np.zeros((nopt, CLASSES_NUM))
 
         knn_python(
@@ -83,7 +84,7 @@ def run(name, sizes=5, step=2, nopt=2 ** 20):
             TRAIN_DATA_SIZE,
             nopt,
             p_predictions,
-            p_queue_neighbors_lst,
+            #p_queue_neighbors_lst,
             p_votes_to_classes_lst,
             DATA_DIM,
         )

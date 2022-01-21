@@ -24,6 +24,7 @@
 # EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 # *****************************************************************************
 
+import numpy as np
 
 def knn_python(
     train,
@@ -34,12 +35,11 @@ def knn_python(
     train_size,
     test_size,
     predictions,
-    queue_neighbors_lst,
     votes_to_classes_lst,
     data_dim,
 ):
     for i in range(test_size):
-        queue_neighbors = queue_neighbors_lst[i]
+        queue_neighbors = np.empty((k, 2)) #queue_neighbors_lst[i]
 
         for j in range(k):
             # dist = euclidean_dist(train[j], test[i])

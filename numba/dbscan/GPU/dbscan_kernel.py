@@ -27,6 +27,7 @@
 import dpctl
 import numpy as np
 from numba import jit
+from device_selector import get_device_selector
 # import numba_dppy
 from numba_dpcomp.mlir.kernel_impl import kernel, get_global_id, DEFAULT_LOCAL_SIZE
 import base_dbscan
@@ -144,7 +145,7 @@ def dbscan(n, dim, data, eps, min_pts, assignments):
     # distances_list = np.empty(n*n)
     sizes = np.zeros(n, dtype=np.int64)
 
-    with dpctl.device_context(base_dbscan.get_device_selector()):
+    with dpctl.device_context(get_device_selector()):
         get_neighborhood[n, DEFAULT_LOCAL_SIZE](
             n, dim, data, eps, indices_list, sizes, assignments, 1, n
         )

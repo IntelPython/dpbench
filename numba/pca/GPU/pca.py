@@ -7,7 +7,7 @@ import base_pca
 import numba
 import numpy as np
 import dpctl
-
+from device_selector import get_device_selector
 
 @numba.njit(parallel=True, fastmath=True)
 def pca_impl(data):
@@ -29,7 +29,7 @@ def pca_impl(data):
 
 
 def call_pca(data):
-    with dpctl.device_context(base_pca.get_device_selector()):
+    with dpctl.device_context(get_device_selector()):
         pca_impl(data)
 
 

@@ -6,6 +6,7 @@ import dpctl
 import base_pair_wise
 import numpy as np
 import numba
+from device_selector import get_device_selector
 
 # Naieve pairwise distance impl - take an array representing M points in N dimensions, and return the M x M matrix of Euclidean distances
 @numba.njit(parallel=True, fastmath=True)
@@ -29,7 +30,7 @@ def pw_distance_kernel(X1, X2, D):
 
 
 def pw_distance(X1, X2, D):
-    with dpctl.device_context(base_pair_wise.get_device_selector()):
+    with dpctl.device_context(get_device_selector()):
         pw_distance_kernel(X1, X2, D)
 
 

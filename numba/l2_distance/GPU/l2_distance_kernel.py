@@ -6,6 +6,7 @@ import dpctl
 import base_l2_distance
 import math
 import os
+from device_selector import get_device_selector
 
 backend = os.getenv("NUMBA_BACKEND", "legacy")
 if backend == "legacy":
@@ -33,7 +34,7 @@ else:
         atomic_add(c, 0, sq)
 
 def l2_distance(a, b, distance):
-    with dpctl.device_context(base_l2_distance.get_device_selector()):
+    with dpctl.device_context(get_device_selector()):
         l2_distance_kernel[(a.shape[0], a.shape[1]), DEFAULT_LOCAL_SIZE](a, b, distance)
 
     return math.sqrt(distance)

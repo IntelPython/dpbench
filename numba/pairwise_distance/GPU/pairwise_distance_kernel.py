@@ -6,6 +6,7 @@ import dpctl
 import base_pair_wise
 import os
 import numpy as np
+from device_selector import get_device_selector
 
 backend = os.getenv("NUMBA_BACKEND", "legacy")
 if backend == "legacy":
@@ -43,7 +44,7 @@ else:
 
 
 def pw_distance(X1, X2, D):
-    with dpctl.device_context(base_pair_wise.get_device_selector()):
+    with dpctl.device_context(get_device_selector()):
         pairwise_python[X1.shape[0], DEFAULT_LOCAL_SIZE](X1, X2, D)
 
 

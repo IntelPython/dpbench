@@ -2,7 +2,7 @@ import dpctl
 import base_kmeans
 import numpy
 import numba
-
+from device_selector import get_device_selector
 REPEAT = 1
 
 # defines total number of iterations for kmeans accuracy
@@ -57,7 +57,7 @@ def kmeans(
 ):
 
     for i in range(ITERATIONS):
-        with dpctl.device_context(base_kmeans.get_device_selector()):
+        with dpctl.device_context(get_device_selector()):
             groupByCluster(arrayP, arrayPcluster, arrayC, num_points, num_centroids)
 
         calCentroidsSum(

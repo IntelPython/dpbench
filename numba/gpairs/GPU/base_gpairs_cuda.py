@@ -70,7 +70,7 @@ def copy_d2h(d_result):
 ##############################################
 
 
-def run(name, alg, sizes=10, step=2, nopt=2 ** 10):
+def run(name, alg, sizes=10, step=2, nopt=2**10):
     import argparse
 
     parser = argparse.ArgumentParser()

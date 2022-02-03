@@ -34,23 +34,6 @@ except NameError:
 NUMBER_OF_CENTROIDS = 10
 
 ###############################################
-def get_device_selector(is_gpu=True):
-    if is_gpu is True:
-        device_selector = "gpu"
-    else:
-        device_selector = "cpu"
-
-    if (
-        os.environ.get("SYCL_DEVICE_FILTER") is None
-        or os.environ.get("SYCL_DEVICE_FILTER") == "opencl"
-    ):
-        return "opencl:" + device_selector
-
-    if os.environ.get("SYCL_DEVICE_FILTER") == "level_zero":
-        return "level_zero:" + device_selector
-
-    return os.environ.get("SYCL_DEVICE_FILTER")
-
 
 def gen_data_np(nopt):
     X, arrayPclusters, arrayC, arrayCsum, arrayCnumpoint = gen_rand_data(
@@ -108,7 +91,7 @@ def gen_data_usm(nopt):
 ##############################################
 
 
-def run(name, alg, sizes=5, step=2, nopt=2 ** 13):
+def run(name, alg, sizes=5, step=2, nopt=2**13):
     import argparse
 
     parser = argparse.ArgumentParser()

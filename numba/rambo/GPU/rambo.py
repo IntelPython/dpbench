@@ -4,7 +4,7 @@ import numpy
 import numba
 import base_rambo
 import dpctl
-
+from device_selector import get_device_selector
 
 @numba.jit(nopython=True, fastmath=True)
 def vectmultiply(a, b):
@@ -107,7 +107,7 @@ def get_output_mom2(C1, F1, Q1, nevts, nout):
 
 def generate_points(ecms, nevts, nout):
     C1, F1, Q1 = gen_rand_data(nevts, nout)
-    with dpctl.device_context(base_rambo.get_device_selector()):
+    with dpctl.device_context(get_device_selector()):
         output_particles = get_output_mom2(C1, F1, Q1, nevts, nout)
 
     return output_particles

@@ -6,6 +6,7 @@ import dpctl
 import base_l2_distance
 import numpy as np
 import numba
+from device_selector import get_device_selector
 
 
 @numba.njit(parallel=True, fastmath=True)
@@ -18,7 +19,7 @@ def l2_distance_kernel(a, b):
 
 
 def l2_distance(a, b, distance):
-    with dpctl.device_context(base_l2_distance.get_device_selector()):
+    with dpctl.device_context(get_device_selector()):
         l2_distance_kernel(a, b)
 
 

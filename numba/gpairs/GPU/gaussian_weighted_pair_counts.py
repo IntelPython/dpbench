@@ -2,7 +2,14 @@ import numpy as np
 
 # from numba import njit
 # import numba_dppy
-from numba_dpcomp.mlir.kernel_impl import kernel, get_global_id, get_global_size, atomic, DEFAULT_LOCAL_SIZE
+from numba_dpcomp.mlir.kernel_impl import (
+    kernel,
+    get_global_id,
+    get_global_size,
+    atomic,
+    DEFAULT_LOCAL_SIZE,
+)
+
 atomic_add = atomic.add
 
 # from numba.dppy.dppy_driver import driver as drv
@@ -12,9 +19,9 @@ import math
 from numba import cuda
 
 __all__ = (
-    "count_weighted_pairs_3d_cuda",
-    "count_weighted_pairs_3d_cuda_fix",
-    "count_weighted_pairs_3d_cuda_mesh",
+    # "count_weighted_pairs_3d_cuda",
+    # "count_weighted_pairs_3d_cuda_fix",
+    # "count_weighted_pairs_3d_cuda_mesh",
     # 'count_weighted_pairs_3d_cpu_corrfunc',
     # 'count_weighted_pairs_3d_cpu_mp',
     # 'count_weighted_pairs_3d_cpu',

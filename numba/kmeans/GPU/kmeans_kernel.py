@@ -1,8 +1,15 @@
 import dpctl
 import base_kmeans
 import numpy
+from device_selector import get_device_selector
 # import numba_dppy
-from numba_dpcomp.mlir.kernel_impl import kernel, get_global_id, atomic, DEFAULT_LOCAL_SIZE
+from numba_dpcomp.mlir.kernel_impl import (
+    kernel,
+    get_global_id,
+    atomic,
+    DEFAULT_LOCAL_SIZE,
+)
+
 atomic_add = atomic.add
 
 REPEAT = 1
@@ -109,7 +116,7 @@ def run_kmeans(
     NUMBER_OF_CENTROIDS,
 ):
 
-    with dpctl.device_context(base_kmeans.get_device_selector()):
+    with dpctl.device_context(get_device_selector()):
         for i in range(REPEAT):
             arrayC, arrayCsum, arrayCnumpoint = kmeans(
                 arrayP,

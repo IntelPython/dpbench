@@ -23,7 +23,7 @@ DEFAULT_RMIN, DEFAULT_RMAX = 0.1, 50
 DEFAULT_RBINS = np.logspace(
     np.log10(DEFAULT_RMIN), np.log10(DEFAULT_RMAX), DEFAULT_NBINS
 ).astype(np.float32)
-DEFAULT_RBINS_SQUARED = (DEFAULT_RBINS ** 2).astype(np.float32)
+DEFAULT_RBINS_SQUARED = (DEFAULT_RBINS**2).astype(np.float32)
 
 ######################################################
 # GLOBAL DECLARATIONS THAT WILL BE USED IN ALL FILES #
@@ -92,7 +92,7 @@ def copy_d2h(d_result):
 ##############################################
 
 
-def run(name, alg, sizes=10, step=2, nopt=2 ** 10):
+def run(name, alg, sizes=10, step=2, nopt=2**10):
     import argparse
 
     parser = argparse.ArgumentParser()

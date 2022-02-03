@@ -6,6 +6,7 @@
 from __future__ import print_function
 import numpy as np
 import sys, json, os, datetime
+from device_selector import get_device_selector
 import dpctl, dpctl.tensor as dpt  # , dpctl.memory as dpmem
 from dpbench_python.blackscholes.bs_python import black_scholes_python
 from dpbench_datagen.blackscholes.generate_data_random import SEED
@@ -60,25 +61,6 @@ VOLATILITY = 0.2
 TEST_ARRAY_LENGTH = 1024
 
 ###############################################
-
-
-def get_device_selector(is_gpu=True):
-    if is_gpu is True:
-        device_selector = "gpu"
-    else:
-        device_selector = "cpu"
-
-    if (
-        os.environ.get("SYCL_DEVICE_FILTER") is None
-        or os.environ.get("SYCL_DEVICE_FILTER") == "opencl"
-    ):
-        return "opencl:" + device_selector
-
-    if os.environ.get("SYCL_DEVICE_FILTER") == "level_zero":
-        return "level_zero:" + device_selector
-
-    return os.environ.get("SYCL_DEVICE_FILTER")
-
 
 def gen_data_np(nopt):
     price, strike, t = gen_rand_data(nopt)
@@ -153,7 +135,7 @@ def gen_data_usm(nopt):
 ##############################################
 
 # create input data, call blackscholes computation function (alg)
-def run(name, alg, sizes=14, step=2, nopt=2 ** 15):
+def run(name, alg, sizes=14, step=2, nopt=2**15):
     import argparse
 
     parser = argparse.ArgumentParser()
@@ -254,7 +236,7 @@ def run(name, alg, sizes=14, step=2, nopt=2 ** 15):
             price, strike, t, call, put = gen_data_np(nopt)
 
         iterations = xrange(repeat)
-        print("ERF: {}: Size: {}".format(name, nopt), end=" ", flush=True)
+        # print("ERF: {}: Size: {}".format(name, nopt), end=" ", flush=True)
         sys.stdout.flush()
 
         # call algorithm

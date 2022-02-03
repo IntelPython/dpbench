@@ -3,7 +3,7 @@ import numpy.random as rnd
 import sys, json, os, datetime
 from timeit import default_timer as now
 import dpctl, dpctl.memory as dpmem
-
+from device_selector import get_device_selector
 ######################################################
 # GLOBAL DECLARATIONS THAT WILL BE USED IN ALL FILES #
 ######################################################
@@ -23,27 +23,9 @@ HALO = 1
 STR_SIZE = 256
 DEVICE = 0
 
-LWS = 2 ** 8
+LWS = 2**8
 
 ###############################################
-def get_device_selector(is_gpu=True):
-    if is_gpu is True:
-        device_selector = "gpu"
-    else:
-        device_selector = "cpu"
-
-    if (
-        os.environ.get("SYCL_DEVICE_FILTER") is None
-        or os.environ.get("SYCL_DEVICE_FILTER") == "opencl"
-    ):
-        return "opencl:" + device_selector
-
-    if os.environ.get("SYCL_DEVICE_FILTER") == "level_zero":
-        return "level_zero:" + device_selector
-
-    return os.environ.get("SYCL_DEVICE_FILTER")
-
-
 def gen_data_np(rows, cols):
     return (rnd.randint(LOW, HIGH, (rows, cols)), np.empty(cols))
 
@@ -68,7 +50,7 @@ def gen_data_usm(rows, cols):
 ##############################################
 
 
-def run(name, alg, sizes=5, step=2, rows=2 ** 10, cols=2 ** 6, pyramid_height=20):
+def run(name, alg, sizes=5, step=2, rows=2**10, cols=2**6, pyramid_height=20):
     import argparse
 
     parser = argparse.ArgumentParser()

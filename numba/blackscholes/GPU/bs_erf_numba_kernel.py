@@ -4,6 +4,8 @@
 
 import dpctl
 import base_bs_erf
+from device_selector import get_device_selector
+
 # import numba_dppy
 from numba_dpcomp.mlir.kernel_impl import kernel, get_global_id, DEFAULT_LOCAL_SIZE
 from math import log, sqrt, exp, erf
@@ -45,7 +47,7 @@ def black_scholes(nopt, price, strike, t, rate, vol, call, put):
 
 def black_scholes_driver(nopt, price, strike, t, rate, vol, call, put):
     # offload blackscholes computation to GPU (toggle level0 or opencl driver).
-    with dpctl.device_context(base_bs_erf.get_device_selector()):
+    with dpctl.device_context(get_device_selector()):
         black_scholes[nopt, DEFAULT_LOCAL_SIZE](
             nopt, price, strike, t, rate, vol, call, put
         )

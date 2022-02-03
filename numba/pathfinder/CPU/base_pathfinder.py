@@ -23,7 +23,7 @@ HALO = 1
 STR_SIZE = 256
 DEVICE = 0
 
-LWS = 2 ** 10
+LWS = 2**10
 
 ###############################################
 
@@ -35,7 +35,7 @@ def gen_data(rows, cols):
 ##############################################
 
 
-def run(name, alg, sizes=5, step=2, rows=2 ** 10, cols=2 ** 6, pyramid_height=20):
+def run(name, alg, sizes=5, step=2, rows=2**10, cols=2**6, pyramid_height=20):
     import argparse
 
     parser = argparse.ArgumentParser()

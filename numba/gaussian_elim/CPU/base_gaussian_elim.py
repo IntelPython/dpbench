@@ -3,7 +3,7 @@ import os
 import json
 from timeit import default_timer as now
 from dpbench_datagen.gaussian_elim import gen_matrix, gen_vec
-
+from device_selector import get_device_selector
 import dpctl, dpctl.memory as dpmem
 
 ######################################################
@@ -21,25 +21,6 @@ except NameError:
 BLOCK_SIZE_0 = 256
 BLOCK_SIZE_1_X = 16
 BLOCK_SIZE_1_Y = 16
-
-
-def get_device_selector(is_gpu=True):
-    if is_gpu is True:
-        device_selector = "gpu"
-    else:
-        device_selector = "cpu"
-
-    if (
-        os.environ.get("SYCL_DEVICE_FILTER") is None
-        or os.environ.get("SYCL_DEVICE_FILTER") == "opencl"
-    ):
-        return "opencl:" + device_selector
-
-    if os.environ.get("SYCL_DEVICE_FILTER") == "level_zero":
-        return "level_zero:" + device_selector
-
-    return os.environ.get("SYCL_DEVICE_FILTER")
-
 
 def gen_matrix_usm(size):
     m_buf = gen_matrix(size)

@@ -26,8 +26,15 @@
 
 import base_knn
 import dpctl
+from device_selector import get_device_selector
 # import numba_dppy
-from numba_dpcomp.mlir.kernel_impl import kernel, get_global_id, atomic, kernel_func, DEFAULT_LOCAL_SIZE
+from numba_dpcomp.mlir.kernel_impl import (
+    kernel,
+    get_global_id,
+    atomic,
+    kernel_func,
+    DEFAULT_LOCAL_SIZE,
+)
 import math
 
 import dpctl.tensor as dpt
@@ -46,7 +53,7 @@ def euclidean_dist(x1, x2, data_dim):
         diff = x1[i] - x2[i]
         distance += diff * diff
 
-    result = distance ** 0.5
+    result = distance**0.5
     return result
 
 
@@ -179,7 +186,7 @@ def run_knn(
     votes_to_classes_lst,
     data_dim,
 ):
-    with dpctl.device_context(base_knn.get_device_selector()) as gpu_queue:
+    with dpctl.device_context(get_device_selector()) as gpu_queue:
         run_knn_kernel[test_size, DEFAULT_LOCAL_SIZE](
             train,
             train_labels,

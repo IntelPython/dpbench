@@ -27,6 +27,7 @@
 import argparse
 import sys, os, json
 import datetime
+from device_selector import get_device_selector
 import numpy as np
 import dpctl, dpctl.tensor as dpt
 from dpbench_python.dbscan.dbscan_python import dbscan_python
@@ -57,28 +58,6 @@ except NameError:
 
 
 ###############################################
-
-
-def get_device_selector(is_gpu=True):
-    if is_gpu is True:
-        device_selector = "gpu"
-    else:
-        device_selector = "cpu"
-
-    if (
-        os.environ.get("SYCL_DEVICE_FILTER") is None
-        or os.environ.get("SYCL_DEVICE_FILTER") == "opencl"
-    ):
-        return "opencl:" + device_selector
-
-    if os.environ.get("SYCL_DEVICE_FILTER") == "level_zero":
-        return "level_zero:" + device_selector
-
-    return os.environ.get("SYCL_DEVICE_FILTER")
-
-
-##############################################
-
 
 def gen_data_usm(nopt, dims, a_minpts, a_eps):
     data, p_eps, p_minpts = gen_rand_data(nopt, dims)
@@ -116,8 +95,10 @@ def gen_data_np(nopt, dims, a_minpts, a_eps):
 
     return (data, assignments, eps, minpts)
 
+##############################################
 
-def run(name, alg, sizes=5, step=2, nopt=2 ** 10):
+
+def run(name, alg, sizes=5, step=2, nopt=2**10):
     parser = argparse.ArgumentParser()
     parser.add_argument("--steps", type=int, default=sizes, help="Number of steps")
     parser.add_argument("--step", type=int, default=step, help="Factor for each step")

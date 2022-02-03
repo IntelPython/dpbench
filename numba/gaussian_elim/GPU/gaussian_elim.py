@@ -3,7 +3,7 @@ import numpy as np
 import numba
 import dpctl
 import numba_dppy
-
+from device_selector import get_device_selector
 
 @numba_dppy.kernel
 def compute_ratio_kernel(m, a, size, t):
@@ -42,7 +42,7 @@ def run_gaussian_elim(
 ):
     # Setup and Run kernels
     for t in range(size - 1):
-        with dpctl.device_context(base_gaussian_elim.get_device_selector()):
+        with dpctl.device_context(get_device_selector()):
             compute_ratio_kernel[global_work_size_1[0], local_work_size_buf_1[0]](
                 extra_matrix, solve_matrix, size, t
             )

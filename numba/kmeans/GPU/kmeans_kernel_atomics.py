@@ -2,6 +2,7 @@ import dpctl
 import base_kmeans
 import numpy
 import numba_dppy
+from device_selector import get_device_selector
 
 REPEAT = 1
 
@@ -108,7 +109,7 @@ def run_kmeans(
     NUMBER_OF_CENTROIDS,
 ):
 
-    with dpctl.device_context(base_kmeans.get_device_selector()):
+    with dpctl.device_context(get_device_selector()):
         for i in range(REPEAT):
             # for i1 in range(NUMBER_OF_CENTROIDS):
             #     arrayC[i1, 0] = arrayP[i1, 0]

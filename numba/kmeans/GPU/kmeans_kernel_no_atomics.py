@@ -2,7 +2,7 @@ import dpctl
 import base_kmeans
 import numpy
 import numba_dppy
-
+from device_selector import get_device_selector
 REPEAT = 1
 
 ITERATIONS = 30
@@ -50,7 +50,7 @@ def kmeans(
 ):
 
     for i in range(ITERATIONS):
-        with dpctl.device_context(base_kmeans.get_device_selector()):
+        with dpctl.device_context(get_device_selector()):
             groupByCluster[num_points, numba_dppy.DEFAULT_LOCAL_SIZE](
                 arrayP, arrayPcluster, arrayC, num_points, num_centroids
             )

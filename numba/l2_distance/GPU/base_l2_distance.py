@@ -14,6 +14,7 @@ from dpbench_python.l2_distance.l2_distance_python import l2_distance_python
 from dpbench_datagen.l2_distance import gen_data
 from dpbench_datagen.l2_distance.generate_data_random import SEED
 
+from device_selector import get_device_selector
 
 from timeit import default_timer
 
@@ -31,23 +32,6 @@ except NameError:
 
 
 ###############################################
-def get_device_selector(is_gpu=True):
-    if is_gpu is True:
-        device_selector = "gpu"
-    else:
-        device_selector = "cpu"
-
-    if (
-        os.environ.get("SYCL_DEVICE_FILTER") is None
-        or os.environ.get("SYCL_DEVICE_FILTER") == "opencl"
-    ):
-        return "opencl:" + device_selector
-
-    if os.environ.get("SYCL_DEVICE_FILTER") == "level_zero":
-        return "level_zero:" + device_selector
-
-    return os.environ.get("SYCL_DEVICE_FILTER")
-
 
 def gen_data_usm(nopt, dims):
     x, y = gen_data(nopt, dims, np.float32)
@@ -78,7 +62,6 @@ def gen_data_usm(nopt, dims):
     distance_usm.usm_data.copy_from_host(distance.reshape((-1)).view("|u1"))
 
     return x_usm, y_usm, distance_usm
-
 
 ##############################################
 

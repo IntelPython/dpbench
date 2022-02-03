@@ -2,6 +2,7 @@ import base_pathfinder
 import numba_dppy
 import dpctl
 from numba import int64 as local_dtype
+from device_selector import get_device_selector
 
 IN_RANGE = lambda x, min, max: ((x) >= (min) and (x) <= (max))
 # CLAMP_RANGE = lambda x, min, max: (x = min if (x<(min)) else (max if (x>(max)) else x))
@@ -23,8 +24,8 @@ def pathfinder_kernel(gpuWall, gpuSrc, gpuResult, iteration, borderCols, cols, t
 
     BLOCK_SIZE = numba_dppy.get_local_size(0)
 
-    prev = numba_dppy.local.array(shape=2 ** 8, dtype=local_dtype)
-    result = numba_dppy.local.array(shape=2 ** 8, dtype=local_dtype)
+    prev = numba_dppy.local.array(shape=2**8, dtype=local_dtype)
+    result = numba_dppy.local.array(shape=2**8, dtype=local_dtype)
 
     bx = numba_dppy.get_group_id(0)
     tx = numba_dppy.get_local_id(0)
@@ -117,7 +118,7 @@ def run_pathfinder(data, rows, cols, pyramid_height, result):
 
         iteration = MIN(pyramid_height, rows - t - 1)
 
-        with dpctl.device_context(base_pathfinder.get_device_selector()):
+        with dpctl.device_context(get_device_selector()):
             # invoke kernel with data - all rows except first row
             pathfinder_kernel[rows * cols, base_pathfinder.LWS](
                 data[1:rows, :],

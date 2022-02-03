@@ -2,10 +2,11 @@
 import base_rambo
 import numpy, math
 from numba import jit
+
 # import numba_dppy
 import dpctl
 from numba_dpcomp.mlir.kernel_impl import kernel, get_global_id, DEFAULT_LOCAL_SIZE
-
+from device_selector import get_device_selector
 
 @jit(nopython=True, fastmath=True)
 def vectmultiply(a, b):
@@ -76,7 +77,7 @@ def call_ocl(nevts, nout):
     C1, F1, Q1 = gen_rand_data(nevts, nout)
     output = numpy.empty((nevts, nout, 4))
 
-    with dpctl.device_context(base_rambo.get_device_selector()):
+    with dpctl.device_context(get_device_selector()):
         get_output_mom2[nevts, DEFAULT_LOCAL_SIZE](C1, F1, Q1, output, nout)
 
     return output

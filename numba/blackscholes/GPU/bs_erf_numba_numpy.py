@@ -4,6 +4,7 @@
 
 import dpctl
 import base_bs_erf
+from device_selector import get_device_selector
 import numba as nb
 import numpy as np
 from numpy import log, exp, sqrt
@@ -47,7 +48,7 @@ def black_scholes_kernel(nopt, price, strike, t, rate, vol, call, put):
 
 def black_scholes(nopt, price, strike, t, rate, vol, call, put):
     # offload blackscholes computation to GPU (toggle level0 or opencl driver).
-    with dpctl.device_context(base_bs_erf.get_device_selector()):
+    with dpctl.device_context(get_device_selector()):
         black_scholes_kernel(nopt, price, strike, t, rate, vol, call, put)
 
 

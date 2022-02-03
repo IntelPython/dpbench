@@ -5,7 +5,7 @@ import os, json, datetime
 import numpy as np
 import numpy.random as rnd
 import dpctl, dpctl.tensor as dpt
-
+from device_selector import get_device_selector
 from dpbench_python.gpairs.gpairs_python import gpairs_python
 from dpbench_datagen.gpairs import gen_rand_data
 
@@ -32,23 +32,6 @@ except NameError:
     xrange = range
 
 ###############################################
-def get_device_selector(is_gpu=True):
-    if is_gpu is True:
-        device_selector = "gpu"
-    else:
-        device_selector = "cpu"
-
-    if (
-        os.environ.get("SYCL_DEVICE_FILTER") is None
-        or os.environ.get("SYCL_DEVICE_FILTER") == "opencl"
-    ):
-        return "opencl:" + device_selector
-
-    if os.environ.get("SYCL_DEVICE_FILTER") == "level_zero":
-        return "level_zero:" + device_selector
-
-    return os.environ.get("SYCL_DEVICE_FILTER")
-
 
 def gen_data_np(npoints, dtype=np.float32):
     x1, y1, z1, w1, x2, y2, z2, w2, DEFAULT_RBINS_SQUARED = gen_rand_data(
@@ -152,9 +135,10 @@ def gen_data_usm(npoints):
 
 ##############################################
 
-gen_data_usm=gen_data_np
+gen_data_usm = gen_data_np
 
-def run(name, alg, sizes=5, step=2, nopt=2 ** 16):
+
+def run(name, alg, sizes=2, step=2, nopt=2**16):
     import argparse
 
     parser = argparse.ArgumentParser()

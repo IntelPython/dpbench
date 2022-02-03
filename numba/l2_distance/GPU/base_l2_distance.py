@@ -83,7 +83,7 @@ def gen_data_usm(nopt, dims):
 ##############################################
 
 
-def run(name, alg, sizes=10, step=2, nopt=2 ** 20):
+def run(name, alg, sizes=2, step=2, nopt=2**20):
     import argparse
 
     parser = argparse.ArgumentParser()
@@ -145,7 +145,6 @@ def run(name, alg, sizes=10, step=2, nopt=2 ** 20):
     output["metrics"] = []
 
     times = np.empty(repeat)
-
     if args.test:
         X, Y = gen_data(nopt, dims, np.float32)
         p_dis = l2_distance_python(X, Y)

@@ -698,6 +698,7 @@ class workloads:
                     wl_names[all_workloads.l2_distance.value]["numba"],
                     "--steps",
                     "1",
+                    "--test"
                 ],
                 "NUMBA_CPU_PERF_CMD": [
                     "python",
@@ -807,6 +808,7 @@ class workloads:
                     else wl_names[all_workloads.pca.value]["kernel"],
                     "--steps",
                     "1",
+                    "--test"
                 ],
                 "NUMBA_PERF_CMD": [
                     "python",
@@ -943,6 +945,7 @@ class workloads:
                     else wl_names[all_workloads.rambo.value]["kernel"],
                     "--steps",
                     "1",
+                    "--test"
                 ],
                 "NUMBA_PERF_CMD": [
                     "python",
@@ -1007,6 +1010,7 @@ class workloads:
                     else wl_names[all_workloads.gpairs.value]["kernel"],
                     "--steps",
                     "1",
+                    "--test"
                 ],
                 "NUMBA_PERF_CMD": [
                     "python",

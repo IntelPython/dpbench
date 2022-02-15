@@ -28,8 +28,9 @@ import dpctl
 import numpy as np
 from numba import jit
 from device_selector import get_device_selector
-# import numba_dppy
-from numba_dpcomp.mlir.kernel_impl import kernel, get_global_id, DEFAULT_LOCAL_SIZE
+import numba_dppy
+from numba_dppy import kernel, get_global_id, DEFAULT_LOCAL_SIZE
+# from numba_dpcomp.mlir.kernel_impl import kernel, get_global_id, DEFAULT_LOCAL_SIZE
 import base_dbscan
 import utils
 
@@ -38,18 +39,18 @@ UNDEFINED = -2
 DEFAULT_QUEUE_CAPACITY = 10
 
 
-# @numba_dppy.kernel(
-#     access_types={
-#         "read_only": ["data"],
-#         "write_only": ["assignments", "ind_lst"],
-#         "read_write": ["sz_lst"],
-#     }
-# )
-@kernel
+@numba_dppy.kernel(
+    access_types={
+        "read_only": ["data"],
+        "write_only": ["assignments", "ind_lst"],
+        "read_write": ["sz_lst"],
+    }
+)
+# @kernel
 def get_neighborhood(
     n, dim, data, eps, ind_lst, sz_lst, assignments, block_size, nblocks
 ):
-    i = get_global_id(0)
+    i = numba_dppy.get_global_id(0)
 
     start = i * block_size
     stop = n if i + 1 == nblocks else start + block_size

@@ -1,8 +1,15 @@
 import numpy as np
 
 # from numba import njit
-# import numba_dppy
-from numba_dpcomp.mlir.kernel_impl import (
+import numba_dppy
+# from numba_dpcomp.mlir.kernel_impl import (
+#     kernel,
+#     get_global_id,
+#     get_global_size,
+#     atomic,
+#     DEFAULT_LOCAL_SIZE,
+# )
+from numba_dppy import (
     kernel,
     get_global_id,
     get_global_size,
@@ -310,8 +317,8 @@ def count_weighted_pairs_3d_intel(
     by a distance less than r, for each r**2 in the input rbins_squared.
     """
 
-    start = get_global_id(0)
-    stride = get_global_size(0)
+    start = numba_dppy.get_global_id(0)
+    stride = numba_dppy.get_global_size(0)
 
     n1 = x1.shape[0]
     n2 = x2.shape[0]
@@ -349,7 +356,7 @@ def count_weighted_pairs_3d_intel_ver2(
     by a distance less than r, for each r**2 in the input rbins_squared.
     """
 
-    i = get_global_id(0)
+    i = numba_dppy.get_global_id(0)
     nbins = rbins_squared.shape[0]
     n2 = x2.shape[0]
 

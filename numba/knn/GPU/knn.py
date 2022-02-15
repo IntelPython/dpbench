@@ -27,12 +27,20 @@
 import base_knn
 import dpctl
 from device_selector import get_device_selector
-# import numba_dppy
-from numba_dpcomp.mlir.kernel_impl import (
+import numba_dppy
+import numba
+# from numba_dpcomp.mlir.kernel_impl import (
+#     kernel,
+#     get_global_id,
+#     atomic,
+#     kernel_func,
+#     DEFAULT_LOCAL_SIZE,
+# )
+from numba_dppy import (
     kernel,
     get_global_id,
     atomic,
-    kernel_func,
+    # kernel_func,
     DEFAULT_LOCAL_SIZE,
 )
 import math
@@ -45,7 +53,8 @@ import dpctl.tensor as dpt
 #     return np.linalg.norm(x1-x2)
 
 
-@kernel_func
+# @kernel_func
+@numba.jit(nopython=True)
 def euclidean_dist(x1, x2, data_dim):
     distance = 0
 
@@ -57,7 +66,8 @@ def euclidean_dist(x1, x2, data_dim):
     return result
 
 
-@kernel_func
+# @kernel_func
+@numba.jit(nopython=True)
 def push_queue(queue_neighbors, new_distance, index=4):  # 4: k-1
     while index > 0 and new_distance[0] < queue_neighbors[index - 1, 0]:
         queue_neighbors[index] = queue_neighbors[index - 1]
@@ -65,25 +75,26 @@ def push_queue(queue_neighbors, new_distance, index=4):  # 4: k-1
         queue_neighbors[index] = new_distance
 
 
-@kernel_func
+# @kernel_func
+@numba.jit(nopython=True)
 def sort_queue(queue_neighbors):
     for i in range(len(queue_neighbors)):
         push_queue(queue_neighbors, queue_neighbors[i], i)
 
 
-# @numba_dppy.kernel(
-#     access_types={
-#         "read_only": [
-#             "train",
-#             "train_labels",
-#             "test",
-#             "votes_to_classes_lst",
-#             "queue_neighbors_lst",
-#         ],
-#         "write_only": ["predictions"],
-#     }
-# )
-@kernel
+@numba_dppy.kernel(
+    access_types={
+        "read_only": [
+            "train",
+            "train_labels",
+            "test",
+            "votes_to_classes_lst",
+            "queue_neighbors_lst",
+        ],
+        "write_only": ["predictions"],
+    }
+)
+# @kernel
 def run_knn_kernel(
     train,
     train_labels,
@@ -96,7 +107,7 @@ def run_knn_kernel(
     votes_to_classes_lst,
     data_dim,
 ):
-    i = get_global_id(0)
+    i = numba_dppy.get_global_id(0)
     queue_neighbors = queue_neighbors_lst[i]
 
     for j in range(k):

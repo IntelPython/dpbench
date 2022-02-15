@@ -166,7 +166,10 @@ class workloads:
                 "numba": "kmeans.py",
                 "kernel": "kmeans_kernel.py",
             },
-            all_workloads.knn.value: {"numba": "knn.py", "kernel": "knn.py"},
+            all_workloads.knn.value: {
+                "numba": "knn.py",
+                "kernel": "knn.py"
+            },
             all_workloads.l2_distance.value: {
                 "numba": "l2_distance.py",
                 "kernel": "l2_distance_kernel.py",
@@ -175,7 +178,10 @@ class workloads:
                 "numba": "pairwise_distance.py",
                 "kernel": "pairwise_distance_kernel.py",
             },
-            all_workloads.pca.value: {"numba": "pca.py", "kernel": "pca.py"},
+            all_workloads.pca.value: {
+                "numba": "pca.py",
+                "kernel": "pca.py"
+            },
             # all_workloads.pathfinder.value:{'numba':"pathfinder.py",
             #                            'kernel':"pathfinder.py"},
             all_workloads.rambo.value: {
@@ -1010,7 +1016,9 @@ class workloads:
                     else wl_names[all_workloads.gpairs.value]["kernel"],
                     "--steps",
                     "1",
-                    "--test"
+                    "--test",
+                    "--size",
+                    "1024"
                 ],
                 "NUMBA_PERF_CMD": [
                     "python",
@@ -1170,6 +1178,8 @@ class workloads:
             #     'NATIVE_ADVISOR_CMD': ["./umap", "1"],
             # },
         }
+
+        print(input_wls, " @@@@@")
 
         if not input_wls:
             # iterate through all workload and set execute=True

@@ -138,7 +138,7 @@ def gen_data_usm(npoints):
 gen_data_usm = gen_data_np
 
 
-def run(name, alg, sizes=2, step=2, nopt=2**16):
+def run(name, alg, sizes=2, step=2, nopt=2**15):
     import argparse
 
     parser = argparse.ArgumentParser()

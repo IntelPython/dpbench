@@ -4,7 +4,8 @@ import gaussian_weighted_pair_counts as gwpc
 from device_selector import get_device_selector
 
 # import numba_dppy
-from numba_dpcomp.mlir.kernel_impl import DEFAULT_LOCAL_SIZE
+# from numba_dpcomp.mlir.kernel_impl import DEFAULT_LOCAL_SIZE
+from numba_dppy import DEFAULT_LOCAL_SIZE
 import dpctl
 
 

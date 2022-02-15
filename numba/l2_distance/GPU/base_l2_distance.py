@@ -146,7 +146,6 @@ def run(name, alg, sizes=2, step=2, nopt=2**20):
             print("Test succeeded. Python dis: ", p_dis, " Numba dis: ", n_dis, "\n")
         else:
             print("Test failed. Python dis: ", p_dis, " Numba dis: ", n_dis, "\n")
-        return
 
     for _ in xrange(sizes):
         if args.usm is True:
@@ -159,13 +158,24 @@ def run(name, alg, sizes=2, step=2, nopt=2**20):
         # print("ERF: {}: Size: {}".format(name, nopt), end=' ', flush=True)
         sys.stdout.flush()
 
-        alg(X, Y, distance)  # warmup
+        n_dis = alg(X, Y, distance)  # warmup
 
         for i in iterations:
+            distance = np.asarray([0.0]).astype(np.float32)
+
+            X, Y = gen_data(nopt, dims, np.float32)
+            p_dis = l2_distance_python(X, Y)
+
             t0 = default_timer()
-            alg(X, Y, distance)
+            n_dis = alg(X, Y, distance)
             t1 = default_timer()
+
             times[i] = t1 - t0
+
+            if np.allclose(n_dis, p_dis, rtol=1e-05 * np.sqrt(nopt)):
+                print("Test succeeded. Python dis: ", p_dis, " Numba dis: ", n_dis, "\n")
+            else:
+                print("Test failed. Python dis: ", p_dis, " Numba dis: ", n_dis, "\n")
 
         time = np.median(times)
 

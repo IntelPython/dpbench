@@ -3,10 +3,12 @@
 # SPDX-License-Identifier: MIT
 
 import dpctl
-import base_l2_distance
 import math
 import os
+import sys
+
 from device_selector import get_device_selector
+import base_l2_distance
 
 backend = os.getenv("NUMBA_BACKEND", "legacy")
 if backend == "legacy":
@@ -34,10 +36,15 @@ else:
         atomic_add(c, 0, sq)
 
 def l2_distance(a, b, distance):
-    with dpctl.device_context(get_device_selector()):
+    with dpctl.device_context(dpctl.select_default_device()):
+        print("before", flush=True, file=sys.stderr)
         l2_distance_kernel[(a.shape[0], a.shape[1]), DEFAULT_LOCAL_SIZE](a, b, distance)
+        print("after", flush=True, file=sys.stderr)
 
-    return math.sqrt(distance)
+    if int(distance) >= 0:
+        return math.sqrt(distance)
+    else:
+        return 0.
 
 
 base_l2_distance.run("l2 distance kernel", l2_distance)

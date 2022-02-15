@@ -13,8 +13,8 @@ if backend == "legacy":
     import numba as nb
     @nb.njit(parallel=True, fastmath=True)
     def l2_distance_kernel(a, b):
-        sub = a - b
-        sq = np.square(sub)
+        sub = a - b # this line is offloaded
+        sq = np.square(sub) # this line is offloaded
         sum = np.sum(sq)
         d = np.sqrt(sum)
         return d

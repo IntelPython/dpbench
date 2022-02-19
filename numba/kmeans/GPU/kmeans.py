@@ -1,15 +1,27 @@
 import dpctl
-import base_kmeans
 import numpy
 import numba
-from device_selector import get_device_selector
-REPEAT = 1
+import os
 
+import base_kmeans
+from device_selector import get_device_selector
+
+REPEAT = 1
 # defines total number of iterations for kmeans accuracy
 ITERATIONS = 30
 
+backend = os.getenv("NUMBA_BACKEND", "legacy")
+if backend == "legacy":
+    import numba as nb
+    __njit = nb.jit(nopython=True, parallel=True, fastmath=True)
+else:
+    import numba_dpcomp as nb
+    __njit = nb.njit(parallel=True, fastmath=True, enable_gpu_pipeline=True)
+
+
+
 # determine the euclidean distance from the cluster center to each point
-@numba.jit(nopython=True, parallel=True, fastmath=True)
+@__njit
 def groupByCluster(arrayP, arrayPcluster, arrayC, num_points, num_centroids):
     # parallel for loop
     for i0 in numba.prange(num_points):
@@ -25,7 +37,7 @@ def groupByCluster(arrayP, arrayPcluster, arrayC, num_points, num_centroids):
 
 
 # assign points to cluster
-@numba.jit(nopython=True, parallel=True, fastmath=True)
+@__njit
 def calCentroidsSum(
     arrayP, arrayPcluster, arrayCsum, arrayCnumpoint, num_points, num_centroids
 ):
@@ -45,16 +57,14 @@ def calCentroidsSum(
 
 
 # update the centriods array after computation
-@numba.jit(nopython=True, parallel=True, fastmath=True)
+@__njit
 def updateCentroids(arrayC, arrayCsum, arrayCnumpoint, num_centroids):
     for i in numba.prange(num_centroids):
         arrayC[i, 0] = arrayCsum[i, 0] / arrayCnumpoint[i]
         arrayC[i, 1] = arrayCsum[i, 1] / arrayCnumpoint[i]
 
 
-def kmeans(
-    arrayP, arrayPcluster, arrayC, arrayCsum, arrayCnumpoint, num_points, num_centroids
-):
+def kmeans(arrayP, arrayPcluster, arrayC, arrayCsum, arrayCnumpoint, num_points, num_centroids):
 
     for i in range(ITERATIONS):
         with dpctl.device_context(get_device_selector()):
@@ -67,22 +77,6 @@ def kmeans(
         updateCentroids(arrayC, arrayCsum, arrayCnumpoint, num_centroids)
 
     return arrayC, arrayCsum, arrayCnumpoint
-
-
-def printCentroid(arrayC, arrayCsum, arrayCnumpoint):
-    for i in range(NUMBER_OF_CENTROIDS):
-        print(
-            "[x={:6f}, y={:6f}, x_sum={:6f}, y_sum={:6f}, num_points={:d}]".format(
-                arrayC[i, 0],
-                arrayC[i, 1],
-                arrayCsum[i, 0],
-                arrayCsum[i, 1],
-                arrayCnumpoint[i],
-            )
-        )
-
-    print("--------------------------------------------------")
-
 
 def run_kmeans(
     arrayP,
@@ -108,12 +102,5 @@ def run_kmeans(
             NUMBER_OF_POINTS,
             NUMBER_OF_CENTROIDS,
         )
-
-    #     if i + 1 == REPEAT:
-    #         printCentroid(arrayC, arrayCsum, arrayCnumpoint)
-
-    # print("Iterations: {:d}".format(ITERATIONS))
-    # print("Average Time: {:.4f} ms".format(total))
-
 
 base_kmeans.run("Kmeans Numba", run_kmeans)

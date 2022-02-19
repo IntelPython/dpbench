@@ -8,115 +8,71 @@ REPEAT = 1
 ITERATIONS = 30
 
 backend = os.getenv("NUMBA_BACKEND", "legacy")
+
 if backend == "legacy":
+    from numba_dppy import kernel, get_global_id, atomic, DEFAULT_LOCAL_SIZE
     import numba_dppy
-    from numba_dppy import (
-        kernel,
-        get_global_id,
-        atomic,
-        DEFAULT_LOCAL_SIZE,
-    )
     atomic_add = atomic.add
 
-    @kernel
-    def groupByCluster(arrayP, arrayPcluster, arrayC, num_points, num_centroids):
-        idx = numba_dppy.get_global_id(0)
-        minor_distance = -1
-        for i in range(num_centroids):
-            dx = arrayP[idx, 0] - arrayC[i, 0]
-            dy = arrayP[idx, 1] - arrayC[i, 1]
-            my_distance = numpy.sqrt(dx * dx + dy * dy)
-            if minor_distance > my_distance or minor_distance == -1:
-                minor_distance = my_distance
-                arrayPcluster[idx] = i
-
-
-    @kernel
-    def calCentroidsSum1(arrayCsum, arrayCnumpoint):
-        i = numba_dppy.get_global_id(0)
-        arrayCsum[i, 0] = 0
-        arrayCsum[i, 1] = 0
-        arrayCnumpoint[i] = 0
-
-
-    @kernel
-    def calCentroidsSum2(arrayP, arrayPcluster, arrayCsum, arrayCnumpoint):
-        i = numba_dppy.get_global_id(0)
-        ci = arrayPcluster[i]
-        atomic_add(arrayCsum, (ci, 0), arrayP[i, 0])
-        atomic_add(arrayCsum, (ci, 1), arrayP[i, 1])
-        atomic_add(arrayCnumpoint, ci, 1)
-
-
-    @kernel
-    def updateCentroids(arrayC, arrayCsum, arrayCnumpoint, num_centroids):
-        i = numba_dppy.get_global_id(0)
-        arrayC[i, 0] = arrayCsum[i, 0] / arrayCnumpoint[i]
-        arrayC[i, 1] = arrayCsum[i, 1] / arrayCnumpoint[i]
-
-
-    @kernel
-    def copy_arrayC(arrayC, arrayP):
-        i = numba_dppy.get_global_id(0)
-        arrayC[i, 0] = arrayP[i, 0]
-        arrayC[i, 1] = arrayP[i, 1]
-
+    __kernel = numba_dppy.kernel(
+        access_types={
+            "read_only": ["data"],
+            "write_only": ["assignments", "ind_lst"],
+            "read_write": ["sz_lst"],
+        }
+    )
 else:
-    from numba_dpcomp.mlir.kernel_impl import (
-        kernel,
-        get_global_id,
-        atomic,
-        DEFAULT_LOCAL_SIZE,
-    )
+    from numba_dpcomp.mlir.kernel_impl import kernel, get_global_id, atomic, DEFAULT_LOCAL_SIZE
+
+    import numba_dpcomp.mlir.kernel_impl as numba_dppy # this doesn't work for dppy if no explicit numba_dppy before get_global_id(0)
     atomic_add = atomic.add
 
-    @kernel
-    def groupByCluster(arrayP, arrayPcluster, arrayC, num_points, num_centroids):
-        idx = get_global_id(0)
-        minor_distance = -1
-        for i in range(num_centroids):
-            dx = arrayP[idx, 0] - arrayC[i, 0]
-            dy = arrayP[idx, 1] - arrayC[i, 1]
-            my_distance = numpy.sqrt(dx * dx + dy * dy)
-            if minor_distance > my_distance or minor_distance == -1:
-                minor_distance = my_distance
-                arrayPcluster[idx] = i
+@kernel
+def groupByCluster(arrayP, arrayPcluster, arrayC, num_points, num_centroids):
+    idx = numba_dppy.get_global_id(0)
+    # if idx < num_points: # why it was removed??
+    minor_distance = -1
+    for i in range(num_centroids):
+        dx = arrayP[idx, 0] - arrayC[i, 0]
+        dy = arrayP[idx, 1] - arrayC[i, 1]
+        my_distance = numpy.sqrt(dx * dx + dy * dy)
+        if minor_distance > my_distance or minor_distance == -1:
+            minor_distance = my_distance
+            arrayPcluster[idx] = i
 
 
-    @kernel
-    def calCentroidsSum1(arrayCsum, arrayCnumpoint):
-        i = get_global_id(0)
-        arrayCsum[i, 0] = 0
-        arrayCsum[i, 1] = 0
-        arrayCnumpoint[i] = 0
+@kernel
+def calCentroidsSum1(arrayCsum, arrayCnumpoint):
+    i = numba_dppy.get_global_id(0)
+    arrayCsum[i, 0] = 0
+    arrayCsum[i, 1] = 0
+    arrayCnumpoint[i] = 0
 
 
-    @kernel
-    def calCentroidsSum2(arrayP, arrayPcluster, arrayCsum, arrayCnumpoint):
-        i = get_global_id(0)
-        ci = arrayPcluster[i]
-        atomic_add(arrayCsum, (ci, 0), arrayP[i, 0])
-        atomic_add(arrayCsum, (ci, 1), arrayP[i, 1])
-        atomic_add(arrayCnumpoint, ci, 1)
+@kernel
+def calCentroidsSum2(arrayP, arrayPcluster, arrayCsum, arrayCnumpoint):
+    i = numba_dppy.get_global_id(0)
+    ci = arrayPcluster[i]
+    atomic_add(arrayCsum, (ci, 0), arrayP[i, 0])
+    atomic_add(arrayCsum, (ci, 1), arrayP[i, 1])
+    atomic_add(arrayCnumpoint, ci, 1)
 
 
-    @kernel
-    def updateCentroids(arrayC, arrayCsum, arrayCnumpoint, num_centroids):
-        i = get_global_id(0)
-        arrayC[i, 0] = arrayCsum[i, 0] / arrayCnumpoint[i]
-        arrayC[i, 1] = arrayCsum[i, 1] / arrayCnumpoint[i]
+@kernel
+def updateCentroids(arrayC, arrayCsum, arrayCnumpoint, num_centroids):
+    i = numba_dppy.get_global_id(0)
+    arrayC[i, 0] = arrayCsum[i, 0] / arrayCnumpoint[i]
+    arrayC[i, 1] = arrayCsum[i, 1] / arrayCnumpoint[i]
 
 
-    @kernel
-    def copy_arrayC(arrayC, arrayP):
-        i = get_global_id(0)
-        arrayC[i, 0] = arrayP[i, 0]
-        arrayC[i, 1] = arrayP[i, 1]
+@kernel
+def copy_arrayC(arrayC, arrayP):
+    i = numba_dppy.get_global_id(0)
+    arrayC[i, 0] = arrayP[i, 0]
+    arrayC[i, 1] = arrayP[i, 1]
 
 
-def kmeans(
-    arrayP, arrayPcluster, arrayC, arrayCsum, arrayCnumpoint, num_points, num_centroids
-):
+def kmeans(arrayP, arrayPcluster, arrayC, arrayCsum, arrayCnumpoint, num_points, num_centroids):
 
     copy_arrayC[num_centroids, DEFAULT_LOCAL_SIZE](arrayC, arrayP)
 
@@ -142,22 +98,6 @@ def kmeans(
         )
 
     return arrayC, arrayCsum, arrayCnumpoint
-
-
-def printCentroid(arrayC, arrayCsum, arrayCnumpoint, NUMBER_OF_CENTROIDS):
-    for i in range(NUMBER_OF_CENTROIDS):
-        print(
-            "[x={:6f}, y={:6f}, x_sum={:6f}, y_sum={:6f}, num_points={:d}]".format(
-                arrayC[i, 0],
-                arrayC[i, 1],
-                arrayCsum[i, 0],
-                arrayCsum[i, 1],
-                arrayCnumpoint[i],
-            )
-        )
-
-    print("--------------------------------------------------")
-
 
 def run_kmeans(
     arrayP,

@@ -35,6 +35,20 @@ NUMBER_OF_CENTROIDS = 10
 
 ###############################################
 
+def printCentroid(arrayC, arrayCsum, arrayCnumpoint, NUMBER_OF_CENTROIDS):
+    for i in range(NUMBER_OF_CENTROIDS):
+        print(
+            "[x={:6f}, y={:6f}, x_sum={:6f}, y_sum={:6f}, num_points={:d}]".format(
+                arrayC[i, 0],
+                arrayC[i, 1],
+                arrayCsum[i, 0],
+                arrayCsum[i, 1],
+                arrayCnumpoint[i],
+            )
+        )
+
+    print("--------------------------------------------------")
+
 def gen_data_np(nopt):
     X, arrayPclusters, arrayC, arrayCsum, arrayCnumpoint = gen_rand_data(
         nopt, dtype=np.float32

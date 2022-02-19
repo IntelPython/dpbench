@@ -24,29 +24,42 @@
 # EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 # *****************************************************************************
 
-import base_knn
+
 import dpctl
-from device_selector import get_device_selector
-import numba_dppy
-import numba
-# from numba_dpcomp.mlir.kernel_impl import (
-#     kernel,
-#     get_global_id,
-#     atomic,
-#     kernel_func,
-#     DEFAULT_LOCAL_SIZE,
-# )
-from numba_dppy import (
-    kernel,
-    get_global_id,
-    atomic,
-    # kernel_func,
-    DEFAULT_LOCAL_SIZE,
-)
 import math
+import numba
+import os
 
-import dpctl.tensor as dpt
+import base_knn
+from device_selector import get_device_selector
 
+backend = os.getenv("NUMBA_BACKEND", "legacy")
+
+if backend == "legacy":
+    from numba_dppy import kernel, get_global_id, atomic, DEFAULT_LOCAL_SIZE
+
+    import numba_dppy
+
+    __kernel = numba_dppy.kernel(
+        access_types={
+            "read_only": [
+                "train",
+                "train_labels",
+                "test",
+                "votes_to_classes_lst",
+                "queue_neighbors_lst",
+            ],
+            "write_only": ["predictions"],
+        }
+)
+else:
+    from numba_dpcomp.mlir.kernel_impl import kernel, get_global_id, atomic, DEFAULT_LOCAL_SIZE
+
+    import numba_dpcomp.mlir.kernel_impl as numba_dppy # this doesn't work for dppy if no explicit numba_dppy before get_global_id(0)
+
+    __kernel = kernel # this doesn't work for dppy without modifiers
+
+########## not actually called
 
 # @numba.jit(nopython=True)
 # def euclidean_dist(x1, x2):
@@ -81,20 +94,15 @@ def sort_queue(queue_neighbors):
     for i in range(len(queue_neighbors)):
         push_queue(queue_neighbors, queue_neighbors[i], i)
 
+###############
 
-@numba_dppy.kernel(
-    access_types={
-        "read_only": [
-            "train",
-            "train_labels",
-            "test",
-            "votes_to_classes_lst",
-            "queue_neighbors_lst",
-        ],
-        "write_only": ["predictions"],
-    }
-)
-# @kernel
+
+
+
+
+
+
+@__kernel
 def run_knn_kernel(
     train,
     train_labels,

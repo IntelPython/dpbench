@@ -5,11 +5,19 @@
 import dpctl
 import base_bs_erf
 from device_selector import get_device_selector
-import numba as nb
+
 from math import log, sqrt, exp, erf
 
+backend = os.getenv("NUMBA_BACKEND", "legacy")
+if backend == "legacy":
+    import numba as nb
+    __njit = nb.njit(parallel=True, fastmath=True)
+else:
+    import numba_dpcomp as nb
+    __njit = nb.njit(parallel=True, fastmath=True, enable_gpu_pipeline=True)
+
 # blackscholes implemented as a parallel loop using numba.prange
-@nb.njit(parallel=True, fastmath=True)
+@__njit
 def black_scholes_kernel(nopt, price, strike, t, rate, vol, call, put):
     mr = -rate
     sig_sig_two = vol * vol * 2

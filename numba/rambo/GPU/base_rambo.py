@@ -32,7 +32,7 @@ SEED = 7777777
 ###############################################
 
 
-def run(name, alg, sizes=5, step=2, nopt=2**20):
+def run(name, alg, sizes=1, step=2, nopt=2**20):
     import argparse
 
     parser = argparse.ArgumentParser()

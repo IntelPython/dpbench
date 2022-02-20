@@ -125,7 +125,7 @@ def dbscan(n, dim, data, eps, min_pts, assignments):
     # distances_list = np.empty(n*n)
     sizes = np.zeros(n, dtype=np.int64)
 
-    with dpctl.device_context(get_device_selector()):
+    with dpctl.device_context(get_device_selector(is_gpu=True)):
         get_neighborhood(n, dim, data, eps, indices_list, sizes, assignments)
 
     return compute_clusters(n, min_pts, assignments, sizes, indices_list)

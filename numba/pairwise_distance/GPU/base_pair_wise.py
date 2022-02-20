@@ -43,7 +43,7 @@ def gen_data(nopt, dims):
 def gen_data_usm(nopt, dims):
     X, Y, D = gen_data(nopt, dims)
 
-    with dpctl.device_context(get_device_selector()) as gpu_queue:
+    with dpctl.device_context(get_device_selector(is_gpu=True)) as gpu_queue:
         X_usm = dpt.usm_ndarray(
             X.shape,
             dtype=X.dtype,

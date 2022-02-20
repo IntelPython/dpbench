@@ -109,7 +109,7 @@ def run_kmeans(
     NUMBER_OF_CENTROIDS,
 ):
 
-    with dpctl.device_context(get_device_selector()):
+    with dpctl.device_context(get_device_selector(is_gpu=True)):
         for i in range(REPEAT):
             arrayC, arrayCsum, arrayCnumpoint = kmeans(
                 arrayP,

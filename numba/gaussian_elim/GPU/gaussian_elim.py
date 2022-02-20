@@ -42,7 +42,7 @@ def run_gaussian_elim(
 ):
     # Setup and Run kernels
     for t in range(size - 1):
-        with dpctl.device_context(get_device_selector()):
+        with dpctl.device_context(get_device_selector(is_gpu=True)):
             compute_ratio_kernel[global_work_size_1[0], local_work_size_buf_1[0]](
                 extra_matrix, solve_matrix, size, t
             )

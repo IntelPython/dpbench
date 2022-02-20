@@ -34,7 +34,7 @@ def gen_data_usm(rows, cols):
     data_buf = rnd.randint(LOW, HIGH, (rows, cols), dtype=np.int32)
     result_buf = np.empty(cols, dtype=np.int32)
 
-    with dpctl.device_context(get_device_selector()):
+    with dpctl.device_context(get_device_selector(is_gpu=True)):
         data_usm = dpmem.MemoryUSMShared(rows * cols * np.dtype("i4").itemsize)
         result_usm = dpmem.MemoryUSMShared(cols * np.dtype("i4").itemsize)
 

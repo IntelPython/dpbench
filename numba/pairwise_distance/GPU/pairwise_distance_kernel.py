@@ -44,7 +44,7 @@ else:
 
 
 def pw_distance(X1, X2, D):
-    with dpctl.device_context(get_device_selector()):
+    with dpctl.device_context(get_device_selector(is_gpu=True)):
         pairwise_python[X1.shape[0], DEFAULT_LOCAL_SIZE](X1, X2, D)
 
 

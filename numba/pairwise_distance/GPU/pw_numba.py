@@ -28,7 +28,7 @@ def pw_distance_kernel(X1, X2, D):
 
 
 def pw_distance(X1, X2, D):
-    with dpctl.device_context(get_device_selector()):
+    with dpctl.device_context(get_device_selector(is_gpu=True)):
         pw_distance_kernel(X1, X2, D)
 
 

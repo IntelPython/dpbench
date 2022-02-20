@@ -29,7 +29,7 @@ def pca_impl(data):
 
 
 def call_pca(data):
-    with dpctl.device_context(get_device_selector()):
+    with dpctl.device_context(get_device_selector(is_gpu=True)):
         pca_impl(data)
 
 

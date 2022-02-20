@@ -118,7 +118,7 @@ def run_pathfinder(data, rows, cols, pyramid_height, result):
 
         iteration = MIN(pyramid_height, rows - t - 1)
 
-        with dpctl.device_context(get_device_selector()):
+        with dpctl.device_context(get_device_selector(is_gpu=True)):
             # invoke kernel with data - all rows except first row
             pathfinder_kernel[rows * cols, base_pathfinder.LWS](
                 data[1:rows, :],

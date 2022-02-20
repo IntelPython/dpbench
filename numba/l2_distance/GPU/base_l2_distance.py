@@ -37,7 +37,7 @@ def gen_data_usm(nopt, dims):
     x, y = gen_data(nopt, dims, np.float32)
     distance = np.asarray([0.0]).astype(np.float32)
 
-    with dpctl.device_context(get_device_selector()) as gpu_queue:
+    with dpctl.device_context(get_device_selector(is_gpu=True)) as gpu_queue:
         x_usm = dpt.usm_ndarray(
             x.shape,
             dtype=x.dtype,

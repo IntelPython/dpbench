@@ -63,7 +63,7 @@ def gen_data_usm(nopt, dims, a_minpts, a_eps):
     data, p_eps, p_minpts = gen_rand_data(nopt, dims)
     assignments = np.empty(nopt, dtype=np.int64)
 
-    with dpctl.device_context(get_device_selector()) as gpu_queue:
+    with dpctl.device_context(get_device_selector(is_gpu=True)) as gpu_queue:
         data_usm = dpt.usm_ndarray(
             data.shape,
             dtype=data.dtype,

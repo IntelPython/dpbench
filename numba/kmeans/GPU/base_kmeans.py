@@ -9,6 +9,7 @@ import dpctl, dpctl.memory as dpmem, dpctl.tensor as dpt
 from dpbench_python.kmeans.kmeans_python import kmeans_python
 from dpbench_datagen.kmeans import gen_rand_data
 from dpbench_datagen.kmeans.generate_data_random import SEED
+from device_selector import get_device_selector
 
 try:
     import itimer as it
@@ -61,7 +62,7 @@ def gen_data_usm(nopt):
         nopt, dtype=np.float32
     )
 
-    with dpctl.device_context(get_device_selector()) as gpu_queue:
+    with dpctl.device_context(get_device_selector(is_gpu=True)) as gpu_queue:
         X_usm = dpt.usm_ndarray(
             X.shape,
             dtype=X.dtype,

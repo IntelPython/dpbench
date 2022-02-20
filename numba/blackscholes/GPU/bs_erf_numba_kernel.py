@@ -12,73 +12,46 @@ backend = os.getenv("NUMBA_BACKEND", "legacy")
 if backend == "legacy":
     import numba_dppy
     from numba_dppy import kernel, get_global_id, DEFAULT_LOCAL_SIZE
-    @numba_dppy.kernel(
-        access_types={"read_only": ["price", "strike", "t"], "write_only": ["call", "put"]}
-    )
-    def black_scholes(nopt, price, strike, t, rate, vol, call, put):
-        mr = -rate
-        sig_sig_two = vol * vol * 2
-
-        i = numba_dppy.get_global_id(0)
-
-        P = price[i]
-        S = strike[i]
-        T = t[i]
-
-        a = log(P / S)
-        b = T * mr
-
-        z = T * sig_sig_two
-        c = 0.25 * z
-        y = 1.0 / sqrt(z)
-
-        w1 = (a - b + c) * y
-        w2 = (a - b - c) * y
-
-        d1 = 0.5 + 0.5 * erf(w1)
-        d2 = 0.5 + 0.5 * erf(w2)
-
-        Se = exp(b) * S
-
-        r = P * d1 - Se * d2
-        call[i] = r
-        put[i] = r - P + Se
+    __kernel = numba_dppy.kernel(access_types={"read_only": ["price", "strike", "t"], "write_only": ["call", "put"]})
 else:
     from numba_dpcomp.mlir.kernel_impl import kernel, get_global_id, DEFAULT_LOCAL_SIZE
-    @kernel
-    def black_scholes(nopt, price, strike, t, rate, vol, call, put):
-        mr = -rate
-        sig_sig_two = vol * vol * 2
+    import numba_dpcomp.mlir.kernel_impl as numba_dppy
+    __kernel = kernel
 
-        i = get_global_id(0)
+@__kernel
+def black_scholes(nopt, price, strike, t, rate, vol, call, put):
+    mr = -rate
+    sig_sig_two = vol * vol * 2
 
-        P = price[i]
-        S = strike[i]
-        T = t[i]
+    i = numba_dppy.get_global_id(0)
 
-        a = log(P / S)
-        b = T * mr
+    P = price[i]
+    S = strike[i]
+    T = t[i]
 
-        z = T * sig_sig_two
-        c = 0.25 * z
-        y = 1.0 / sqrt(z)
+    a = log(P / S)
+    b = T * mr
 
-        w1 = (a - b + c) * y
-        w2 = (a - b - c) * y
+    z = T * sig_sig_two
+    c = 0.25 * z
+    y = 1.0 / sqrt(z)
 
-        d1 = 0.5 + 0.5 * erf(w1)
-        d2 = 0.5 + 0.5 * erf(w2)
+    w1 = (a - b + c) * y
+    w2 = (a - b - c) * y
 
-        Se = exp(b) * S
+    d1 = 0.5 + 0.5 * erf(w1)
+    d2 = 0.5 + 0.5 * erf(w2)
 
-        r = P * d1 - Se * d2
-        call[i] = r
-        put[i] = r - P + Se
+    Se = exp(b) * S
+
+    r = P * d1 - Se * d2
+    call[i] = r
+    put[i] = r - P + Se
 
 
 def black_scholes_driver(nopt, price, strike, t, rate, vol, call, put):
     # offload blackscholes computation to GPU (toggle level0 or opencl driver).
-    with dpctl.device_context(get_device_selector()):
+    with dpctl.device_context(get_device_selector(is_gpu=True)):
         black_scholes[nopt, DEFAULT_LOCAL_SIZE](
             nopt, price, strike, t, rate, vol, call, put
         )

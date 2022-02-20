@@ -25,7 +25,7 @@ BLOCK_SIZE_1_Y = 16
 def gen_matrix_usm(size):
     m_buf = gen_matrix(size)
 
-    with dpctl.device_context(get_device_selector()):
+    with dpctl.device_context(get_device_selector(is_gpu=False)):
         m_usm = dpmem.MemoryUSMShared(size * size * np.dtype("float").itemsize)
         m_usm.copy_from_host(m_buf.view("u1"))
 
@@ -35,7 +35,7 @@ def gen_matrix_usm(size):
 def gen_vec_usm(size, value):
     v_buf = gen_vec(size, value)
 
-    with dpctl.device_context(get_device_selector()):
+    with dpctl.device_context(get_device_selector(is_gpu=False)):
         v_usm = dpmem.MemoryUSMShared(size * np.dtype("float").itemsize)
         v_usm.copy_from_host(v_buf.view("u1"))
 

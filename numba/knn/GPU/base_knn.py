@@ -74,7 +74,7 @@ def gen_data_usm(nopt):
     queue_neighbors_lst = np.empty((nopt, N_NEIGHBORS, 2))
     votes_to_classes_lst = np.zeros((nopt, CLASSES_NUM))
 
-    with dpctl.device_context(get_device_selector()) as gpu_queue:
+    with dpctl.device_context(get_device_selector(is_gpu=True)) as gpu_queue:
         train_usm = dpt.usm_ndarray(
             x_train.shape,
             dtype=x_train.dtype,

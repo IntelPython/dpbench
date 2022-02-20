@@ -45,7 +45,7 @@ def gen_data_usm(npoints):
     # init numpy obj
     x1, y1, z1, w1, x2, y2, z2, w2, DEFAULT_RBINS_SQUARED, result = gen_data_np(npoints)
 
-    with dpctl.device_context(get_device_selector()) as gpu_queue:
+    with dpctl.device_context(get_device_selector(is_gpu=True)) as gpu_queue:
         # init usmdevice memory
         x1_usm = dpt.usm_ndarray(
             x1.shape,

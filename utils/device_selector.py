@@ -1,7 +1,7 @@
 import os
 
 
-def get_device_selector(is_gpu=True):
+def get_device_selector(is_gpu):
     if is_gpu is True:
         device_selector = "gpu"
     else:

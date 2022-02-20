@@ -50,7 +50,7 @@ def kmeans(
 ):
 
     for i in range(ITERATIONS):
-        with dpctl.device_context(get_device_selector()):
+        with dpctl.device_context(get_device_selector(is_gpu=True)):
             groupByCluster[num_points, numba_dppy.DEFAULT_LOCAL_SIZE](
                 arrayP, arrayPcluster, arrayC, num_points, num_centroids
             )

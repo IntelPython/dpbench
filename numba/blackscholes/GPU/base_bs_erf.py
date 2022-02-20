@@ -79,7 +79,7 @@ def gen_data_usm(nopt):
     call_buf = np.zeros(nopt, dtype=np.float64)
     put_buf = -np.ones(nopt, dtype=np.float64)
 
-    with dpctl.device_context(get_device_selector()) as gpu_queue:
+    with dpctl.device_context(get_device_selector(is_gpu=True)) as gpu_queue:
         # init usmdevice memory
         # price_usm = dpmem.MemoryUSMDevice(nopt*np.dtype('f8').itemsize)
         # strike_usm = dpmem.MemoryUSMDevice(nopt*np.dtype('f8').itemsize)

@@ -55,7 +55,7 @@ def get_output_mom2(C1, F1, Q1, nevts, nout):
 def generate_points(ecms, nevts, nout):
     C1, F1, Q1 = gen_rand_data(nevts, nout)
 
-    with dpctl.device_context(get_device_selector()):
+    with dpctl.device_context(get_device_selector(is_gpu=True)):
         output_particles = get_output_mom2(C1, F1, Q1, nevts, nout)
 
     return output_particles

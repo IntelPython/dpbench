@@ -83,7 +83,7 @@ def gen_data_usm(nopt):
     call_buf = np.zeros(nopt, dtype=np.float64)
     put_buf = -np.ones(nopt, dtype=np.float64)
 
-    with dpctl.device_context(get_device_selector()) as cpu_queue:
+    with dpctl.device_context(get_device_selector(is_gpu=False)) as cpu_queue:
         # init usmdevice memory
         # price_usm = dpmem.MemoryUSMDevice(nopt*np.dtype('f8').itemsize)
         # strike_usm = dpmem.MemoryUSMDevice(nopt*np.dtype('f8').itemsize)
@@ -204,7 +204,7 @@ def run(name, alg, sizes=14, step=2, nopt=2**15):
         if args.usm is True:  # test usm feature
             price_usm, strike_usm, t_usm, call_usm, put_usm = gen_data_usm(nopt)
             # pass usm input data to kernel
-            with dpctl.device_context(get_device_selector()):
+            with dpctl.device_context(get_device_selector(is_gpu=False)):
                 alg(
                     nopt,
                     price_usm,

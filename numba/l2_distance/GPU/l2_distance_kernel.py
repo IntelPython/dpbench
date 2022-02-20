@@ -36,7 +36,7 @@ else:
         atomic_add(c, 0, sq)
 
 def l2_distance(a, b, distance):
-    with dpctl.device_context(dpctl.select_default_device()):
+    with dpctl.device_context(get_device_selector(is_gpu=True)):
         print("before", flush=True, file=sys.stderr)
         l2_distance_kernel[(a.shape[0], a.shape[1]), DEFAULT_LOCAL_SIZE](a, b, distance)
         print("after", flush=True, file=sys.stderr)

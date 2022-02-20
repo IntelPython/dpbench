@@ -67,7 +67,7 @@ def updateCentroids(arrayC, arrayCsum, arrayCnumpoint, num_centroids):
 def kmeans(arrayP, arrayPcluster, arrayC, arrayCsum, arrayCnumpoint, num_points, num_centroids):
 
     for i in range(ITERATIONS):
-        with dpctl.device_context(get_device_selector()):
+        with dpctl.device_context(get_device_selector(is_gpu=True)):
             groupByCluster(arrayP, arrayPcluster, arrayC, num_points, num_centroids)
 
         calCentroidsSum(

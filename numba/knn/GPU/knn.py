@@ -205,7 +205,7 @@ def run_knn(
     votes_to_classes_lst,
     data_dim,
 ):
-    with dpctl.device_context(get_device_selector()) as gpu_queue:
+    with dpctl.device_context(get_device_selector(is_gpu=True)) as gpu_queue:
         run_knn_kernel[test_size, DEFAULT_LOCAL_SIZE](
             train,
             train_labels,

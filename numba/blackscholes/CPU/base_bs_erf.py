@@ -6,6 +6,7 @@
 from __future__ import print_function
 import numpy as np
 import sys, json, os, datetime
+
 try:
     import dpctl, dpctl.memory as dpmem, dpctl.tensor as dpt
 except ImportError:
@@ -202,7 +203,9 @@ def run(name, alg, sizes=14, step=2, nopt=2 ** 15):
 
     output = {}
     output["name"] = name
-    output['datetime']  = datetime.datetime.strftime(datetime.datetime.now(),'%Y-%m-%d %H:%M:%S')
+    output["datetime"] = datetime.datetime.strftime(
+        datetime.datetime.now(), "%Y-%m-%d %H:%M:%S"
+    )
     output["sizes"] = sizes
     output["step"] = step
     output["repeat"] = repeat

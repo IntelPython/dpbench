@@ -73,13 +73,15 @@ def run(name, alg, sizes=5, step=2, nopt=2 ** 10):
     dims = int(args.d)
 
     output = {}
-    output['name']      = name
-    output['datetime']  = datetime.datetime.strftime(datetime.datetime.now(),'%Y-%m-%d %H:%M:%S')
-    output['sizes']     = sizes
-    output['step']      = step
-    output['repeat']    = repeat
-    output['randseed']  = SEED
-    output['metrics']   = []
+    output["name"] = name
+    output["datetime"] = datetime.datetime.strftime(
+        datetime.datetime.now(), "%Y-%m-%d %H:%M:%S"
+    )
+    output["sizes"] = sizes
+    output["step"] = step
+    output["repeat"] = repeat
+    output["randseed"] = SEED
+    output["metrics"] = []
 
     rnd.seed(SEED)
     f = open("perf_output.csv", "w", 1)

@@ -187,14 +187,15 @@ def run(name, alg, sizes=5, step=2, nopt=2 ** 20):
     repeat = args.repeat
 
     output = {}
-    output['name']      = name
-    output['datetime']  = datetime.datetime.strftime(datetime.datetime.now(),'%Y-%m-%d %H:%M:%S')
-    output['sizes']     = sizes
-    output['step']      = step
-    output['repeat']    = repeat
-    output['randseed']  = SEED_TEST
-    output['metrics']   = []
-
+    output["name"] = name
+    output["datetime"] = datetime.datetime.strftime(
+        datetime.datetime.now(), "%Y-%m-%d %H:%M:%S"
+    )
+    output["sizes"] = sizes
+    output["step"] = step
+    output["repeat"] = repeat
+    output["randseed"] = SEED_TEST
+    output["metrics"] = []
 
     if args.test:
         x_train, y_train = gen_train_data()

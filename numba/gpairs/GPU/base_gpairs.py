@@ -198,14 +198,15 @@ def run(name, alg, sizes=5, step=2, nopt=2 ** 16):
     repeat = int(args.repeat)
 
     output = {}
-    output['name']      = name
-    output['datetime']  = datetime.datetime.strftime(datetime.datetime.now(),'%Y-%m-%d %H:%M:%S')
-    output['sizes']     = sizes
-    output['step']      = step
-    output['repeat']    = repeat
-    output['randseed']  = -1
-    output['metrics']   = []
-
+    output["name"] = name
+    output["datetime"] = datetime.datetime.strftime(
+        datetime.datetime.now(), "%Y-%m-%d %H:%M:%S"
+    )
+    output["sizes"] = sizes
+    output["step"] = step
+    output["repeat"] = repeat
+    output["randseed"] = -1
+    output["metrics"] = []
 
     if args.test:
         x1, y1, z1, w1, x2, y2, z2, w2, DEFAULT_RBINS_SQUARED, result_p = gen_data_np(

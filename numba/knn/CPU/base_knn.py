@@ -98,7 +98,6 @@ def run(name, alg, sizes=10, step=2, nopt=2 ** 10):
     output["sizes"] = sizes
     output["step"] = step
     output["repeat"] = repeat
-    output["randseed"] = SEED
     output["metrics"] = []
 
     if args.test:

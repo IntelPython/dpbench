@@ -18,7 +18,9 @@ if backend == "legacy":
 else:
     import numba_dpcomp as nb
 
-    __njit = nb.jit(nopython=True, parallel=True, fastmath=True, enable_gpu_pipeline=True)
+    __njit = nb.jit(
+        nopython=True, parallel=True, fastmath=True, enable_gpu_pipeline=True
+    )
 
 
 # determine the euclidean distance from the cluster center to each point

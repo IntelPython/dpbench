@@ -15,11 +15,7 @@ if backend == "legacy":
 
     atomic_add = atomic.add
 else:
-    from numba_dpcomp.mlir.kernel_impl import (
-        kernel,
-        atomic,
-        DEFAULT_LOCAL_SIZE,
-    )
+    from numba_dpcomp.mlir.kernel_impl import kernel, atomic, DEFAULT_LOCAL_SIZE
 
     import numba_dpcomp.mlir.kernel_impl as numba_dppy  # this doesn't work for dppy if no explicit numba_dppy before get_global_id(0)
 

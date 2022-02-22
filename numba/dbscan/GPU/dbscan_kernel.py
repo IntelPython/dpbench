@@ -44,22 +44,20 @@ if backend == "legacy":
 
     __jit = numba.jit(nopython=True)
 else:
-    from numba_dpcomp.mlir.kernel_impl import (
-        kernel,
-        DEFAULT_LOCAL_SIZE,
-    )
+    from numba_dpcomp.mlir.kernel_impl import kernel, DEFAULT_LOCAL_SIZE
     import numba_dpcomp
     import numba_dpcomp.mlir.kernel_impl as numba_dppy  # this doesn't work for dppy if no explicit numba_dppy before get_global_id(0)
 
     __jit = numba_dpcomp.jit(nopython=True, enable_gpu_pipeline=True)
 
+
 @kernel(
-        access_types={
-            "read_only": ["data"],
-            "write_only": ["assignments", "ind_lst"],
-            "read_write": ["sz_lst"],
-        }
-    )
+    access_types={
+        "read_only": ["data"],
+        "write_only": ["assignments", "ind_lst"],
+        "read_write": ["sz_lst"],
+    }
+)
 def get_neighborhood(
     n, dim, data, eps, ind_lst, sz_lst, assignments, block_size, nblocks
 ):
@@ -87,6 +85,7 @@ def get_neighborhood(
                     ind_lst[j * n + size] = k
                     # dist_lst[j * n + size] = dist
                     sz_lst[j] = size + 1
+
 
 @__jit
 def compute_clusters(n, min_pts, assignments, sizes, indices_list):
@@ -130,6 +129,7 @@ def compute_clusters(n, min_pts, assignments, sizes, indices_list):
                     qu.push(next_point)
 
     return nclusters
+
 
 def dbscan(n, dim, data, eps, min_pts, assignments):
     indices_list = np.empty(n * n, dtype=np.int64)

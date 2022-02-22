@@ -9,6 +9,7 @@ import numpy as np
 import dpctl
 from device_selector import get_device_selector
 
+
 @numba.njit(parallel=True, fastmath=True)
 def pca_impl(data):
     tdata = data.T

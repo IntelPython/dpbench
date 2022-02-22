@@ -34,7 +34,7 @@ except NameError:
     xrange = range
 
 
-def run(name, alg, sizes=10, step=2, nopt=2**16):
+def run(name, alg, sizes=10, step=2, nopt=2 ** 16):
     import argparse
 
     parser = argparse.ArgumentParser()

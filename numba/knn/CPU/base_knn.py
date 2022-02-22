@@ -63,7 +63,7 @@ except NameError:
 ###############################################
 
 
-def run(name, alg, sizes=10, step=2, nopt=2**10):
+def run(name, alg, sizes=10, step=2, nopt=2 ** 10):
     parser = argparse.ArgumentParser()
     parser.add_argument("--steps", type=int, default=sizes, help="Number of steps")
     parser.add_argument("--step", type=int, default=step, help="Factor for each step")

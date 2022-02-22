@@ -5,6 +5,7 @@ import dpctl
 import numba_dppy
 from device_selector import get_device_selector
 
+
 @numba_dppy.kernel
 def compute_ratio_kernel(m, a, size, t):
     i = numba_dppy.get_global_id(0)

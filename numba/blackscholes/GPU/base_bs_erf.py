@@ -62,6 +62,7 @@ TEST_ARRAY_LENGTH = 1024
 
 ###############################################
 
+
 def gen_data_np(nopt):
     price, strike, t = gen_rand_data(nopt)
     return (
@@ -135,7 +136,7 @@ def gen_data_usm(nopt):
 ##############################################
 
 # create input data, call blackscholes computation function (alg)
-def run(name, alg, sizes=10, step=2, nopt=2**19):
+def run(name, alg, sizes=10, step=2, nopt=2 ** 19):
     import argparse
 
     parser = argparse.ArgumentParser()

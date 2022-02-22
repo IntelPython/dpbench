@@ -51,12 +51,16 @@ if backend == "legacy":
         }
     )
 else:
-    from numba_dpcomp.mlir.kernel_impl import kernel, get_global_id, atomic, DEFAULT_LOCAL_SIZE
+    from numba_dpcomp.mlir.kernel_impl import (
+        kernel,
+        get_global_id,
+        atomic,
+        DEFAULT_LOCAL_SIZE,
+    )
 
-    import numba_dpcomp.mlir.kernel_impl as numba_dppy # this doesn't work for dppy if no explicit numba_dppy before get_global_id(0)
+    import numba_dpcomp.mlir.kernel_impl as numba_dppy  # this doesn't work for dppy if no explicit numba_dppy before get_global_id(0)
 
-    __kernel = kernel # this doesn't work for dppy without modifiers
-
+    __kernel = kernel  # this doesn't work for dppy without modifiers
 
 
 @__kernel

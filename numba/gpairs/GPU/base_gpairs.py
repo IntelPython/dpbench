@@ -33,6 +33,7 @@ except NameError:
 
 ###############################################
 
+
 def gen_data_np(npoints, dtype=np.float32):
     x1, y1, z1, w1, x2, y2, z2, w2, DEFAULT_RBINS_SQUARED = gen_rand_data(
         npoints, dtype
@@ -138,7 +139,7 @@ def gen_data_usm(npoints):
 gen_data_usm = gen_data_np
 
 
-def run(name, alg, sizes=2, step=2, nopt=2**15):
+def run(name, alg, sizes=2, step=2, nopt=2 ** 15):
     import argparse
 
     parser = argparse.ArgumentParser()

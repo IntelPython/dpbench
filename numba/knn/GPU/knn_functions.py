@@ -46,7 +46,7 @@ def euclidean_dist(x1, x2):
         diff = x1[i] - x2[i]
         distance += diff * diff
 
-    result = distance**0.5
+    result = distance ** 0.5
     # result = np.sqrt(distance)
     return result
 

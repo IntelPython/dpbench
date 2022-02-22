@@ -59,6 +59,7 @@ except NameError:
 
 ###############################################
 
+
 def gen_data_usm(nopt, dims, a_minpts, a_eps):
     data, p_eps, p_minpts = gen_rand_data(nopt, dims)
     assignments = np.empty(nopt, dtype=np.int64)
@@ -95,10 +96,11 @@ def gen_data_np(nopt, dims, a_minpts, a_eps):
 
     return (data, assignments, eps, minpts)
 
+
 ##############################################
 
 
-def run(name, alg, sizes=5, step=2, nopt=2**10):
+def run(name, alg, sizes=5, step=2, nopt=2 ** 10):
     parser = argparse.ArgumentParser()
     parser.add_argument("--steps", type=int, default=sizes, help="Number of steps")
     parser.add_argument("--step", type=int, default=step, help="Factor for each step")

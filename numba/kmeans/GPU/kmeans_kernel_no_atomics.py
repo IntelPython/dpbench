@@ -3,6 +3,7 @@ import base_kmeans
 import numpy
 import numba_dppy
 from device_selector import get_device_selector
+
 REPEAT = 1
 
 ITERATIONS = 30
@@ -56,8 +57,7 @@ def kmeans(
             )
 
             calCentroidsSum1[num_centroids, numba_dppy.DEFAULT_LOCAL_SIZE](
-                arrayCsum,
-                arrayCnumpoint,
+                arrayCsum, arrayCnumpoint
             )
 
         calCentroidsSum2(arrayP, arrayPcluster, arrayCsum, arrayCnumpoint, num_points)

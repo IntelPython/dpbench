@@ -36,6 +36,7 @@ NUMBER_OF_CENTROIDS = 10
 
 ###############################################
 
+
 def printCentroid(arrayC, arrayCsum, arrayCnumpoint, NUMBER_OF_CENTROIDS):
     for i in range(NUMBER_OF_CENTROIDS):
         print(
@@ -49,6 +50,7 @@ def printCentroid(arrayC, arrayCsum, arrayCnumpoint, NUMBER_OF_CENTROIDS):
         )
 
     print("--------------------------------------------------")
+
 
 def gen_data_np(nopt):
     X, arrayPclusters, arrayC, arrayCsum, arrayCnumpoint = gen_rand_data(
@@ -106,7 +108,7 @@ def gen_data_usm(nopt):
 ##############################################
 
 
-def run(name, alg, sizes=5, step=2, nopt=2**13):
+def run(name, alg, sizes=5, step=2, nopt=2 ** 13):
     import argparse
 
     parser = argparse.ArgumentParser()

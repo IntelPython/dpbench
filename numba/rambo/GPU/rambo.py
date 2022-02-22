@@ -9,10 +9,12 @@ from device_selector import get_device_selector
 backend = os.getenv("NUMBA_BACKEND", "legacy")
 if backend == "legacy":
     import numba as nb
+
     __njit = nb.jit(nopython=True, parallel=False)
     __fmjit = nb.jit(nopython=True, parallel=False, fastmath=True)
 else:
     import numba_dpcomp as nb
+
     __njit = nb.njit(parallel=True, enable_gpu_pipeline=True)
     __fmjit = nb.njit(parallel=True, fastmath=True, enable_gpu_pipeline=True)
 
@@ -59,6 +61,7 @@ def generate_points(ecms, nevts, nout):
         output_particles = get_output_mom2(C1, F1, Q1, nevts, nout)
 
     return output_particles
+
 
 def rambo(evt_per_calc):
     ng = 4

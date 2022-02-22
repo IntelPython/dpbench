@@ -54,7 +54,7 @@ SEED = 7777777
 ##############################################
 
 
-def run(name, alg, sizes=10, step=2, nopt=2**10):
+def run(name, alg, sizes=10, step=2, nopt=2 ** 10):
     import argparse
 
     parser = argparse.ArgumentParser()
@@ -74,7 +74,7 @@ def run(name, alg, sizes=10, step=2, nopt=2**10):
         "--text", required=False, default="", help="Print with each result"
     )
     parser.add_argument(
-        "--dims", required=False, type=int, default=2**7, help="Dimensions"
+        "--dims", required=False, type=int, default=2 ** 7, help="Dimensions"
     )
     parser.add_argument("--rand", required=False, type=bool, default=True, help="Rand?")
     parser.add_argument(

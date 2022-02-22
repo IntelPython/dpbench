@@ -11,9 +11,11 @@ from math import log, sqrt, exp, erf
 backend = os.getenv("NUMBA_BACKEND", "legacy")
 if backend == "legacy":
     import numba as nb
+
     __njit = nb.njit(parallel=True, fastmath=True)
 else:
     import numba_dpcomp as nb
+
     __njit = nb.njit(parallel=True, fastmath=True, enable_gpu_pipeline=True)
 
 # blackscholes implemented as a parallel loop using numba.prange

@@ -8,6 +8,7 @@ import numba
 import numpy as np
 from device_selector import get_device_selector
 
+
 @numba.njit(parallel=True, fastmath=True)
 def matmul(X, Y):
     result = np.zeros((X.shape[0], Y.shape[1]))

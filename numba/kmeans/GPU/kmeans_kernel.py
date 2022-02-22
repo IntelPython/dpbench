@@ -12,6 +12,7 @@ backend = os.getenv("NUMBA_BACKEND", "legacy")
 if backend == "legacy":
     from numba_dppy import kernel, get_global_id, atomic, DEFAULT_LOCAL_SIZE
     import numba_dppy
+
     atomic_add = atomic.add
 
     __kernel = numba_dppy.kernel(
@@ -22,10 +23,17 @@ if backend == "legacy":
         }
     )
 else:
-    from numba_dpcomp.mlir.kernel_impl import kernel, get_global_id, atomic, DEFAULT_LOCAL_SIZE
+    from numba_dpcomp.mlir.kernel_impl import (
+        kernel,
+        get_global_id,
+        atomic,
+        DEFAULT_LOCAL_SIZE,
+    )
 
-    import numba_dpcomp.mlir.kernel_impl as numba_dppy # this doesn't work for dppy if no explicit numba_dppy before get_global_id(0)
+    import numba_dpcomp.mlir.kernel_impl as numba_dppy  # this doesn't work for dppy if no explicit numba_dppy before get_global_id(0)
+
     atomic_add = atomic.add
+
 
 @kernel
 def groupByCluster(arrayP, arrayPcluster, arrayC, num_points, num_centroids):
@@ -72,7 +80,9 @@ def copy_arrayC(arrayC, arrayP):
     arrayC[i, 1] = arrayP[i, 1]
 
 
-def kmeans(arrayP, arrayPcluster, arrayC, arrayCsum, arrayCnumpoint, num_points, num_centroids):
+def kmeans(
+    arrayP, arrayPcluster, arrayC, arrayCsum, arrayCnumpoint, num_points, num_centroids
+):
 
     copy_arrayC[num_centroids, DEFAULT_LOCAL_SIZE](arrayC, arrayP)
 
@@ -81,16 +91,10 @@ def kmeans(arrayP, arrayPcluster, arrayC, arrayCsum, arrayCnumpoint, num_points,
             arrayP, arrayPcluster, arrayC, num_points, num_centroids
         )
 
-        calCentroidsSum1[num_centroids, DEFAULT_LOCAL_SIZE](
-            arrayCsum,
-            arrayCnumpoint,
-        )
+        calCentroidsSum1[num_centroids, DEFAULT_LOCAL_SIZE](arrayCsum, arrayCnumpoint)
 
         calCentroidsSum2[num_points, DEFAULT_LOCAL_SIZE](
-            arrayP,
-            arrayPcluster,
-            arrayCsum,
-            arrayCnumpoint,
+            arrayP, arrayPcluster, arrayCsum, arrayCnumpoint
         )
 
         updateCentroids[num_centroids, DEFAULT_LOCAL_SIZE](
@@ -98,6 +102,7 @@ def kmeans(arrayP, arrayPcluster, arrayC, arrayCsum, arrayCnumpoint, num_points,
         )
 
     return arrayC, arrayCsum, arrayCnumpoint
+
 
 def run_kmeans(
     arrayP,

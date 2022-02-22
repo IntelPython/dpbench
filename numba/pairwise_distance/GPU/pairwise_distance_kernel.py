@@ -26,6 +26,7 @@ if backend == "legacy":
                 d += tmp * tmp
             D[i, j] = np.sqrt(d)
 
+
 else:
     from numba_dpcomp.mlir.kernel_impl import kernel, get_global_id, DEFAULT_LOCAL_SIZE
 

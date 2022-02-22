@@ -13,9 +13,11 @@ from math import erf
 backend = os.getenv("NUMBA_BACKEND", "legacy")
 if backend == "legacy":
     import numba as nb
+
     __njit = nb.njit(parallel=True, fastmath=True)
 else:
     import numba_dpcomp as nb
+
     __njit = nb.njit(parallel=True, fastmath=True, enable_gpu_pipeline=True)
 
 # Numba does know erf function from numpy or scipy

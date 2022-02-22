@@ -22,6 +22,7 @@ BLOCK_SIZE_0 = 256
 BLOCK_SIZE_1_X = 16
 BLOCK_SIZE_1_Y = 16
 
+
 def gen_matrix_usm(size):
     m_buf = gen_matrix(size)
 

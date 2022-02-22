@@ -11,11 +11,18 @@ backend = os.getenv("NUMBA_BACKEND", "legacy")
 if backend == "legacy":
     from numba_dppy import kernel, get_global_id, atomic, DEFAULT_LOCAL_SIZE
     import numba_dppy
+
     __njit = numba_dppy.jit(nopython=True)
 else:
-    from numba_dpcomp.mlir.kernel_impl import kernel, get_global_id, atomic, DEFAULT_LOCAL_SIZE
-    import numba_dpcomp.mlir.kernel_impl as numba_dppy # this doesn't work for dppy if no explicit numba_dppy before get_global_id(0)
+    from numba_dpcomp.mlir.kernel_impl import (
+        kernel,
+        get_global_id,
+        atomic,
+        DEFAULT_LOCAL_SIZE,
+    )
+    import numba_dpcomp.mlir.kernel_impl as numba_dppy  # this doesn't work for dppy if no explicit numba_dppy before get_global_id(0)
     import numba_dpcomp
+
     __njit = numba_dpcomp.jit(nopython=True)
 
 # memory allocation in the kernel??
@@ -35,6 +42,7 @@ def gen_rand_data(nevts, nout):
 
     return C1, F1, Q1
 
+
 @kernel
 def get_output_mom2(C1, F1, Q1, output, nout):
     i = numba_dppy.get_global_id(0)
@@ -49,6 +57,7 @@ def get_output_mom2(C1, F1, Q1, output, nout):
         output[i, j, 2] = Q * S * math.cos(F)
         output[i, j, 3] = Q * C
 
+
 # memory allocation in the kernel??
 def GeneratePoints(nevts, nout):
     # kernel is on CPU
@@ -61,6 +70,7 @@ def GeneratePoints(nevts, nout):
 
     return output
 
+
 # very strange kernel
 def rambo(evt_per_calc):
     ng = 4
@@ -70,5 +80,6 @@ def rambo(evt_per_calc):
     for i in range(nruns):
         e = GeneratePoints(evt_per_calc, ng)
     return e
+
 
 base_rambo.run("Rambo Numba", rambo)

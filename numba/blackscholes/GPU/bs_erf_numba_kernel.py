@@ -12,11 +12,19 @@ backend = os.getenv("NUMBA_BACKEND", "legacy")
 if backend == "legacy":
     import numba_dppy
     from numba_dppy import kernel, get_global_id, DEFAULT_LOCAL_SIZE
-    __kernel = numba_dppy.kernel(access_types={"read_only": ["price", "strike", "t"], "write_only": ["call", "put"]})
+
+    __kernel = numba_dppy.kernel(
+        access_types={
+            "read_only": ["price", "strike", "t"],
+            "write_only": ["call", "put"],
+        }
+    )
 else:
     from numba_dpcomp.mlir.kernel_impl import kernel, get_global_id, DEFAULT_LOCAL_SIZE
     import numba_dpcomp.mlir.kernel_impl as numba_dppy
+
     __kernel = kernel
+
 
 @__kernel
 def black_scholes(nopt, price, strike, t, rate, vol, call, put):

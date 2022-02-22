@@ -33,6 +33,7 @@ except NameError:
 
 ###############################################
 
+
 def gen_data_usm(nopt, dims):
     x, y = gen_data(nopt, dims, np.float32)
     distance = np.asarray([0.0]).astype(np.float32)
@@ -63,10 +64,11 @@ def gen_data_usm(nopt, dims):
 
     return x_usm, y_usm, distance_usm
 
+
 ##############################################
 
 
-def run(name, alg, sizes=2, step=2, nopt=2**20):
+def run(name, alg, sizes=2, step=2, nopt=2 ** 20):
     import argparse
 
     parser = argparse.ArgumentParser()
@@ -93,10 +95,7 @@ def run(name, alg, sizes=2, step=2, nopt=2**20):
     )
     parser.add_argument("-d", type=int, default=1, help="Dimensions")
     parser.add_argument(
-        "--test",
-        required=False,
-        action="store_true",
-        help="Validation",
+        "--test", required=False, action="store_true", help="Validation"
     )
     parser.add_argument(
         "--usm",
@@ -173,7 +172,9 @@ def run(name, alg, sizes=2, step=2, nopt=2**20):
             times[i] = t1 - t0
 
             if np.allclose(n_dis, p_dis, rtol=1e-05 * np.sqrt(nopt)):
-                print("Test succeeded. Python dis: ", p_dis, " Numba dis: ", n_dis, "\n")
+                print(
+                    "Test succeeded. Python dis: ", p_dis, " Numba dis: ", n_dis, "\n"
+                )
             else:
                 print("Test failed. Python dis: ", p_dis, " Numba dis: ", n_dis, "\n")
 

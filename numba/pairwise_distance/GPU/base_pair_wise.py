@@ -14,6 +14,7 @@ from dpbench_datagen.pairwise_distance import gen_rand_data
 from dpbench_datagen.pairwise_distance.generate_data_random import SEED
 
 from device_selector import get_device_selector
+
 try:
     import itimer as it
 
@@ -72,7 +73,7 @@ def gen_data_usm(nopt, dims):
 ##############################################
 
 
-def run(name, alg, sizes=5, step=2, nopt=2**10):
+def run(name, alg, sizes=5, step=2, nopt=2 ** 10):
     import argparse
 
     parser = argparse.ArgumentParser()

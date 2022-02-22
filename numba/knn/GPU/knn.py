@@ -51,13 +51,18 @@ if backend == "legacy":
             ],
             "write_only": ["predictions"],
         }
-)
+    )
 else:
-    from numba_dpcomp.mlir.kernel_impl import kernel, get_global_id, atomic, DEFAULT_LOCAL_SIZE
+    from numba_dpcomp.mlir.kernel_impl import (
+        kernel,
+        get_global_id,
+        atomic,
+        DEFAULT_LOCAL_SIZE,
+    )
 
-    import numba_dpcomp.mlir.kernel_impl as numba_dppy # this doesn't work for dppy if no explicit numba_dppy before get_global_id(0)
+    import numba_dpcomp.mlir.kernel_impl as numba_dppy  # this doesn't work for dppy if no explicit numba_dppy before get_global_id(0)
 
-    __kernel = kernel # this doesn't work for dppy without modifiers
+    __kernel = kernel  # this doesn't work for dppy without modifiers
 
 ########## not actually called
 
@@ -75,7 +80,7 @@ def euclidean_dist(x1, x2, data_dim):
         diff = x1[i] - x2[i]
         distance += diff * diff
 
-    result = distance**0.5
+    result = distance ** 0.5
     return result
 
 
@@ -94,12 +99,8 @@ def sort_queue(queue_neighbors):
     for i in range(len(queue_neighbors)):
         push_queue(queue_neighbors, queue_neighbors[i], i)
 
+
 ###############
-
-
-
-
-
 
 
 @__kernel

@@ -166,10 +166,7 @@ class workloads:
                 "numba": "kmeans.py",
                 "kernel": "kmeans_kernel.py",
             },
-            all_workloads.knn.value: {
-                "numba": "knn.py",
-                "kernel": "knn.py"
-            },
+            all_workloads.knn.value: {"numba": "knn.py", "kernel": "knn.py"},
             all_workloads.l2_distance.value: {
                 "numba": "l2_distance.py",
                 "kernel": "l2_distance_kernel.py",
@@ -178,10 +175,7 @@ class workloads:
                 "numba": "pairwise_distance.py",
                 "kernel": "pairwise_distance_kernel.py",
             },
-            all_workloads.pca.value: {
-                "numba": "pca.py",
-                "kernel": "pca.py"
-            },
+            all_workloads.pca.value: {"numba": "pca.py", "kernel": "pca.py"},
             # all_workloads.pathfinder.value:{'numba':"pathfinder.py",
             #                            'kernel':"pathfinder.py"},
             all_workloads.rambo.value: {
@@ -197,7 +191,7 @@ class workloads:
         self.wl_list = {
             all_workloads.blackscholes.value: {
                 "execute": False,
-                "ref_input": 2**28,
+                "ref_input": 2 ** 28,
                 "NUMBA_TEST_CMD": [
                     "python",
                     wl_names[all_workloads.blackscholes.value]["numba"]
@@ -219,7 +213,7 @@ class workloads:
                     "--steps",
                     "1",
                     "--size",
-                    str(2**28),
+                    str(2 ** 28),
                 ],
                 "NUMBA_ADVISOR_CMD": [
                     "python",
@@ -229,7 +223,7 @@ class workloads:
                     "--steps",
                     "1",
                     "--size",
-                    str(2**28),
+                    str(2 ** 28),
                 ],
                 "NUMBA_CPU_TEST_CMD": [
                     "python",
@@ -247,7 +241,7 @@ class workloads:
                     "--steps",
                     "1",
                     "--size",
-                    str(2**28),
+                    str(2 ** 28),
                 ],
                 "NUMBA_CPU_ADVISOR_CMD": [
                     "python",
@@ -255,7 +249,7 @@ class workloads:
                     "--steps",
                     "1",
                     "--size",
-                    str(2**28),
+                    str(2 ** 28),
                 ],
                 "NATIVE_TEST_CMD": ["python", "base_bs_erf.py", "--test"],
                 "NATIVE_PERF_CMD": ["python", "base_bs_erf.py"],
@@ -265,14 +259,14 @@ class workloads:
                     "--steps",
                     "1",
                     "--size",
-                    str(2**28),
+                    str(2 ** 28),
                 ],
-                "NATIVE_VTUNE_CMD": ["./black_scholes", str(2**28)],
-                "NATIVE_ADVISOR_CMD": ["./black_scholes", str(2**28)],
+                "NATIVE_VTUNE_CMD": ["./black_scholes", str(2 ** 28)],
+                "NATIVE_ADVISOR_CMD": ["./black_scholes", str(2 ** 28)],
             },
             all_workloads.dbscan.value: {
                 "execute": False,
-                "ref_input": 2**14,
+                "ref_input": 2 ** 14,
                 "NUMBA_TEST_CMD": [
                     "python",
                     wl_names[all_workloads.dbscan.value]["numba"]
@@ -294,7 +288,7 @@ class workloads:
                     "--steps",
                     "1",
                     "--size",
-                    str(2**14),
+                    str(2 ** 14),
                 ],
                 "NUMBA_ADVISOR_CMD": [
                     "python",
@@ -304,7 +298,7 @@ class workloads:
                     "--steps",
                     "1",
                     "--size",
-                    str(2**14),
+                    str(2 ** 14),
                 ],
                 "NUMBA_CPU_TEST_CMD": [
                     "python",
@@ -322,7 +316,7 @@ class workloads:
                     "--steps",
                     "1",
                     "--size",
-                    str(2**14),
+                    str(2 ** 14),
                 ],
                 "NUMBA_CPU_ADVISOR_CMD": [
                     "python",
@@ -330,7 +324,7 @@ class workloads:
                     "--steps",
                     "1",
                     "--size",
-                    str(2**14),
+                    str(2 ** 14),
                 ],
                 "SCIKIT_LEARN_TEST_CMD": ["python", "dbscan.py", "--steps", "1"],
                 "SCIKIT_LEARN_PERF_CMD": ["python", "dbscan.py"],
@@ -340,7 +334,7 @@ class workloads:
                     "--steps",
                     "1",
                     "--size",
-                    str(2**14),
+                    str(2 ** 14),
                 ],
                 "SCIKIT_LEARN_ADVISOR_CMD": [
                     "python",
@@ -348,7 +342,7 @@ class workloads:
                     "--steps",
                     "1",
                     "--size",
-                    str(2**14),
+                    str(2 ** 14),
                 ],
                 "DAAL4PY_TEST_CMD": ["python", "dbscan.py", "--steps", "1"],
                 "DAAL4PY_PERF_CMD": ["python", "dbscan.py"],
@@ -358,7 +352,7 @@ class workloads:
                     "--steps",
                     "1",
                     "--size",
-                    str(2**14),
+                    str(2 ** 14),
                 ],
                 "DAAL4PY_ADVISOR_CMD": [
                     "python",
@@ -366,14 +360,14 @@ class workloads:
                     "--steps",
                     "1",
                     "--size",
-                    str(2**14),
+                    str(2 ** 14),
                 ],
                 "NATIVE_TEST_CMD": ["python", "base_dbscan.py", "--test"],
                 "NATIVE_PERF_CMD": ["python", "base_dbscan.py"],
                 "NATIVE_VTUNE_CMD": [
                     "./dbscan",
                     "1",
-                    str(2**14),
+                    str(2 ** 14),
                     "10",
                     "20",
                     "0.6",
@@ -382,7 +376,7 @@ class workloads:
                 "NATIVE_ADVISOR_CMD": [
                     "./dbscan",
                     "1",
-                    str(2**14),
+                    str(2 ** 14),
                     "10",
                     "20",
                     "0.6",
@@ -398,7 +392,7 @@ class workloads:
                 "NATIVE_OPTIMISED_VTUNE_CMD": [
                     "./dbscan",
                     "1",
-                    str(2**13),
+                    str(2 ** 13),
                     "10",
                     "20",
                     "0.6",
@@ -407,7 +401,7 @@ class workloads:
                 "NATIVE_OPTIMISED_ADVISOR_CMD": [
                     "./dbscan",
                     "1",
-                    str(2**13),
+                    str(2 ** 13),
                     "10",
                     "20",
                     "0.6",
@@ -416,7 +410,7 @@ class workloads:
             },
             all_workloads.kmeans.value: {
                 "execute": False,
-                "ref_input": 2**22,
+                "ref_input": 2 ** 22,
                 "NUMBA_TEST_CMD": [
                     "python",
                     wl_names[all_workloads.kmeans.value]["numba"]
@@ -438,7 +432,7 @@ class workloads:
                     "--steps",
                     "1",
                     "--size",
-                    str(2**20),
+                    str(2 ** 20),
                 ],
                 "NUMBA_ADVISOR_CMD": [
                     "python",
@@ -448,7 +442,7 @@ class workloads:
                     "--steps",
                     "1",
                     "--size",
-                    str(2**20),
+                    str(2 ** 20),
                 ],
                 "NUMBA_CPU_TEST_CMD": [
                     "python",
@@ -466,7 +460,7 @@ class workloads:
                     "--steps",
                     "1",
                     "--size",
-                    str(2**20),
+                    str(2 ** 20),
                 ],
                 "NUMBA_CPU_ADVISOR_CMD": [
                     "python",
@@ -474,7 +468,7 @@ class workloads:
                     "--steps",
                     "1",
                     "--size",
-                    str(2**20),
+                    str(2 ** 20),
                 ],
                 "SCIKIT_LEARN_TEST_CMD": ["python", "kmeans.py", "--steps", "1"],
                 "SCIKIT_LEARN_PERF_CMD": ["python", "kmeans.py"],
@@ -484,7 +478,7 @@ class workloads:
                     "--steps",
                     "1",
                     "--size",
-                    str(2**20),
+                    str(2 ** 20),
                 ],
                 "SCIKIT_LEARN_ADVISOR_CMD": [
                     "python",
@@ -492,7 +486,7 @@ class workloads:
                     "--steps",
                     "1",
                     "--size",
-                    str(2**20),
+                    str(2 ** 20),
                 ],
                 "DAAL4PY_TEST_CMD": ["python", "kmeans.py", "--steps", "1"],
                 "DAAL4PY_PERF_CMD": ["python", "kmeans.py"],
@@ -502,7 +496,7 @@ class workloads:
                     "--steps",
                     "1",
                     "--size",
-                    str(2**20),
+                    str(2 ** 20),
                 ],
                 "DAAL4PY_ADVISOR_CMD": [
                     "python",
@@ -510,12 +504,12 @@ class workloads:
                     "--steps",
                     "1",
                     "--size",
-                    str(2**20),
+                    str(2 ** 20),
                 ],
                 "NATIVE_TEST_CMD": ["python", "base_kmeans.py", "--test"],
                 "NATIVE_PERF_CMD": ["python", "base_kmeans.py"],
-                "NATIVE_VTUNE_CMD": ["./kmeans", "1", str(2**20)],
-                "NATIVE_ADVISOR_CMD": ["./kmeans", "1", str(2**20)],
+                "NATIVE_VTUNE_CMD": ["./kmeans", "1", str(2 ** 20)],
+                "NATIVE_ADVISOR_CMD": ["./kmeans", "1", str(2 ** 20)],
                 "NATIVE_OPTIMISED_TEST_CMD": [
                     "python",
                     "base_kmeans.py",
@@ -529,7 +523,7 @@ class workloads:
                     "--steps",
                     "1",
                     "--size",
-                    str(2**20),
+                    str(2 ** 20),
                 ],
                 "NATIVE_OPTIMISED_ADVISOR_CMD": [
                     "python",
@@ -537,12 +531,12 @@ class workloads:
                     "--steps",
                     "1",
                     "--size",
-                    str(2**20),
+                    str(2 ** 20),
                 ],
             },
             all_workloads.knn.value: {
                 "execute": False,
-                "ref_input": 2**24,
+                "ref_input": 2 ** 24,
                 "NUMBA_TEST_CMD": [
                     "python",
                     wl_names[all_workloads.knn.value]["numba"]
@@ -564,7 +558,7 @@ class workloads:
                     "--steps",
                     "1",
                     "--size",
-                    str(2**24),
+                    str(2 ** 24),
                 ],
                 "NUMBA_ADVISOR_CMD": [
                     "python",
@@ -574,7 +568,7 @@ class workloads:
                     "--steps",
                     "1",
                     "--size",
-                    str(2**24),
+                    str(2 ** 24),
                 ],
                 "NUMBA_CPU_TEST_CMD": [
                     "python",
@@ -592,7 +586,7 @@ class workloads:
                     "--steps",
                     "1",
                     "--size",
-                    str(2**24),
+                    str(2 ** 24),
                 ],
                 "NUMBA_CPU_ADVISOR_CMD": [
                     "python",
@@ -600,7 +594,7 @@ class workloads:
                     "--steps",
                     "1",
                     "--size",
-                    str(2**24),
+                    str(2 ** 24),
                 ],
                 "SCIKIT_LEARN_TEST_CMD": ["python", "knn.py", "--steps", "1"],
                 "SCIKIT_LEARN_PERF_CMD": ["python", "knn.py"],
@@ -610,7 +604,7 @@ class workloads:
                     "--steps",
                     "1",
                     "--size",
-                    str(2**24),
+                    str(2 ** 24),
                 ],
                 "SCIKIT_LEARN_ADVISOR_CMD": [
                     "python",
@@ -618,7 +612,7 @@ class workloads:
                     "--steps",
                     "1",
                     "--size",
-                    str(2**24),
+                    str(2 ** 24),
                 ],
                 "DAAL4PY_TEST_CMD": ["python", "knn.py", "--steps", "1"],
                 "DAAL4PY_PERF_CMD": ["python", "knn.py"],
@@ -628,7 +622,7 @@ class workloads:
                     "--steps",
                     "1",
                     "--size",
-                    str(2**24),
+                    str(2 ** 24),
                 ],
                 "DAAL4PY_ADVISOR_CMD": [
                     "python",
@@ -636,12 +630,12 @@ class workloads:
                     "--steps",
                     "1",
                     "--size",
-                    str(2**24),
+                    str(2 ** 24),
                 ],
                 "NATIVE_TEST_CMD": ["python", "base_knn.py", "--test"],
                 "NATIVE_PERF_CMD": ["python", "base_knn.py"],
-                "NATIVE_VTUNE_CMD": ["./knn", "1", str(2**24)],
-                "NATIVE_ADVISOR_CMD": ["./knn", "1", str(2**24)],
+                "NATIVE_VTUNE_CMD": ["./knn", "1", str(2 ** 24)],
+                "NATIVE_ADVISOR_CMD": ["./knn", "1", str(2 ** 24)],
                 "NATIVE_OPTIMISED_TEST_CMD": ["python", "base_knn.py", "--steps", "1"],
                 "NATIVE_OPTIMISED_PERF_CMD": ["python", "base_knn.py"],
                 "NATIVE_OPTIMISED_VTUNE_CMD": [
@@ -650,7 +644,7 @@ class workloads:
                     "--steps",
                     "1",
                     "--size",
-                    str(2**24),
+                    str(2 ** 24),
                 ],
                 "NATIVE_OPTIMISED_ADVISOR_CMD": [
                     "python",
@@ -658,12 +652,12 @@ class workloads:
                     "--steps",
                     "1",
                     "--size",
-                    str(2**24),
+                    str(2 ** 24),
                 ],
             },
             all_workloads.l2_distance.value: {
                 "execute": False,
-                "ref_input": 2**25,
+                "ref_input": 2 ** 25,
                 "NUMBA_TEST_CMD": [
                     "python",
                     wl_names[all_workloads.l2_distance.value]["numba"]
@@ -671,7 +665,7 @@ class workloads:
                     else wl_names[all_workloads.l2_distance.value]["kernel"],
                     "--steps",
                     "1",
-                    "--test"
+                    "--test",
                 ],
                 "NUMBA_PERF_CMD": [
                     "python",
@@ -687,7 +681,7 @@ class workloads:
                     "--steps",
                     "1",
                     "--size",
-                    str(2**25),
+                    str(2 ** 25),
                 ],
                 "NUMBA_ADVISOR_CMD": [
                     "python",
@@ -697,14 +691,14 @@ class workloads:
                     "--steps",
                     "1",
                     "--size",
-                    str(2**25),
+                    str(2 ** 25),
                 ],
                 "NUMBA_CPU_TEST_CMD": [
                     "python",
                     wl_names[all_workloads.l2_distance.value]["numba"],
                     "--steps",
                     "1",
-                    "--test"
+                    "--test",
                 ],
                 "NUMBA_CPU_PERF_CMD": [
                     "python",
@@ -716,7 +710,7 @@ class workloads:
                     "--steps",
                     "1",
                     "--size",
-                    str(2**25),
+                    str(2 ** 25),
                 ],
                 "NUMBA_CPU_ADVISOR_CMD": [
                     "python",
@@ -724,12 +718,12 @@ class workloads:
                     "--steps",
                     "1",
                     "--size",
-                    str(2**25),
+                    str(2 ** 25),
                 ],
                 "NATIVE_TEST_CMD": ["./l2_distance", "1"],
                 "NATIVE_PERF_CMD": ["./l2_distance"],
-                "NATIVE_VTUNE_CMD": ["./l2_distance", "1", str(2**25)],
-                "NATIVE_ADVISOR_CMD": ["./l2_distance", "1", str(2**25)],
+                "NATIVE_VTUNE_CMD": ["./l2_distance", "1", str(2 ** 25)],
+                "NATIVE_ADVISOR_CMD": ["./l2_distance", "1", str(2 ** 25)],
                 # 'NATIVE_OPTIMISED_TEST_CMD': ["./l2_distance", "1"],
                 # 'NATIVE_OPTIMISED_PERF_CMD': ["./l2_distance"],
                 # 'NATIVE_OPTIMISED_VTUNE_CMD': ["./l2_distance", "1", str(2**22)],
@@ -737,7 +731,7 @@ class workloads:
             },
             all_workloads.pairwise_distance.value: {
                 "execute": False,
-                "ref_input": 2**14,
+                "ref_input": 2 ** 14,
                 "NUMBA_TEST_CMD": [
                     "python",
                     wl_names[all_workloads.pairwise_distance.value]["numba"]
@@ -745,7 +739,7 @@ class workloads:
                     else wl_names[all_workloads.pairwise_distance.value]["kernel"],
                     "--steps",
                     "1",
-                    "--test"
+                    "--test",
                 ],
                 "NUMBA_PERF_CMD": [
                     "python",
@@ -761,7 +755,7 @@ class workloads:
                     "--steps",
                     "1",
                     "--size",
-                    str(2**14),
+                    str(2 ** 14),
                 ],
                 "NUMBA_ADVISOR_CMD": [
                     "python",
@@ -771,7 +765,7 @@ class workloads:
                     "--steps",
                     "1",
                     "--size",
-                    str(2**14),
+                    str(2 ** 14),
                 ],
                 "NUMBA_CPU_TEST_CMD": [
                     "python",
@@ -789,7 +783,7 @@ class workloads:
                     "--steps",
                     "1",
                     "--size",
-                    str(2**13),
+                    str(2 ** 13),
                 ],
                 "NUMBA_CPU_ADVISOR_CMD": [
                     "python",
@@ -797,16 +791,16 @@ class workloads:
                     "--steps",
                     "1",
                     "--size",
-                    str(2**13),
+                    str(2 ** 13),
                 ],
                 "NATIVE_TEST_CMD": ["./pairwise_distance", "1"],
                 "NATIVE_PERF_CMD": ["./pairwise_distance"],
-                "NATIVE_VTUNE_CMD": ["./pairwise_distance", "1", str(2**14), "1"],
-                "NATIVE_ADVISOR_CMD": ["./pairwise_distance", "1", str(2**14), "1"],
+                "NATIVE_VTUNE_CMD": ["./pairwise_distance", "1", str(2 ** 14), "1"],
+                "NATIVE_ADVISOR_CMD": ["./pairwise_distance", "1", str(2 ** 14), "1"],
             },
             all_workloads.pca.value: {
                 "execute": False,
-                "ref_input": 2**19,
+                "ref_input": 2 ** 19,
                 "NUMBA_TEST_CMD": [
                     "python",
                     wl_names[all_workloads.pca.value]["numba"]
@@ -814,7 +808,7 @@ class workloads:
                     else wl_names[all_workloads.pca.value]["kernel"],
                     "--steps",
                     "1",
-                    "--test"
+                    "--test",
                 ],
                 "NUMBA_PERF_CMD": [
                     "python",
@@ -830,7 +824,7 @@ class workloads:
                     "--steps",
                     "1",
                     "--size",
-                    str(2**15),
+                    str(2 ** 15),
                 ],
                 "NUMBA_ADVISOR_CMD": [
                     "python",
@@ -840,7 +834,7 @@ class workloads:
                     "--steps",
                     "1",
                     "--size",
-                    str(2**15),
+                    str(2 ** 15),
                 ],
                 "NUMBA_CPU_TEST_CMD": [
                     "python",
@@ -858,7 +852,7 @@ class workloads:
                     "--steps",
                     "1",
                     "--size",
-                    str(2**15),
+                    str(2 ** 15),
                 ],
                 "NUMBA_CPU_ADVISOR_CMD": [
                     "python",
@@ -866,7 +860,7 @@ class workloads:
                     "--steps",
                     "1",
                     "--size",
-                    str(2**15),
+                    str(2 ** 15),
                 ],
                 "SCIKIT_LEARN_TEST_CMD": ["python", "pca.py", "--steps", "1"],
                 "SCIKIT_LEARN_PERF_CMD": ["python", "pca.py"],
@@ -876,7 +870,7 @@ class workloads:
                     "--steps",
                     "1",
                     "--size",
-                    str(2**15),
+                    str(2 ** 15),
                 ],
                 "SCIKIT_LEARN_ADVISOR_CMD": [
                     "python",
@@ -884,7 +878,7 @@ class workloads:
                     "--steps",
                     "1",
                     "--size",
-                    str(2**15),
+                    str(2 ** 15),
                 ],
                 "DAAL4PY_TEST_CMD": ["python", "pca.py", "--steps", "1"],
                 "DAAL4PY_PERF_CMD": ["python", "pca.py"],
@@ -894,7 +888,7 @@ class workloads:
                     "--steps",
                     "1",
                     "--size",
-                    str(2**15),
+                    str(2 ** 15),
                 ],
                 "DAAL4PY_ADVISOR_CMD": [
                     "python",
@@ -902,7 +896,7 @@ class workloads:
                     "--steps",
                     "1",
                     "--size",
-                    str(2**15),
+                    str(2 ** 15),
                 ],
                 "NATIVE_TEST_CMD": ["python", "base_pca.py", "--steps", "1"],
                 "NATIVE_PERF_CMD": ["python", "base_pca.py"],
@@ -912,7 +906,7 @@ class workloads:
                     "--steps",
                     "1",
                     "--size",
-                    str(2**15),
+                    str(2 ** 15),
                 ],
                 "NATIVE_ADVISOR_CMD": [
                     "python",
@@ -920,7 +914,7 @@ class workloads:
                     "--steps",
                     "1",
                     "--size",
-                    str(2**15),
+                    str(2 ** 15),
                 ],
                 "NATIVE_OPTIMISED_TEST_CMD": ["python", "base_pca.py", "--steps", "1"],
                 "NATIVE_OPTIMISED_PERF_CMD": ["python", "base_pca.py"],
@@ -930,7 +924,7 @@ class workloads:
                     "--steps",
                     "1",
                     "--size",
-                    str(2**15),
+                    str(2 ** 15),
                 ],
                 "NATIVE_OPTIMISED_ADVISOR_CMD": [
                     "python",
@@ -938,7 +932,7 @@ class workloads:
                     "--steps",
                     "1",
                     "--size",
-                    str(2**15),
+                    str(2 ** 15),
                 ],
             },
             all_workloads.rambo.value: {
@@ -951,7 +945,7 @@ class workloads:
                     else wl_names[all_workloads.rambo.value]["kernel"],
                     "--steps",
                     "1",
-                    "--test"
+                    "--test",
                 ],
                 "NUMBA_PERF_CMD": [
                     "python",
@@ -1018,7 +1012,7 @@ class workloads:
                     "1",
                     "--test",
                     "--size",
-                    "1024"
+                    "1024",
                 ],
                 "NUMBA_PERF_CMD": [
                     "python",

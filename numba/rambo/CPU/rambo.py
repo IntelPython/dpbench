@@ -74,7 +74,7 @@ def get_output_mom2(C1, F1, Q1, nevts, nout):
     for i in numba.prange(nevts):
         for j in range(nout):
             C = 2.0 * C1[i, j] - 1.0
-            S = numpy.sqrt(1 - C**2)
+            S = numpy.sqrt(1 - C ** 2)
             F = 2.0 * numpy.pi * F1[i, j]
             Q = -numpy.log(Q1[i, j])
 

@@ -12,6 +12,7 @@ from device_selector import get_device_selector
 backend = os.getenv("NUMBA_BACKEND", "legacy")
 if backend == "legacy":
     import numba as nb
+
     # Naieve pairwise distance impl - take an array representing M points in N dimensions, and return the M x M matrix of Euclidean distances
     @nb.njit(parallel=True, fastmath=True)
     def pw_distance_kernel(X1, X2, D):
@@ -31,8 +32,11 @@ if backend == "legacy":
                     d += tmp * tmp
                 # Write computed distance to distance matrix
                 D[i, j] = np.sqrt(d)
+
+
 else:
     import numba_dpcomp as nb
+
     # Naieve pairwise distance impl - take an array representing M points in N dimensions, and return the M x M matrix of Euclidean distances
     @nb.njit(parallel=True, fastmath=True, enable_gpu_pipeline=True)
     def pw_distance_kernel(X1, X2, D):
@@ -53,8 +57,10 @@ else:
                 # Write computed distance to distance matrix
                 D[i, j] = np.sqrt(d)
 
+
 def pw_distance(X1, X2, D):
     with dpctl.device_context(get_device_selector(is_gpu=True)):
         pw_distance_kernel(X1, X2, D)
+
 
 base_pair_wise.run("Numba par_for", pw_distance)

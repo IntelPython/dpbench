@@ -39,11 +39,15 @@ DEFAULT_QUEUE_CAPACITY = 10
 backend = os.getenv("NUMBA_BACKEND", "legacy")
 if backend == "legacy":
     import numba as nb
+
     __pjit = nb.jit(nopython=True, parallel=True, fastmath=True)
     __jit = nb.jit(nopython=True)
 else:
     import numba_dpcomp as nb
-    __pjit = nb.jit(nopython=True, parallel=True, fastmath=True, enable_gpu_pipeline=True)
+
+    __pjit = nb.jit(
+        nopython=True, parallel=True, fastmath=True, enable_gpu_pipeline=True
+    )
     __jit = nb.jit(nopython=True)
 
 
@@ -76,7 +80,7 @@ def get_neighborhood(n, dim, data, eps, ind_lst, sz_lst, assignments):
                         sz_lst[j] = size + 1
 
 
-@__jit # commented out to benchmark dpcomp for GPU, since no mixed execution
+@__jit  # commented out to benchmark dpcomp for GPU, since no mixed execution
 def compute_clusters(n, min_pts, assignments, sizes, indices_list):
     nclusters = 0
     nnoise = 0

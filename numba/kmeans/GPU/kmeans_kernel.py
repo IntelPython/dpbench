@@ -10,22 +10,13 @@ ITERATIONS = 30
 backend = os.getenv("NUMBA_BACKEND", "legacy")
 
 if backend == "legacy":
-    from numba_dppy import kernel, get_global_id, atomic, DEFAULT_LOCAL_SIZE
+    from numba_dppy import kernel, atomic, DEFAULT_LOCAL_SIZE
     import numba_dppy
 
     atomic_add = atomic.add
-
-    __kernel = numba_dppy.kernel(
-        access_types={
-            "read_only": ["data"],
-            "write_only": ["assignments", "ind_lst"],
-            "read_write": ["sz_lst"],
-        }
-    )
 else:
     from numba_dpcomp.mlir.kernel_impl import (
         kernel,
-        get_global_id,
         atomic,
         DEFAULT_LOCAL_SIZE,
     )

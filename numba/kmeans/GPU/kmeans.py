@@ -18,7 +18,7 @@ if backend == "legacy":
 else:
     import numba_dpcomp as nb
 
-    __njit = nb.njit(parallel=True, fastmath=True, enable_gpu_pipeline=True)
+    __njit = nb.jit(nopython=True, parallel=True, fastmath=True, enable_gpu_pipeline=True)
 
 
 # determine the euclidean distance from the cluster center to each point
@@ -70,8 +70,7 @@ def kmeans(
 ):
 
     for i in range(ITERATIONS):
-        with dpctl.device_context(get_device_selector(is_gpu=True)):
-            groupByCluster(arrayP, arrayPcluster, arrayC, num_points, num_centroids)
+        groupByCluster(arrayP, arrayPcluster, arrayC, num_points, num_centroids)
 
         calCentroidsSum(
             arrayP, arrayPcluster, arrayCsum, arrayCnumpoint, num_points, num_centroids
@@ -92,20 +91,21 @@ def run_kmeans(
     NUMBER_OF_CENTROIDS,
 ):
 
-    for i in range(REPEAT):
-        for i1 in range(NUMBER_OF_CENTROIDS):
-            arrayC[i1, 0] = arrayP[i1, 0]
-            arrayC[i1, 1] = arrayP[i1, 1]
+    with dpctl.device_context(get_device_selector(is_gpu=True)):
+        for i in range(REPEAT):
+            for i1 in range(NUMBER_OF_CENTROIDS):
+                arrayC[i1, 0] = arrayP[i1, 0]
+                arrayC[i1, 1] = arrayP[i1, 1]
 
-        arrayC, arrayCsum, arrayCnumpoint = kmeans(
-            arrayP,
-            arrayPclusters,
-            arrayC,
-            arrayCsum,
-            arrayCnumpoint,
-            NUMBER_OF_POINTS,
-            NUMBER_OF_CENTROIDS,
-        )
+            arrayC, arrayCsum, arrayCnumpoint = kmeans(
+                arrayP,
+                arrayPclusters,
+                arrayC,
+                arrayCsum,
+                arrayCnumpoint,
+                NUMBER_OF_POINTS,
+                NUMBER_OF_CENTROIDS,
+            )
 
 
 base_kmeans.run("Kmeans Numba", run_kmeans)

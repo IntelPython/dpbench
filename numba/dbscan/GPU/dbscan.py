@@ -48,7 +48,7 @@ else:
     __pjit = nb.jit(
         nopython=True, parallel=True, fastmath=True, enable_gpu_pipeline=True
     )
-    __jit = nb.jit(nopython=True)
+    __jit = nb.jit(nopython=True, enable_gpu_pipeline=True)
 
 
 @__pjit

@@ -1,9 +1,9 @@
 # Copyright (C) 2017-2018 Intel Corporation
 #
 # SPDX-License-Identifier: MIT
-
-import os, json
+import os, json, datetime
 import numpy as np
+import numpy.random as rnd
 import dpctl, dpctl.tensor as dpt
 
 from dpbench_python.gpairs.gpairs_python import gpairs_python
@@ -199,9 +199,13 @@ def run(name, alg, sizes=5, step=2, nopt=2 ** 16):
 
     output = {}
     output["name"] = name
+    output["datetime"] = datetime.datetime.strftime(
+        datetime.datetime.now(), "%Y-%m-%d %H:%M:%S"
+    )
     output["sizes"] = sizes
     output["step"] = step
     output["repeat"] = repeat
+    output["randseed"] = -1
     output["metrics"] = []
 
     if args.test:

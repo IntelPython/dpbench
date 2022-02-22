@@ -4,10 +4,11 @@
 
 import numpy as np
 import numpy.random as rnd
-import sys, json, os
+import sys, json, os, datetime
 import dpctl, dpctl.memory as dpmem, dpctl.tensor as dpt
 from dpbench_python.kmeans.kmeans_python import kmeans_python
 from dpbench_datagen.kmeans import gen_rand_data
+from dpbench_datagen.kmeans.generate_data_random import SEED
 
 try:
     import itimer as it
@@ -156,9 +157,13 @@ def run(name, alg, sizes=5, step=2, nopt=2 ** 13):
 
     output = {}
     output["name"] = name
+    output["datetime"] = datetime.datetime.strftime(
+        datetime.datetime.now(), "%Y-%m-%d %H:%M:%S"
+    )
     output["sizes"] = sizes
     output["step"] = step
     output["repeat"] = repeat
+    output["randseed"] = SEED
     output["metrics"] = []
 
     if args.test:

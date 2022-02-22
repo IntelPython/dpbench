@@ -3,7 +3,7 @@
 # SPDX-License-Identifier: MIT
 
 import numpy as np
-import sys, os, json
+import sys, os, json, datetime
 
 # import numpy.random_intel as rnd
 import numpy.random as rnd
@@ -12,6 +12,7 @@ import dpctl.tensor as dpt
 
 from dpbench_python.l2_distance.l2_distance_python import l2_distance_python
 from dpbench_datagen.l2_distance import gen_data
+from dpbench_datagen.l2_distance.generate_data_random import SEED
 
 
 from timeit import default_timer
@@ -22,7 +23,6 @@ get_mops = lambda t0, t1, n: (n / (t1 - t0), t1 - t0)
 ######################################################
 # GLOBAL DECLARATIONS THAT WILL BE USED IN ALL FILES #
 ######################################################
-
 # make xrange available in python 3
 try:
     xrange
@@ -134,10 +134,14 @@ def run(name, alg, sizes=10, step=2, nopt=2 ** 20):
 
     output = {}
     output["name"] = name
+    output["datetime"] = datetime.datetime.strftime(
+        datetime.datetime.now(), "%Y-%m-%d %H:%M:%S"
+    )
     output["sizes"] = sizes
     output["step"] = step
     output["repeat"] = repeat
     output["dims"] = dims
+    output["randseed"] = SEED
     output["metrics"] = []
 
     times = np.empty(repeat)
@@ -187,7 +191,7 @@ def run(name, alg, sizes=10, step=2, nopt=2 ** 20):
             "ERF: {:15s} | Size: {:10d} | TIME: {:10.6f}".format(name, nopt, time),
             flush=True,
         )
-        output["metrics"].append((nopt, time))
+        output["metrics"].append((nopt, 0, time))  # zero placeholder for mops
         # f.write(str(nopt) + "," + str(mops * 2 * repeat) + "\n")
         f2.write(str(nopt) + "," + str(time) + "\n")
 

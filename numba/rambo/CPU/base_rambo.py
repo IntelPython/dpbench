@@ -4,6 +4,7 @@
 
 import numpy.random as rnd
 import json
+import datetime
 
 try:
     import itimer as it
@@ -65,6 +66,9 @@ def run(name, alg, sizes=6, step=2, nopt=2 ** 13):
 
     output = {}
     output["name"] = name
+    output["datetime"] = datetime.datetime.strftime(
+        datetime.datetime.now(), "%Y-%m-%d %H:%M:%S"
+    )
     output["sizes"] = sizes
     output["step"] = step
     output["repeat"] = repeat

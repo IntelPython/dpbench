@@ -25,7 +25,7 @@
 # *****************************************************************************
 
 import argparse
-import sys, os, json
+import sys, os, json, datetime
 import numpy as np
 import numpy.random as rnd
 
@@ -37,6 +37,7 @@ from dpbench_datagen.knn import (
     TRAIN_DATA_SIZE,
     N_NEIGHBORS,
 )
+from dpbench_datagen.knn.generate_data_random import SEED_TEST
 from dpbench_python.knn.knn_python import knn_python
 import dpctl
 import dpctl.tensor as dpt
@@ -187,9 +188,13 @@ def run(name, alg, sizes=5, step=2, nopt=2 ** 20):
 
     output = {}
     output["name"] = name
+    output["datetime"] = datetime.datetime.strftime(
+        datetime.datetime.now(), "%Y-%m-%d %H:%M:%S"
+    )
     output["sizes"] = sizes
     output["step"] = step
     output["repeat"] = repeat
+    output["randseed"] = SEED_TEST
     output["metrics"] = []
 
     if args.test:

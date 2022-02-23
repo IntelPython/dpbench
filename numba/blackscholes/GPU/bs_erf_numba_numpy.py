@@ -27,6 +27,7 @@ else:
 def nberf(x):
     return erf(x)
 
+
 # blackscholes implemented using numpy function calls
 @__njit
 def black_scholes_kernel(price, strike, t, rate, vol, call, put):

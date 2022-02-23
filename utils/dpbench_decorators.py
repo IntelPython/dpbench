@@ -25,6 +25,7 @@
 # *****************************************************************************
 
 import os
+
 # from numba import jit, njit, vectorize
 
 backend = os.getenv("NUMBA_BACKEND", "legacy")

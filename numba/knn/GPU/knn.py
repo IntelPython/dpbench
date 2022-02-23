@@ -39,12 +39,10 @@ if backend == "legacy":
     from numba_dppy import kernel, DEFAULT_LOCAL_SIZE
     import numba_dppy
 else:
-    from numba_dpcomp.mlir.kernel_impl import (
-        kernel,
-        DEFAULT_LOCAL_SIZE,
-    )
+    from numba_dpcomp.mlir.kernel_impl import kernel, DEFAULT_LOCAL_SIZE
 
     import numba_dpcomp.mlir.kernel_impl as numba_dppy  # this doesn't work for dppy if no explicit numba_dppy before get_global_id(0)
+
 
 @kernel(
     access_types={

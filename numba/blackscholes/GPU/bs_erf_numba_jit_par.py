@@ -22,7 +22,6 @@ else:
     __vectorize = nb.vectorize(nopython=True, enable_gpu_pipeline=True)
 
 
-
 # blackscholes implemented as a parallel loop using numba.prange
 @__njit
 def black_scholes_kernel(nopt, price, strike, t, rate, vol, call, put):

@@ -36,74 +36,28 @@ from device_selector import get_device_selector
 backend = os.getenv("NUMBA_BACKEND", "legacy")
 
 if backend == "legacy":
-    from numba_dppy import kernel, get_global_id, atomic, DEFAULT_LOCAL_SIZE
-
+    from numba_dppy import kernel, DEFAULT_LOCAL_SIZE
     import numba_dppy
-
-    __kernel = numba_dppy.kernel(
-        access_types={
-            "read_only": [
-                "train",
-                "train_labels",
-                "test",
-                "votes_to_classes_lst",
-                "queue_neighbors_lst",
-            ],
-            "write_only": ["predictions"],
-        }
-    )
 else:
     from numba_dpcomp.mlir.kernel_impl import (
         kernel,
-        get_global_id,
-        atomic,
         DEFAULT_LOCAL_SIZE,
     )
 
     import numba_dpcomp.mlir.kernel_impl as numba_dppy  # this doesn't work for dppy if no explicit numba_dppy before get_global_id(0)
 
-    __kernel = kernel  # this doesn't work for dppy without modifiers
-
-########## not actually called
-
-# @numba.jit(nopython=True)
-# def euclidean_dist(x1, x2):
-#     return np.linalg.norm(x1-x2)
-
-
-# @kernel_func
-@numba.jit(nopython=True)
-def euclidean_dist(x1, x2, data_dim):
-    distance = 0
-
-    for i in range(data_dim):
-        diff = x1[i] - x2[i]
-        distance += diff * diff
-
-    result = distance ** 0.5
-    return result
-
-
-# @kernel_func
-@numba.jit(nopython=True)
-def push_queue(queue_neighbors, new_distance, index=4):  # 4: k-1
-    while index > 0 and new_distance[0] < queue_neighbors[index - 1, 0]:
-        queue_neighbors[index] = queue_neighbors[index - 1]
-        index = index - 1
-        queue_neighbors[index] = new_distance
-
-
-# @kernel_func
-@numba.jit(nopython=True)
-def sort_queue(queue_neighbors):
-    for i in range(len(queue_neighbors)):
-        push_queue(queue_neighbors, queue_neighbors[i], i)
-
-
-###############
-
-
-@__kernel
+@kernel(
+    access_types={
+        "read_only": [
+            "train",
+            "train_labels",
+            "test",
+            "votes_to_classes_lst",
+            "queue_neighbors_lst",
+        ],
+        "write_only": ["predictions"],
+    }
+)
 def run_knn_kernel(
     train,
     train_labels,
@@ -132,10 +86,7 @@ def run_knn_kernel(
         queue_neighbors[j, 0] = dist
         queue_neighbors[j, 1] = train_labels[j]
 
-    # sort_queue(queue_neighbors)
-    # for j in range(len(queue_neighbors)):
     for j in range(k):
-        # push_queue(queue_neighbors, queue_neighbors[i], i)
         new_distance = queue_neighbors[j, 0]
         new_neighbor_label = queue_neighbors[j, 1]
         index = j
@@ -150,7 +101,6 @@ def run_knn_kernel(
             queue_neighbors[index, 1] = new_neighbor_label
 
     for j in range(k, train_size):
-        # dist = euclidean_dist(train[j], test[i])
         x1 = train[j]
         x2 = test[i]
 
@@ -163,7 +113,6 @@ def run_knn_kernel(
         if dist < queue_neighbors[k - 1][0]:
             queue_neighbors[k - 1][0] = dist
             queue_neighbors[k - 1][1] = train_labels[j]
-            # push_queue(queue_neighbors, queue_neighbors[k - 1])
             new_distance = queue_neighbors[k - 1, 0]
             new_neighbor_label = queue_neighbors[k - 1, 1]
             index = k - 1

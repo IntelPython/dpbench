@@ -42,7 +42,7 @@ if backend == "legacy":
     from numba_dppy import kernel, DEFAULT_LOCAL_SIZE
     import numba_dppy
 
-    __jit = numba.jit(nopython=True)
+    __jit = jit(nopython=True)
 else:
     from numba_dpcomp.mlir.kernel_impl import kernel, DEFAULT_LOCAL_SIZE
     import numba_dpcomp

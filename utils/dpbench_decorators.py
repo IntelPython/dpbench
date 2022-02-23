@@ -24,4 +24,18 @@
 # EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 # *****************************************************************************
 
-from numba import jit, njit, vectorize
+import os
+# from numba import jit, njit, vectorize
+
+backend = os.getenv("NUMBA_BACKEND", "legacy")
+if backend == "legacy":
+    import numba as nb
+
+    njit_gpu = nb.njit(parallel=True, fastmath=True)
+    vectorize_gpu = nb.vectorize(nopython=True)
+else:
+    import numba_dpcomp as nb
+    import numba
+
+    njit_gpu = nb.njit(parallel=True, fastmath=True, enable_gpu_pipeline=True)
+    vectorize_gpu = numba.vectorize(nopython=True, enable_gpu_pipeline=True)

@@ -2,6 +2,7 @@ import dpctl
 import base_kmeans
 import numpy
 import numba_dppy
+from device_selector import get_device_selector
 
 REPEAT = 1
 
@@ -50,14 +51,13 @@ def kmeans(
 ):
 
     for i in range(ITERATIONS):
-        with dpctl.device_context(base_kmeans.get_device_selector()):
+        with dpctl.device_context(get_device_selector(is_gpu=True)):
             groupByCluster[num_points, numba_dppy.DEFAULT_LOCAL_SIZE](
                 arrayP, arrayPcluster, arrayC, num_points, num_centroids
             )
 
             calCentroidsSum1[num_centroids, numba_dppy.DEFAULT_LOCAL_SIZE](
-                arrayCsum,
-                arrayCnumpoint,
+                arrayCsum, arrayCnumpoint
             )
 
         calCentroidsSum2(arrayP, arrayPcluster, arrayCsum, arrayCnumpoint, num_points)

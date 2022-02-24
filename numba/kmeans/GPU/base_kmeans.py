@@ -9,6 +9,7 @@ import dpctl, dpctl.memory as dpmem, dpctl.tensor as dpt
 from dpbench_python.kmeans.kmeans_python import kmeans_python
 from dpbench_datagen.kmeans import gen_rand_data
 from dpbench_datagen.kmeans.generate_data_random import SEED
+from device_selector import get_device_selector
 
 try:
     import itimer as it
@@ -34,22 +35,21 @@ except NameError:
 NUMBER_OF_CENTROIDS = 10
 
 ###############################################
-def get_device_selector(is_gpu=True):
-    if is_gpu is True:
-        device_selector = "gpu"
-    else:
-        device_selector = "cpu"
 
-    if (
-        os.environ.get("SYCL_DEVICE_FILTER") is None
-        or os.environ.get("SYCL_DEVICE_FILTER") == "opencl"
-    ):
-        return "opencl:" + device_selector
 
-    if os.environ.get("SYCL_DEVICE_FILTER") == "level_zero":
-        return "level_zero:" + device_selector
+def printCentroid(arrayC, arrayCsum, arrayCnumpoint, NUMBER_OF_CENTROIDS):
+    for i in range(NUMBER_OF_CENTROIDS):
+        print(
+            "[x={:6f}, y={:6f}, x_sum={:6f}, y_sum={:6f}, num_points={:d}]".format(
+                arrayC[i, 0],
+                arrayC[i, 1],
+                arrayCsum[i, 0],
+                arrayCsum[i, 1],
+                arrayCnumpoint[i],
+            )
+        )
 
-    return os.environ.get("SYCL_DEVICE_FILTER")
+    print("--------------------------------------------------")
 
 
 def gen_data_np(nopt):
@@ -64,7 +64,7 @@ def gen_data_usm(nopt):
         nopt, dtype=np.float32
     )
 
-    with dpctl.device_context(get_device_selector()) as gpu_queue:
+    with dpctl.device_context(get_device_selector(is_gpu=True)) as gpu_queue:
         X_usm = dpt.usm_ndarray(
             X.shape,
             dtype=X.dtype,

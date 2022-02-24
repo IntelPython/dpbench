@@ -25,9 +25,10 @@
 # *****************************************************************************
 
 import dpctl
+import os
 import numpy as np
 from numba import jit
-import numba_dppy
+from device_selector import get_device_selector
 import base_dbscan
 import utils
 
@@ -35,8 +36,22 @@ NOISE = -1
 UNDEFINED = -2
 DEFAULT_QUEUE_CAPACITY = 10
 
+backend = os.getenv("NUMBA_BACKEND", "legacy")
 
-@numba_dppy.kernel(
+if backend == "legacy":
+    from numba_dppy import kernel, DEFAULT_LOCAL_SIZE
+    import numba_dppy
+
+    __jit = jit(nopython=True)
+else:
+    from numba_dpcomp.mlir.kernel_impl import kernel, DEFAULT_LOCAL_SIZE
+    import numba_dpcomp
+    import numba_dpcomp.mlir.kernel_impl as numba_dppy  # this doesn't work for dppy if no explicit numba_dppy before get_global_id(0)
+
+    __jit = numba_dpcomp.jit(nopython=True, enable_gpu_pipeline=True)
+
+
+@kernel(
     access_types={
         "read_only": ["data"],
         "write_only": ["assignments", "ind_lst"],
@@ -72,28 +87,7 @@ def get_neighborhood(
                     sz_lst[j] = size + 1
 
 
-# def call_ocl(n, dim, data, eps, ind_lst, dist_lst, sz_lst, assignments):
-#     device_env = numba_dppy.runtime.get_gpu_device()
-
-#     ddata = device_env.copy_array_to_device(data)
-#     dsz_lst = device_env.copy_array_to_device(sz_lst)
-
-#     dind_lst = numba_dppy.DeviceArray(device_env.get_env_ptr(), ind_lst)
-#     ddist_lst = numba_dppy.DeviceArray(device_env.get_env_ptr(), dist_lst)
-#     dassignments = numba_dppy.DeviceArray(device_env.get_env_ptr(), assignments)
-
-#     block_size = 1  # nBlocks to be equal to n on GPU
-#     nblocks = n // block_size + int(n % block_size > 0)
-
-#     get_neighborhood[nblocks,](n, dim, ddata, eps, dind_lst, ddist_lst, dsz_lst, dassignments,
-#                                 block_size, nblocks)
-
-#     device_env.copy_array_from_device(dind_lst)
-#     device_env.copy_array_from_device(dsz_lst)
-#     device_env.copy_array_from_device(dassignments)
-
-
-@jit(nopython=True)
+@__jit
 def compute_clusters(n, min_pts, assignments, sizes, indices_list):
     nclusters = 0
     nnoise = 0
@@ -139,15 +133,12 @@ def compute_clusters(n, min_pts, assignments, sizes, indices_list):
 
 def dbscan(n, dim, data, eps, min_pts, assignments):
     indices_list = np.empty(n * n, dtype=np.int64)
-    # distances_list = np.empty(n*n)
     sizes = np.zeros(n, dtype=np.int64)
 
-    with dpctl.device_context(base_dbscan.get_device_selector()):
-        get_neighborhood[n, numba_dppy.DEFAULT_LOCAL_SIZE](
+    with dpctl.device_context(get_device_selector(is_gpu=True)):
+        get_neighborhood[n, DEFAULT_LOCAL_SIZE](
             n, dim, data, eps, indices_list, sizes, assignments, 1, n
         )
-
-    # call_ocl(n, dim, data, eps, indices_list, distances_list, sizes, assignments)
 
     return compute_clusters(n, min_pts, assignments, sizes, indices_list)
 

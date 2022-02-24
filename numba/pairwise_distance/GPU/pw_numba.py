@@ -6,7 +6,7 @@ import dpctl
 import base_pair_wise
 import numpy as np
 import numba
-
+from device_selector import get_device_selector
 
 # Pairwise Numpy implementation using the equation (a-b)^2 = a^2 + b^2 - 2*a*b
 @numba.njit(parallel=True, fastmath=True)
@@ -28,7 +28,7 @@ def pw_distance_kernel(X1, X2, D):
 
 
 def pw_distance(X1, X2, D):
-    with dpctl.device_context(base_pair_wise.get_device_selector()):
+    with dpctl.device_context(get_device_selector(is_gpu=True)):
         pw_distance_kernel(X1, X2, D)
 
 

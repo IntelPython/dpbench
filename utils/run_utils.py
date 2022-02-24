@@ -126,8 +126,7 @@ def run_command(
         print("executing:", subprocess.list2cmdline(command_string))
 
     try:
-        output = subprocess.check_output(command_string)
-
+        output = subprocess.check_output(command_string, universal_newlines=True)
         if verbose == 1:
             print(output)
     except subprocess.CalledProcessError as e:

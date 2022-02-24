@@ -20,8 +20,9 @@ def __dump_text__(data_array, file_name):
 
 def gen_data(nopt, dims, dtype=DTYPE):
     rnd.seed(SEED)
-    return rnd.random((nopt, dims)).astype(dtype), rnd.random((nopt, dims)).astype(
-        dtype
+    return (
+        rnd.random((nopt, dims)).astype(dtype),
+        rnd.random((nopt, dims)).astype(dtype),
     )
 
 

@@ -6,6 +6,7 @@
 from __future__ import print_function
 import numpy as np
 import sys, json, os, datetime
+from device_selector import get_device_selector
 
 try:
     import dpctl, dpctl.memory as dpmem, dpctl.tensor as dpt
@@ -66,24 +67,6 @@ TEST_ARRAY_LENGTH = 1024
 ###############################################
 
 
-def get_device_selector(is_gpu=False):
-    if is_gpu is True:
-        device_selector = "gpu"
-    else:
-        device_selector = "cpu"
-
-    if (
-        os.environ.get("SYCL_DEVICE_FILTER") is None
-        or os.environ.get("SYCL_DEVICE_FILTER") == "opencl"
-    ):
-        return "opencl:" + device_selector
-
-    if os.environ.get("SYCL_DEVICE_FILTER") == "level_zero":
-        return "level_zero:" + device_selector
-
-    return os.environ.get("SYCL_DEVICE_FILTER")
-
-
 def gen_data_np(nopt):
     price, strike, t = gen_rand_data(nopt)
     return (
@@ -101,7 +84,7 @@ def gen_data_usm(nopt):
     call_buf = np.zeros(nopt, dtype=np.float64)
     put_buf = -np.ones(nopt, dtype=np.float64)
 
-    with dpctl.device_context(get_device_selector()) as cpu_queue:
+    with dpctl.device_context(get_device_selector(is_gpu=False)) as cpu_queue:
         # init usmdevice memory
         # price_usm = dpmem.MemoryUSMDevice(nopt*np.dtype('f8').itemsize)
         # strike_usm = dpmem.MemoryUSMDevice(nopt*np.dtype('f8').itemsize)
@@ -222,7 +205,7 @@ def run(name, alg, sizes=14, step=2, nopt=2 ** 15):
         if args.usm is True:  # test usm feature
             price_usm, strike_usm, t_usm, call_usm, put_usm = gen_data_usm(nopt)
             # pass usm input data to kernel
-            with dpctl.device_context(get_device_selector()):
+            with dpctl.device_context(get_device_selector(is_gpu=False)):
                 alg(
                     nopt,
                     price_usm,

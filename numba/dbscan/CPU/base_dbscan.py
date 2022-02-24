@@ -32,7 +32,8 @@ import numpy.random as rnd
 from typing import NamedTuple
 from sklearn.datasets import make_blobs
 from sklearn.preprocessing import StandardScaler
-import dbscan_python
+
+from dpbench_python.dbscan.dbscan_python import dbscan_python
 
 try:
     import itimer as it

@@ -6,14 +6,21 @@
 from __future__ import print_function
 import numpy as np
 import sys, json, os, datetime
-from device_selector import get_device_selector
 
 try:
     import dpctl, dpctl.memory as dpmem, dpctl.tensor as dpt
 except ImportError:
     pass
+
+import inspect
+
+current_dir = os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentframe())))
+sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.dirname(current_dir))))
+
+from device_selector import get_device_selector
 from dpbench_datagen.blackscholes.generate_data_random import SEED
-from ..utils.dpbench_python.blackscholes.bs_python import black_scholes_python
+from dpbench_python.blackscholes.bs_python import black_scholes_python
+from dpbench_datagen.blackscholes import gen_rand_data
 
 try:
     from numpy import erf
@@ -41,8 +48,6 @@ except:
 
     now = default_timer
     get_mops = lambda t0, t1, n: (n / (t1 - t0), t1 - t0)
-
-from utils.dpbench_datagen.blackscholes import gen_rand_data
 
 ######################################################
 # GLOBAL DECLARATIONS THAT WILL BE USED IN ALL FILES #

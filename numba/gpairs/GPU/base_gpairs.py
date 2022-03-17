@@ -7,7 +7,7 @@ import numpy as np
 import dpctl, dpctl.tensor as dpt
 
 from dpbench_python.gpairs.gpairs_python import gpairs_python
-from dpbench_datagen.gpairs import gen_rand_data
+from dpbench_datagen.gpairs import gen_rand_data, DEFAULT_NBINS
 
 try:
     import itimer as it
@@ -23,7 +23,7 @@ except:
 ######################################################
 # GLOBAL DECLARATIONS THAT WILL BE USED IN ALL FILES #
 ######################################################
-DEFAULT_NBINS = 20
+#DEFAULT_NBINS = 20
 
 # make xrange available in python 3
 try:
@@ -54,7 +54,7 @@ def gen_data_np(npoints, dtype=np.float32):
     x1, y1, z1, w1, x2, y2, z2, w2, DEFAULT_RBINS_SQUARED = gen_rand_data(
         npoints, dtype
     )
-    result = np.zeros_like(DEFAULT_RBINS_SQUARED)[:-1].astype(dtype)
+    result = np.zeros_like(DEFAULT_RBINS_SQUARED).astype(dtype)
     return (x1, y1, z1, w1, x2, y2, z2, w2, DEFAULT_RBINS_SQUARED, result)
 
 
@@ -223,8 +223,8 @@ def run(name, alg, sizes=5, step=2, nopt=2 ** 16):
                 DEFAULT_RBINS_SQUARED,
                 result_usm,
             ) = gen_data_usm(nopt)
-            alg(x1, y1, z1, w1, x2, y2, z2, w2, DEFAULT_RBINS_SQUARED, result_usm)
-            result_n = np.empty(DEFAULT_NBINS - 1, dtype=np.float32)
+            alg(nopt, DEFAULT_NBINS, x1, y1, z1, w1, x2, y2, z2, w2, DEFAULT_RBINS_SQUARED, result_usm)
+            result_n = np.empty(DEFAULT_NBINS, dtype=np.float32)
             result_usm.usm_data.copy_to_host(result_n.view("u1"))
         else:
             (
@@ -241,7 +241,7 @@ def run(name, alg, sizes=5, step=2, nopt=2 ** 16):
             ) = gen_data_np(nopt)
 
             # pass numpy generated data to kernel
-            alg(x1, y1, z1, w1, x2, y2, z2, w2, DEFAULT_RBINS_SQUARED, result_n)
+            alg(nopt, DEFAULT_NBINS, x1, y1, z1, w1, x2, y2, z2, w2, DEFAULT_RBINS_SQUARED, result_n)
 
         if np.allclose(result_p, result_n):
             print("Test succeeded\n")
@@ -278,10 +278,10 @@ def run(name, alg, sizes=5, step=2, nopt=2 ** 16):
             )
         iterations = xrange(repeat)
 
-        alg(x1, y1, z1, w1, x2, y2, z2, w2, DEFAULT_RBINS_SQUARED, result)  # warmup
+        alg(nopt, DEFAULT_NBINS, x1, y1, z1, w1, x2, y2, z2, w2, DEFAULT_RBINS_SQUARED, result)  # warmup
         t0 = now()
         for _ in iterations:
-            alg(x1, y1, z1, w1, x2, y2, z2, w2, DEFAULT_RBINS_SQUARED, result)
+            alg(nopt, DEFAULT_NBINS, x1, y1, z1, w1, x2, y2, z2, w2, DEFAULT_RBINS_SQUARED, result)
 
         mops, time = get_mops(t0, now(), nopt)
         f.write(str(nopt) + "," + str(mops * 2 * repeat) + "\n")

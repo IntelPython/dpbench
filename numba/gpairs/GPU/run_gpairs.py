@@ -24,7 +24,7 @@ def count_weighted_pairs_3d_intel_no_slm(n, nbins, d_x1, d_y1, d_z1, d_w1, d_x2,
     slm_hist_size = ceiling_quotient(nbins, private_hist_size) * private_hist_size
 
     with dpctl.device_context(base_gpairs.get_device_selector()):
-        gwpc.count_weighted_pairs_3d_intel_no_slm_ker[gwsRange, lwsRange](n, nbins, slm_hist_size, private_hist_size, d_x1, d_y1, d_z1, d_w1, d_x2, d_y2, d_z2, d_w2, d_rbins_squared, d_result)
+        gwpc.count_weighted_pairs_3d_intel_no_slm[gwsRange, lwsRange](n, nbins, slm_hist_size, private_hist_size, d_x1, d_y1, d_z1, d_w1, d_x2, d_y2, d_z2, d_w2, d_rbins_squared, d_result)
 
 def count_weighted_pairs_3d_intel_orig(n, nbins, d_x1, d_y1, d_z1, d_w1, d_x2, d_y2, d_z2, d_w2, d_rbins_squared, d_result):
 

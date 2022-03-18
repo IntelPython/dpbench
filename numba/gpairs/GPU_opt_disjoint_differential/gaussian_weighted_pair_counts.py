@@ -346,6 +346,56 @@ def count_weighted_pairs_3d_intel_no_slm_ker(n, nbins, slm_hist_size, private_hi
             pk += 1
 
 @numba_dppy.kernel
+def count_weighted_pairs_3d_intel_diff_ker(
+        n, nbins, x1, y1, z1, w1, x2, y2, z2, w2, rbins_squared, result
+):
+    i = numba_dppy.get_global_id(0)
+
+    result_pvt = numba_dppy.private.array(shape=20, dtype=np.float32)
+    rbins_pvt = numba_dppy.private.array(shape=20, dtype=np.float32)
+
+    for j in range(nbins):
+        result_pvt[j] = 0.0
+        rbins_pvt[j] = rbins_squared[j]
+    
+    px = x1[i]
+    py = y1[i]
+    pz = z1[i]
+    pw = w1[i]
+    for j in range(n):
+        qx = x2[j]
+        qy = y2[j]
+        qz = z2[j]
+        qw = w2[j]
+        dx = px - qx
+        dy = py - qy
+        dz = pz - qz
+        wprod = pw * qw
+        dsq = dx * dx + dy * dy + dz * dz
+
+        if (dsq <= rbins_pvt[nbins-1]):
+            for k in range(nbins-1, -1, -1):
+                if (dsq > rbins_pvt[k]):
+                    result_pvt[k+1] += wprod
+                    break
+                if (k == 0):
+                    result_pvt[k] += wprod
+                    break
+
+    for j in range(nbins-2, -1, -1):
+        for k in range(j+1, nbins, 1):
+            result_pvt[k] += result_pvt[j];
+
+    for j in range(nbins):
+        result[i,j] += result_pvt[j]
+
+@numba_dppy.kernel
+def count_weighted_pairs_3d_intel_diff_agg_ker(result, n):
+    col_id = numba_dppy.get_global_id(0)
+    for i in range(1,n):
+        result[0,col_id] += result[i,col_id]
+    
+@numba_dppy.kernel
 def count_weighted_pairs_3d_intel_orig_ker(
         n, nbins, x1, y1, z1, w1, x2, y2, z2, w2, rbins_squared, result_tmp
 ):

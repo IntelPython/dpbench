@@ -54,7 +54,7 @@ def gen_data_np(npoints, dtype=np.float32):
     x1, y1, z1, w1, x2, y2, z2, w2, DEFAULT_RBINS_SQUARED = gen_rand_data(
         npoints, dtype
     )
-    result = np.zeros_like(DEFAULT_RBINS_SQUARED).astype(dtype)
+    result = np.zeros((npoints, DEFAULT_RBINS_SQUARED.shape[0]), dtype=dtype)
     return (x1, y1, z1, w1, x2, y2, z2, w2, DEFAULT_RBINS_SQUARED, result)
 
 
@@ -134,7 +134,7 @@ def gen_data_usm(npoints):
     z2_usm.usm_data.copy_from_host(z2.view("u1"))
     w2_usm.usm_data.copy_from_host(w2.view("u1"))
     DEFAULT_RBINS_SQUARED_usm.usm_data.copy_from_host(DEFAULT_RBINS_SQUARED.view("u1"))
-    result_usm.usm_data.copy_from_host(result.view("u1"))
+    result_usm.usm_data.copy_from_host(result.reshape((-1)).view("u1"))
 
     return (
         x1_usm,
@@ -208,6 +208,7 @@ def run(name, alg, sizes=5, step=2, nopt=2 ** 16):
         x1, y1, z1, w1, x2, y2, z2, w2, DEFAULT_RBINS_SQUARED, result_p = gen_data_np(
             nopt
         )
+        result_p = np.zeros_like(DEFAULT_RBINS_SQUARED).astype(np.float32)
         gpairs_python(x1, y1, z1, w1, x2, y2, z2, w2, DEFAULT_RBINS_SQUARED, result_p)
 
         if args.usm is True:  # test usm feature
@@ -224,8 +225,8 @@ def run(name, alg, sizes=5, step=2, nopt=2 ** 16):
                 result_usm,
             ) = gen_data_usm(nopt)
             alg(nopt, DEFAULT_NBINS, x1, y1, z1, w1, x2, y2, z2, w2, DEFAULT_RBINS_SQUARED, result_usm)
-            result_n = np.empty(DEFAULT_NBINS, dtype=np.float32)
-            result_usm.usm_data.copy_to_host(result_n.view("u1"))
+            result_n = np.empty((nopt,DEFAULT_NBINS), dtype=np.float32)
+            result_usm.usm_data.copy_to_host(result_n.reshape((-1)).view("u1"))
         else:
             (
                 x1_n,
@@ -243,7 +244,7 @@ def run(name, alg, sizes=5, step=2, nopt=2 ** 16):
             # pass numpy generated data to kernel
             alg(nopt, DEFAULT_NBINS, x1, y1, z1, w1, x2, y2, z2, w2, DEFAULT_RBINS_SQUARED, result_n)
 
-        if np.allclose(result_p, result_n, atol=1e-06):
+        if np.allclose(result_p, result_n[0], atol=1e-06):
             print("Test succeeded\n")
         else:
             print(
@@ -251,7 +252,7 @@ def run(name, alg, sizes=5, step=2, nopt=2 ** 16):
                 "Python result: ",
                 result_p,
                 "\n numba result:",
-                result_n,
+                result_n[0],
             )
         return
 

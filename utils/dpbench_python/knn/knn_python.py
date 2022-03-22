@@ -26,6 +26,7 @@
 
 import numpy as np
 
+
 def knn_python(
     train,
     train_labels,
@@ -39,7 +40,7 @@ def knn_python(
     data_dim,
 ):
     for i in range(test_size):
-        queue_neighbors = np.empty((k, 2)) #queue_neighbors_lst[i]
+        queue_neighbors = np.empty((k, 2))  # queue_neighbors_lst[i]
 
         for j in range(k):
             # dist = euclidean_dist(train[j], test[i])

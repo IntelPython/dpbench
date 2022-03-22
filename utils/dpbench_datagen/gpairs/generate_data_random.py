@@ -104,10 +104,12 @@ def gen_rand_data(npoints, dtype=np.float64):
     x2 = np.random.randn(npoints).astype(np.float32)
     y2 = np.random.randn(npoints).astype(np.float32)
     z2 = np.random.randn(npoints).astype(np.float32)
-    w2 = np.random.rand( npoints).astype(np.float32)
+    w2 = np.random.rand(npoints).astype(np.float32)
     w2 = w2 / np.sum(w2)
 
-    DEFAULT_RBINS_SQUARED = __generate_rbins__(dtype) #np.array([0.5, 1.2, 3.0, 4.0, 5.0, 7.0, 10., 15., 100.]).astype(np.float32)
+    DEFAULT_RBINS_SQUARED = __generate_rbins__(
+        dtype
+    )  # np.array([0.5, 1.2, 3.0, 4.0, 5.0, 7.0, 10., 15., 100.]).astype(np.float32)
 
     return (x1, y1, z1, w1, x2, y2, z2, w2, DEFAULT_RBINS_SQUARED)
 

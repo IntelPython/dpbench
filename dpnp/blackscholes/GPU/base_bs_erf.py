@@ -10,12 +10,14 @@ from dpbench_python.blackscholes.bs_python import black_scholes_python
 
 try:
     from dpnp import erf
+
     numpy_ver += "-erf"
 except:
     from scipy.special import erf
 
 try:
     from dpnp import invsqrt
+
     numpy_ver += "-invsqrt"
     print(numpy_ver)
 except:

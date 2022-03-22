@@ -23,7 +23,7 @@ except:
 ######################################################
 # GLOBAL DECLARATIONS THAT WILL BE USED IN ALL FILES #
 ######################################################
-#DEFAULT_NBINS = 20
+# DEFAULT_NBINS = 20
 
 # make xrange available in python 3
 try:
@@ -224,8 +224,21 @@ def run(name, alg, sizes=5, step=2, nopt=2 ** 16):
                 DEFAULT_RBINS_SQUARED,
                 result_usm,
             ) = gen_data_usm(nopt)
-            alg(nopt, DEFAULT_NBINS, x1, y1, z1, w1, x2, y2, z2, w2, DEFAULT_RBINS_SQUARED, result_usm)
-            result_n = np.empty((nopt,DEFAULT_NBINS), dtype=np.float32)
+            alg(
+                nopt,
+                DEFAULT_NBINS,
+                x1,
+                y1,
+                z1,
+                w1,
+                x2,
+                y2,
+                z2,
+                w2,
+                DEFAULT_RBINS_SQUARED,
+                result_usm,
+            )
+            result_n = np.empty((nopt, DEFAULT_NBINS), dtype=np.float32)
             result_usm.usm_data.copy_to_host(result_n.reshape((-1)).view("u1"))
         else:
             (
@@ -242,7 +255,20 @@ def run(name, alg, sizes=5, step=2, nopt=2 ** 16):
             ) = gen_data_np(nopt)
 
             # pass numpy generated data to kernel
-            alg(nopt, DEFAULT_NBINS, x1, y1, z1, w1, x2, y2, z2, w2, DEFAULT_RBINS_SQUARED, result_n)
+            alg(
+                nopt,
+                DEFAULT_NBINS,
+                x1,
+                y1,
+                z1,
+                w1,
+                x2,
+                y2,
+                z2,
+                w2,
+                DEFAULT_RBINS_SQUARED,
+                result_n,
+            )
 
         if np.allclose(result_p, result_n[0], atol=1e-06):
             print("Test succeeded\n")
@@ -279,10 +305,36 @@ def run(name, alg, sizes=5, step=2, nopt=2 ** 16):
             )
         iterations = xrange(repeat)
 
-        alg(nopt, DEFAULT_NBINS, x1, y1, z1, w1, x2, y2, z2, w2, DEFAULT_RBINS_SQUARED, result)  # warmup
+        alg(
+            nopt,
+            DEFAULT_NBINS,
+            x1,
+            y1,
+            z1,
+            w1,
+            x2,
+            y2,
+            z2,
+            w2,
+            DEFAULT_RBINS_SQUARED,
+            result,
+        )  # warmup
         t0 = now()
         for _ in iterations:
-            alg(nopt, DEFAULT_NBINS, x1, y1, z1, w1, x2, y2, z2, w2, DEFAULT_RBINS_SQUARED, result)
+            alg(
+                nopt,
+                DEFAULT_NBINS,
+                x1,
+                y1,
+                z1,
+                w1,
+                x2,
+                y2,
+                z2,
+                w2,
+                DEFAULT_RBINS_SQUARED,
+                result,
+            )
 
         mops, time = get_mops(t0, now(), nopt)
         f.write(str(nopt) + "," + str(mops * 2 * repeat) + "\n")

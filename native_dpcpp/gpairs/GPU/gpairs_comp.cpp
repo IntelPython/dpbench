@@ -106,7 +106,7 @@ sycl::event gpairs_slm(
 			// needed since previous loop writes out into global memory dsq_mat
                         // allocated for each work-item in work-group
                         it.barrier(sycl::access::fence_space::local_space);
-			
+
                         /* update slm_hist. Use work-item private buffer of 16 tfloat elements */
                         for (size_t k = 0; k < slm_hist_size; k += private_hist_size)
                         {
@@ -164,13 +164,13 @@ sycl::event gpairs_slm(
                         }
                     });
             });
-				  
+
     partial_hists_ev = q->submit([&](sycl::handler &cgh) {
     	cgh.depends_on(partial_hists_ev);
     	sycl::context ctx = q->get_context();
     	cgh.host_task([=]() {sycl::free(dsq_mat, ctx);});
       });
-    
+
     return partial_hists_ev;
 }
 
@@ -300,7 +300,7 @@ sycl::event gpairs_orig( queue* q, size_t npoints, tfloat* x1, tfloat* y1, tfloa
 
   tfloat* t_results_tmp = (tfloat*)malloc((DEFAULT_NBINS) * sizeof(tfloat));
   memset (t_results_tmp,0,(DEFAULT_NBINS) * sizeof(tfloat));
-  
+
   tfloat* results_tmp = (tfloat*)malloc_device( (DEFAULT_NBINS) * sizeof(tfloat), *q);
   q->memcpy(results_tmp, t_results_tmp, (DEFAULT_NBINS) * sizeof(tfloat));
 

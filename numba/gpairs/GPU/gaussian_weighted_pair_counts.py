@@ -3,6 +3,7 @@ import numba_dppy
 import math
 from numba import cuda
 
+
 @cuda.jit
 def count_weighted_pairs_3d_cuda_mesh(
     x1,
@@ -259,8 +260,24 @@ def count_weighted_pairs_3d_cuda_fix(
             j += 1
         i += stride
 
+
 @numba_dppy.kernel
-def count_weighted_pairs_3d_intel_no_slm_ker(n, nbins, slm_hist_size, private_hist_size, x0, y0, z0, w0, x1, y1, z1, w1, rbins_squared, result):
+def count_weighted_pairs_3d_intel_no_slm_ker(
+    n,
+    nbins,
+    slm_hist_size,
+    private_hist_size,
+    x0,
+    y0,
+    z0,
+    w0,
+    x1,
+    y1,
+    z1,
+    w1,
+    rbins_squared,
+    result,
+):
 
     lid0 = numba_dppy.get_local_id(0)
     gr0 = numba_dppy.get_group_id(0)
@@ -273,7 +290,7 @@ def count_weighted_pairs_3d_intel_no_slm_ker(n, nbins, slm_hist_size, private_hi
 
     n_wi = 20
 
-    dsq_mat = numba_dppy.private.array(shape=(20*20), dtype=np.float32)
+    dsq_mat = numba_dppy.private.array(shape=(20 * 20), dtype=np.float32)
     w0_vec = numba_dppy.private.array(shape=(20), dtype=np.float32)
     w1_vec = numba_dppy.private.array(shape=(20), dtype=np.float32)
 
@@ -290,7 +307,7 @@ def count_weighted_pairs_3d_intel_no_slm_ker(n, nbins, slm_hist_size, private_hi
         w1_vec[i1] = w1[j1]
         i1 += 1
         j1 += lws1
-        
+
     # compute (n_wi, n_wi) matrix of squared distances in work-item
     j0 = offset0
     i0 = 0
@@ -309,7 +326,7 @@ def count_weighted_pairs_3d_intel_no_slm_ker(n, nbins, slm_hist_size, private_hi
             dsq_mat[i0 * n_wi + i1] = dx * dx + dy * dy + dz * dz
             i1 += 1
             j1 += lws1
-            
+
         i0 += 1
         j0 += lws0
 
@@ -327,16 +344,18 @@ def count_weighted_pairs_3d_intel_no_slm_ker(n, nbins, slm_hist_size, private_hi
             while (i1 < n_wi) and (j1 < n):
                 dsq = dsq_mat[i0 * n_wi + i1]
                 pw = w0_vec[i0] * w1_vec[i1]
-                #i1 += 1
-                #j1 += lws1
+                # i1 += 1
+                # j1 += lws1
                 pk = k
                 for p in range(private_hist_size):
-                    private_hist[p] += (pw if (pk < nbins and dsq <= rbins_squared[pk]) else 0.0)
+                    private_hist[p] += (
+                        pw if (pk < nbins and dsq <= rbins_squared[pk]) else 0.0
+                    )
                     pk += 1
 
                 i1 += 1
                 j1 += lws1
-            
+
             i0 += 1
             j0 += lws0
 
@@ -345,9 +364,10 @@ def count_weighted_pairs_3d_intel_no_slm_ker(n, nbins, slm_hist_size, private_hi
             numba_dppy.atomic.add(result, pk, private_hist[p])
             pk += 1
 
+
 @numba_dppy.kernel
 def count_weighted_pairs_3d_intel_orig_ker(
-        n, nbins, x1, y1, z1, w1, x2, y2, z2, w2, rbins_squared, result_tmp
+    n, nbins, x1, y1, z1, w1, x2, y2, z2, w2, rbins_squared, result_tmp
 ):
     """Naively count Npairs(<r), the total number of pairs that are separated
     by a distance less than r, for each r**2 in the input rbins_squared.
@@ -370,18 +390,20 @@ def count_weighted_pairs_3d_intel_orig_ker(
         wprod = pw * qw
         dsq = dx * dx + dy * dy + dz * dz
 
-        if (dsq <= rbins_squared[nbins-1]):
-            for k in range(nbins-1, -1, -1):
-                if (k==0) or (dsq > rbins_squared[k-1]):
+        if dsq <= rbins_squared[nbins - 1]:
+            for k in range(nbins - 1, -1, -1):
+                if (k == 0) or (dsq > rbins_squared[k - 1]):
                     numba_dppy.atomic.add(result_tmp, k, wprod)
                     break
+
 
 @numba_dppy.kernel
 def count_weighted_pairs_3d_intel_agg_ker(result, result_tmp):
     i = numba_dppy.get_global_id(0)
-    for j in range(i+1):
+    for j in range(i + 1):
         result[i] += result_tmp[j]
-        
+
+
 @numba_dppy.kernel
 def count_weighted_pairs_3d_intel_ver1(
     n, nbins, x1, y1, z1, w1, x2, y2, z2, w2, rbins_squared, result
@@ -422,7 +444,7 @@ def count_weighted_pairs_3d_intel_ver1(
 
 @numba_dppy.kernel
 def count_weighted_pairs_3d_intel_ver2(
-        n, nbins, x1, y1, z1, w1, x2, y2, z2, w2, rbins_squared, result
+    n, nbins, x1, y1, z1, w1, x2, y2, z2, w2, rbins_squared, result
 ):
     """Naively count Npairs(<r), the total number of pairs that are separated
     by a distance less than r, for each r**2 in the input rbins_squared.

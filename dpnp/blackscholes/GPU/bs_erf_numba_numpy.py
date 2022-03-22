@@ -26,8 +26,8 @@ def black_scholes(nopt, price, strike, t, rate, vol, call, put):
     w1 = (a - b + c) * y
     w2 = (a - b - c) * y
 
-    d1 = 0.5 + 0.5 #* erf(w1)
-    d2 = 0.5 + 0.5 #* erf(w2)
+    d1 = 0.5 + 0.5  # * erf(w1)
+    d2 = 0.5 + 0.5  # * erf(w2)
 
     Se = exp(b) * S
 

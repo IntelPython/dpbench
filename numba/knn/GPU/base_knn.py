@@ -71,7 +71,6 @@ def gen_data_usm(nopt):
     x_test = gen_test_data(nopt)
 
     predictions = np.empty(nopt)
-    queue_neighbors_lst = np.empty((nopt, N_NEIGHBORS, 2))
     votes_to_classes_lst = np.zeros((nopt, CLASSES_NUM))
 
     with dpctl.device_context(get_device_selector(is_gpu=True)) as gpu_queue:
@@ -99,12 +98,6 @@ def gen_data_usm(nopt):
             buffer="device",
             buffer_ctor_kwargs={"queue": gpu_queue},
         )
-        queue_neighbors_lst_usm = dpt.usm_ndarray(
-            queue_neighbors_lst.shape,
-            dtype=queue_neighbors_lst.dtype,
-            buffer="device",
-            buffer_ctor_kwargs={"queue": gpu_queue},
-        )
         votes_to_classes_lst_usm = dpt.usm_ndarray(
             votes_to_classes_lst.shape,
             dtype=votes_to_classes_lst.dtype,
@@ -116,9 +109,6 @@ def gen_data_usm(nopt):
     train_labels_usm.usm_data.copy_from_host(y_train.reshape((-1)).view("|u1"))
     test_usm.usm_data.copy_from_host(x_test.reshape((-1)).view("|u1"))
     predictions_usm.usm_data.copy_from_host(predictions.reshape((-1)).view("|u1"))
-    queue_neighbors_lst_usm.usm_data.copy_from_host(
-        queue_neighbors_lst.reshape((-1)).view("|u1")
-    )
     votes_to_classes_lst_usm.usm_data.copy_from_host(
         votes_to_classes_lst.reshape((-1)).view("|u1")
     )
@@ -128,7 +118,6 @@ def gen_data_usm(nopt):
         train_labels_usm,
         test_usm,
         predictions_usm,
-        queue_neighbors_lst_usm,
         votes_to_classes_lst_usm,
     )
 
@@ -183,7 +172,6 @@ def run(name, alg, sizes=5, step=2, nopt=2 ** 10):
         x_train, y_train = gen_train_data()
         x_test = gen_test_data(nopt)
         p_predictions = np.empty(nopt)
-        p_queue_neighbors_lst = np.empty((nopt, N_NEIGHBORS, 2))
         p_votes_to_classes_lst = np.zeros((nopt, CLASSES_NUM))
 
         knn_python(
@@ -195,7 +183,6 @@ def run(name, alg, sizes=5, step=2, nopt=2 ** 10):
             TRAIN_DATA_SIZE,
             nopt,
             p_predictions,
-            p_queue_neighbors_lst,
             p_votes_to_classes_lst,
             DATA_DIM,
         )
@@ -206,7 +193,6 @@ def run(name, alg, sizes=5, step=2, nopt=2 ** 10):
                 train_labels_usm,
                 test_usm,
                 predictions_usm,
-                queue_neighbors_lst_usm,
                 votes_to_classes_lst_usm,
             ) = gen_data_usm(nopt)
             alg(
@@ -218,7 +204,6 @@ def run(name, alg, sizes=5, step=2, nopt=2 ** 10):
                 nopt,
                 TRAIN_DATA_SIZE,
                 predictions_usm,
-                queue_neighbors_lst_usm,
                 votes_to_classes_lst_usm,
                 DATA_DIM,
             )
@@ -228,7 +213,6 @@ def run(name, alg, sizes=5, step=2, nopt=2 ** 10):
 
         else:
             n_predictions = np.empty(nopt)
-            n_queue_neighbors_lst = np.empty((nopt, N_NEIGHBORS, 2))
             n_votes_to_classes_lst = np.zeros((nopt, CLASSES_NUM))
 
             alg(
@@ -240,7 +224,6 @@ def run(name, alg, sizes=5, step=2, nopt=2 ** 10):
                 TRAIN_DATA_SIZE,
                 nopt,
                 n_predictions,
-                n_queue_neighbors_lst,
                 n_votes_to_classes_lst,
                 DATA_DIM,
             )
@@ -274,14 +257,12 @@ def run(name, alg, sizes=5, step=2, nopt=2 ** 10):
                     y_train,
                     x_test,
                     predictions,
-                    queue_neighbors_lst,
                     votes_to_classes_lst,
                 ) = gen_data_usm(nopt)
             else:
                 x_train, y_train = gen_train_data()
                 x_test = gen_test_data(nopt)
                 predictions = np.empty(nopt)
-                queue_neighbors_lst = np.empty((nopt, N_NEIGHBORS, 2))
                 votes_to_classes_lst = np.zeros((nopt, CLASSES_NUM))
 
             alg(
@@ -293,7 +274,6 @@ def run(name, alg, sizes=5, step=2, nopt=2 ** 10):
                 nopt,
                 TRAIN_DATA_SIZE,
                 predictions,
-                queue_neighbors_lst,
                 votes_to_classes_lst,
                 DATA_DIM,
             )  # warmup
@@ -309,7 +289,6 @@ def run(name, alg, sizes=5, step=2, nopt=2 ** 10):
                     nopt,
                     TRAIN_DATA_SIZE,
                     predictions,
-                    queue_neighbors_lst,
                     votes_to_classes_lst,
                     DATA_DIM,
                 )

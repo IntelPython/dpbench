@@ -42,6 +42,7 @@ def run(name, sizes=5, step=2, nopt=2 ** 13):
     args = parser.parse_args()
     nopt = args.size
     repeat = args.repeat
+    sizes = args.steps
 
     clean_string = ["make", "clean"]
     utils.run_command(clean_string, verbose=True)

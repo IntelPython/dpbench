@@ -38,7 +38,7 @@ def gen_data_np(npoints, dtype=np.float32):
     x1, y1, z1, w1, x2, y2, z2, w2, DEFAULT_RBINS_SQUARED = gen_rand_data(
         npoints, dtype
     )
-    result = np.zeros_like(DEFAULT_RBINS_SQUARED).astype(dtype)
+    result = np.zeros_like(DEFAULT_RBINS_SQUARED)[:-1].astype(dtype)
     return (x1, y1, z1, w1, x2, y2, z2, w2, DEFAULT_RBINS_SQUARED, result)
 
 
@@ -107,7 +107,7 @@ def run(name, sizes=5, step=2, nopt=2 ** 16):
         result_n = np.fromfile("result.bin", np.float32)
 
         # compare outputs
-        if np.allclose(result_p, result_n, atol=1e-06):
+        if np.allclose(result_p, result_n):
             print(
                 "Test succeeded. Python result: ",
                 result_p,

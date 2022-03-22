@@ -62,16 +62,13 @@ int main(int argc, char * argv[])
     InitData( q, nopt, &x1, &y1, &z1, &w1, &x2, &y2, &z2, &w2, &rbins, &results_test);
 
     /* Warm up cycle */
-    sycl::event gpairs_ev = gpairs_no_slm( q, nopt, x1, y1, z1, w1, x2, y2, z2, w2, DEFAULT_NBINS, rbins, results_test);
+    call_gpairs_opt( q, nopt, x1, y1, z1, w1, x2, y2, z2, w2, rbins, results_test);
 
-    gpairs_ev.wait();
-
-    ResetResult(q, results_test);
+    ResetResult(nopt, q, results_test);
 
     t1 = timer_rdtsc();
     for(int j = 0; j < repeat; j++) {
-      sycl::event gpairs_ev = gpairs_no_slm( q, nopt, x1, y1, z1, w1, x2, y2, z2, w2, DEFAULT_NBINS, rbins, results_test);
-      gpairs_ev.wait();
+      call_gpairs_opt( q, nopt, x1, y1, z1, w1, x2, y2, z2, w2, rbins, results_test );
     }
     t2 = timer_rdtsc();
 
@@ -96,13 +93,13 @@ int main(int argc, char * argv[])
     }
 
 #if 0 //print result
-    for (size_t i = 0; i < (DEFAULT_NBINS-1); i++) {
+    for (size_t i = 0; i < (DEFAULT_NBINS); i++) {
       std::cout << results_test[i] << std::endl;
     }
 #endif
 
     /* Deallocate arrays */
-    FreeData( q, x1, y1, z1, w1, x2, y2, z2, w2, rbins, results_test);
+    FreeData( q, x1, y1, z1, w1, x2, y2, z2, w2, rbins, results_test );
 
     fclose(fptr);
     fclose(fptr1);

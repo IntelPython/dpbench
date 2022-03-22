@@ -27,8 +27,7 @@
 
 import dpctl
 import math
-import numba
-import os
+import numpy as np
 
 import base_knn
 from device_selector import get_device_selector
@@ -46,13 +45,7 @@ else:
 
 @kernel(
     access_types={
-        "read_only": [
-            "train",
-            "train_labels",
-            "test",
-            "votes_to_classes_lst",
-            "queue_neighbors_lst",
-        ],
+        "read_only": ["train", "train_labels", "test", "votes_to_classes_lst"],
         "write_only": ["predictions"],
     }
 )
@@ -64,12 +57,11 @@ def run_knn_kernel(
     classes_num,
     train_size,
     predictions,
-    queue_neighbors_lst,
     votes_to_classes_lst,
     data_dim,
 ):
     i = numba_dppy.get_global_id(0)
-    queue_neighbors = queue_neighbors_lst[i]
+    queue_neighbors = numba_dppy.private.array(shape=(5, 2), dtype=np.float64)
 
     for j in range(k):
         x1 = train[j]
@@ -149,7 +141,6 @@ def run_knn(
     test_size,
     train_size,
     predictions,
-    queue_neighbors_lst,
     votes_to_classes_lst,
     data_dim,
 ):
@@ -162,7 +153,6 @@ def run_knn(
             classes_num,
             train_size,
             predictions,
-            queue_neighbors_lst,
             votes_to_classes_lst,
             data_dim,
         )

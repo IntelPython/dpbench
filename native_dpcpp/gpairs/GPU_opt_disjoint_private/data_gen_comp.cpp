@@ -36,6 +36,7 @@ void InitData(queue* q, size_t npoints, tfloat **x1, tfloat **y1, tfloat **z1, t
 	      tfloat **x2, tfloat **y2, tfloat **z2, tfloat **w2, tfloat **rbins, tfloat **results_test) {
 
   tfloat *t_x1, *t_y1, *t_z1, *t_w1, *t_x2, *t_y2, *t_z2, *t_w2, *t_rbins, *t_results_test;
+
   /* Allocate aligned memory */
   t_x1 = (tfloat*)_mm_malloc(npoints * sizeof(tfloat), ALIGN_FACTOR);
   t_y1 = (tfloat*)_mm_malloc(npoints * sizeof(tfloat), ALIGN_FACTOR);
@@ -47,7 +48,7 @@ void InitData(queue* q, size_t npoints, tfloat **x1, tfloat **y1, tfloat **z1, t
   t_w2 = (tfloat*)_mm_malloc(npoints * sizeof(tfloat), ALIGN_FACTOR);
 
   t_rbins = (tfloat*)_mm_malloc(DEFAULT_NBINS * sizeof(tfloat), ALIGN_FACTOR);
-  t_results_test = (tfloat*)_mm_malloc((DEFAULT_NBINS) * sizeof(tfloat), ALIGN_FACTOR);
+  t_results_test = (tfloat*)_mm_malloc(npoints*(DEFAULT_NBINS-1) * sizeof(tfloat), ALIGN_FACTOR);
 
   if ( (t_x1 == NULL) || (t_y1 == NULL) || (t_z1 == NULL) || (t_w1 == NULL) ||
        (t_x2 == NULL) || (t_y2 == NULL) || (t_z2 == NULL) || (t_w2 == NULL)) {
@@ -64,7 +65,7 @@ void InitData(queue* q, size_t npoints, tfloat **x1, tfloat **y1, tfloat **z1, t
   ReadInputFromBinFile<tfloat> ("z2.bin", reinterpret_cast<char *>(t_z2), npoints);
   ReadInputFromBinFile<tfloat> ("w2.bin", reinterpret_cast<char *>(t_w2), npoints);
   ReadInputFromBinFile<tfloat> ("DEFAULT_RBINS_SQUARED.bin", reinterpret_cast<char *>(t_rbins), DEFAULT_NBINS);
-  memset (t_results_test,0,(DEFAULT_NBINS) * sizeof(tfloat));
+  memset (t_results_test,0,npoints*(DEFAULT_NBINS-1) * sizeof(tfloat));
 
   tfloat *d_x1, *d_y1, *d_z1, *d_w1, *d_x2, *d_y2, *d_z2, *d_w2, *d_rbins, *d_results_test;
 
@@ -77,7 +78,7 @@ void InitData(queue* q, size_t npoints, tfloat **x1, tfloat **y1, tfloat **z1, t
   d_z2 = (tfloat*)malloc_device( npoints * sizeof(tfloat), *q);
   d_w2 = (tfloat*)malloc_device( npoints * sizeof(tfloat), *q);
   d_rbins = (tfloat*)malloc_device( DEFAULT_NBINS * sizeof(tfloat), *q);
-  d_results_test = (tfloat*)malloc_device( (DEFAULT_NBINS) * sizeof(tfloat), *q);
+  d_results_test = (tfloat*)malloc_device( npoints*(DEFAULT_NBINS-1) * sizeof(tfloat), *q);
 
   // copy data host to device
   q->memcpy(d_x1, t_x1, npoints * sizeof(tfloat));
@@ -89,7 +90,7 @@ void InitData(queue* q, size_t npoints, tfloat **x1, tfloat **y1, tfloat **z1, t
   q->memcpy(d_z2, t_z2, npoints * sizeof(tfloat));
   q->memcpy(d_w2, t_w2, npoints * sizeof(tfloat));
   q->memcpy(d_rbins, t_rbins, DEFAULT_NBINS * sizeof(tfloat));
-  q->memcpy(d_results_test, t_results_test, (DEFAULT_NBINS) * sizeof(tfloat));
+  q->memcpy(d_results_test, t_results_test, npoints*(DEFAULT_NBINS-1) * sizeof(tfloat));
 
   q->wait();
 
@@ -117,10 +118,10 @@ void InitData(queue* q, size_t npoints, tfloat **x1, tfloat **y1, tfloat **z1, t
   _mm_free(t_results_test);
 }
 
-void ResetResult (queue* q, tfloat* results_test) {
-  tfloat* t_results_test = (tfloat*)_mm_malloc((DEFAULT_NBINS) * sizeof(tfloat), ALIGN_FACTOR);
-  memset (t_results_test,0,(DEFAULT_NBINS) * sizeof(tfloat));
-  q->memcpy(results_test, t_results_test, (DEFAULT_NBINS) * sizeof(tfloat));
+void ResetResult (size_t npoints, queue* q, tfloat* results_test) {
+  tfloat* t_results_test = (tfloat*)_mm_malloc(npoints*(DEFAULT_NBINS-1) * sizeof(tfloat), ALIGN_FACTOR);
+  memset (t_results_test,0,npoints*(DEFAULT_NBINS-1) * sizeof(tfloat));
+  q->memcpy(results_test, t_results_test, npoints*(DEFAULT_NBINS-1) * sizeof(tfloat));
   q->wait();
   _mm_free(t_results_test);
 }
@@ -138,5 +139,5 @@ void FreeData( queue* q, tfloat *x1, tfloat *y1, tfloat *z1, tfloat *w1,
   free(z2,q->get_context());
   free(w2,q->get_context());
   free(rbins,q->get_context());
-  free(results_test,q->get_context());
+  free(results_test, q->get_context());
 }

@@ -65,8 +65,7 @@ def __dump_text__(x1, y1, z1, w1, x2, y2, z2, w2, DEFAULT_RBINS_SQUARED):
         DEFAULT_RBINS_SQUARED.tofile(fd, "\n", "%s")
 
 
-def __random_weighted_points__(n, Lbox, seed, dtype):
-    rng = rnd.RandomState(seed)
+def __random_weighted_points__(n, Lbox, rng, dtype):
     data = rng.uniform(0, 1, n * 4)
     x, y, z, w = (
         data[:n] * Lbox,
@@ -88,13 +87,29 @@ def __generate_rbins__(dtype):
 
 # call numpy to generate input data
 def gen_rand_data(npoints, dtype=np.float64):
-    Lbox = 500.0
-    n1 = npoints
-    n2 = npoints
-    x1, y1, z1, w1 = __random_weighted_points__(n1, Lbox, 0, dtype)
-    x2, y2, z2, w2 = __random_weighted_points__(n2, Lbox, 1, dtype)
+    # Lbox = 500.0
+    # n1 = npoints
+    # n2 = npoints
+    # rng = rnd.RandomState(1234)
+    # x1, y1, z1, w1 = __random_weighted_points__(n1, Lbox, rng, dtype)
+    # x2, y2, z2, w2 = __random_weighted_points__(n2, Lbox, rng, dtype)
 
-    DEFAULT_RBINS_SQUARED = __generate_rbins__(dtype)
+    np.random.seed(1234)
+    x1 = np.random.randn(npoints).astype(np.float32)
+    y1 = np.random.randn(npoints).astype(np.float32)
+    z1 = np.random.randn(npoints).astype(np.float32)
+    w1 = np.random.rand(npoints).astype(np.float32)
+    w1 = w1 / np.sum(w1)
+
+    x2 = np.random.randn(npoints).astype(np.float32)
+    y2 = np.random.randn(npoints).astype(np.float32)
+    z2 = np.random.randn(npoints).astype(np.float32)
+    w2 = np.random.rand(npoints).astype(np.float32)
+    w2 = w2 / np.sum(w2)
+
+    DEFAULT_RBINS_SQUARED = __generate_rbins__(
+        dtype
+    )  # np.array([0.5, 1.2, 3.0, 4.0, 5.0, 7.0, 10., 15., 100.]).astype(np.float32)
 
     return (x1, y1, z1, w1, x2, y2, z2, w2, DEFAULT_RBINS_SQUARED)
 

@@ -4,7 +4,7 @@
 
 import dpctl
 import base_bs_erf
-from dpnp import log, exp
+from numpy import log, exp
 from base_bs_erf import erf, invsqrt
 
 
@@ -26,8 +26,8 @@ def black_scholes(nopt, price, strike, t, rate, vol, call, put):
     w1 = (a - b + c) * y
     w2 = (a - b - c) * y
 
-    d1 = 0.5 + 0.5 * erf(w1)
-    d2 = 0.5 + 0.5 * erf(w2)
+    d1 = 0.5 + 0.5  # * erf(w1)
+    d2 = 0.5 + 0.5  # * erf(w2)
 
     Se = exp(b) * S
 
@@ -36,8 +36,8 @@ def black_scholes(nopt, price, strike, t, rate, vol, call, put):
 
 
 def black_scholes_dpctl(nopt, price, strike, t, rate, vol, call, put):
-    with dpctl.device_context("opencl:gpu"):
+    with dpctl.device_context(base_bs_erf.get_device_selector()):
         black_scholes(nopt, price, strike, t, rate, vol, call, put)
 
 
-base_bs_erf.run("Numba@jit-numpy", black_scholes_dpctl, nparr=True, pass_args=True)
+base_bs_erf.run("dpnp", black_scholes_dpctl)

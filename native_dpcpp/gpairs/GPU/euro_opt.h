@@ -26,13 +26,38 @@ using namespace std;
 #define DEFAULT_NBINS 20
 
 void InitData( queue* q, size_t npoints, tfloat **x1, tfloat **y1, tfloat **z1, tfloat **w1,
-	      tfloat **x2, tfloat **y2, tfloat **z2, tfloat **w2, tfloat **rbins, tfloat **results_test );
+	      tfloat **x2, tfloat **y2, tfloat **z2, tfloat **w2, tfloat **rbins, tfloat **results_test);
 
 void FreeData( queue* q, tfloat *x1, tfloat *y1, tfloat *z1, tfloat *w1,
 	       tfloat *x2, tfloat *y2, tfloat *z2, tfloat *w2, tfloat *rbins, tfloat *results_test);
 
-void call_gpairs(queue* q, size_t nopt, tfloat *x1, tfloat *y1, tfloat *z1, tfloat *w1,
-		 tfloat *x2, tfloat *y2, tfloat *z2, tfloat *w2, tfloat *rbins, tfloat *results_test);
+sycl::event gpairs_slm(
+    sycl::queue *q,
+    size_t n,
+    tfloat *x0, tfloat *y0, tfloat *z0, tfloat *w0,
+    tfloat *x1, tfloat *y1, tfloat *z1, tfloat *w1,
+    size_t nbins, tfloat *rbins, tfloat *hist);
+
+sycl::event gpairs_no_slm(
+    sycl::queue *q,
+    size_t n,
+    tfloat *x0, tfloat *y0, tfloat *z0, tfloat *w0,
+    tfloat *x1, tfloat *y1, tfloat *z1, tfloat *w1,
+    size_t nbins, tfloat *rbins, tfloat *hist);
+
+sycl::event gpairs_orig(
+    sycl::queue *q,
+    size_t n,
+    tfloat *x0, tfloat *y0, tfloat *z0, tfloat *w0,
+    tfloat *x1, tfloat *y1, tfloat *z1, tfloat *w1,
+    size_t nbins, tfloat *rbins, tfloat *hist);
+
+void gpairs_host(
+    sycl::queue *q,
+    size_t n,
+    tfloat *x0, tfloat *y0, tfloat *z0, tfloat *w0,
+    tfloat *x1, tfloat *y1, tfloat *z1, tfloat *w1,
+    size_t nbins, tfloat *rbins, tfloat *hist);
 
 void ResetResult (queue* q, tfloat* results_test);
 

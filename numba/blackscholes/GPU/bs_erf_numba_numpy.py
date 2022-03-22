@@ -4,20 +4,33 @@
 
 import dpctl
 import base_bs_erf
-import numba as nb
+from device_selector import get_device_selector
 import numpy as np
+import os
 from numpy import log, exp, sqrt
 from math import erf
 
+backend = os.getenv("NUMBA_BACKEND", "legacy")
+if backend == "legacy":
+    import numba as nb
+
+    __njit = nb.njit(parallel=True, fastmath=True)
+    __vectorize = nb.vectorize(nopython=True)
+else:
+    import numba_dpcomp as nb
+
+    __njit = nb.njit(parallel=True, fastmath=True, enable_gpu_pipeline=True)
+    __vectorize = nb.vectorize(nopython=True, enable_gpu_pipeline=True)
+
 # Numba does know erf function from numpy or scipy
-@nb.vectorize(nopython=True)
+@__vectorize
 def nberf(x):
     return erf(x)
 
 
 # blackscholes implemented using numpy function calls
-@nb.jit(nopython=True, parallel=True, fastmath=True)
-def black_scholes_kernel(nopt, price, strike, t, rate, vol, call, put):
+@__njit
+def black_scholes_kernel(price, strike, t, rate, vol, call, put):
     mr = -rate
     sig_sig_two = vol * vol * 2
 
@@ -47,8 +60,8 @@ def black_scholes_kernel(nopt, price, strike, t, rate, vol, call, put):
 
 def black_scholes(nopt, price, strike, t, rate, vol, call, put):
     # offload blackscholes computation to GPU (toggle level0 or opencl driver).
-    with dpctl.device_context(base_bs_erf.get_device_selector()):
-        black_scholes_kernel(nopt, price, strike, t, rate, vol, call, put)
+    with dpctl.device_context(get_device_selector(is_gpu=True)):
+        black_scholes_kernel(price, strike, t, rate, vol, call, put)
 
 
 # call the run function to setup input data and performance data infrastructure

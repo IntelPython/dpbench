@@ -25,17 +25,33 @@
 # *****************************************************************************
 
 import dpctl
+import os
 import numpy as np
 from numba import jit, prange
 import base_dbscan
 import utils
+from device_selector import get_device_selector
 
 NOISE = -1
 UNDEFINED = -2
 DEFAULT_QUEUE_CAPACITY = 10
 
+backend = os.getenv("NUMBA_BACKEND", "legacy")
+if backend == "legacy":
+    import numba as nb
 
-@jit(nopython=True, parallel=True, fastmath=True)
+    __pjit = nb.jit(nopython=True, parallel=True, fastmath=True)
+    __jit = nb.jit(nopython=True)
+else:
+    import numba_dpcomp as nb
+
+    __pjit = nb.jit(
+        nopython=True, parallel=True, fastmath=True, enable_gpu_pipeline=True
+    )
+    __jit = nb.jit(nopython=True, enable_gpu_pipeline=True)
+
+
+@__pjit
 def get_neighborhood(n, dim, data, eps, ind_lst, sz_lst, assignments):
     block_size = 1
     nblocks = n // block_size + int(n % block_size > 0)
@@ -64,7 +80,7 @@ def get_neighborhood(n, dim, data, eps, ind_lst, sz_lst, assignments):
                         sz_lst[j] = size + 1
 
 
-@jit(nopython=True)
+@__jit  # commented out to benchmark dpcomp for GPU, since no mixed execution
 def compute_clusters(n, min_pts, assignments, sizes, indices_list):
     nclusters = 0
     nnoise = 0
@@ -113,7 +129,7 @@ def dbscan(n, dim, data, eps, min_pts, assignments):
     # distances_list = np.empty(n*n)
     sizes = np.zeros(n, dtype=np.int64)
 
-    with dpctl.device_context(base_dbscan.get_device_selector()):
+    with dpctl.device_context(get_device_selector(is_gpu=True)):
         get_neighborhood(n, dim, data, eps, indices_list, sizes, assignments)
 
     return compute_clusters(n, min_pts, assignments, sizes, indices_list)

@@ -3,7 +3,7 @@
 # SPDX-License-Identifier: MIT
 
 import numpy as np
-import sys, os, json
+import sys, os, json, datetime
 
 # import numpy.random_intel as rnd
 import numpy.random as rnd
@@ -12,7 +12,9 @@ import dpctl.tensor as dpt
 
 from dpbench_python.l2_distance.l2_distance_python import l2_distance_python
 from dpbench_datagen.l2_distance import gen_data
+from dpbench_datagen.l2_distance.generate_data_random import SEED
 
+from device_selector import get_device_selector
 
 from timeit import default_timer
 
@@ -22,7 +24,6 @@ get_mops = lambda t0, t1, n: (n / (t1 - t0), t1 - t0)
 ######################################################
 # GLOBAL DECLARATIONS THAT WILL BE USED IN ALL FILES #
 ######################################################
-
 # make xrange available in python 3
 try:
     xrange
@@ -31,29 +32,13 @@ except NameError:
 
 
 ###############################################
-def get_device_selector(is_gpu=True):
-    if is_gpu is True:
-        device_selector = "gpu"
-    else:
-        device_selector = "cpu"
-
-    if (
-        os.environ.get("SYCL_DEVICE_FILTER") is None
-        or os.environ.get("SYCL_DEVICE_FILTER") == "opencl"
-    ):
-        return "opencl:" + device_selector
-
-    if os.environ.get("SYCL_DEVICE_FILTER") == "level_zero":
-        return "level_zero:" + device_selector
-
-    return os.environ.get("SYCL_DEVICE_FILTER")
 
 
 def gen_data_usm(nopt, dims):
     x, y = gen_data(nopt, dims, np.float32)
     distance = np.asarray([0.0]).astype(np.float32)
 
-    with dpctl.device_context(get_device_selector()) as gpu_queue:
+    with dpctl.device_context(get_device_selector(is_gpu=True)) as gpu_queue:
         x_usm = dpt.usm_ndarray(
             x.shape,
             dtype=x.dtype,
@@ -83,7 +68,7 @@ def gen_data_usm(nopt, dims):
 ##############################################
 
 
-def run(name, alg, sizes=10, step=2, nopt=2 ** 20):
+def run(name, alg, sizes=2, step=2, nopt=2 ** 20):
     import argparse
 
     parser = argparse.ArgumentParser()
@@ -110,10 +95,7 @@ def run(name, alg, sizes=10, step=2, nopt=2 ** 20):
     )
     parser.add_argument("-d", type=int, default=1, help="Dimensions")
     parser.add_argument(
-        "--test",
-        required=False,
-        action="store_true",
-        help="Validation",
+        "--test", required=False, action="store_true", help="Validation"
     )
     parser.add_argument(
         "--usm",
@@ -134,14 +116,17 @@ def run(name, alg, sizes=10, step=2, nopt=2 ** 20):
 
     output = {}
     output["name"] = name
+    output["datetime"] = datetime.datetime.strftime(
+        datetime.datetime.now(), "%Y-%m-%d %H:%M:%S"
+    )
     output["sizes"] = sizes
     output["step"] = step
     output["repeat"] = repeat
     output["dims"] = dims
+    output["randseed"] = SEED
     output["metrics"] = []
 
     times = np.empty(repeat)
-
     if args.test:
         X, Y = gen_data(nopt, dims, np.float32)
         p_dis = l2_distance_python(X, Y)
@@ -160,7 +145,6 @@ def run(name, alg, sizes=10, step=2, nopt=2 ** 20):
             print("Test succeeded. Python dis: ", p_dis, " Numba dis: ", n_dis, "\n")
         else:
             print("Test failed. Python dis: ", p_dis, " Numba dis: ", n_dis, "\n")
-        return
 
     for _ in xrange(sizes):
         if args.usm is True:
@@ -173,13 +157,26 @@ def run(name, alg, sizes=10, step=2, nopt=2 ** 20):
         # print("ERF: {}: Size: {}".format(name, nopt), end=' ', flush=True)
         sys.stdout.flush()
 
-        alg(X, Y, distance)  # warmup
+        n_dis = alg(X, Y, distance)  # warmup
 
         for i in iterations:
+            distance = np.asarray([0.0]).astype(np.float32)
+
+            X, Y = gen_data(nopt, dims, np.float32)
+            p_dis = l2_distance_python(X, Y)
+
             t0 = default_timer()
-            alg(X, Y, distance)
+            n_dis = alg(X, Y, distance)
             t1 = default_timer()
+
             times[i] = t1 - t0
+
+            if np.allclose(n_dis, p_dis, rtol=1e-05 * np.sqrt(nopt)):
+                print(
+                    "Test succeeded. Python dis: ", p_dis, " Numba dis: ", n_dis, "\n"
+                )
+            else:
+                print("Test failed. Python dis: ", p_dis, " Numba dis: ", n_dis, "\n")
 
         time = np.median(times)
 
@@ -187,7 +184,7 @@ def run(name, alg, sizes=10, step=2, nopt=2 ** 20):
             "ERF: {:15s} | Size: {:10d} | TIME: {:10.6f}".format(name, nopt, time),
             flush=True,
         )
-        output["metrics"].append((nopt, time))
+        output["metrics"].append((nopt, 0, time))  # zero placeholder for mops
         # f.write(str(nopt) + "," + str(mops * 2 * repeat) + "\n")
         f2.write(str(nopt) + "," + str(time) + "\n")
 

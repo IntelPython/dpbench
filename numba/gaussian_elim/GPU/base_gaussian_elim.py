@@ -3,7 +3,7 @@ import os
 import json
 from timeit import default_timer as now
 from dpbench_datagen.gaussian_elim import gen_matrix, gen_vec
-
+from device_selector import get_device_selector
 import dpctl, dpctl.memory as dpmem
 
 ######################################################
@@ -23,28 +23,10 @@ BLOCK_SIZE_1_X = 16
 BLOCK_SIZE_1_Y = 16
 
 
-def get_device_selector(is_gpu=True):
-    if is_gpu is True:
-        device_selector = "gpu"
-    else:
-        device_selector = "cpu"
-
-    if (
-        os.environ.get("SYCL_DEVICE_FILTER") is None
-        or os.environ.get("SYCL_DEVICE_FILTER") == "opencl"
-    ):
-        return "opencl:" + device_selector
-
-    if os.environ.get("SYCL_DEVICE_FILTER") == "level_zero":
-        return "level_zero:" + device_selector
-
-    return os.environ.get("SYCL_DEVICE_FILTER")
-
-
 def gen_matrix_usm(size):
     m_buf = gen_matrix(size)
 
-    with dpctl.device_context(get_device_selector()):
+    with dpctl.device_context(get_device_selector(is_gpu=True)):
         m_usm = dpmem.MemoryUSMShared(size * size * np.dtype("float").itemsize)
         m_usm.copy_from_host(m_buf.view("u1"))
 
@@ -54,7 +36,7 @@ def gen_matrix_usm(size):
 def gen_vec_usm(size, value):
     v_buf = gen_vec(size, value)
 
-    with dpctl.device_context(get_device_selector()):
+    with dpctl.device_context(get_device_selector(is_gpu=True)):
         v_usm = dpmem.MemoryUSMShared(size * np.dtype("float").itemsize)
         v_usm.copy_from_host(v_buf.view("u1"))
 

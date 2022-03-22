@@ -25,10 +25,10 @@
 # *****************************************************************************
 
 import argparse
-import sys, os, json
+import sys, os, json, datetime
 import numpy as np
 import numpy.random as rnd
-
+from device_selector import get_device_selector
 from dpbench_datagen.knn import (
     gen_train_data,
     gen_test_data,
@@ -37,6 +37,7 @@ from dpbench_datagen.knn import (
     TRAIN_DATA_SIZE,
     N_NEIGHBORS,
 )
+from dpbench_datagen.knn.generate_data_random import SEED_TEST
 from dpbench_python.knn.knn_python import knn_python
 import dpctl
 import dpctl.tensor as dpt
@@ -64,24 +65,6 @@ except NameError:
 
 
 ###############################################
-def get_device_selector(is_gpu=True):
-    if is_gpu is True:
-        device_selector = "gpu"
-    else:
-        device_selector = "cpu"
-
-    if (
-        os.environ.get("SYCL_DEVICE_FILTER") is None
-        or os.environ.get("SYCL_DEVICE_FILTER") == "opencl"
-    ):
-        return "opencl:" + device_selector
-
-    if os.environ.get("SYCL_DEVICE_FILTER") == "level_zero":
-        return "level_zero:" + device_selector
-
-    return os.environ.get("SYCL_DEVICE_FILTER")
-
-
 def gen_data_usm(nopt):
     # init numpy obj
     x_train, y_train = gen_train_data()
@@ -90,7 +73,7 @@ def gen_data_usm(nopt):
     predictions = np.empty(nopt)
     votes_to_classes_lst = np.zeros((nopt, CLASSES_NUM))
 
-    with dpctl.device_context(get_device_selector()) as gpu_queue:
+    with dpctl.device_context(get_device_selector(is_gpu=True)) as gpu_queue:
         train_usm = dpt.usm_ndarray(
             x_train.shape,
             dtype=x_train.dtype,
@@ -142,7 +125,7 @@ def gen_data_usm(nopt):
 ##############################################
 
 
-def run(name, alg, sizes=5, step=2, nopt=2 ** 20):
+def run(name, alg, sizes=5, step=2, nopt=2 ** 10):
     parser = argparse.ArgumentParser()
     parser.add_argument("--steps", type=int, default=sizes, help="Number of steps")
     parser.add_argument("--step", type=int, default=step, help="Factor for each step")
@@ -176,9 +159,13 @@ def run(name, alg, sizes=5, step=2, nopt=2 ** 20):
 
     output = {}
     output["name"] = name
+    output["datetime"] = datetime.datetime.strftime(
+        datetime.datetime.now(), "%Y-%m-%d %H:%M:%S"
+    )
     output["sizes"] = sizes
     output["step"] = step
     output["repeat"] = repeat
+    output["randseed"] = SEED_TEST
     output["metrics"] = []
 
     if args.test:

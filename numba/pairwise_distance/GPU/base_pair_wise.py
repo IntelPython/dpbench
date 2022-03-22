@@ -4,12 +4,16 @@
 
 
 import numpy as np
-import sys, json, os
+import numpy.random as rnd
+import sys, json, os, datetime
 import dpctl, dpctl.tensor as dpt
 from dpbench_python.pairwise_distance.pairwise_distance_python import (
     pairwise_distance_python,
 )
 from dpbench_datagen.pairwise_distance import gen_rand_data
+from dpbench_datagen.pairwise_distance.generate_data_random import SEED
+
+from device_selector import get_device_selector
 
 try:
     import itimer as it
@@ -25,7 +29,6 @@ except:
 ######################################################
 # GLOBAL DECLARATIONS THAT WILL BE USED IN ALL FILES #
 ######################################################
-
 # make xrange available in python 3
 try:
     xrange
@@ -33,24 +36,6 @@ except NameError:
     xrange = range
 
 ###############################################
-def get_device_selector(is_gpu=True):
-    if is_gpu is True:
-        device_selector = "gpu"
-    else:
-        device_selector = "cpu"
-
-    if (
-        os.environ.get("SYCL_DEVICE_FILTER") is None
-        or os.environ.get("SYCL_DEVICE_FILTER") == "opencl"
-    ):
-        return "opencl:" + device_selector
-
-    if os.environ.get("SYCL_DEVICE_FILTER") == "level_zero":
-        return "level_zero:" + device_selector
-
-    return os.environ.get("SYCL_DEVICE_FILTER")
-
-
 def gen_data(nopt, dims):
     X, Y = gen_rand_data(nopt, dims)
     return (X, Y, np.empty((nopt, nopt)))
@@ -59,7 +44,7 @@ def gen_data(nopt, dims):
 def gen_data_usm(nopt, dims):
     X, Y, D = gen_data(nopt, dims)
 
-    with dpctl.device_context(get_device_selector()) as gpu_queue:
+    with dpctl.device_context(get_device_selector(is_gpu=True)) as gpu_queue:
         X_usm = dpt.usm_ndarray(
             X.shape,
             dtype=X.dtype,
@@ -136,9 +121,13 @@ def run(name, alg, sizes=5, step=2, nopt=2 ** 10):
 
     output = {}
     output["name"] = name
+    output["datetime"] = datetime.datetime.strftime(
+        datetime.datetime.now(), "%Y-%m-%d %H:%M:%S"
+    )
     output["sizes"] = sizes
     output["step"] = step
     output["repeat"] = repeat
+    output["randseed"] = SEED
     output["metrics"] = []
 
     if args.test:

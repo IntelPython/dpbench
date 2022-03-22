@@ -1,8 +1,9 @@
 import numpy as np
-import sys, json, os
 import numpy.random as rnd
+import sys, json, os, datetime
 from timeit import default_timer as now
 import dpctl, dpctl.memory as dpmem
+from device_selector import get_device_selector
 
 ######################################################
 # GLOBAL DECLARATIONS THAT WILL BE USED IN ALL FILES #
@@ -26,24 +27,6 @@ DEVICE = 0
 LWS = 2 ** 8
 
 ###############################################
-def get_device_selector(is_gpu=True):
-    if is_gpu is True:
-        device_selector = "gpu"
-    else:
-        device_selector = "cpu"
-
-    if (
-        os.environ.get("SYCL_DEVICE_FILTER") is None
-        or os.environ.get("SYCL_DEVICE_FILTER") == "opencl"
-    ):
-        return "opencl:" + device_selector
-
-    if os.environ.get("SYCL_DEVICE_FILTER") == "level_zero":
-        return "level_zero:" + device_selector
-
-    return os.environ.get("SYCL_DEVICE_FILTER")
-
-
 def gen_data_np(rows, cols):
     return (rnd.randint(LOW, HIGH, (rows, cols)), np.empty(cols))
 
@@ -52,7 +35,7 @@ def gen_data_usm(rows, cols):
     data_buf = rnd.randint(LOW, HIGH, (rows, cols), dtype=np.int32)
     result_buf = np.empty(cols, dtype=np.int32)
 
-    with dpctl.device_context(get_device_selector()):
+    with dpctl.device_context(get_device_selector(is_gpu=True)):
         data_usm = dpmem.MemoryUSMShared(rows * cols * np.dtype("i4").itemsize)
         result_usm = dpmem.MemoryUSMShared(cols * np.dtype("i4").itemsize)
 
@@ -112,6 +95,9 @@ def run(name, alg, sizes=5, step=2, rows=2 ** 10, cols=2 ** 6, pyramid_height=20
 
     output = {}
     output["name"] = name
+    output["datetime"] = datetime.datetime.strftime(
+        datetime.datetime.now(), "%Y-%m-%d %H:%M:%S"
+    )
     output["sizes"] = sizes
     output["step"] = step
     output["repeat"] = repeat

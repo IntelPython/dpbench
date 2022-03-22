@@ -3,7 +3,7 @@
 # SPDX-License-Identifier: MIT
 
 from sklearn.datasets import make_classification, make_regression
-import sys, json, os
+import sys, json, os, datetime
 import numpy.random as rnd
 
 try:
@@ -39,24 +39,6 @@ except NameError:
 
 
 ###############################################
-def get_device_selector(is_gpu=True):
-    if is_gpu is True:
-        device_selector = "gpu"
-    else:
-        device_selector = "cpu"
-
-    if (
-        os.environ.get("SYCL_DEVICE_FILTER") is None
-        or os.environ.get("SYCL_DEVICE_FILTER") == "opencl"
-    ):
-        return "opencl:" + device_selector
-
-    if os.environ.get("SYCL_DEVICE_FILTER") == "level_zero":
-        return "level_zero:" + device_selector
-
-    return os.environ.get("SYCL_DEVICE_FILTER")
-
-
 def gen_c_data(nopt, dims):
     return make_classification(n_samples=nopt, n_features=dims, random_state=0)
 
@@ -109,6 +91,9 @@ def run(name, alg, sizes=10, step=2, nopt=2 ** 10):
 
     output = {}
     output["name"] = name
+    output["datetime"] = datetime.datetime.strftime(
+        datetime.datetime.now(), "%Y-%m-%d %H:%M:%S"
+    )
     output["sizes"] = sizes
     output["step"] = step
     output["repeat"] = repeat

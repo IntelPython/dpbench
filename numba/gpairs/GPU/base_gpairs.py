@@ -1,11 +1,11 @@
 # Copyright (C) 2017-2018 Intel Corporation
 #
 # SPDX-License-Identifier: MIT
-
-import os, json
+import os, json, datetime
 import numpy as np
+import numpy.random as rnd
 import dpctl, dpctl.tensor as dpt
-
+from device_selector import get_device_selector
 from dpbench_python.gpairs.gpairs_python import gpairs_python
 from dpbench_datagen.gpairs import gen_rand_data, DEFAULT_NBINS
 
@@ -32,22 +32,6 @@ except NameError:
     xrange = range
 
 ###############################################
-def get_device_selector(is_gpu=True):
-    if is_gpu is True:
-        device_selector = "gpu"
-    else:
-        device_selector = "cpu"
-
-    if (
-        os.environ.get("SYCL_DEVICE_FILTER") is None
-        or os.environ.get("SYCL_DEVICE_FILTER") == "opencl"
-    ):
-        return "opencl:" + device_selector
-
-    if os.environ.get("SYCL_DEVICE_FILTER") == "level_zero":
-        return "level_zero:" + device_selector
-
-    return os.environ.get("SYCL_DEVICE_FILTER")
 
 
 def gen_data_np(npoints, dtype=np.float32):
@@ -62,7 +46,7 @@ def gen_data_usm(npoints):
     # init numpy obj
     x1, y1, z1, w1, x2, y2, z2, w2, DEFAULT_RBINS_SQUARED, result = gen_data_np(npoints)
 
-    with dpctl.device_context(get_device_selector()) as gpu_queue:
+    with dpctl.device_context(get_device_selector(is_gpu=True)) as gpu_queue:
         # init usmdevice memory
         x1_usm = dpt.usm_ndarray(
             x1.shape,
@@ -152,8 +136,10 @@ def gen_data_usm(npoints):
 
 ##############################################
 
+gen_data_usm = gen_data_np
 
-def run(name, alg, sizes=5, step=2, nopt=2 ** 16):
+
+def run(name, alg, sizes=2, step=2, nopt=2 ** 15):
     import argparse
 
     parser = argparse.ArgumentParser()
@@ -199,9 +185,13 @@ def run(name, alg, sizes=5, step=2, nopt=2 ** 16):
 
     output = {}
     output["name"] = name
+    output["datetime"] = datetime.datetime.strftime(
+        datetime.datetime.now(), "%Y-%m-%d %H:%M:%S"
+    )
     output["sizes"] = sizes
     output["step"] = step
     output["repeat"] = repeat
+    output["randseed"] = -1
     output["metrics"] = []
 
     if args.test:

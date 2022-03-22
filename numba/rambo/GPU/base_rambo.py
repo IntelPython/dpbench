@@ -1,9 +1,9 @@
 # Copyright (C) 2017-2018 Intel Corporation
 #
 # SPDX-License-Identifier: MIT
-
-import json, os
+import json, os, datetime
 import numpy as np
+import numpy.random as rnd
 from dpbench_python.rambo.rambo_python import rambo_python
 
 try:
@@ -27,29 +27,12 @@ try:
 except NameError:
     xrange = range
 
-
-def get_device_selector(is_gpu=True):
-    if is_gpu is True:
-        device_selector = "gpu"
-    else:
-        device_selector = "cpu"
-
-    if (
-        os.environ.get("SYCL_DEVICE_FILTER") is None
-        or os.environ.get("SYCL_DEVICE_FILTER") == "opencl"
-    ):
-        return "opencl:" + device_selector
-
-    if os.environ.get("SYCL_DEVICE_FILTER") == "level_zero":
-        return "level_zero:" + device_selector
-
-    return os.environ.get("SYCL_DEVICE_FILTER")
-
+SEED = 7777777
 
 ###############################################
 
 
-def run(name, alg, sizes=5, step=2, nopt=2 ** 20):
+def run(name, alg, sizes=1, step=2, nopt=2 ** 20):
     import argparse
 
     parser = argparse.ArgumentParser()
@@ -95,10 +78,16 @@ def run(name, alg, sizes=5, step=2, nopt=2 ** 20):
 
     output = {}
     output["name"] = name
+    output["datetime"] = datetime.datetime.strftime(
+        datetime.datetime.now(), "%Y-%m-%d %H:%M:%S"
+    )
     output["sizes"] = sizes
     output["step"] = step
     output["repeat"] = repeat
+    output["randseed"] = SEED
     output["metrics"] = []
+
+    rnd.seed(SEED)
 
     if args.test:
         e_p = rambo_python(nopt)

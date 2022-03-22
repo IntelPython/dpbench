@@ -25,7 +25,7 @@
 # *****************************************************************************
 
 import argparse
-import sys, os, json
+import sys, os, json, datetime
 import numpy as np
 
 from knn_python import knn_python
@@ -92,10 +92,12 @@ def run(name, alg, sizes=10, step=2, nopt=2 ** 10):
 
     output = {}
     output["name"] = name
+    output["datetime"] = datetime.datetime.strftime(
+        datetime.datetime.now(), "%Y-%m-%d %H:%M:%S"
+    )
     output["sizes"] = sizes
     output["step"] = step
     output["repeat"] = repeat
-    # output["randseed"] = SEED
     output["metrics"] = []
 
     if args.test:

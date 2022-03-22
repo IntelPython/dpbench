@@ -6,6 +6,7 @@ import dpctl
 import base_pca
 import numba
 import numpy as np
+from device_selector import get_device_selector
 
 
 @numba.njit(parallel=True, fastmath=True)
@@ -31,7 +32,7 @@ def compute_mean_axis_0(data):
 
 
 def covariance(M):
-    with dpctl.device_context(base_pca.get_device_selector()):
+    with dpctl.device_context(get_device_selector(is_gpu=True)):
         mean = compute_mean_axis_0(M.T)
         X = M - mean[:, None]
         Y = (M - mean[:, None]).T
@@ -40,7 +41,7 @@ def covariance(M):
 
 
 def pca_impl(data):
-    with dpctl.device_context(base_pca.get_device_selector()):
+    with dpctl.device_context(get_device_selector(is_gpu=True)):
         m = compute_mean_axis_0(data)
         c = data - m
         v = covariance(c.T)

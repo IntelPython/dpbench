@@ -4,11 +4,21 @@
 
 import dpctl
 import base_pair_wise
+import os
 import numpy as np
-import numba_dppy
+from device_selector import get_device_selector
+
+backend = os.getenv("NUMBA_BACKEND", "legacy")
+
+if backend == "legacy":
+    from numba_dppy import kernel, atomic, DEFAULT_LOCAL_SIZE
+    import numba_dppy
+else:
+    from numba_dpcomp.mlir.kernel_impl import kernel, atomic, DEFAULT_LOCAL_SIZE
+    import numba_dpcomp.mlir.kernel_impl as numba_dppy  # this doesn't work for dppy if no explicit numba_dppy before get_global_id(0)
 
 
-@numba_dppy.kernel
+@kernel
 def pairwise_python(X1, X2, D):
     i = numba_dppy.get_global_id(0)
 
@@ -23,9 +33,8 @@ def pairwise_python(X1, X2, D):
 
 
 def pw_distance(X1, X2, D):
-    with dpctl.device_context(base_pair_wise.get_device_selector()):
-        # pairwise_python[X1.shape[0],numba_dppy.DEFAULT_LOCAL_SIZE](X1, X2, D)
-        pairwise_python[X1.shape[0], 128](X1, X2, D)
+    with dpctl.device_context(get_device_selector(is_gpu=True)):
+        pairwise_python[X1.shape[0], DEFAULT_LOCAL_SIZE](X1, X2, D)
 
 
 base_pair_wise.run("Pairwise Distance Kernel", pw_distance)

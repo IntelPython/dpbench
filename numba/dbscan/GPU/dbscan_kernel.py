@@ -25,33 +25,18 @@
 # *****************************************************************************
 
 import dpctl
-import os
 import numpy as np
 from numba import jit
 from device_selector import get_device_selector
 import base_dbscan
 import utils
+import numba_dppy as nb
 
 NOISE = -1
 UNDEFINED = -2
 DEFAULT_QUEUE_CAPACITY = 10
 
-backend = os.getenv("NUMBA_BACKEND", "legacy")
-
-if backend == "legacy":
-    from numba_dppy import kernel, DEFAULT_LOCAL_SIZE
-    import numba_dppy
-
-    __jit = jit(nopython=True)
-else:
-    from numba_dpcomp.mlir.kernel_impl import kernel, DEFAULT_LOCAL_SIZE
-    import numba_dpcomp
-    import numba_dpcomp.mlir.kernel_impl as numba_dppy  # this doesn't work for dppy if no explicit numba_dppy before get_global_id(0)
-
-    __jit = numba_dpcomp.jit(nopython=True, enable_gpu_pipeline=True)
-
-
-@kernel(
+@nb.kernel(
     access_types={
         "read_only": ["data"],
         "write_only": ["assignments", "ind_lst"],
@@ -61,7 +46,7 @@ else:
 def get_neighborhood(
     n, dim, data, eps, ind_lst, sz_lst, assignments, block_size, nblocks
 ):
-    i = numba_dppy.get_global_id(0)
+    i = nb.get_global_id(0)
 
     start = i * block_size
     stop = n if i + 1 == nblocks else start + block_size
@@ -87,7 +72,7 @@ def get_neighborhood(
                     sz_lst[j] = size + 1
 
 
-@__jit
+@jit(nopython=True)
 def compute_clusters(n, min_pts, assignments, sizes, indices_list):
     nclusters = 0
     nnoise = 0
@@ -136,7 +121,7 @@ def dbscan(n, dim, data, eps, min_pts, assignments):
     sizes = np.zeros(n, dtype=np.int64)
 
     with dpctl.device_context(get_device_selector(is_gpu=True)):
-        get_neighborhood[n, DEFAULT_LOCAL_SIZE](
+        get_neighborhood[n, nb.DEFAULT_LOCAL_SIZE](
             n, dim, data, eps, indices_list, sizes, assignments, 1, n
         )
 

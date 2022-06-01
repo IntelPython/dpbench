@@ -32,7 +32,7 @@
     q->wait();
 
     q->submit([&](handler& h) {
-        auto sumr = sycl::ONEAPI::reduction(d_sum, sycl::ONEAPI::plus<>());
+        auto sumr = sycl::reduction(d_sum, sycl::plus<>());
 
         h.parallel_for<class theKernel>(sycl::nd_range<1>{nopt, 256}, sumr, [=](sycl::nd_item<1> item, auto& sumr_arg) {
             size_t i = item.get_global_id(0);

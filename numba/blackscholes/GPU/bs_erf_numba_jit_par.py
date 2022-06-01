@@ -9,21 +9,8 @@ import numba
 from device_selector import get_device_selector
 import base_bs_erf
 
-backend = os.getenv("NUMBA_BACKEND", "legacy")
-if backend == "legacy":
-    import numba as nb
-
-    __njit = nb.njit(parallel=True, fastmath=True)
-    __vectorize = nb.vectorize(nopython=True)
-else:
-    import numba_dpcomp as nb
-
-    __njit = nb.njit(parallel=True, fastmath=True, enable_gpu_pipeline=True)
-    __vectorize = nb.vectorize(nopython=True, enable_gpu_pipeline=True)
-
-
 # blackscholes implemented as a parallel loop using numba.prange
-@__njit
+@numba.njit(parallel=True, fastmath=True)
 def black_scholes_kernel(nopt, price, strike, t, rate, vol, call, put):
     mr = -rate
     sig_sig_two = vol * vol * 2

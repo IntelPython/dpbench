@@ -28,22 +28,11 @@
 import dpctl
 import math
 import numpy as np
-
+import numba_dppy as nb
 import base_knn
 from device_selector import get_device_selector
 
-backend = os.getenv("NUMBA_BACKEND", "legacy")
-
-if backend == "legacy":
-    from numba_dppy import kernel, DEFAULT_LOCAL_SIZE
-    import numba_dppy
-else:
-    from numba_dpcomp.mlir.kernel_impl import kernel, DEFAULT_LOCAL_SIZE
-
-    import numba_dpcomp.mlir.kernel_impl as numba_dppy  # this doesn't work for dppy if no explicit numba_dppy before get_global_id(0)
-
-
-@kernel(
+@nb.kernel(
     access_types={
         "read_only": ["train", "train_labels", "test", "votes_to_classes_lst"],
         "write_only": ["predictions"],
@@ -145,7 +134,7 @@ def run_knn(
     data_dim,
 ):
     with dpctl.device_context(get_device_selector(is_gpu=True)) as gpu_queue:
-        run_knn_kernel[test_size, DEFAULT_LOCAL_SIZE](
+        run_knn_kernel[test_size, nb.DEFAULT_LOCAL_SIZE](
             train,
             train_labels,
             test,

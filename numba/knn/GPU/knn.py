@@ -66,12 +66,7 @@ def sort_queue(queue_neighbors):
 
 @numba_dppy.kernel(
     access_types={
-        "read_only": [
-            "train",
-            "train_labels",
-            "test",
-            "votes_to_classes_lst"
-        ],
+        "read_only": ["train", "train_labels", "test", "votes_to_classes_lst"],
         "write_only": ["predictions"],
     }
 )

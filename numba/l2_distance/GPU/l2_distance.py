@@ -4,33 +4,22 @@
 
 import dpctl
 import numpy as np
-import os
-
 import base_l2_distance
-from device_selector import get_device_selector
+import numba as nb
 
-backend = os.getenv("NUMBA_BACKEND", "legacy")
-if backend == "legacy":
-    import numba as nb
-
-    __njit = nb.njit(parallel=True, fastmath=True)
-else:
-    import numba_dpcomp as nb
-
-    __njit = nb.njit(parallel=True, fastmath=True, enable_gpu_pipeline=True)
-
+__njit = nb.njit(parallel=True, fastmath=True)
 
 @__njit
 def l2_distance_kernel(a, b):
-    sub = a - b  # this line is offloaded
-    sq = np.square(sub)  # this line is offloaded
+    sub = a - b
+    sq = np.square(sub)
     sum = np.sum(sq)
     d = np.sqrt(sum)
     return d
 
 
 def l2_distance(a, b, _):
-    with dpctl.device_context(get_device_selector(is_gpu=True)):
+    with dpctl.device_context(base_l2_distance.get_device_selector(is_gpu=True)):
         return l2_distance_kernel(a, b)
 
 

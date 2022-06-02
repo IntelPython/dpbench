@@ -64,15 +64,15 @@ void calCentroidsSum(queue* q,
   	  size_t i = myID[0];
   	  size_t ci = points[i].cluster;
 
-  	  sycl::ext::oneapi::atomic_ref<tfloat, sycl::ext::oneapi::memory_order::relaxed, sycl::ext::oneapi::memory_scope::system,
+  	  sycl::atomic_ref<tfloat, sycl::memory_order::relaxed, sycl::memory_scope::system,
   		     access::address_space::global_space> centroid_x_sum(centroids[ci].x_sum);
   	  centroid_x_sum += points[i].x;
 
-  	  sycl::ext::oneapi::atomic_ref<tfloat, sycl::ext::oneapi::memory_order::relaxed, sycl::ext::oneapi::memory_scope::system,
+  	  sycl::atomic_ref<tfloat, sycl::memory_order::relaxed, sycl::memory_scope::system,
   		     access::address_space::global_space> centroid_y_sum(centroids[ci].y_sum);
   	  centroid_y_sum += points[i].y;
 
-  	  sycl::ext::oneapi::atomic_ref<tint, sycl::ext::oneapi::memory_order::relaxed, sycl::ext::oneapi::memory_scope::system,
+  	  sycl::atomic_ref<tint, sycl::memory_order::relaxed, sycl::memory_scope::system,
   		     access::address_space::global_space> centroid_num_points(centroids[ci].num_points);
   	  centroid_num_points += 1;
 

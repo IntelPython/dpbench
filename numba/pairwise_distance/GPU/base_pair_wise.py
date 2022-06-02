@@ -73,7 +73,7 @@ def gen_data_usm(nopt, dims):
 ##############################################
 
 
-def run(name, alg, sizes=5, step=2, nopt=2 ** 10):
+def run(name, alg, sizes=6, step=2, nopt=2 ** 10):
     import argparse
 
     parser = argparse.ArgumentParser()

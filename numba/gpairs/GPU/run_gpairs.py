@@ -2,24 +2,12 @@ import base_gpairs
 import numpy as np
 import gaussian_weighted_pair_counts as gwpc
 import dpctl, dpctl.tensor as dpt
-
 from device_selector import get_device_selector
 import dpctl
-import os
+from numba_dppy import kernel, atomic, DEFAULT_LOCAL_SIZE
+import numba_dppy
 
-backend = os.getenv("NUMBA_BACKEND", "legacy")
-
-if backend == "legacy":
-    from numba_dppy import kernel, atomic, DEFAULT_LOCAL_SIZE
-    import numba_dppy
-
-    atomic_add = atomic.add
-else:
-    from numba_dpcomp.mlir.kernel_impl import kernel, atomic, DEFAULT_LOCAL_SIZE
-    import numba_dpcomp.mlir.kernel_impl as numba_dppy  # this doesn't work for dppy if no explicit numba_dppy before get_global_id(0)
-
-    atomic_add = atomic.add
-
+atomic_add = atomic.add
 
 @kernel
 def count_weighted_pairs_3d_intel(
@@ -122,8 +110,8 @@ def count_weighted_pairs_3d_intel_no_slm(
 
     slm_hist_size = ceiling_quotient(nbins, private_hist_size) * private_hist_size
 
-    with dpctl.device_context(base_gpairs.get_device_selector()):
-        gwpc.count_weighted_pairs_3d_intel_no_slm[gwsRange, lwsRange](
+    with dpctl.device_context(base_gpairs.get_device_selector(is_gpu=True)):
+        gwpc.count_weighted_pairs_3d_intel_no_slm_ker[gwsRange, lwsRange](
             n,
             nbins,
             slm_hist_size,
@@ -137,7 +125,7 @@ def count_weighted_pairs_3d_intel_no_slm(
             d_z2,
             d_w2,
             d_rbins_squared,
-            d_result,
+            d_result
         )
 
 
@@ -175,36 +163,19 @@ def count_weighted_pairs_3d_intel_orig(
 def run_gpairs(
     n, nbins, d_x1, d_y1, d_z1, d_w1, d_x2, d_y2, d_z2, d_w2, d_rbins_squared, d_result
 ):
-
-    if backend == "legacy":
-        count_weighted_pairs_3d_intel_no_slm_ker(
-            n,
-            nbins,
-            d_x1,
-            d_y1,
-            d_z1,
-            d_w1,
-            d_x2,
-            d_y2,
-            d_z2,
-            d_w2,
-            d_rbins_squared,
-            d_result,
-        )
-    else:
-        with dpctl.device_context(get_device_selector(is_gpu=True)):
-            count_weighted_pairs_3d_intel[d_x1.shape[0], DEFAULT_LOCAL_SIZE](
-                d_x1,
-                d_y1,
-                d_z1,
-                d_w1,
-                d_x2,
-                d_y2,
-                d_z2,
-                d_w2,
-                d_rbins_squared,
-                d_result,
-            )
-
+    count_weighted_pairs_3d_intel_no_slm(
+        n,
+        nbins,
+        d_x1,
+        d_y1,
+        d_z1,
+        d_w1,
+        d_x2,
+        d_y2,
+        d_z2,
+        d_w2,
+        d_rbins_squared,
+        d_result
+    )
 
 base_gpairs.run("Gpairs Dppy kernel", run_gpairs)

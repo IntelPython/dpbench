@@ -8,15 +8,8 @@ import os
 import numpy as np
 from device_selector import get_device_selector
 
-backend = os.getenv("NUMBA_BACKEND", "legacy")
-
-if backend == "legacy":
-    from numba_dppy import kernel, atomic, DEFAULT_LOCAL_SIZE
-    import numba_dppy
-else:
-    from numba_dpcomp.mlir.kernel_impl import kernel, atomic, DEFAULT_LOCAL_SIZE
-    import numba_dpcomp.mlir.kernel_impl as numba_dppy  # this doesn't work for dppy if no explicit numba_dppy before get_global_id(0)
-
+from numba_dppy import kernel, atomic, DEFAULT_LOCAL_SIZE
+import numba_dppy
 
 @kernel
 def pairwise_python(X1, X2, D):

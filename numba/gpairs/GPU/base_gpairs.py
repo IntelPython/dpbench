@@ -136,6 +136,7 @@ def gen_data_usm(npoints):
 
 ##############################################
 
+
 def run(name, alg, sizes=2, step=2, nopt=2 ** 15):
     import argparse
 

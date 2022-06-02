@@ -36,6 +36,7 @@ NOISE = -1
 UNDEFINED = -2
 DEFAULT_QUEUE_CAPACITY = 10
 
+
 @nb.jit(nopython=True, parallel=True, fastmath=True)
 def get_neighborhood(n, dim, data, eps, ind_lst, sz_lst, assignments):
     block_size = 1

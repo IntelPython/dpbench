@@ -12,6 +12,7 @@ import numba_dppy
 
 atomic_add = atomic.add
 
+
 @kernel(access_types={"read_only": ["a", "b"], "write_only": ["c"]})
 def l2_distance_kernel(a, b, c):
     i = numba_dppy.get_global_id(0)

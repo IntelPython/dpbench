@@ -9,6 +9,7 @@ import numba as nb
 
 __njit = nb.njit(parallel=True, fastmath=True)
 
+
 @__njit
 def l2_distance_kernel(a, b):
     sub = a - b

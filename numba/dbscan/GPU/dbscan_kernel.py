@@ -36,6 +36,7 @@ NOISE = -1
 UNDEFINED = -2
 DEFAULT_QUEUE_CAPACITY = 10
 
+
 @nb.kernel(
     access_types={
         "read_only": ["data"],

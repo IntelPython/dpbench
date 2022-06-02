@@ -8,6 +8,7 @@ from device_selector import get_device_selector
 from numba_dppy import kernel, get_global_id, atomic, DEFAULT_LOCAL_SIZE
 import numba_dppy
 
+
 def gen_rand_data(nevts, nout):
     C1 = numpy.empty((nevts, nout))
     F1 = numpy.empty((nevts, nout))

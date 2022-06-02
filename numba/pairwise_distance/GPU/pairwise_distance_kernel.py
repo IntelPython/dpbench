@@ -11,6 +11,7 @@ from device_selector import get_device_selector
 from numba_dppy import kernel, atomic, DEFAULT_LOCAL_SIZE
 import numba_dppy
 
+
 @kernel
 def pairwise_python(X1, X2, D):
     i = numba_dppy.get_global_id(0)

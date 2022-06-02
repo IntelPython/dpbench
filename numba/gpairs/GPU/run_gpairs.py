@@ -9,6 +9,7 @@ import numba_dppy
 
 atomic_add = atomic.add
 
+
 @kernel
 def count_weighted_pairs_3d_intel(
     x1, y1, z1, w1, x2, y2, z2, w2, rbins_squared, result
@@ -125,7 +126,7 @@ def count_weighted_pairs_3d_intel_no_slm(
             d_z2,
             d_w2,
             d_rbins_squared,
-            d_result
+            d_result,
         )
 
 
@@ -175,7 +176,8 @@ def run_gpairs(
         d_z2,
         d_w2,
         d_rbins_squared,
-        d_result
+        d_result,
     )
+
 
 base_gpairs.run("Gpairs Dppy kernel", run_gpairs)

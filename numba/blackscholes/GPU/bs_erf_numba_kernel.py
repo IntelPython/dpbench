@@ -9,6 +9,7 @@ from device_selector import get_device_selector
 from math import log, sqrt, exp, erf
 import numba_dppy as nb
 
+
 @nb.kernel(
     access_types={"read_only": ["price", "strike", "t"], "write_only": ["call", "put"]}
 )

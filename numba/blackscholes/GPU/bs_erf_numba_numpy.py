@@ -14,6 +14,7 @@ import numba as nb
 def nberf(x):
     return erf(x)
 
+
 # blackscholes implemented using numpy function calls
 @nb.njit(parallel=True, fastmath=True)
 def black_scholes_kernel(price, strike, t, rate, vol, call, put):

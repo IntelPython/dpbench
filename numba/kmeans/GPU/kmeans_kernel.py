@@ -9,6 +9,7 @@ ITERATIONS = 30
 
 atomic_add = atomic.add
 
+
 @nb.kernel
 def groupByCluster(arrayP, arrayPcluster, arrayC, num_points, num_centroids):
     idx = nb.get_global_id(0)
@@ -65,7 +66,9 @@ def kmeans(
             arrayP, arrayPcluster, arrayC, num_points, num_centroids
         )
 
-        calCentroidsSum1[num_centroids, nb.DEFAULT_LOCAL_SIZE](arrayCsum, arrayCnumpoint)
+        calCentroidsSum1[num_centroids, nb.DEFAULT_LOCAL_SIZE](
+            arrayCsum, arrayCnumpoint
+        )
 
         calCentroidsSum2[num_points, nb.DEFAULT_LOCAL_SIZE](
             arrayP, arrayPcluster, arrayCsum, arrayCnumpoint

@@ -32,6 +32,7 @@ import numba_dppy as nb
 import base_knn
 from device_selector import get_device_selector
 
+
 @nb.kernel(
     access_types={
         "read_only": ["train", "train_labels", "test", "votes_to_classes_lst"],

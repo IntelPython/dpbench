@@ -49,8 +49,8 @@ def run_knn_kernel(
     votes_to_classes_lst,
     data_dim,
 ):
-    i = numba_dppy.get_global_id(0)
-    queue_neighbors = numba_dppy.private.array(shape=(5, 2), dtype=np.float64)
+    i = nb.get_global_id(0)
+    queue_neighbors = nb.private.array(shape=(5, 2), dtype=np.float64)
 
     for j in range(k):
         x1 = train[j]

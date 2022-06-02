@@ -1,33 +1,13 @@
 import numpy
 import math
 import dpctl
-import os
 
 import base_rambo
 from device_selector import get_device_selector
 
-backend = os.getenv("NUMBA_BACKEND", "legacy")
+from numba_dppy import kernel, get_global_id, atomic, DEFAULT_LOCAL_SIZE
+import numba_dppy
 
-if backend == "legacy":
-    from numba_dppy import kernel, get_global_id, atomic, DEFAULT_LOCAL_SIZE
-    import numba_dppy
-
-    __njit = numba_dppy.jit(nopython=True)
-else:
-    from numba_dpcomp.mlir.kernel_impl import (
-        kernel,
-        get_global_id,
-        atomic,
-        DEFAULT_LOCAL_SIZE,
-    )
-    import numba_dpcomp.mlir.kernel_impl as numba_dppy  # this doesn't work for dppy if no explicit numba_dppy before get_global_id(0)
-    import numba_dpcomp
-
-    __njit = numba_dpcomp.jit(nopython=True)
-
-# memory allocation in the kernel??
-# @__njit
-# dpcomp: Can't resolve function: Function(<built-in method seed of numpy.random.mtrand.RandomState object at 0x7f55b1ed4740>)
 def gen_rand_data(nevts, nout):
     C1 = numpy.empty((nevts, nout))
     F1 = numpy.empty((nevts, nout))

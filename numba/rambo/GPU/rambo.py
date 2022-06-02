@@ -1,22 +1,14 @@
 import numpy
 import numba
 import dpctl
-import os
 
 import base_rambo
 from device_selector import get_device_selector
 
-backend = os.getenv("NUMBA_BACKEND", "legacy")
-if backend == "legacy":
-    import numba as nb
+import numba as nb
 
-    __njit = nb.jit(nopython=True, parallel=False)
-    __fmjit = nb.jit(nopython=True, parallel=False, fastmath=True)
-else:
-    import numba_dpcomp as nb
-
-    __njit = nb.njit(parallel=True, enable_gpu_pipeline=True)
-    __fmjit = nb.njit(parallel=True, fastmath=True, enable_gpu_pipeline=True)
+__njit = nb.jit(nopython=True, parallel=False)
+__fmjit = nb.jit(nopython=True, parallel=False, fastmath=True)
 
 
 # @__njit

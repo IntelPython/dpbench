@@ -55,7 +55,7 @@ def run(name, sizes=5, step=2, nopt=2 ** 20):
     if args.usm:
         build_string = ["make", "comp"]
         utils.run_command(build_string, verbose=True)
-        exec_name = "./rambo_comp"
+        exec_name = "./rambo"
     else:
         build_string = ["make"]
         utils.run_command(build_string, verbose=True)

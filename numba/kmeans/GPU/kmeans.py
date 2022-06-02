@@ -1,27 +1,13 @@
 import dpctl
 import numpy
-import numba
-import os
-
 import base_kmeans
-from device_selector import get_device_selector
+import numba
 
 REPEAT = 1
 # defines total number of iterations for kmeans accuracy
 ITERATIONS = 30
 
-backend = os.getenv("NUMBA_BACKEND", "legacy")
-if backend == "legacy":
-    import numba as nb
-
-    __njit = nb.jit(nopython=True, parallel=True, fastmath=True)
-else:
-    import numba_dpcomp as nb
-
-    __njit = nb.jit(
-        nopython=True, parallel=True, fastmath=True, enable_gpu_pipeline=True
-    )
-
+__njit = numba.jit(nopython=True, parallel=True, fastmath=True)
 
 # determine the euclidean distance from the cluster center to each point
 @__njit
@@ -93,7 +79,7 @@ def run_kmeans(
     NUMBER_OF_CENTROIDS,
 ):
 
-    with dpctl.device_context(get_device_selector(is_gpu=True)):
+    with dpctl.device_context(base_kmeans.get_device_selector(is_gpu=True)):
         for i in range(REPEAT):
             for i1 in range(NUMBER_OF_CENTROIDS):
                 arrayC[i1, 0] = arrayP[i1, 0]

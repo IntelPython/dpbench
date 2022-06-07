@@ -785,8 +785,6 @@ class workloads:
                     else wl_names[all_workloads.gpairs.value]["kernel"],
                     "--usm" if comp_only_mode else None,
                     "--test",
-                    "--steps",
-                    "1",
                     "--size",
                     "1024",
                 ],

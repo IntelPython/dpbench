@@ -1,0 +1,67 @@
+{
+    "benchmark": {
+        "name": "Black-Scholes Formula",
+        "short_name": "black-scholes",
+        "relative_path": "black_scholes",
+        "module_name": "black_scholes",
+        "func_name": "black_scholes",
+        "kind": "microbenchmark",
+        "domain": "Finance",
+        "parameters": {
+            "S": {
+                "nopt": 400000,
+                "seed": 123456789
+            },
+            "M": {
+                "nopt": 4000000,
+                "seed": 123456789
+            },
+            "L": {
+                "nopt": 40000000,
+                "seed": 123456789
+            },
+            "paper": {
+                "nopt": 1000000,
+                "seed": 123456789
+            }
+        },
+        "init": {
+            "func_name": "initialize",
+            "input_args": [
+                "nopt",
+                "seed"
+            ],
+            "output_args": [
+                "nopt",
+                "price",
+                "strike",
+                "t",
+                "rate",
+                "volatility",
+                "call",
+                "put"
+            ]
+        },
+        "input_args": [
+            "nopt",
+            "price",
+            "strike",
+            "t",
+            "rate",
+            "volatility",
+            "call",
+            "put"
+        ],
+        "array_args": [
+            "price",
+            "strike",
+            "t",
+            "call",
+            "put"
+        ],
+        "output_args": [
+            "call",
+            "put"
+        ]
+    }
+}

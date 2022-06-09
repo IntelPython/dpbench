@@ -136,3 +136,6 @@ dmypy.json
 # Results files
 *.csv
 # *.json
+
+# SQLlite Databases
+*.db

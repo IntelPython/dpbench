@@ -25,7 +25,7 @@ class Framework(object):
         parent_folder = pathlib.Path(__file__).parent.absolute()
         frmwrk_filename = "{f}.json".format(f=fname)
         frmwrk_path = parent_folder.joinpath(
-            "..", "..", "framework_info", frmwrk_filename
+            "..", "framework_info", frmwrk_filename
         )
         try:
             with open(frmwrk_path) as json_file:

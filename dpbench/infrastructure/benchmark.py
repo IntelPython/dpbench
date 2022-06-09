@@ -9,19 +9,28 @@ class Benchmark(object):
     """A class for reading and benchmark information and initializing
     benchmark data."""
 
-    def __init__(self, bname: str):
+    def __init__(self, bname: str, bconfig_path: str = None):
         """Reads benchmark information.
         :param bname: The benchmark name.
+        "param config_path: Optional location of the config JSON file for the
+        benchmark. If none is provided, the default config inside the
+        package's bench_info directory is used.
         """
 
         self.bname = bname
         self.bdata = dict()
 
-        parent_folder = pathlib.Path(__file__).parent.absolute()
         bench_filename = "{b}.json".format(b=bname)
-        bench_path = parent_folder.joinpath(
-            "..", "..", "bench_info", bench_filename
-        )
+        bench_path = None
+
+        if bconfig_path:
+            bench_path = bconfig_path.joinpath(bench_filename)
+        else:
+            parent_folder = pathlib.Path(__file__).parent.absolute()
+            bench_path = parent_folder.joinpath(
+                "..", "bench_info", bench_filename
+            )
+
         try:
             with open(bench_path) as json_file:
                 self.info = json.load(json_file)["benchmark"]

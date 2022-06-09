@@ -1,0 +1,83 @@
+{
+    "benchmark": {
+        "name": "GPairs",
+        "short_name": "gpairs",
+        "relative_path": "gpairs",
+        "module_name": "gpairs",
+        "func_name": "gpairs",
+        "kind": "microbenchmark",
+        "domain": "Astrophysics",
+        "parameters": {
+            "S": {
+                "nopt": 4000,
+                "seed": 123456789,
+                "nbins": 20,
+                "rmax": 50,
+                "rmin": 0.1
+            },
+            "M": {
+                "nopt": 40000,
+                "seed": 123456789,
+                "nbins": 20,
+                "rmax": 50,
+                "rmin": 0.1
+            },
+            "L": {
+                "nopt": 400000,
+                "seed": 123456789,
+                "nbins": 20,
+                "rmax": 50,
+                "rmin": 0.1
+            }
+        },
+        "init": {
+            "func_name": "initialize",
+            "input_args": [
+                "nopt",
+                "seed",
+                "nbins",
+                "rmax",
+                "rmin"
+            ],
+            "output_args": [
+                "x1",
+                "y1",
+                "z1",
+                "w1",
+                "x2",
+                "y2",
+                "z2",
+                "w2",
+                "rbins",
+                "results"
+            ]
+        },
+        "input_args": [
+            "x1",
+            "y1",
+            "z1",
+            "w1",
+            "x2",
+            "y2",
+            "z2",
+            "w2",
+            "rbins",
+            "results"
+        ],
+        "array_args": [
+            "x1",
+            "y1",
+            "z1",
+            "w1",
+            "x2",
+            "y2",
+            "z2",
+            "w2",
+            "rbins",
+            "results"
+        ],
+        "output_args": [
+            "results"
+        ]
+    }
+}

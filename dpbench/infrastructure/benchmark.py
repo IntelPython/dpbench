@@ -28,7 +28,7 @@ class Benchmark(object):
         else:
             parent_folder = pathlib.Path(__file__).parent.absolute()
             bench_path = parent_folder.joinpath(
-                "..", "bench_info", bench_filename
+                "..", "configs", "bench_info", bench_filename
             )
 
         try:

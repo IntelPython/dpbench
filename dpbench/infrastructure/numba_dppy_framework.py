@@ -109,5 +109,5 @@ class NumbaDppyFramework(Framework):
 
         dpctl_ctx_str = "with dpctl.device_context(dpctl.select_{d}_device()): ".format(d=self.device)
         arg_str = self.arg_str(bench, impl)
-        main_exec_str = "__dpb_result = __dpb_impl[4000000,]({a})".format(a=arg_str)
+        main_exec_str = "__dpb_result = __dpb_impl({a})".format(a=arg_str)
         return dpctl_ctx_str + main_exec_str

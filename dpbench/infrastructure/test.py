@@ -38,13 +38,11 @@ class Test(object):
             copy = frmwrk.copy_func()
             setup_str = frmwrk.setup_str(self.bench, impl)
             exec_str = frmwrk.exec_str(self.bench, impl)
-            # print(setup_str)
-            # print(exec_str)
         except Exception as e:
             print("Failed to load the {} implementation.".format(report_str))
             print(e)
             return None, None
-        ldict = {"__npb_impl": impl, "__npb_copy": copy, **bdata}
+        ldict = {"__dpb_impl": impl, "__dpb_copy": copy, **bdata}
         try:
             out, timelist = util.benchmark(
                 exec_str,
@@ -52,7 +50,7 @@ class Test(object):
                 report_str + " - " + mode,
                 repeat,
                 ldict,
-                "__npb_result",
+                "__dpb_result",
             )
         except Exception as e:
             print("Failed to execute the {} implementation.".format(report_str))

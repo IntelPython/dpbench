@@ -147,7 +147,6 @@ def benchmark(
     output=None,
     verbose=True,
 ):
-
     timeit.template = timeit_tmpl.format(
         init="{init}", setup="{setup}", stmt="{stmt}", output=output
     )

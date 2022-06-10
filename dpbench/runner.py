@@ -45,14 +45,15 @@ def run_benchmarks(
         # Create the needed Frameworks by looking at the benchmark
         # implementations
         for bimpl in bench_impls:
-            if "_numba" in bimpl:
+            if "_dppy" in bimpl:
+                fws.append(dpbi.NumbaDppyFramework("numba_dppy"))
+            elif "_numba" in bimpl:
                 # create a Numba framework
                 fws.append(dpbi.NumbaFramework("numba"))
             elif "_numpy" in bimpl:
                 fws.append(dpbi.Framework("numpy"))
-            elif "_dpex" in bimpl:
-                pass
             elif "_dpnp" in bimpl:
+                fws.append(dpbi.DpnpFramework("dpnp"))
                 pass
 
         # Check if a NumPy implementation of the benchmark is there. The

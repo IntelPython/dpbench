@@ -64,16 +64,25 @@ def run_benchmarks(
                 "WARN: Skipping running "
                 + b
                 + ". Missing NumPy implementation for "
-                + "the benchmark"
+                + "the benchmark."
             )
             continue
 
         for fw in fws:
             if fw not in fw_np:
                 test = dpbi.Test(bench=bench, frmwrk=fw, npfrmwrk=fw_np[0])
-                test.run(
-                    preset=preset,
-                    repeat=repeat,
-                    validate=validate,
-                    timeout=timeout,
-                )
+                try:
+                    test.run(
+                        preset=preset,
+                        repeat=repeat,
+                        validate=validate,
+                        timeout=timeout,
+                    )
+                except Exception:
+                    warnings.warn(
+                        "ERROR: Failed to test the "
+                        + fw.fname
+                        + " implementation for "
+                        + b
+                        + "."
+                    )

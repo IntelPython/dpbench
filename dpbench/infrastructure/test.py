@@ -73,7 +73,7 @@ class Test(object):
         """Tests the framework against the benchmark.
         :param preset: The preset to use for testing (S, M, L, paper).
         :param validate: If true, it validates the output against NumPy.
-        :param repeat: The number of repeatitions.
+        :param repeat: The number of repetitions.
         """
         print(
             "***** Testing {f} with {b} on the {p} dataset *****".format(

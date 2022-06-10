@@ -25,7 +25,7 @@ class Framework(object):
         parent_folder = pathlib.Path(__file__).parent.absolute()
         frmwrk_filename = "{f}.json".format(f=fname)
         frmwrk_path = parent_folder.joinpath(
-            "..", "framework_info", frmwrk_filename
+            "..", "configs", "framework_info", frmwrk_filename
         )
         try:
             with open(frmwrk_path) as json_file:
@@ -174,7 +174,6 @@ class Framework(object):
         """
 
         arg_str = self.arg_str(bench, impl)
-        # param_str = self.param_str(bench, impl)
         return "__npb_result = __npb_impl({a})".format(a=arg_str)
 
 
@@ -191,7 +190,6 @@ def generate_framework(fname: str) -> Framework:
     try:
         with open(frmwrk_path) as json_file:
             info = json.load(json_file)["framework"]
-            # print(info)
     except Exception as e:
         print(
             "Framework JSON file {f} could not be opened.".format(

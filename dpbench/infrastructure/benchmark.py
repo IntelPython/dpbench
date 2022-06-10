@@ -28,7 +28,7 @@ class Benchmark(object):
         else:
             parent_folder = pathlib.Path(__file__).parent.absolute()
             bench_path = parent_folder.joinpath(
-                "..", "bench_info", bench_filename
+                "..", "configs", "bench_info", bench_filename
             )
 
         try:
@@ -85,8 +85,17 @@ class Benchmark(object):
                 i=self.info["init"]["func_name"],
                 iargs=",".join(self.info["init"]["input_args"]),
             )
-            exec(init_str, data)
-            del data[self.info["init"]["func_name"]]
+            try:
+                exec(init_str, data)
+            except Exception as e:
+                print(
+                    "Benchmark {m} could not be initialized with data.".format(
+                        m=module_filename
+                    )
+                )
+                raise (e)
+            finally:
+                del data[self.info["init"]["func_name"]]
 
         self.bdata[preset] = data
         return self.bdata[preset]

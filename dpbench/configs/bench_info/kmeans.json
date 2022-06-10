@@ -1,0 +1,77 @@
+{
+    "benchmark": {
+        "name": "KMeans",
+        "short_name": "kmeans",
+        "relative_path": "kmeans",
+        "module_name": "kmeans",
+        "func_name": "kmeans",
+        "kind": "microbenchmark",
+        "domain": "Machine Learning",
+        "parameters": {
+            "S": {
+                "nopt": 4000,
+                "niters": 10,
+                "seed": 123456789,
+                "ndims": 2,
+                "ncentroids": 10
+            },
+            "M": {
+                "nopt": 40000,
+                "niters": 10,
+                "seed": 123456789,
+                "ndims": 2,
+                "ncentroids": 10
+            },
+            "L": {
+                "nopt": 400000,
+                "niters": 10,
+                "seed": 123456789,
+                "ndims": 2,
+                "ncentroids": 10
+            }
+        },
+        "init": {
+            "func_name": "initialize",
+            "input_args": [
+                "nopt",
+                "niters",
+                "seed",
+                "ndims",
+                "ncentroids"
+            ],
+            "output_args": [
+                "arrayP",
+                "arrayPclusters",
+                "arrayC",
+                "arrayCsum",
+                "arrayCnumpoint",
+                "niters",
+                "nopt",
+                "ncentroids"
+            ]
+        },
+        "input_args": [
+            "arrayP",
+            "arrayPclusters",
+            "arrayC",
+            "arrayCsum",
+            "arrayCnumpoint",
+            "niters",
+            "nopt",
+            "ncentroids"
+        ],
+        "array_args": [
+            "arrayP",
+            "arrayPclusters",
+            "arrayC",
+            "arrayCsum",
+            "arrayCnumpoint"
+        ],
+        "output_args": [
+            "arrayPclusters",
+            "arrayC",
+            "arrayCsum",
+            "arrayCnumpoint"
+        ]
+    }
+}

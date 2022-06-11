@@ -1,7 +1,10 @@
 # Copyright (C) 2017-2018 Intel Corporation
 #
 # SPDX-License-Identifier: MIT
-import os, json, datetime
+import datetime
+import json
+import os
+
 import numpy as np
 import numpy.random as rnd
 
@@ -23,7 +26,7 @@ DEFAULT_RMIN, DEFAULT_RMAX = 0.1, 50
 DEFAULT_RBINS = np.logspace(
     np.log10(DEFAULT_RMIN), np.log10(DEFAULT_RMAX), DEFAULT_NBINS
 ).astype(np.float32)
-DEFAULT_RBINS_SQUARED = (DEFAULT_RBINS ** 2).astype(np.float32)
+DEFAULT_RBINS_SQUARED = (DEFAULT_RBINS**2).astype(np.float32)
 
 ######################################################
 # GLOBAL DECLARATIONS THAT WILL BE USED IN ALL FILES #
@@ -92,7 +95,7 @@ def copy_d2h(d_result):
 ##############################################
 
 
-def run(name, alg, sizes=10, step=2, nopt=2 ** 10):
+def run(name, alg, sizes=10, step=2, nopt=2**10):
     import argparse
 
     parser = argparse.ArgumentParser()
@@ -106,7 +109,10 @@ def run(name, alg, sizes=10, step=2, nopt=2 ** 10):
         "--size", required=False, default=nopt, help="Initial data size"
     )
     parser.add_argument(
-        "--repeat", required=False, default=1, help="Iterations inside measured region"
+        "--repeat",
+        required=False,
+        default=1,
+        help="Iterations inside measured region",
     )
     parser.add_argument(
         "--text", required=False, default="", help="Print with each result"

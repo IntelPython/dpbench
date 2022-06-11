@@ -1,12 +1,13 @@
-import numpy
 import math
-import dpctl
-import numba
-import base_rambo
-from device_selector import get_device_selector
 
-from numba_dppy import kernel, get_global_id, atomic, DEFAULT_LOCAL_SIZE
+import base_rambo
+import dpctl
 import numba_dppy
+import numpy
+from device_selector import get_device_selector
+from numba_dppy import DEFAULT_LOCAL_SIZE, atomic, get_global_id, kernel
+
+import numba
 
 
 @numba.njit()

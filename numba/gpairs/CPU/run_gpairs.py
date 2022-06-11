@@ -17,7 +17,16 @@ def run_gpairs(x1, y1, z1, w1, x2, y2, z2, w2, d_rbins_squared):
     result = result.astype(np.float32)
     results_test = np.zeros_like(result).astype(np.float64)
     count_weighted_pairs_3d_cpu(
-        x1, y1, z1, w1, x2, y2, z2, w2, d_rbins_squared.astype(np.float32), results_test
+        x1,
+        y1,
+        z1,
+        w1,
+        x2,
+        y2,
+        z2,
+        w2,
+        d_rbins_squared.astype(np.float32),
+        results_test,
     )
 
 

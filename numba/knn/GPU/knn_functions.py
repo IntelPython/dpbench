@@ -24,9 +24,10 @@
 # EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 # *****************************************************************************
 
-import numpy as np
-import numba
 import base_knn
+import numpy as np
+
+import numba
 
 DATA_DIM = 16
 
@@ -46,7 +47,7 @@ def euclidean_dist(x1, x2):
         diff = x1[i] - x2[i]
         distance += diff * diff
 
-    result = distance ** 0.5
+    result = distance**0.5
     # result = np.sqrt(distance)
     return result
 

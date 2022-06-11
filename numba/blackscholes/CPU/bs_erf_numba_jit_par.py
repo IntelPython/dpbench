@@ -2,12 +2,15 @@
 #
 # SPDX-License-Identifier: MIT
 
-import dpctl
+from math import erf, exp, log, sqrt
+
 import base_bs_erf
-import numba as nb
+import dpctl
 from device_selector import get_device_selector
-from math import log, sqrt, exp, erf
 from dpbench_decorators import njit
+
+import numba as nb
+
 
 # blackscholes implemented as a parallel loop using numba.prange
 @njit(parallel=True, fastmath=True)

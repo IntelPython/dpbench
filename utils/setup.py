@@ -1,5 +1,4 @@
-from setuptools import setup, find_packages
-
+from setuptools import find_packages, setup
 
 PACKAGENAME = "dpbench_utils"
 VERSION = "0.0.dev"

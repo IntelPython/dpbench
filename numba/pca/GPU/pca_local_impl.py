@@ -2,11 +2,12 @@
 #
 # SPDX-License-Identifier: MIT
 
-import dpctl
 import base_pca
-import numba
+import dpctl
 import numpy as np
 from device_selector import get_device_selector
+
+import numba
 
 
 @numba.njit(parallel=True, fastmath=True)

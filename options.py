@@ -1,9 +1,17 @@
+import enum
 import os
 import sys
-import enum
 
-VTUNE_HOTSPOTS_CMD = ["vtune", "-run-pass-thru=--no-altstack", "-collect=hotspots"]
-VTUNE_THREADING_CMD = ["vtune", "-run-pass-thru=--no-altstack", "-collect=threading"]
+VTUNE_HOTSPOTS_CMD = [
+    "vtune",
+    "-run-pass-thru=--no-altstack",
+    "-collect=hotspots",
+]
+VTUNE_THREADING_CMD = [
+    "vtune",
+    "-run-pass-thru=--no-altstack",
+    "-collect=threading",
+]
 VTUNE_GPU_OFFLOAD_CMD = [
     "vtune",
     "-run-pass-thru=--no-altstack",
@@ -184,7 +192,7 @@ class workloads:
         self.wl_list = {
             all_workloads.blackscholes.value: {
                 "execute": False,
-                "ref_input": 2 ** 28,
+                "ref_input": 2**28,
                 "NUMBA_TEST_CMD": [
                     "python",
                     wl_names[all_workloads.blackscholes.value]["numba"]
@@ -209,7 +217,7 @@ class workloads:
                     "--steps",
                     "1",
                     "--size",
-                    str(2 ** 28),
+                    str(2**28),
                 ],
                 "NUMBA_ADVISOR_CMD": [
                     "python",
@@ -220,7 +228,7 @@ class workloads:
                     "--steps",
                     "1",
                     "--size",
-                    str(2 ** 28),
+                    str(2**28),
                 ],
                 "NATIVE_TEST_CMD": [
                     "python",
@@ -240,20 +248,24 @@ class workloads:
                     "--steps",
                     "1",
                     "--size",
-                    str(2 ** 28),
+                    str(2**28),
                 ],
                 "NATIVE_VTUNE_CMD": [
-                    "./black_scholes_comp" if comp_only_mode else "./black_scholes",
-                    str(2 ** 28),
+                    "./black_scholes_comp"
+                    if comp_only_mode
+                    else "./black_scholes",
+                    str(2**28),
                 ],
                 "NATIVE_ADVISOR_CMD": [
-                    "./black_scholes_comp" if comp_only_mode else "./black_scholes",
-                    str(2 ** 28),
+                    "./black_scholes_comp"
+                    if comp_only_mode
+                    else "./black_scholes",
+                    str(2**28),
                 ],
             },
             all_workloads.dbscan.value: {
                 "execute": False,
-                "ref_input": 2 ** 14,
+                "ref_input": 2**14,
                 "NUMBA_TEST_CMD": [
                     "python",
                     wl_names[all_workloads.dbscan.value]["numba"]
@@ -275,7 +287,7 @@ class workloads:
                     "--steps",
                     "1",
                     "--size",
-                    str(2 ** 14),
+                    str(2**14),
                 ],
                 "NUMBA_ADVISOR_CMD": [
                     "python",
@@ -285,14 +297,14 @@ class workloads:
                     "--steps",
                     "1",
                     "--size",
-                    str(2 ** 14),
+                    str(2**14),
                 ],
                 "NATIVE_TEST_CMD": ["python", "base_dbscan.py", "--test"],
                 "NATIVE_PERF_CMD": ["python", "base_dbscan.py"],
                 "NATIVE_VTUNE_CMD": [
                     "./dbscan",
                     "1",
-                    str(2 ** 14),
+                    str(2**14),
                     "10",
                     "20",
                     "0.6",
@@ -301,7 +313,7 @@ class workloads:
                 "NATIVE_ADVISOR_CMD": [
                     "./dbscan",
                     "1",
-                    str(2 ** 14),
+                    str(2**14),
                     "10",
                     "20",
                     "0.6",
@@ -310,7 +322,7 @@ class workloads:
             },
             all_workloads.kmeans.value: {
                 "execute": False,
-                "ref_input": 2 ** 22,
+                "ref_input": 2**22,
                 "NUMBA_TEST_CMD": [
                     "python",
                     wl_names[all_workloads.kmeans.value]["numba"]
@@ -335,7 +347,7 @@ class workloads:
                     "--steps",
                     "1",
                     "--size",
-                    str(2 ** 20),
+                    str(2**20),
                 ],
                 "NUMBA_ADVISOR_CMD": [
                     "python",
@@ -346,7 +358,7 @@ class workloads:
                     "--steps",
                     "1",
                     "--size",
-                    str(2 ** 20),
+                    str(2**20),
                 ],
                 "NATIVE_TEST_CMD": [
                     "python",
@@ -362,17 +374,17 @@ class workloads:
                 "NATIVE_VTUNE_CMD": [
                     "./kmeans_comp" if comp_only_mode else "./kmeans",
                     "1",
-                    str(2 ** 20),
+                    str(2**20),
                 ],
                 "NATIVE_ADVISOR_CMD": [
                     "./kmeans_comp" if comp_only_mode else "./kmeans",
                     "1",
-                    str(2 ** 20),
+                    str(2**20),
                 ],
             },
             all_workloads.knn.value: {
                 "execute": False,
-                "ref_input": 2 ** 24,
+                "ref_input": 2**24,
                 "NUMBA_TEST_CMD": [
                     "python",
                     wl_names[all_workloads.knn.value]["numba"]
@@ -399,7 +411,7 @@ class workloads:
                     "--steps",
                     "1",
                     "--size",
-                    str(2 ** 24),
+                    str(2**24),
                 ],
                 "NUMBA_ADVISOR_CMD": [
                     "python",
@@ -410,7 +422,7 @@ class workloads:
                     "--steps",
                     "1",
                     "--size",
-                    str(2 ** 24),
+                    str(2**24),
                 ],
                 "NATIVE_TEST_CMD": [
                     "python",
@@ -428,17 +440,17 @@ class workloads:
                 "NATIVE_VTUNE_CMD": [
                     "./knn_comp" if comp_only_mode else "./knn",
                     "1",
-                    str(2 ** 24),
+                    str(2**24),
                 ],
                 "NATIVE_ADVISOR_CMD": [
                     "./knn_comp" if comp_only_mode else "./knn",
                     "1",
-                    str(2 ** 24),
+                    str(2**24),
                 ],
             },
             all_workloads.l2_distance.value: {
                 "execute": False,
-                "ref_input": 2 ** 25,
+                "ref_input": 2**25,
                 "NUMBA_TEST_CMD": [
                     "python",
                     wl_names[all_workloads.l2_distance.value]["numba"]
@@ -463,7 +475,7 @@ class workloads:
                     "--steps",
                     "1",
                     "--size",
-                    str(2 ** 25),
+                    str(2**25),
                 ],
                 "NUMBA_ADVISOR_CMD": [
                     "python",
@@ -474,7 +486,7 @@ class workloads:
                     "--steps",
                     "1",
                     "--size",
-                    str(2 ** 25),
+                    str(2**25),
                 ],
                 "NATIVE_TEST_CMD": [
                     "python",
@@ -503,12 +515,14 @@ class workloads:
             },
             all_workloads.pairwise_distance.value: {
                 "execute": False,
-                "ref_input": 2 ** 14,
+                "ref_input": 2**14,
                 "NUMBA_TEST_CMD": [
                     "python",
                     wl_names[all_workloads.pairwise_distance.value]["numba"]
                     if not kernel_mode
-                    else wl_names[all_workloads.pairwise_distance.value]["kernel"],
+                    else wl_names[all_workloads.pairwise_distance.value][
+                        "kernel"
+                    ],
                     "--usm" if comp_only_mode else None,
                     "--test",
                 ],
@@ -516,30 +530,36 @@ class workloads:
                     "python",
                     wl_names[all_workloads.pairwise_distance.value]["numba"]
                     if not kernel_mode
-                    else wl_names[all_workloads.pairwise_distance.value]["kernel"],
+                    else wl_names[all_workloads.pairwise_distance.value][
+                        "kernel"
+                    ],
                     "--usm" if comp_only_mode else None,
                 ],
                 "NUMBA_VTUNE_CMD": [
                     "python",
                     wl_names[all_workloads.pairwise_distance.value]["numba"]
                     if not kernel_mode
-                    else wl_names[all_workloads.pairwise_distance.value]["kernel"],
+                    else wl_names[all_workloads.pairwise_distance.value][
+                        "kernel"
+                    ],
                     "--usm" if comp_only_mode else None,
                     "--steps",
                     "1",
                     "--size",
-                    str(2 ** 14),
+                    str(2**14),
                 ],
                 "NUMBA_ADVISOR_CMD": [
                     "python",
                     wl_names[all_workloads.pairwise_distance.value]["numba"]
                     if not kernel_mode
-                    else wl_names[all_workloads.pairwise_distance.value]["kernel"],
+                    else wl_names[all_workloads.pairwise_distance.value][
+                        "kernel"
+                    ],
                     "--usm" if comp_only_mode else None,
                     "--steps",
                     "1",
                     "--size",
-                    str(2 ** 14),
+                    str(2**14),
                 ],
                 "NATIVE_TEST_CMD": [
                     "python",
@@ -563,13 +583,13 @@ class workloads:
                     "./pairwise_distance_comp"
                     if comp_only_mode
                     else "./pairwise_distance",
-                    str(2 ** 28),
+                    str(2**28),
                 ],
                 "NATIVE_ADVISOR_CMD": [
                     "./pairwise_distance_comp"
                     if comp_only_mode
                     else "./pairwise_distance",
-                    str(2 ** 28),
+                    str(2**28),
                 ],
             },
             # all_workloads.pca.value: {

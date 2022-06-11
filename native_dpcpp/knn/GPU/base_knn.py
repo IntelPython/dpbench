@@ -2,18 +2,19 @@
 #
 # SPDX-License-Identifier: MIT
 
-import os
-import run_utils as utils
-import numpy as np
 import argparse
+import os
+
+import numpy as np
+import run_utils as utils
 from dpbench_datagen.knn import (
-    gen_data_to_file,
-    gen_train_data,
-    gen_test_data,
-    N_NEIGHBORS,
     CLASSES_NUM,
-    TRAIN_DATA_SIZE,
     DATA_DIM,
+    N_NEIGHBORS,
+    TRAIN_DATA_SIZE,
+    gen_data_to_file,
+    gen_test_data,
+    gen_train_data,
 )
 from dpbench_python.knn.knn_python import knn_python
 
@@ -24,13 +25,22 @@ except NameError:
     xrange = range
 
 # create input data, call blackscholes computation function (alg)
-def run(name, sizes=5, step=2, nopt=2 ** 20):
+def run(name, sizes=5, step=2, nopt=2**20):
     parser = argparse.ArgumentParser()
-    parser.add_argument("--steps", type=int, default=sizes, help="Number of steps")
-    parser.add_argument("--step", type=int, default=step, help="Factor for each step")
-    parser.add_argument("--size", type=int, default=nopt, help="Initial data size")
     parser.add_argument(
-        "--repeat", type=int, default=1, help="Iterations inside measured region"
+        "--steps", type=int, default=sizes, help="Number of steps"
+    )
+    parser.add_argument(
+        "--step", type=int, default=step, help="Factor for each step"
+    )
+    parser.add_argument(
+        "--size", type=int, default=nopt, help="Initial data size"
+    )
+    parser.add_argument(
+        "--repeat",
+        type=int,
+        default=1,
+        help="Iterations inside measured region",
     )
     parser.add_argument(
         "--test",

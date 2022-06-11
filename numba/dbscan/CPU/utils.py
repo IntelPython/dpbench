@@ -1,7 +1,7 @@
 import numpy as np
 from numba.experimental import jitclass
-from numba import int64
 
+from numba import int64
 
 queue_spec = [
     ("capacity", int64),

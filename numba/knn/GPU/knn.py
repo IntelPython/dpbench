@@ -24,14 +24,13 @@
 # EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 # *****************************************************************************
 
+import math
+
 import base_knn
 import dpctl
-import numba_dppy
-import math
-import numpy as np
-
 import dpctl.tensor as dpt
-
+import numba_dppy
+import numpy as np
 
 # @numba.jit(nopython=True)
 # def euclidean_dist(x1, x2):
@@ -46,7 +45,7 @@ def euclidean_dist(x1, x2, data_dim):
         diff = x1[i] - x2[i]
         distance += diff * diff
 
-    result = distance ** 0.5
+    result = distance**0.5
     return result
 
 

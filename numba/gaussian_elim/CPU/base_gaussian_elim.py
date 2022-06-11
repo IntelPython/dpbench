@@ -1,10 +1,12 @@
-import numpy as np
-import os
 import json
+import os
 from timeit import default_timer as now
-from dpbench_datagen.gaussian_elim import gen_matrix, gen_vec
+
+import dpctl
+import dpctl.memory as dpmem
+import numpy as np
 from device_selector import get_device_selector
-import dpctl, dpctl.memory as dpmem
+from dpbench_datagen.gaussian_elim import gen_matrix, gen_vec
 
 ######################################################
 # GLOBAL DECLARATIONS THAT WILL BE USED IN ALL FILES #
@@ -110,7 +112,10 @@ def run(name, alg, steps=5, step=2, size=10):
         help="Use USM Shared or pure numpy",
     )
     parser.add_argument(
-        "--repeat", required=False, default=1, help="Iterations inside measured region"
+        "--repeat",
+        required=False,
+        default=1,
+        help="Iterations inside measured region",
     )
     parser.add_argument(
         "--json",

@@ -2,14 +2,14 @@
 #
 # SPDX-License-Identifier: MIT
 
-import dpctl
-import base_pair_wise
 import os
+
+import base_pair_wise
+import dpctl
+import numba_dppy
 import numpy as np
 from device_selector import get_device_selector
-
-from numba_dppy import kernel, atomic, DEFAULT_LOCAL_SIZE
-import numba_dppy
+from numba_dppy import DEFAULT_LOCAL_SIZE, atomic, kernel
 
 
 @kernel

@@ -1,6 +1,7 @@
+import base_kmeans
 import dpctl
 import numpy
-import base_kmeans
+
 import numba
 
 REPEAT = 1
@@ -54,14 +55,25 @@ def updateCentroids(arrayC, arrayCsum, arrayCnumpoint, num_centroids):
 
 
 def kmeans(
-    arrayP, arrayPcluster, arrayC, arrayCsum, arrayCnumpoint, num_points, num_centroids
+    arrayP,
+    arrayPcluster,
+    arrayC,
+    arrayCsum,
+    arrayCnumpoint,
+    num_points,
+    num_centroids,
 ):
 
     for i in range(ITERATIONS):
         groupByCluster(arrayP, arrayPcluster, arrayC, num_points, num_centroids)
 
         calCentroidsSum(
-            arrayP, arrayPcluster, arrayCsum, arrayCnumpoint, num_points, num_centroids
+            arrayP,
+            arrayPcluster,
+            arrayCsum,
+            arrayCnumpoint,
+            num_points,
+            num_centroids,
         )
 
         updateCentroids(arrayC, arrayCsum, arrayCnumpoint, num_centroids)

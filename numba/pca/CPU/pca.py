@@ -4,9 +4,10 @@
 
 
 import base_pca
-import numba
 import numpy as np
 from dpbench_decorators import jit
+
+import numba
 
 
 @jit(nopython=True, parallel=True, fastmath=True)

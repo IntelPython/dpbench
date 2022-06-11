@@ -1,9 +1,10 @@
 #!/usr/bin/env python
 # import matplotlib.pyplot as plt
+import base_rambo
 import mkl_random
 import numpy
+
 import numba
-import base_rambo
 
 
 @numba.jit(nopython=True, fastmath=True)
@@ -34,7 +35,9 @@ def get_inputs(ecms, nevts):
     pb = numpy.array([ecms / 2.0, 0.0, 0.0, -ecms / 2])
 
     input_particles = numpy.array([pa, pb])
-    input_particles = numpy.repeat(input_particles[numpy.newaxis, ...], nevts, axis=0)
+    input_particles = numpy.repeat(
+        input_particles[numpy.newaxis, ...], nevts, axis=0
+    )
 
     return input_particles
 
@@ -74,7 +77,7 @@ def get_output_mom2(C1, F1, Q1, nevts, nout):
     for i in numba.prange(nevts):
         for j in range(nout):
             C = 2.0 * C1[i, j] - 1.0
-            S = numpy.sqrt(1 - C ** 2)
+            S = numpy.sqrt(1 - C**2)
             F = 2.0 * numpy.pi * F1[i, j]
             Q = -numpy.log(Q1[i, j])
 

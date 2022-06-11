@@ -25,14 +25,17 @@
 # *****************************************************************************
 
 import argparse
-import sys, os, json
 import datetime
+import json
+import os
+import sys
+from typing import NamedTuple
+
+import dbscan_python
 import numpy as np
 import numpy.random as rnd
-from typing import NamedTuple
 from sklearn.datasets import make_blobs
 from sklearn.preprocessing import StandardScaler
-import dbscan_python
 
 try:
     import itimer as it
@@ -71,39 +74,42 @@ class Params(NamedTuple):
 
 SEED = 7777777
 OPTIMAL_PARAMS = {
-    DataSize(n_samples=2 ** 8, n_features=2): Params(eps=0.173, minpts=4),
-    DataSize(n_samples=2 ** 8, n_features=3): Params(eps=0.35, minpts=6),
-    DataSize(n_samples=2 ** 8, n_features=10): Params(eps=0.8, minpts=20),
-    DataSize(n_samples=2 ** 9, n_features=2): Params(eps=0.15, minpts=4),
-    DataSize(n_samples=2 ** 9, n_features=3): Params(eps=0.1545, minpts=6),
-    DataSize(n_samples=2 ** 9, n_features=10): Params(eps=0.7, minpts=20),
-    DataSize(n_samples=2 ** 10, n_features=2): Params(eps=0.1066, minpts=4),
-    DataSize(n_samples=2 ** 10, n_features=3): Params(eps=0.26, minpts=6),
-    DataSize(n_samples=2 ** 10, n_features=10): Params(eps=0.6, minpts=20),
-    DataSize(n_samples=2 ** 11, n_features=2): Params(eps=0.095, minpts=4),
-    DataSize(n_samples=2 ** 11, n_features=3): Params(eps=0.18, minpts=6),
-    DataSize(n_samples=2 ** 11, n_features=10): Params(eps=0.6, minpts=20),
-    DataSize(n_samples=2 ** 12, n_features=2): Params(eps=0.0715, minpts=4),
-    DataSize(n_samples=2 ** 12, n_features=3): Params(eps=0.17, minpts=6),
-    DataSize(n_samples=2 ** 12, n_features=10): Params(eps=0.6, minpts=20),
-    DataSize(n_samples=2 ** 13, n_features=2): Params(eps=0.073, minpts=4),
-    DataSize(n_samples=2 ** 13, n_features=3): Params(eps=0.149, minpts=6),
-    DataSize(n_samples=2 ** 13, n_features=10): Params(eps=0.6, minpts=20),
-    DataSize(n_samples=2 ** 14, n_features=2): Params(eps=0.0695, minpts=4),
-    DataSize(n_samples=2 ** 14, n_features=3): Params(eps=0.108, minpts=6),
-    DataSize(n_samples=2 ** 14, n_features=10): Params(eps=0.6, minpts=20),
-    DataSize(n_samples=2 ** 15, n_features=2): Params(eps=0.0695, minpts=4),
-    DataSize(n_samples=2 ** 15, n_features=3): Params(eps=0.108, minpts=6),
-    DataSize(n_samples=2 ** 15, n_features=10): Params(eps=0.6, minpts=20),
-    DataSize(n_samples=2 ** 16, n_features=2): Params(eps=0.0695, minpts=4),
-    DataSize(n_samples=2 ** 16, n_features=3): Params(eps=0.108, minpts=6),
-    DataSize(n_samples=2 ** 16, n_features=10): Params(eps=0.6, minpts=20),
+    DataSize(n_samples=2**8, n_features=2): Params(eps=0.173, minpts=4),
+    DataSize(n_samples=2**8, n_features=3): Params(eps=0.35, minpts=6),
+    DataSize(n_samples=2**8, n_features=10): Params(eps=0.8, minpts=20),
+    DataSize(n_samples=2**9, n_features=2): Params(eps=0.15, minpts=4),
+    DataSize(n_samples=2**9, n_features=3): Params(eps=0.1545, minpts=6),
+    DataSize(n_samples=2**9, n_features=10): Params(eps=0.7, minpts=20),
+    DataSize(n_samples=2**10, n_features=2): Params(eps=0.1066, minpts=4),
+    DataSize(n_samples=2**10, n_features=3): Params(eps=0.26, minpts=6),
+    DataSize(n_samples=2**10, n_features=10): Params(eps=0.6, minpts=20),
+    DataSize(n_samples=2**11, n_features=2): Params(eps=0.095, minpts=4),
+    DataSize(n_samples=2**11, n_features=3): Params(eps=0.18, minpts=6),
+    DataSize(n_samples=2**11, n_features=10): Params(eps=0.6, minpts=20),
+    DataSize(n_samples=2**12, n_features=2): Params(eps=0.0715, minpts=4),
+    DataSize(n_samples=2**12, n_features=3): Params(eps=0.17, minpts=6),
+    DataSize(n_samples=2**12, n_features=10): Params(eps=0.6, minpts=20),
+    DataSize(n_samples=2**13, n_features=2): Params(eps=0.073, minpts=4),
+    DataSize(n_samples=2**13, n_features=3): Params(eps=0.149, minpts=6),
+    DataSize(n_samples=2**13, n_features=10): Params(eps=0.6, minpts=20),
+    DataSize(n_samples=2**14, n_features=2): Params(eps=0.0695, minpts=4),
+    DataSize(n_samples=2**14, n_features=3): Params(eps=0.108, minpts=6),
+    DataSize(n_samples=2**14, n_features=10): Params(eps=0.6, minpts=20),
+    DataSize(n_samples=2**15, n_features=2): Params(eps=0.0695, minpts=4),
+    DataSize(n_samples=2**15, n_features=3): Params(eps=0.108, minpts=6),
+    DataSize(n_samples=2**15, n_features=10): Params(eps=0.6, minpts=20),
+    DataSize(n_samples=2**16, n_features=2): Params(eps=0.0695, minpts=4),
+    DataSize(n_samples=2**16, n_features=3): Params(eps=0.108, minpts=6),
+    DataSize(n_samples=2**16, n_features=10): Params(eps=0.6, minpts=20),
 }
 
 
 def gen_data(n_samples, n_features, centers=10, random_state=SEED):
     X, *_ = make_blobs(
-        n_samples=n_samples, n_features=n_features, centers=centers, random_state=SEED
+        n_samples=n_samples,
+        n_features=n_features,
+        centers=centers,
+        random_state=SEED,
     )
     X = StandardScaler().fit_transform(X)
 
@@ -113,16 +119,27 @@ def gen_data(n_samples, n_features, centers=10, random_state=SEED):
 ##############################################
 
 
-def run(name, alg, sizes=5, step=2, nopt=2 ** 10):
+def run(name, alg, sizes=5, step=2, nopt=2**10):
     parser = argparse.ArgumentParser()
-    parser.add_argument("--steps", type=int, default=sizes, help="Number of steps")
-    parser.add_argument("--step", type=int, default=step, help="Factor for each step")
-    parser.add_argument("--size", type=int, default=nopt, help="Initial data size")
     parser.add_argument(
-        "--repeat", type=int, default=1, help="Iterations inside measured region"
+        "--steps", type=int, default=sizes, help="Number of steps"
+    )
+    parser.add_argument(
+        "--step", type=int, default=step, help="Factor for each step"
+    )
+    parser.add_argument(
+        "--size", type=int, default=nopt, help="Initial data size"
+    )
+    parser.add_argument(
+        "--repeat",
+        type=int,
+        default=1,
+        help="Iterations inside measured region",
     )
     parser.add_argument("--dims", type=int, default=10, help="Dimensions")
-    parser.add_argument("--eps", type=float, default=0.6, help="Neighborhood value")
+    parser.add_argument(
+        "--eps", type=float, default=0.6, help="Neighborhood value"
+    )
     parser.add_argument("--minpts", type=int, default=20, help="minPts")
     parser.add_argument(
         "--json",
@@ -158,7 +175,9 @@ def run(name, alg, sizes=5, step=2, nopt=2 ** 10):
         data = gen_data(nopt, args.dims)
         assignments = np.empty(nopt, dtype=np.int64)
         data_size = DataSize(n_samples=nopt, n_features=args.dims)
-        params = OPTIMAL_PARAMS.get(data_size, Params(eps=args.eps, minpts=args.minpts))
+        params = OPTIMAL_PARAMS.get(
+            data_size, Params(eps=args.eps, minpts=args.minpts)
+        )
         minpts = params.minpts or args.minpts
         eps = params.eps or args.eps
 
@@ -191,7 +210,9 @@ def run(name, alg, sizes=5, step=2, nopt=2 ** 10):
             minpts = params.minpts or args.minpts
             eps = params.eps or args.eps
 
-            nclusters = alg(nopt, args.dims, data, eps, minpts, assignments)  # warmup
+            nclusters = alg(
+                nopt, args.dims, data, eps, minpts, assignments
+            )  # warmup
 
             t0 = now()
             for _ in xrange(repeat):

@@ -2,12 +2,14 @@
 #
 # SPDX-License-Identifier: MIT
 
-import os, json
-import numpy as np
-import dpctl, dpctl.tensor as dpt
+import json
+import os
 
-from dpbench_python.gpairs.gpairs_python import gpairs_python
+import dpctl
+import dpctl.tensor as dpt
+import numpy as np
 from dpbench_datagen.gpairs import gen_rand_data
+from dpbench_python.gpairs.gpairs_python import gpairs_python
 
 try:
     import itimer as it
@@ -55,7 +57,9 @@ def gen_data_np(npoints, dtype=np.float32):
         npoints, dtype
     )
     # result = np.zeros_like(DEFAULT_RBINS_SQUARED)[:-1].astype(dtype)
-    result = np.zeros((npoints, DEFAULT_RBINS_SQUARED.shape[0] - 1)).astype(dtype)
+    result = np.zeros((npoints, DEFAULT_RBINS_SQUARED.shape[0] - 1)).astype(
+        dtype
+    )
     return (x1, y1, z1, w1, x2, y2, z2, w2, DEFAULT_RBINS_SQUARED, result)
 
 
@@ -136,7 +140,9 @@ def gen_data_usm(npoints, dtype=np.float32):
     y2_usm.usm_data.copy_from_host(y2.view("u1"))
     z2_usm.usm_data.copy_from_host(z2.view("u1"))
     w2_usm.usm_data.copy_from_host(w2.view("u1"))
-    DEFAULT_RBINS_SQUARED_usm.usm_data.copy_from_host(DEFAULT_RBINS_SQUARED.view("u1"))
+    DEFAULT_RBINS_SQUARED_usm.usm_data.copy_from_host(
+        DEFAULT_RBINS_SQUARED.view("u1")
+    )
     result_usm.usm_data.copy_from_host(result.reshape((-1)).view("u1"))
 
     return (
@@ -156,7 +162,7 @@ def gen_data_usm(npoints, dtype=np.float32):
 ##############################################
 
 
-def run(name, alg, sizes=5, step=2, nopt=2 ** 16):
+def run(name, alg, sizes=5, step=2, nopt=2**16):
     import argparse
 
     parser = argparse.ArgumentParser()
@@ -170,7 +176,10 @@ def run(name, alg, sizes=5, step=2, nopt=2 ** 16):
         "--size", required=False, default=nopt, help="Initial data size"
     )
     parser.add_argument(
-        "--repeat", required=False, default=1, help="Iterations inside measured region"
+        "--repeat",
+        required=False,
+        default=1,
+        help="Iterations inside measured region",
     )
     parser.add_argument(
         "--text", required=False, default="", help="Print with each result"
@@ -208,9 +217,18 @@ def run(name, alg, sizes=5, step=2, nopt=2 ** 16):
     output["metrics"] = []
 
     if args.test:
-        x1, y1, z1, w1, x2, y2, z2, w2, DEFAULT_RBINS_SQUARED, result_p = gen_data_np(
-            nopt
-        )
+        (
+            x1,
+            y1,
+            z1,
+            w1,
+            x2,
+            y2,
+            z2,
+            w2,
+            DEFAULT_RBINS_SQUARED,
+            result_p,
+        ) = gen_data_np(nopt)
         gpairs_python(
             x1, y1, z1, w1, x2, y2, z2, w2, DEFAULT_RBINS_SQUARED, result_p[0]
         )
@@ -228,7 +246,18 @@ def run(name, alg, sizes=5, step=2, nopt=2 ** 16):
                 DEFAULT_RBINS_SQUARED,
                 result_usm,
             ) = gen_data_usm(nopt)
-            alg(x1, y1, z1, w1, x2, y2, z2, w2, DEFAULT_RBINS_SQUARED, result_usm)
+            alg(
+                x1,
+                y1,
+                z1,
+                w1,
+                x2,
+                y2,
+                z2,
+                w2,
+                DEFAULT_RBINS_SQUARED,
+                result_usm,
+            )
             result_n = np.empty((nopt, DEFAULT_NBINS - 1), dtype=np.float32)
             result_usm.usm_data.copy_to_host(result_n.reshape((-1)).view("u1"))
         else:
@@ -278,12 +307,23 @@ def run(name, alg, sizes=5, step=2, nopt=2 ** 16):
                 result,
             ) = gen_data_usm(nopt)
         else:
-            x1, y1, z1, w1, x2, y2, z2, w2, DEFAULT_RBINS_SQUARED, result = gen_data_np(
-                nopt
-            )
+            (
+                x1,
+                y1,
+                z1,
+                w1,
+                x2,
+                y2,
+                z2,
+                w2,
+                DEFAULT_RBINS_SQUARED,
+                result,
+            ) = gen_data_np(nopt)
         iterations = xrange(repeat)
 
-        alg(x1, y1, z1, w1, x2, y2, z2, w2, DEFAULT_RBINS_SQUARED, result)  # warmup
+        alg(
+            x1, y1, z1, w1, x2, y2, z2, w2, DEFAULT_RBINS_SQUARED, result
+        )  # warmup
         t0 = now()
         for _ in iterations:
             alg(x1, y1, z1, w1, x2, y2, z2, w2, DEFAULT_RBINS_SQUARED, result)

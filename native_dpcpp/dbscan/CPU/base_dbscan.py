@@ -25,10 +25,11 @@
 # *****************************************************************************
 
 import os
+
 import numpy as np
 import run_utils as utils
+from dpbench_datagen.dbscan import gen_data_to_file, gen_rand_data
 from dpbench_python.dbscan.dbscan_python import dbscan_python
-from dpbench_datagen.dbscan import gen_rand_data, gen_data_to_file
 
 ######################################################
 # GLOBAL DECLARATIONS THAT WILL BE USED IN ALL FILES #
@@ -54,18 +55,29 @@ def gen_data_np(nopt, dims, a_minpts, a_eps):
 #################################################
 
 
-def run(name, sizes=5, step=2, nopt=2 ** 10):
+def run(name, sizes=5, step=2, nopt=2**10):
     import argparse
 
     parser = argparse.ArgumentParser()
-    parser.add_argument("--steps", type=int, default=sizes, help="Number of steps")
-    parser.add_argument("--step", type=int, default=step, help="Factor for each step")
-    parser.add_argument("--size", type=int, default=nopt, help="Initial data size")
     parser.add_argument(
-        "--repeat", type=int, default=1, help="Iterations inside measured region"
+        "--steps", type=int, default=sizes, help="Number of steps"
+    )
+    parser.add_argument(
+        "--step", type=int, default=step, help="Factor for each step"
+    )
+    parser.add_argument(
+        "--size", type=int, default=nopt, help="Initial data size"
+    )
+    parser.add_argument(
+        "--repeat",
+        type=int,
+        default=1,
+        help="Iterations inside measured region",
     )
     parser.add_argument("--dims", type=int, default=10, help="Dimensions")
-    parser.add_argument("--eps", type=float, default=0.6, help="Neighborhood value")
+    parser.add_argument(
+        "--eps", type=float, default=0.6, help="Neighborhood value"
+    )
     parser.add_argument("--minpts", type=int, default=20, help="minPts")
     parser.add_argument(
         "--usm",
@@ -97,7 +109,9 @@ def run(name, sizes=5, step=2, nopt=2 ** 10):
         data, p_assignments, eps, minpts = gen_data_np(
             nopt, args.dims, args.minpts, args.eps
         )
-        p_nclusters = dbscan_python(nopt, args.dims, data, eps, minpts, p_assignments)
+        p_nclusters = dbscan_python(
+            nopt, args.dims, data, eps, minpts, p_assignments
+        )
 
         # if args.usm is True:
         #     data, assignments, eps, minpts = gen_data_usm(nopt, args.dims, args.minpts, args.eps)
@@ -120,12 +134,18 @@ def run(name, sizes=5, step=2, nopt=2 ** 10):
         if np.allclose(n_assignments, p_assignments):
             print("Test succeeded.\n")
             print(
-                "n_assignments = ", n_assignments, "\n p_assignments = ", p_assignments
+                "n_assignments = ",
+                n_assignments,
+                "\n p_assignments = ",
+                p_assignments,
             )
         else:
             print("Test failed.\n")
             print(
-                "n_assignments = ", n_assignments, "\n p_assignments = ", p_assignments
+                "n_assignments = ",
+                n_assignments,
+                "\n p_assignments = ",
+                p_assignments,
             )
         return
 

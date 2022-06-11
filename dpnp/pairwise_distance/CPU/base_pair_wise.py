@@ -3,9 +3,11 @@
 # SPDX-License-Identifier: MIT
 
 
-import dpnp as np
 import sys
+
 import dpnp.random as rnd
+
+import dpnp as np
 
 try:
     import itimer as it
@@ -32,13 +34,17 @@ except NameError:
 
 
 def gen_data(nopt, dims):
-    return (rnd.random((nopt, dims)), rnd.random((nopt, dims)), np.empty((nopt, nopt)))
+    return (
+        rnd.random((nopt, dims)),
+        rnd.random((nopt, dims)),
+        np.empty((nopt, nopt)),
+    )
 
 
 ##############################################
 
 
-def run(name, alg, sizes=5, step=2, nopt=2 ** 10):
+def run(name, alg, sizes=5, step=2, nopt=2**10):
     import argparse
 
     parser = argparse.ArgumentParser()

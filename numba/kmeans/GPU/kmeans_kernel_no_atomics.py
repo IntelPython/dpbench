@@ -1,7 +1,7 @@
-import dpctl
 import base_kmeans
-import numpy
+import dpctl
 import numba_dppy
+import numpy
 from device_selector import get_device_selector
 
 REPEAT = 1
@@ -31,7 +31,9 @@ def calCentroidsSum1(arrayCsum, arrayCnumpoint):
     arrayCnumpoint[i] = 0
 
 
-def calCentroidsSum2(arrayP, arrayPcluster, arrayCsum, arrayCnumpoint, num_points):
+def calCentroidsSum2(
+    arrayP, arrayPcluster, arrayCsum, arrayCnumpoint, num_points
+):
     for i in range(num_points):
         ci = arrayPcluster[i]
         arrayCsum[ci, 0] += arrayP[i, 0]
@@ -47,7 +49,13 @@ def updateCentroids(arrayC, arrayCsum, arrayCnumpoint, num_centroids):
 
 
 def kmeans(
-    arrayP, arrayPcluster, arrayC, arrayCsum, arrayCnumpoint, num_points, num_centroids
+    arrayP,
+    arrayPcluster,
+    arrayC,
+    arrayCsum,
+    arrayCnumpoint,
+    num_points,
+    num_centroids,
 ):
 
     for i in range(ITERATIONS):
@@ -60,7 +68,9 @@ def kmeans(
                 arrayCsum, arrayCnumpoint
             )
 
-        calCentroidsSum2(arrayP, arrayPcluster, arrayCsum, arrayCnumpoint, num_points)
+        calCentroidsSum2(
+            arrayP, arrayPcluster, arrayCsum, arrayCnumpoint, num_points
+        )
 
         with dpctl.device_context("opencl:gpu"):
             updateCentroids[num_centroids, numba_dppy.DEFAULT_LOCAL_SIZE](

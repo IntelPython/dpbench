@@ -24,13 +24,14 @@
 # EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 # *****************************************************************************
 
+import base_dbscan
 import dpctl
 import numpy as np
-from numba import jit, prange
-import base_dbscan
-import utils
 from device_selector import get_device_selector
+
 import numba as nb
+import utils
+from numba import jit, prange
 
 NOISE = -1
 UNDEFINED = -2

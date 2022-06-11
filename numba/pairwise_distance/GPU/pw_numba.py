@@ -2,11 +2,13 @@
 #
 # SPDX-License-Identifier: MIT
 
-import dpctl
 import base_pair_wise
+import dpctl
 import numpy as np
-import numba
 from device_selector import get_device_selector
+
+import numba
+
 
 # Pairwise Numpy implementation using the equation (a-b)^2 = a^2 + b^2 - 2*a*b
 @numba.njit(parallel=True, fastmath=True)

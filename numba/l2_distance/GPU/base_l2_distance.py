@@ -2,21 +2,22 @@
 #
 # SPDX-License-Identifier: MIT
 
+import datetime
+import json
+import os
+import sys
+from timeit import default_timer
+
+import dpctl
+import dpctl.tensor as dpt
 import numpy as np
-import sys, os, json, datetime
 
 # import numpy.random_intel as rnd
 import numpy.random as rnd
-import dpctl
-import dpctl.tensor as dpt
-
-from dpbench_python.l2_distance.l2_distance_python import l2_distance_python
+from device_selector import get_device_selector
 from dpbench_datagen.l2_distance import gen_data
 from dpbench_datagen.l2_distance.generate_data_random import SEED
-
-from device_selector import get_device_selector
-
-from timeit import default_timer
+from dpbench_python.l2_distance.l2_distance_python import l2_distance_python
 
 now = default_timer
 get_mops = lambda t0, t1, n: (n / (t1 - t0), t1 - t0)
@@ -68,7 +69,7 @@ def gen_data_usm(nopt, dims):
 ##############################################
 
 
-def run(name, alg, sizes=5, step=2, nopt=2 ** 25):
+def run(name, alg, sizes=5, step=2, nopt=2**25):
     import argparse
 
     parser = argparse.ArgumentParser()
@@ -82,7 +83,10 @@ def run(name, alg, sizes=5, step=2, nopt=2 ** 25):
         "--size", required=False, default=nopt, help="Initial data size"
     )
     parser.add_argument(
-        "--repeat", required=False, default=1, help="Iterations inside measured region"
+        "--repeat",
+        required=False,
+        default=1,
+        help="Iterations inside measured region",
     )
     parser.add_argument(
         "--text", required=False, default="", help="Print with each result"
@@ -142,9 +146,17 @@ def run(name, alg, sizes=5, step=2, nopt=2 ** 25):
         # RMS error grows proportional to sqrt(n)
         # absolute(a - b) <= (atol + rtol * absolute(b))
         if np.allclose(n_dis, p_dis, rtol=1e-05 * np.sqrt(nopt)):
-            print("Test succeeded. Python dis: ", p_dis, " Numba dis: ", n_dis, "\n")
+            print(
+                "Test succeeded. Python dis: ",
+                p_dis,
+                " Numba dis: ",
+                n_dis,
+                "\n",
+            )
         else:
-            print("Test failed. Python dis: ", p_dis, " Numba dis: ", n_dis, "\n")
+            print(
+                "Test failed. Python dis: ", p_dis, " Numba dis: ", n_dis, "\n"
+            )
 
     for _ in xrange(sizes):
         if args.usm is True:
@@ -173,15 +185,27 @@ def run(name, alg, sizes=5, step=2, nopt=2 ** 25):
 
             if np.allclose(n_dis, p_dis, rtol=1e-05 * np.sqrt(nopt)):
                 print(
-                    "Test succeeded. Python dis: ", p_dis, " Numba dis: ", n_dis, "\n"
+                    "Test succeeded. Python dis: ",
+                    p_dis,
+                    " Numba dis: ",
+                    n_dis,
+                    "\n",
                 )
             else:
-                print("Test failed. Python dis: ", p_dis, " Numba dis: ", n_dis, "\n")
+                print(
+                    "Test failed. Python dis: ",
+                    p_dis,
+                    " Numba dis: ",
+                    n_dis,
+                    "\n",
+                )
 
         time = np.median(times)
 
         print(
-            "ERF: {:15s} | Size: {:10d} | TIME: {:10.6f}".format(name, nopt, time),
+            "ERF: {:15s} | Size: {:10d} | TIME: {:10.6f}".format(
+                name, nopt, time
+            ),
             flush=True,
         )
         output["metrics"].append((nopt, 0, time))  # zero placeholder for mops

@@ -2,9 +2,10 @@
 #
 # SPDX-License-Identifier: MIT
 
+import base_l2_distance
 import dpctl
 import numpy as np
-import base_l2_distance
+
 import numba as nb
 
 __njit = nb.njit(parallel=True, fastmath=True)
@@ -20,7 +21,9 @@ def l2_distance_kernel(a, b):
 
 
 def l2_distance(a, b, _):
-    with dpctl.device_context(base_l2_distance.get_device_selector(is_gpu=True)):
+    with dpctl.device_context(
+        base_l2_distance.get_device_selector(is_gpu=True)
+    ):
         return l2_distance_kernel(a, b)
 
 

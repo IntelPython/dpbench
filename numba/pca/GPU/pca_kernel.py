@@ -4,11 +4,12 @@
 
 
 import base_pca
-import numba
-import numpy as np
-from numba import dppy, jit, prange
 import dppy.core as ocldrv
 import numpy
+import numpy as np
+
+import numba
+from numba import dppy, jit, prange
 
 
 @numba.njit(parallel={"spirv": True}, fastmath=True)

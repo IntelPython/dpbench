@@ -1,8 +1,10 @@
+import math
+
 import base_gpairs_cuda
 import numpy as np
-from numba import cuda
 from gaussian_weighted_pair_counts import count_weighted_pairs_3d_cuda
-import math
+
+from numba import cuda
 
 
 def run_gpairs(

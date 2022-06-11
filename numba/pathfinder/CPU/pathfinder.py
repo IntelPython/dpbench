@@ -1,6 +1,7 @@
 import base_pathfinder
-import numba_dppy
 import dpctl
+import numba_dppy
+
 from numba import int64 as local_dtype
 
 IN_RANGE = lambda x, min, max: ((x) >= (min) and (x) <= (max))

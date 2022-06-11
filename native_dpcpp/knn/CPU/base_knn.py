@@ -2,10 +2,13 @@
 #
 # SPDX-License-Identifier: MIT
 
-import os, utils
-import numpy as np
 import argparse
+import os
+
+import numpy as np
 from dpbench_datagen.knn import gen_data_to_file
+
+import utils
 
 # make xrange available in python 3
 try:

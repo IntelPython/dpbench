@@ -25,14 +25,17 @@
 # *****************************************************************************
 
 import argparse
-import sys, os, json
 import datetime
+import json
+import os
+import sys
+from typing import NamedTuple
+
+import dbscan_python
 import numpy as np
 import numpy.random as rnd
-from typing import NamedTuple
 from sklearn.datasets import make_blobs
 from sklearn.preprocessing import StandardScaler
-import dbscan_python
 
 try:
     import itimer as it

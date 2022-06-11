@@ -1,7 +1,8 @@
 import base_gpairs
-import numpy as np
+import dpctl
+import dpctl.tensor as dpt
 import gaussian_weighted_pair_counts as gwpc
-import dpctl, dpctl.tensor as dpt
+import numpy as np
 
 
 def ceiling_quotient(n, m):

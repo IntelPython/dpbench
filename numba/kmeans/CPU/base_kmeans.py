@@ -2,9 +2,12 @@
 #
 # SPDX-License-Identifier: MIT
 
+import datetime
+import json
+import sys
+
 import numpy as np
 import numpy.random as rnd
-import sys, json, datetime
 
 try:
     import itimer as it

@@ -2,14 +2,20 @@
 #
 # SPDX-License-Identifier: MIT
 
+import datetime
+import json
+import os
+import sys
+
+import dpctl
+import dpctl.memory as dpmem
+import dpctl.tensor as dpt
 import numpy as np
 import numpy.random as rnd
-import sys, json, os, datetime
-import dpctl, dpctl.memory as dpmem, dpctl.tensor as dpt
-from dpbench_python.kmeans.kmeans_python import kmeans_python
+from device_selector import get_device_selector
 from dpbench_datagen.kmeans import gen_rand_data
 from dpbench_datagen.kmeans.generate_data_random import SEED
-from device_selector import get_device_selector
+from dpbench_python.kmeans.kmeans_python import kmeans_python
 
 try:
     import itimer as it

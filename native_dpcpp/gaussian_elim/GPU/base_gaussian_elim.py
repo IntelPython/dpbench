@@ -2,11 +2,12 @@
 #
 # SPDX-License-Identifier: MIT
 
-import os
-import run_utils as utils
-import numpy as np
 import argparse
-from dpbench_datagen.gaussian_elim import gen_matrix, gen_vec, gen_data_to_file
+import os
+
+import numpy as np
+import run_utils as utils
+from dpbench_datagen.gaussian_elim import gen_data_to_file, gen_matrix, gen_vec
 
 
 def run(name, sizes=1, step=2, nopt=2**2):

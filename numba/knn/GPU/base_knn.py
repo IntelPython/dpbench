@@ -25,21 +25,23 @@
 # *****************************************************************************
 
 import argparse
-import sys, os, json
-import numpy as np
-import numpy.random as rnd
+import json
+import os
+import sys
 
-from dpbench_datagen.knn import (
-    gen_train_data,
-    gen_test_data,
-    CLASSES_NUM,
-    DATA_DIM,
-    TRAIN_DATA_SIZE,
-    N_NEIGHBORS,
-)
-from dpbench_python.knn.knn_python import knn_python
 import dpctl
 import dpctl.tensor as dpt
+import numpy as np
+import numpy.random as rnd
+from dpbench_datagen.knn import (
+    CLASSES_NUM,
+    DATA_DIM,
+    N_NEIGHBORS,
+    TRAIN_DATA_SIZE,
+    gen_test_data,
+    gen_train_data,
+)
+from dpbench_python.knn.knn_python import knn_python
 
 try:
     import itimer as it

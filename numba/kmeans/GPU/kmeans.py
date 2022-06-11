@@ -1,6 +1,7 @@
+import base_kmeans
 import dpctl
 import numpy
-import base_kmeans
+
 import numba
 
 REPEAT = 1

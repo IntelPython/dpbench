@@ -2,14 +2,17 @@
 #
 # SPDX-License-Identifier: MIT
 
+import json
+import os
+import sys
+
 import numpy as np
-import sys, json, os
 import run_utils as utils
+from dpbench_datagen.l2_distance import gen_data, gen_data_to_file
+from dpbench_python.l2_distance.l2_distance_python import l2_distance_python
 
 # import numpy.random_intel as rnd
 
-from dpbench_python.l2_distance.l2_distance_python import l2_distance_python
-from dpbench_datagen.l2_distance import gen_data, gen_data_to_file
 
 try:
     xrange

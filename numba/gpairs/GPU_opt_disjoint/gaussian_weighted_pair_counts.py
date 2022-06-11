@@ -1,12 +1,12 @@
-import numpy as np
-
-# from numba import njit
-import numba_dppy
-
 # from numba.dppy.dppy_driver import driver as drv
 # import joblib
 # import multiprocessing
 import math
+
+# from numba import njit
+import numba_dppy
+import numpy as np
+
 from numba import cuda
 
 __all__ = (

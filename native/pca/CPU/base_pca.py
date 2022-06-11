@@ -25,10 +25,11 @@
 # *****************************************************************************
 
 import os
+
 import numpy as np
-from sklearn.datasets import make_classification, make_regression
 import pandas as pd
 import run_utils as utils
+from sklearn.datasets import make_classification, make_regression
 
 ######################################################
 # GLOBAL DECLARATIONS THAT WILL BE USED IN ALL FILES #

@@ -1,9 +1,10 @@
 #!/usr/bin/env python
 # import matplotlib.pyplot as plt
+import base_rambo
 import mkl_random
 import numpy
+
 import numba
-import base_rambo
 
 
 @numba.jit(nopython=True, fastmath=True)

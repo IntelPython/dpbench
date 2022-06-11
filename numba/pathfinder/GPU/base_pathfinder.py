@@ -1,8 +1,13 @@
+import datetime
+import json
+import os
+import sys
+from timeit import default_timer as now
+
+import dpctl
+import dpctl.memory as dpmem
 import numpy as np
 import numpy.random as rnd
-import sys, json, os, datetime
-from timeit import default_timer as now
-import dpctl, dpctl.memory as dpmem
 from device_selector import get_device_selector
 
 ######################################################

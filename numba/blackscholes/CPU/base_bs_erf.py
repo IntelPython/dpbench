@@ -4,16 +4,23 @@
 
 
 from __future__ import print_function
+
+import datetime
+import json
+import os
+import sys
+
 import numpy as np
-import sys, json, os, datetime
 from device_selector import get_device_selector
 
 try:
-    import dpctl, dpctl.memory as dpmem, dpctl.tensor as dpt
+    import dpctl
+    import dpctl.memory as dpmem
+    import dpctl.tensor as dpt
 except ImportError:
     pass
-from dpbench_python.blackscholes.bs_python import black_scholes_python
 from dpbench_datagen.blackscholes.generate_data_random import SEED
+from dpbench_python.blackscholes.bs_python import black_scholes_python
 
 try:
     from numpy import erf

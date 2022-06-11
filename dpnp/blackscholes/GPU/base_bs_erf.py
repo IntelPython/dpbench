@@ -3,10 +3,16 @@
 # SPDX-License-Identifier: MIT
 
 from __future__ import print_function
-import dpnp as np
-import sys, json, os
-import dpctl, dpctl.tensor as dpt  # , dpctl.memory as dpmem
+
+import json
+import os
+import sys
+
+import dpctl
+import dpctl.tensor as dpt  # , dpctl.memory as dpmem
 from dpbench_python.blackscholes.bs_python import black_scholes_python
+
+import dpnp as np
 
 try:
     from dpnp import erf

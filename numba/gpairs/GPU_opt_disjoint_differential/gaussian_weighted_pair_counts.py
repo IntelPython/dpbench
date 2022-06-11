@@ -1,6 +1,8 @@
-import numpy as np
-import numba_dppy
 import math
+
+import numba_dppy
+import numpy as np
+
 from numba import cuda
 
 

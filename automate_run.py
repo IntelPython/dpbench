@@ -1,5 +1,5 @@
-import options
 import execute_implementations as ei
+import options
 import plot_graphs as pg
 
 if __name__ == "__main__":

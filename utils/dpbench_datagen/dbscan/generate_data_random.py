@@ -1,5 +1,6 @@
-import numpy as np
 from typing import NamedTuple
+
+import numpy as np
 from sklearn.datasets import make_blobs
 from sklearn.preprocessing import StandardScaler
 

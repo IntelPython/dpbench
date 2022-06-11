@@ -4,8 +4,8 @@
 
 
 def initialize(nopt, niters, seed, ndims=2, ncentroids=10):
-    import numpy.random as default_rng
     import numpy as np
+    import numpy.random as default_rng
 
     dtype = np.float64
     XL = 1.0

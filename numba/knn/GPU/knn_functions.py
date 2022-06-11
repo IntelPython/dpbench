@@ -24,9 +24,10 @@
 # EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 # *****************************************************************************
 
-import numpy as np
-import numba
 import base_knn
+import numpy as np
+
+import numba
 
 DATA_DIM = 16
 

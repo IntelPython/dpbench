@@ -2,13 +2,13 @@
 #
 # SPDX-License-Identifier: MIT
 
-import dpctl
 import math
 import sys
-import base_l2_distance
 
-from numba_dppy import kernel, atomic, DEFAULT_LOCAL_SIZE
+import base_l2_distance
+import dpctl
 import numba_dppy
+from numba_dppy import DEFAULT_LOCAL_SIZE, atomic, kernel
 
 atomic_add = atomic.add
 

@@ -2,9 +2,13 @@
 #
 # SPDX-License-Identifier: MIT
 
-from sklearn.datasets import make_classification, make_regression
-import sys, json, os, datetime
+import datetime
+import json
+import os
+import sys
+
 import numpy.random as rnd
+from sklearn.datasets import make_classification, make_regression
 
 try:
     import itimer as it

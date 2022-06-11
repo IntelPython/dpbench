@@ -1,8 +1,10 @@
+import datetime
+import json
+import sys
+from timeit import default_timer as now
+
 import numpy as np
 import numpy.random as rnd
-import sys, json, datetime
-import numpy.random as rnd
-from timeit import default_timer as now
 
 ######################################################
 # GLOBAL DECLARATIONS THAT WILL BE USED IN ALL FILES #

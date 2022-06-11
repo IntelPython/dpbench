@@ -1,6 +1,9 @@
+import os
+import sys
+
 import run_utils as util
+
 import options
-import os, sys
 
 try:
     import pandas as pd

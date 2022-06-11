@@ -2,10 +2,11 @@
 #
 # SPDX-License-Identifier: MIT
 
-import dpctl
 import base_bs_erf
-from dpnp import log, exp
+import dpctl
 from base_bs_erf import erf, invsqrt
+
+from dpnp import exp, log
 
 
 def black_scholes(nopt, price, strike, t, rate, vol, call, put):

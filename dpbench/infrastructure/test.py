@@ -4,14 +4,11 @@
 # SPDX-License-Identifier: BSD-3-Clause
 
 import time
-
-from dpbench.infrastructure import (
-    Benchmark,
-    Framework,
-    timeout_decorator as tout,
-    utilities as util,
-)
 from typing import Any, Callable, Dict, Sequence, Tuple
+
+from dpbench.infrastructure import Benchmark, Framework
+from dpbench.infrastructure import timeout_decorator as tout
+from dpbench.infrastructure import utilities as util
 
 
 class Test(object):

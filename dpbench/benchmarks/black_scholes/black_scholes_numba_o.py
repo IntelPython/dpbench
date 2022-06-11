@@ -3,8 +3,9 @@
 # SPDX-License-Identifier: Apache 2.0
 
 
+from math import erf, exp, log, sqrt
+
 import numba as nb
-from math import log, sqrt, exp, erf
 
 
 @nb.njit(parallel=False, fastmath=True)

@@ -1,8 +1,8 @@
 import base_gpairs
-import numpy as np
+import dpctl
 import gaussian_weighted_pair_counts as gwpc
 import numba_dppy
-import dpctl
+import numpy as np
 
 
 def run_gpairs(

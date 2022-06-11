@@ -26,7 +26,6 @@
 
 import numpy as np
 
-
 # @numba.jit(nopython=True)
 # def euclidean_dist(x1, x2):
 #     return np.linalg.norm(x1-x2)

@@ -1,5 +1,4 @@
 import numpy as np
-
 from dpbench_decorators import njit
 
 try:
@@ -16,6 +15,7 @@ except:
 # import joblib
 # import multiprocessing
 import math
+
 from numba import cuda
 
 __all__ = (

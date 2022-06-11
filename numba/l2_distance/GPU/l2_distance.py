@@ -2,9 +2,10 @@
 #
 # SPDX-License-Identifier: MIT
 
+import base_l2_distance
 import dpctl
 import numpy as np
-import base_l2_distance
+
 import numba as nb
 
 __njit = nb.njit(parallel=True, fastmath=True)

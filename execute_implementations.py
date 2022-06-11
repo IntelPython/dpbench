@@ -2,8 +2,9 @@ import os
 import shutil
 import sys
 
-import options
 import run_utils as util
+
+import options
 
 
 def run_native_optimised_CPU(app_name, cmds, analysis):

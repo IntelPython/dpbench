@@ -2,12 +2,14 @@
 #
 # SPDX-License-Identifier: MIT
 
-import os, json
-import numpy as np
-import dpctl, dpctl.tensor as dpt
+import json
+import os
 
-from dpbench_python.gpairs.gpairs_python import gpairs_python
+import dpctl
+import dpctl.tensor as dpt
+import numpy as np
 from dpbench_datagen.gpairs import gen_rand_data
+from dpbench_python.gpairs.gpairs_python import gpairs_python
 
 try:
     import itimer as it

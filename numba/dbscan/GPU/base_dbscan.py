@@ -25,15 +25,18 @@
 # *****************************************************************************
 
 import argparse
-import sys, os, json
 import datetime
-from device_selector import get_device_selector
+import json
+import os
+import sys
+
+import dpctl
+import dpctl.tensor as dpt
 import numpy as np
-import dpctl, dpctl.tensor as dpt
-from dpbench_python.dbscan.dbscan_python import dbscan_python
+from device_selector import get_device_selector
 from dpbench_datagen.dbscan import gen_rand_data
 from dpbench_datagen.dbscan.generate_data_random import SEED
-
+from dpbench_python.dbscan.dbscan_python import dbscan_python
 
 try:
     import itimer as it

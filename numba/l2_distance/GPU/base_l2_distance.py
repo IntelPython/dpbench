@@ -2,21 +2,22 @@
 #
 # SPDX-License-Identifier: MIT
 
+import datetime
+import json
+import os
+import sys
+from timeit import default_timer
+
+import dpctl
+import dpctl.tensor as dpt
 import numpy as np
-import sys, os, json, datetime
 
 # import numpy.random_intel as rnd
 import numpy.random as rnd
-import dpctl
-import dpctl.tensor as dpt
-
-from dpbench_python.l2_distance.l2_distance_python import l2_distance_python
+from device_selector import get_device_selector
 from dpbench_datagen.l2_distance import gen_data
 from dpbench_datagen.l2_distance.generate_data_random import SEED
-
-from device_selector import get_device_selector
-
-from timeit import default_timer
+from dpbench_python.l2_distance.l2_distance_python import l2_distance_python
 
 now = default_timer
 get_mops = lambda t0, t1, n: (n / (t1 - t0), t1 - t0)

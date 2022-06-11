@@ -1,11 +1,11 @@
 import base_gpairs
-import numpy as np
-import gaussian_weighted_pair_counts as gwpc
-import dpctl, dpctl.tensor as dpt
-from device_selector import get_device_selector
 import dpctl
-from numba_dppy import kernel, atomic, DEFAULT_LOCAL_SIZE
+import dpctl.tensor as dpt
+import gaussian_weighted_pair_counts as gwpc
 import numba_dppy
+import numpy as np
+from device_selector import get_device_selector
+from numba_dppy import DEFAULT_LOCAL_SIZE, atomic, kernel
 
 atomic_add = atomic.add
 

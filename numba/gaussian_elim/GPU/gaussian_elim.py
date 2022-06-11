@@ -1,9 +1,10 @@
 import base_gaussian_elim
-import numpy as np
-import numba
 import dpctl
 import numba_dppy
+import numpy as np
 from device_selector import get_device_selector
+
+import numba
 
 
 @numba_dppy.kernel

@@ -1,10 +1,12 @@
-import numpy as np
-import os
 import json
+import os
 from timeit import default_timer as now
-from dpbench_datagen.gaussian_elim import gen_matrix, gen_vec
+
+import dpctl
+import dpctl.memory as dpmem
+import numpy as np
 from device_selector import get_device_selector
-import dpctl, dpctl.memory as dpmem
+from dpbench_datagen.gaussian_elim import gen_matrix, gen_vec
 
 ######################################################
 # GLOBAL DECLARATIONS THAT WILL BE USED IN ALL FILES #

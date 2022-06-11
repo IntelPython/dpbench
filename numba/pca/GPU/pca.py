@@ -4,10 +4,11 @@
 
 
 import base_pca
-import numba
-import numpy as np
 import dpctl
+import numpy as np
 from device_selector import get_device_selector
+
+import numba
 
 
 @numba.njit(parallel=True, fastmath=True)

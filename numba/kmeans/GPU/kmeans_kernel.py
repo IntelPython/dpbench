@@ -1,7 +1,7 @@
-import dpctl
 import base_kmeans
-import numpy
+import dpctl
 import numba_dppy as nb
+import numpy
 from numba_dppy import atomic
 
 REPEAT = 1

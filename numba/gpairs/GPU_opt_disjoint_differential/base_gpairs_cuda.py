@@ -2,12 +2,14 @@
 #
 # SPDX-License-Identifier: MIT
 
-import os, json
-import numpy as np
-from numba import cuda
+import json
+import os
 
-from dpbench_python.gpairs.gpairs_python import gpairs_python
+import numpy as np
 from dpbench_datagen.gpairs import gen_rand_data
+from dpbench_python.gpairs.gpairs_python import gpairs_python
+
+from numba import cuda
 
 try:
     import itimer as it

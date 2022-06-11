@@ -1,8 +1,9 @@
 import base_pathfinder
-import numba_dppy
 import dpctl
-from numba import int64 as local_dtype
+import numba_dppy
 from device_selector import get_device_selector
+
+from numba import int64 as local_dtype
 
 IN_RANGE = lambda x, min, max: ((x) >= (min) and (x) <= (max))
 # CLAMP_RANGE = lambda x, min, max: (x = min if (x<(min)) else (max if (x>(max)) else x))

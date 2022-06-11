@@ -1,13 +1,17 @@
 # Copyright (C) 2017-2018 Intel Corporation
 #
 # SPDX-License-Identifier: MIT
-import os, json, datetime
+import datetime
+import json
+import os
+
+import dpctl
+import dpctl.tensor as dpt
 import numpy as np
 import numpy.random as rnd
-import dpctl, dpctl.tensor as dpt
 from device_selector import get_device_selector
+from dpbench_datagen.gpairs import DEFAULT_NBINS, gen_rand_data
 from dpbench_python.gpairs.gpairs_python import gpairs_python
-from dpbench_datagen.gpairs import gen_rand_data, DEFAULT_NBINS
 
 try:
     import itimer as it

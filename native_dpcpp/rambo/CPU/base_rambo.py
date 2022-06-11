@@ -3,8 +3,9 @@
 # SPDX-License-Identifier: MIT
 
 import os
-import run_utils as utils
+
 import numpy as np
+import run_utils as utils
 from dpbench_python.rambo.rambo_python import rambo_python
 
 # make xrange available in python 3

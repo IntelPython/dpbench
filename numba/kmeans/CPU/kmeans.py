@@ -1,7 +1,8 @@
 import base_kmeans
 import numpy
-import numba
 from dpbench_decorators import jit
+
+import numba
 
 REPEAT = 1
 

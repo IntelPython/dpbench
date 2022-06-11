@@ -1,8 +1,9 @@
 #!/usr/bin/env python
 import base_rambo
 import numpy
-import numba
 from dpbench_decorators import jit
+
+import numba
 
 
 @jit(nopython=True, fastmath=True)

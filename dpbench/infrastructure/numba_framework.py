@@ -4,9 +4,9 @@
 # SPDX-License-Identifier: BSD-3-Clause
 
 import pathlib
+from typing import Callable, Sequence, Tuple
 
 from dpbench.infrastructure import Benchmark, Framework
-from typing import Callable, Sequence, Tuple
 
 _impl = {
     "object-mode": "o",

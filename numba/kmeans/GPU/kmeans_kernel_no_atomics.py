@@ -1,7 +1,7 @@
-import dpctl
 import base_kmeans
-import numpy
+import dpctl
 import numba_dppy
+import numpy
 from device_selector import get_device_selector
 
 REPEAT = 1

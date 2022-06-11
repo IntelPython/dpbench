@@ -2,9 +2,11 @@
 #
 # SPDX-License-Identifier: Apache 2.0 License
 
-import pkg_resources
-import dpbench.infrastructure as dpbi
 import warnings
+
+import pkg_resources
+
+import dpbench.infrastructure as dpbi
 
 
 def list_available_benchmarks():

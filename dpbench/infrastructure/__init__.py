@@ -6,8 +6,7 @@ from .benchmark import Benchmark
 from .framework import Framework, generate_framework
 from .numba_framework import NumbaFramework
 from .test import Test
-from .utilities import benchmark, validate, time_to_ms, str2bool
-
+from .utilities import benchmark, str2bool, time_to_ms, validate
 
 __all__ = [
     "Benchmark",

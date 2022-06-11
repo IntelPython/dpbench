@@ -4,9 +4,11 @@
 
 
 from __future__ import print_function
-import dpnp as np
-from random import seed, uniform
+
 import sys
+from random import seed, uniform
+
+import dpnp as np
 
 try:
     import dpnp.random_intel as rnd
@@ -138,8 +140,8 @@ def run(
 
     if dask:
         import dask
-        import dask.multiprocessing
         import dask.array as da
+        import dask.multiprocessing
 
         dask_modes = {
             "sq": "single-threaded",

@@ -1,7 +1,10 @@
 # Copyright (C) 2017-2018 Intel Corporation
 #
 # SPDX-License-Identifier: MIT
-import os, json, datetime
+import datetime
+import json
+import os
+
 import numpy as np
 import numpy.random as rnd
 

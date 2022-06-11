@@ -1,8 +1,9 @@
 import base_gaussian_elim
-import numpy as np
-import numba
 import dpctl
 import numba_dppy
+import numpy as np
+
+import numba
 
 
 @numba_dppy.kernel

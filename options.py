@@ -1,6 +1,6 @@
+import enum
 import os
 import sys
-import enum
 
 VTUNE_HOTSPOTS_CMD = [
     "vtune",

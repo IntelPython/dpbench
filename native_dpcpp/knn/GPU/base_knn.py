@@ -2,18 +2,19 @@
 #
 # SPDX-License-Identifier: MIT
 
-import os
-import run_utils as utils
-import numpy as np
 import argparse
+import os
+
+import numpy as np
+import run_utils as utils
 from dpbench_datagen.knn import (
-    gen_data_to_file,
-    gen_train_data,
-    gen_test_data,
-    N_NEIGHBORS,
     CLASSES_NUM,
-    TRAIN_DATA_SIZE,
     DATA_DIM,
+    N_NEIGHBORS,
+    TRAIN_DATA_SIZE,
+    gen_data_to_file,
+    gen_test_data,
+    gen_train_data,
 )
 from dpbench_python.knn.knn_python import knn_python
 

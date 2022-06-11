@@ -25,18 +25,21 @@
 # *****************************************************************************
 
 import argparse
-import sys, os, json, datetime
-import numpy as np
+import datetime
+import json
+import os
+import sys
 
-from knn_python import knn_python
+import numpy as np
 from dpbench_datagen.knn import (
-    gen_train_data,
-    gen_test_data,
     CLASSES_NUM,
     DATA_DIM,
-    TRAIN_DATA_SIZE,
     N_NEIGHBORS,
+    TRAIN_DATA_SIZE,
+    gen_test_data,
+    gen_train_data,
 )
+from knn_python import knn_python
 
 try:
     import itimer as it

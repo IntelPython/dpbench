@@ -11,7 +11,10 @@ import numba_dppy as nb
 
 
 @nb.kernel(
-    access_types={"read_only": ["price", "strike", "t"], "write_only": ["call", "put"]}
+    access_types={
+        "read_only": ["price", "strike", "t"],
+        "write_only": ["call", "put"],
+    }
 )
 def black_scholes(nopt, price, strike, t, rate, vol, call, put):
     mr = -rate

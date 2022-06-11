@@ -136,7 +136,7 @@ def gen_data_usm(nopt):
 ##############################################
 
 # create input data, call blackscholes computation function (alg)
-def run(name, alg, sizes=10, step=2, nopt=2 ** 19):
+def run(name, alg, sizes=10, step=2, nopt=2**19):
     import argparse
 
     parser = argparse.ArgumentParser()
@@ -150,7 +150,10 @@ def run(name, alg, sizes=10, step=2, nopt=2 ** 19):
         "--size", required=False, default=nopt, help="Initial data size"
     )
     parser.add_argument(
-        "--repeat", required=False, default=1, help="Iterations inside measured region"
+        "--repeat",
+        required=False,
+        default=1,
+        help="Iterations inside measured region",
     )
     parser.add_argument(
         "--text", required=False, default="", help="Print with each result"

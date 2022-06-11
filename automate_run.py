@@ -39,7 +39,9 @@ if __name__ == "__main__":
         choices=list(options.analysis),
     )
     parser.add_argument("-k", "--kernel", required=False, action="store_true")
-    parser.add_argument("-c", "--comp_only", required=False, action="store_true")
+    parser.add_argument(
+        "-c", "--comp_only", required=False, action="store_true"
+    )
     parser.add_argument(
         "-ws",
         "--workloads",

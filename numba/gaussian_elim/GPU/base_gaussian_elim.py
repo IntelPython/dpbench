@@ -110,7 +110,10 @@ def run(name, alg, steps=5, step=2, size=10):
         help="Use USM Shared or pure numpy",
     )
     parser.add_argument(
-        "--repeat", required=False, default=1, help="Iterations inside measured region"
+        "--repeat",
+        required=False,
+        default=1,
+        help="Iterations inside measured region",
     )
     parser.add_argument(
         "--json",

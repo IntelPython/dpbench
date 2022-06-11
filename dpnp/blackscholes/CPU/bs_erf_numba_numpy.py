@@ -40,4 +40,6 @@ def black_scholes_dpctl(nopt, price, strike, t, rate, vol, call, put):
         black_scholes(nopt, price, strike, t, rate, vol, call, put)
 
 
-base_bs_erf.run("Numba@jit-numpy", black_scholes_dpctl, nparr=True, pass_args=True)
+base_bs_erf.run(
+    "Numba@jit-numpy", black_scholes_dpctl, nparr=True, pass_args=True
+)

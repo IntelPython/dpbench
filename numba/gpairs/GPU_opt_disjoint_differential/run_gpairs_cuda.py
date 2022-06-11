@@ -12,7 +12,16 @@ def run_gpairs(
     blocks = math.ceil(d_x1.shape[0] / threads)
 
     count_weighted_pairs_3d_cuda[blocks, threads](
-        d_x1, d_y1, d_z1, d_w1, d_x2, d_y2, d_z2, d_w2, d_rbins_squared, d_result
+        d_x1,
+        d_y1,
+        d_z1,
+        d_w1,
+        d_x2,
+        d_y2,
+        d_z2,
+        d_w2,
+        d_rbins_squared,
+        d_result,
     )
 
 

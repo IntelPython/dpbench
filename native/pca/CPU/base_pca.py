@@ -54,18 +54,27 @@ def gen_r_data(nopt, dims):
 #################################################
 
 
-def run(name, sizes=10, step=2, nopt=2 ** 10):
+def run(name, sizes=10, step=2, nopt=2**10):
     import argparse
 
     parser = argparse.ArgumentParser()
-    parser.add_argument("--steps", type=int, default=sizes, help="Number of steps")
-    parser.add_argument("--step", type=int, default=step, help="Factor for each step")
-    parser.add_argument("--size", type=int, default=nopt, help="Initial data size")
     parser.add_argument(
-        "--repeat", type=int, default=1, help="Iterations inside measured region"
+        "--steps", type=int, default=sizes, help="Number of steps"
+    )
+    parser.add_argument(
+        "--step", type=int, default=step, help="Factor for each step"
+    )
+    parser.add_argument(
+        "--size", type=int, default=nopt, help="Initial data size"
+    )
+    parser.add_argument(
+        "--repeat",
+        type=int,
+        default=1,
+        help="Iterations inside measured region",
     )
     parser.add_argument("--text", default="", help="Print with each result")
-    parser.add_argument("--dims", type=int, default=2 ** 7, help="Dimensions")
+    parser.add_argument("--dims", type=int, default=2**7, help="Dimensions")
 
     args = parser.parse_args()
     repeat = args.repeat
@@ -88,7 +97,9 @@ def run(name, sizes=10, step=2, nopt=2 ** 10):
         r_data, _ = gen_r_data(nopt, args.dims)
 
         # write data to csv file
-        pd.DataFrame(r_data).to_csv("pca_normalized.csv", header=None, index=None)
+        pd.DataFrame(r_data).to_csv(
+            "pca_normalized.csv", header=None, index=None
+        )
 
         # run the C program
         run_cmd = ["./pca", str(nopt), str(args.dims), str(repeat)]

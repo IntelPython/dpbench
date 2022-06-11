@@ -45,7 +45,7 @@ def gen_data_np(npoints, dtype=np.float32):
 ##############################################
 
 
-def run(name, sizes=5, step=2, nopt=2 ** 16):
+def run(name, sizes=5, step=2, nopt=2**16):
     import argparse
 
     parser = argparse.ArgumentParser()
@@ -59,7 +59,10 @@ def run(name, sizes=5, step=2, nopt=2 ** 16):
         "--size", required=False, default=nopt, help="Initial data size"
     )
     parser.add_argument(
-        "--repeat", required=False, default=1, help="Iterations inside measured region"
+        "--repeat",
+        required=False,
+        default=1,
+        help="Iterations inside measured region",
     )
     parser.add_argument(
         "--usm",
@@ -93,10 +96,21 @@ def run(name, sizes=5, step=2, nopt=2 ** 16):
         exec_name = "./gpairs"
 
     if args.test:
-        x1, y1, z1, w1, x2, y2, z2, w2, DEFAULT_RBINS_SQUARED, result_p = gen_data_np(
-            nopt
+        (
+            x1,
+            y1,
+            z1,
+            w1,
+            x2,
+            y2,
+            z2,
+            w2,
+            DEFAULT_RBINS_SQUARED,
+            result_p,
+        ) = gen_data_np(nopt)
+        gpairs_python(
+            x1, y1, z1, w1, x2, y2, z2, w2, DEFAULT_RBINS_SQUARED, result_p
         )
-        gpairs_python(x1, y1, z1, w1, x2, y2, z2, w2, DEFAULT_RBINS_SQUARED, result_p)
 
         # run dpcpp
         gen_data_to_file(nopt, np.float32)

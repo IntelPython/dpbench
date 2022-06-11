@@ -103,7 +103,9 @@ class ExperimentError(Exception):
         limit = 10000
         if len(output) > limit:
             self.output = (
-                output[: limit / 2] + "\n\n...TRUNCATED...\n\n" + output[-limit / 2 :]
+                output[: limit / 2]
+                + "\n\n...TRUNCATED...\n\n"
+                + output[-limit / 2 :]
             )
         else:
             self.output = output

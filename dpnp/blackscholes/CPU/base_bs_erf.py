@@ -88,7 +88,14 @@ def gen_data(nopt):
 
 
 def run(
-    name, alg, sizes=14, step=2, nopt=2 ** 15, nparr=True, dask=False, pass_args=False
+    name,
+    alg,
+    sizes=14,
+    step=2,
+    nopt=2**15,
+    nparr=True,
+    dask=False,
+    pass_args=False,
 ):
     import argparse
 
@@ -112,7 +119,10 @@ def run(
         help="Iterations inside measured region",
     )
     parser.add_argument(
-        "--dask", required=False, default="sq", help="Dask scheduler: sq, mt, mp"
+        "--dask",
+        required=False,
+        default="sq",
+        help="Dask scheduler: sq, mt, mp",
     )
     parser.add_argument(
         "--text", required=False, default="", help="Print with each result"
@@ -131,7 +141,11 @@ def run(
         import dask.multiprocessing
         import dask.array as da
 
-        dask_modes = {"sq": "single-threaded", "mt": "threads", "mp": "processes"}
+        dask_modes = {
+            "sq": "single-threaded",
+            "mt": "threads",
+            "mp": "processes",
+        }
         kwargs = {"schd": dask_modes[args.dask]}
         name += "-" + args.dask
 
@@ -161,10 +175,22 @@ def run(
         sys.stdout.flush()
 
         if pass_args:
-            alg(nopt, price, strike, t, RISK_FREE, VOLATILITY, call, put)  # warmup
+            alg(
+                nopt, price, strike, t, RISK_FREE, VOLATILITY, call, put
+            )  # warmup
             t0 = now()
             for _ in iterations:
-                alg(nopt, price, strike, t, RISK_FREE, VOLATILITY, call, put, **kwargs)
+                alg(
+                    nopt,
+                    price,
+                    strike,
+                    t,
+                    RISK_FREE,
+                    VOLATILITY,
+                    call,
+                    put,
+                    **kwargs
+                )
         else:
             alg(nopt, price, strike, t, RISK_FREE, VOLATILITY)  # warmup
             t0 = now()

@@ -15,17 +15,26 @@ except NameError:
 
 
 CLASSES_NUM = 3
-TRAIN_DATA_SIZE = 2 ** 10
+TRAIN_DATA_SIZE = 2**10
 
 
 # create input data, call blackscholes computation function (alg)
-def run(name, sizes=1, step=2, nopt=2 ** 10):
+def run(name, sizes=1, step=2, nopt=2**10):
     parser = argparse.ArgumentParser()
-    parser.add_argument("--steps", type=int, default=sizes, help="Number of steps")
-    parser.add_argument("--step", type=int, default=step, help="Factor for each step")
-    parser.add_argument("--size", type=int, default=nopt, help="Initial data size")
     parser.add_argument(
-        "--repeat", type=int, default=1, help="Iterations inside measured region"
+        "--steps", type=int, default=sizes, help="Number of steps"
+    )
+    parser.add_argument(
+        "--step", type=int, default=step, help="Factor for each step"
+    )
+    parser.add_argument(
+        "--size", type=int, default=nopt, help="Initial data size"
+    )
+    parser.add_argument(
+        "--repeat",
+        type=int,
+        default=1,
+        help="Iterations inside measured region",
     )
     # parser.add_argument('--text', default='', help='Print with each result')
     parser.add_argument(

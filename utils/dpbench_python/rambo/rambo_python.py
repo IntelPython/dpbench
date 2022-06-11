@@ -38,7 +38,9 @@ def get_inputs(ecms, nevts):
     pb = numpy.array([ecms / 2.0, 0.0, 0.0, -ecms / 2])
 
     input_particles = numpy.array([pa, pb])
-    input_particles = numpy.repeat(input_particles[numpy.newaxis, ...], nevts, axis=0)
+    input_particles = numpy.repeat(
+        input_particles[numpy.newaxis, ...], nevts, axis=0
+    )
 
     return input_particles
 

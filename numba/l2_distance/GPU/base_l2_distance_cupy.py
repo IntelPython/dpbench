@@ -37,7 +37,7 @@ def gen_data(nopt, dims):
 ##############################################
 
 
-def run(name, alg, sizes=15, step=2, nopt=c ** 16):
+def run(name, alg, sizes=15, step=2, nopt=c**16):
     import argparse
 
     parser = argparse.ArgumentParser()

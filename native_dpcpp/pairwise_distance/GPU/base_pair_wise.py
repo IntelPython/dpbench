@@ -27,7 +27,7 @@ def gen_data(nopt, dims):
     return (X, Y, np.empty((nopt, nopt)))
 
 
-def run(name, sizes=6, step=2, nopt=2 ** 10):
+def run(name, sizes=6, step=2, nopt=2**10):
     import argparse
 
     parser = argparse.ArgumentParser()
@@ -41,7 +41,10 @@ def run(name, sizes=6, step=2, nopt=2 ** 10):
         "--size", required=False, default=nopt, help="Initial data size"
     )
     parser.add_argument(
-        "--repeat", required=False, default=1, help="Iterations inside measured region"
+        "--repeat",
+        required=False,
+        default=1,
+        help="Iterations inside measured region",
     )
     parser.add_argument(
         "--text", required=False, default="", help="Print with each result"

@@ -93,7 +93,18 @@ def ceiling_quotient(n, m):
 
 
 def count_weighted_pairs_3d_intel_no_slm(
-    n, nbins, d_x1, d_y1, d_z1, d_w1, d_x2, d_y2, d_z2, d_w2, d_rbins_squared, d_result
+    n,
+    nbins,
+    d_x1,
+    d_y1,
+    d_z1,
+    d_w1,
+    d_x2,
+    d_y2,
+    d_z2,
+    d_w2,
+    d_rbins_squared,
+    d_result,
 ):
     n_wi = 20
     private_hist_size = 16
@@ -109,7 +120,9 @@ def count_weighted_pairs_3d_intel_no_slm(
     gwsRange = n_groups0 * lws0, n_groups1 * lws1
     lwsRange = lws0, lws1
 
-    slm_hist_size = ceiling_quotient(nbins, private_hist_size) * private_hist_size
+    slm_hist_size = (
+        ceiling_quotient(nbins, private_hist_size) * private_hist_size
+    )
 
     with dpctl.device_context(base_gpairs.get_device_selector(is_gpu=True)):
         gwpc.count_weighted_pairs_3d_intel_no_slm_ker[gwsRange, lwsRange](
@@ -131,7 +144,18 @@ def count_weighted_pairs_3d_intel_no_slm(
 
 
 def count_weighted_pairs_3d_intel_orig(
-    n, nbins, d_x1, d_y1, d_z1, d_w1, d_x2, d_y2, d_z2, d_w2, d_rbins_squared, d_result
+    n,
+    nbins,
+    d_x1,
+    d_y1,
+    d_z1,
+    d_w1,
+    d_x2,
+    d_y2,
+    d_z2,
+    d_w2,
+    d_rbins_squared,
+    d_result,
 ):
 
     # create tmp result on device
@@ -162,7 +186,18 @@ def count_weighted_pairs_3d_intel_orig(
 
 
 def run_gpairs(
-    n, nbins, d_x1, d_y1, d_z1, d_w1, d_x2, d_y2, d_z2, d_w2, d_rbins_squared, d_result
+    n,
+    nbins,
+    d_x1,
+    d_y1,
+    d_z1,
+    d_w1,
+    d_x2,
+    d_y2,
+    d_z2,
+    d_w2,
+    d_rbins_squared,
+    d_result,
 ):
     count_weighted_pairs_3d_intel_no_slm(
         n,

@@ -13,7 +13,9 @@ def get_runtime_data(app_name, cmds, platform):
 
     try:
         df = pd.read_csv(
-            "runtimes.csv", names=["input_size", "runtime"], index_col="input_size"
+            "runtimes.csv",
+            names=["input_size", "runtime"],
+            index_col="input_size",
         )
         return df.loc[cmds["ref_input"], "runtime"]
     except:

@@ -18,13 +18,22 @@ except NameError:
 NUMBER_OF_CENTROIDS = 10
 
 # create input data, call blackscholes computation function (alg)
-def run(name, sizes=5, step=2, nopt=2 ** 17):
+def run(name, sizes=5, step=2, nopt=2**17):
     parser = argparse.ArgumentParser()
-    parser.add_argument("--steps", type=int, default=sizes, help="Number of steps")
-    parser.add_argument("--step", type=int, default=step, help="Factor for each step")
-    parser.add_argument("--size", type=int, default=nopt, help="Initial data size")
     parser.add_argument(
-        "--repeat", type=int, default=1, help="Iterations inside measured region"
+        "--steps", type=int, default=sizes, help="Number of steps"
+    )
+    parser.add_argument(
+        "--step", type=int, default=step, help="Factor for each step"
+    )
+    parser.add_argument(
+        "--size", type=int, default=nopt, help="Initial data size"
+    )
+    parser.add_argument(
+        "--repeat",
+        type=int,
+        default=1,
+        help="Iterations inside measured region",
     )
     parser.add_argument(
         "--test",
@@ -57,9 +66,13 @@ def run(name, sizes=5, step=2, nopt=2 ** 17):
         exec_name = "./kmeans"
 
     if args.test:
-        X, arrayPclusters_p, arrayC_p, arrayCsum_p, arrayCnumpoint_p = gen_rand_data(
-            nopt, dtype=np.float32
-        )
+        (
+            X,
+            arrayPclusters_p,
+            arrayC_p,
+            arrayCsum_p,
+            arrayCnumpoint_p,
+        ) = gen_rand_data(nopt, dtype=np.float32)
         kmeans_python(
             X,
             arrayPclusters_p,
@@ -77,7 +90,9 @@ def run(name, sizes=5, step=2, nopt=2 ** 17):
         utils.run_command(run_cmd, verbose=True)
 
         # read output of dpcpp
-        arrayC_n = np.fromfile("arrayC.bin", np.float32).reshape(NUMBER_OF_CENTROIDS, 2)
+        arrayC_n = np.fromfile("arrayC.bin", np.float32).reshape(
+            NUMBER_OF_CENTROIDS, 2
+        )
         arrayCsum_n = np.fromfile("arrayCsum.bin", np.float32).reshape(
             NUMBER_OF_CENTROIDS, 2
         )

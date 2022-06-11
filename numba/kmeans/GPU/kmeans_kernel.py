@@ -56,7 +56,13 @@ def copy_arrayC(arrayC, arrayP):
 
 
 def kmeans(
-    arrayP, arrayPcluster, arrayC, arrayCsum, arrayCnumpoint, num_points, num_centroids
+    arrayP,
+    arrayPcluster,
+    arrayC,
+    arrayCsum,
+    arrayCnumpoint,
+    num_points,
+    num_centroids,
 ):
 
     copy_arrayC[num_centroids, nb.DEFAULT_LOCAL_SIZE](arrayC, arrayP)

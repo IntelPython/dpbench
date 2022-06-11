@@ -18,13 +18,17 @@ def l2_distance_kernel(a, b, c):
     i = numba_dppy.get_global_id(0)
     j = numba_dppy.get_global_id(1)
     sub = a[i, j] - b[i, j]
-    sq = sub ** 2
+    sq = sub**2
     atomic_add(c, 0, sq)
 
 
 def l2_distance(a, b, distance):
-    with dpctl.device_context(base_l2_distance.get_device_selector(is_gpu=True)):
-        l2_distance_kernel[(a.shape[0], a.shape[1]), DEFAULT_LOCAL_SIZE](a, b, distance)
+    with dpctl.device_context(
+        base_l2_distance.get_device_selector(is_gpu=True)
+    ):
+        l2_distance_kernel[(a.shape[0], a.shape[1]), DEFAULT_LOCAL_SIZE](
+            a, b, distance
+        )
     return math.sqrt(distance)
 
 

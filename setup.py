@@ -1,7 +1,14 @@
+# Copyright 2022 Intel Corporation
+#
+# SPDX-License-Identifier: Apache 2.0
+
 #!/usr/bin/env python
 
-from setuptools import setup
+from skbuild import setup
+from setuptools import find_packages
+import dpctl
 
+dpctl_include_dir = dpctl.get_include()
 
 setup(
     name="dpbench",
@@ -15,6 +22,15 @@ setup(
         "License :: OSI Approved :: Apache 2.0 License",
         "Operating System :: Linux",
     ],
-    packages=["dpbench", "dpbench.infrastructure"],
+    packages=(
+        find_packages(include=["*"])
+        + find_packages(where="./dpbench/benchmarks/*/*")
+    ),
     python_requires=">=3.8",
+    include_package_data=True,
+    install_requires=[
+        "numpy",
+        "numba",
+    ],
+    cmake_args=["-DDpctl_INCLUDE_DIRS=" + dpctl_include_dir],
 )

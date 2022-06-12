@@ -18,6 +18,17 @@ def list_available_benchmarks():
 def run_benchmarks(
     bconfig_path=None, preset="S", repeat=1, validate=True, timeout=10.0
 ):
+    """Run all benchmarks in the dpbench benchmark directory
+
+    Args:
+        bconfig_path (str, optional): Path to benchmark configurations.
+        Defaults to None.
+        preset (str, optional): Problem size. Defaults to "S".
+        repeat (int, optional): Number of repetitions. Defaults to 1.
+        validate (bool, optional): Whether to validate against NumPy.
+        Defaults to True.
+        timeout (float, optional): Timeout setting. Defaults to 10.0.
+    """
 
     for b in list_available_benchmarks():
         bdir = "benchmarks/" + b
@@ -87,3 +98,62 @@ def run_benchmarks(
                         + b
                         + "."
                     )
+
+
+def all_benchmarks_passed_validation(dbfile):
+    """Checks the results table of the output database to confirm if all
+    benchmarks passed validation in the last run.
+
+    Args:
+        dbfile (str): Name of database with dpbench results
+    """
+
+    summary = (
+        "SELECT "
+        + "MAX(id),"
+        + "benchmark,"
+        + "framework,"
+        + "version,"
+        + "details,"
+        + "IIF(validated == 1, 'PASS', 'FAIL' ) AS result "
+        + "FROM results "
+        + "GROUP BY benchmark, framework, version, details, result "
+        + "ORDER BY benchmark, framework;"
+    )
+
+    failed_benchmark_summary = (
+        "SELECT "
+        + "MAX(id),"
+        + "benchmark,"
+        + "framework,"
+        + "version,"
+        + "details,"
+        + "IIF(validated == 1, 'PASS', 'FAIL' ) AS result "
+        + "FROM results "
+        + "WHERE validated = 0 "
+        + "GROUP BY benchmark, framework, version, details, result;"
+    )
+
+    conn = dpbi.create_connection(dbfile)
+    cur = conn.cursor()
+
+    data = cur.execute(summary)
+    print("Summary")
+    print("==============================================")
+    for row in data:
+        print(row)
+    print("==============================================")
+
+    data = cur.execute(failed_benchmark_summary)
+    fails = [row for row in data]
+
+    if fails:
+        print("Number of failing validations: ", len(fails))
+        print("==============================================")
+        for fail in fails:
+            print(fail)
+        print("==============================================")
+        return False
+    else:
+        print("All benchmarks were validated successfully")
+        return True

@@ -35,21 +35,21 @@ class Test(object):
             copy = frmwrk.copy_func()
             setup_str = frmwrk.setup_str(self.bench, impl)
             exec_str = frmwrk.exec_str(self.bench, impl)
-            # print(setup_str)
-            # print(exec_str)
         except Exception as e:
             print("Failed to load the {} implementation.".format(report_str))
             print(e)
             return None, None
         ldict = {"__npb_impl": impl, "__npb_copy": copy, **bdata}
+        if setup_str:
+            # Execute the copy of arrays into the "__npb_" prefix arrays
+            exec(setup_str, ldict)
         try:
             out, timelist = util.benchmark(
-                exec_str,
-                setup_str,
-                report_str + " - " + mode,
-                repeat,
-                ldict,
-                "__npb_result",
+                stmt=exec_str,
+                out_text=report_str + " - " + mode,
+                repeat=repeat,
+                context=ldict,
+                output="__npb_result",
             )
         except Exception as e:
             print("Failed to execute the {} implementation.".format(report_str))
@@ -62,8 +62,8 @@ class Test(object):
                 out = [out]
         else:
             out = []
-        if "out_args" in self.bench.info.keys():
-            out += [ldict[a] for a in self.frmwrk.args(self.bench)]
+        if "output_args" in self.bench.info.keys():
+            out += [ldict[a] for a in frmwrk.args(self.bench)]
         return out, timelist
 
     def run(
@@ -86,8 +86,21 @@ class Test(object):
         if validate and self.frmwrk.fname != "numpy" and self.numpy:
             np_impl, np_impl_name = self.numpy.implementations(self.bench)[0]
             np_out, _ = self._execute(
-                self.numpy, np_impl, np_impl_name, "validation", bdata, 1
+                frmwrk=self.numpy,
+                impl=np_impl,
+                impl_name=np_impl_name,
+                mode="validation",
+                bdata=bdata,
+                repeat=1,
             )
+            if not np_out:
+                print(
+                    "Failed to produce an output for the NumPy implementation "
+                    + "of "
+                    + self.bench.bname
+                    + ". Skipping execution of the benchmark."
+                )
+                return
         else:
             validate = False
             np_out = None
@@ -123,11 +136,11 @@ class Test(object):
                 )
                 continue
             except Exception:
-                continue
+                raise
 
             # Validation
             valid = True
-            if validate and np_out is not None:
+            if validate:
                 try:
                     valid = util.validate(
                         np_out, frmwrk_out, self.frmwrk.info["full_name"]
@@ -144,6 +157,7 @@ class Test(object):
                             self.frmwrk.info["full_name"]
                         )
                     )
+
             # Main execution
             _, timelist = self._execute(
                 self.frmwrk, impl, impl_name, "median", context, repeat

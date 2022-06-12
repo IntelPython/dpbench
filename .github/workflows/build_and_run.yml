@@ -51,3 +51,11 @@ jobs:
         shell: bash -l {0}
         run: |
           python -c "import dpbench; dpbench.run_benchmarks()" || exit 1
+          python -c "import dpbench; dpbench.all_benchmarks_passed_validation(\"dpbench.db\");"
+          res=`                                                                    \
+            printf "%s"                                                            \
+            "$(python -c "import dpbench;                                          \
+                res=int(dpbench.all_benchmarks_passed_validation(\"dpbench.db\")); \
+                print(\"Validation:\",res)"                                        \
+              )" | grep Validation | cut -f 2 -d ":"` || exit 1
+          if [ ${res} == 0 ]; then exit 1; fi

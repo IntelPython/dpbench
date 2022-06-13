@@ -5,6 +5,8 @@ pybind11_add_module(${py_module_name}
     black_scholes_sycl/_black_scholes_sycl.cpp
 )
 target_include_directories(${py_module_name} PUBLIC ${Dpctl_INCLUDE_DIRS})
+
+file(RELATIVE_PATH py_module_dest ${CMAKE_SOURCE_DIR} ${CMAKE_CURRENT_SOURCE_DIR})
 install(TARGETS ${py_module_name}
-  DESTINATION black_scholes_sycl
+  DESTINATION ${py_module_dest}/black_scholes_sycl
 )

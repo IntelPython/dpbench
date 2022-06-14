@@ -1,0 +1,80 @@
+{
+    "benchmark": {
+        "name": "k-Nearest Neighbors",
+        "short_name": "knn",
+        "relative_path": "knn",
+        "module_name": "knn",
+        "func_name": "knn",
+        "kind": "microbenchmark",
+        "domain": "Supervised Learning",
+        "parameters": {
+            "S": {
+                "test_size": 1024,
+                "train_size": 1024,
+		"data_dim": 16,
+                "classes_num": 3,
+                "seed_test": 777777,		
+                "seed_train": 0,
+		"k": 5
+            },
+            "M": {
+                "test_size": 8388608,
+                "train_size": 1024,
+		"data_dim": 16,
+                "classes_num": 3,
+                "seed_test": 777777,		
+                "seed_train": 0,
+		"k": 5
+            },
+            "L": {
+                "test_size": 16777216,
+                "train_size": 1024,
+		"data_dim": 16,
+                "classes_num": 3,
+                "seed_test": 777777,		
+                "seed_train": 0,
+		"k": 5
+            }
+        },
+        "init": {
+            "func_name": "initialize",
+            "input_args": [
+                "test_size",
+                "train_size",
+		"data_dim",
+		"classes_num",
+		"seed_test",
+		"seed_train"
+            ],
+            "output_args": [
+                "x_train",
+                "y_train",
+                "x_test",
+                "predictions",
+                "votes_to_classes"
+            ]
+        },
+        "input_args": [
+            "x_train",
+            "y_train",
+            "x_test",
+            "k",
+            "classes_num",
+            "train_size",
+            "test_size",
+            "predictions",
+	    "votes_to_classes",
+	    "data_dim"
+        ],
+        "array_args": [
+            "x_train",
+            "y_train",
+            "x_test",
+            "predictions",
+            "votes_to_classes"
+        ],
+        "output_args": [
+            "predictions"
+        ]
+    }
+}

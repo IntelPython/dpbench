@@ -2,7 +2,10 @@
 #
 # SPDX-License-Identifier: Apache-2.0
 
-def initialize(test_size, train_size, data_dim, classes_num, seed_test, seed_train):
+
+def initialize(
+    test_size, train_size, data_dim, classes_num, seed_test, seed_train
+):
     import numpy as np
     import numpy.random as default_rng
 
@@ -26,9 +29,10 @@ def initialize(test_size, train_size, data_dim, classes_num, seed_test, seed_tra
 
     def _gen_test_data(test_size, data_dim, seed_test, dtype):
         return _gen_data_x(test_size, data_dim, seed_test, dtype)
-    
 
-    x_train, y_train = _gen_train_data(train_size, data_dim, classes_num, seed_train, dtype)
+    x_train, y_train = _gen_train_data(
+        train_size, data_dim, classes_num, seed_train, dtype
+    )
     x_test = _gen_test_data(test_size, data_dim, seed_test, dtype)
     predictions = np.empty(test_size)
     votes_to_classes = np.zeros((test_size, classes_num))

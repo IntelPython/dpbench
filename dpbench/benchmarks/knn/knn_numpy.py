@@ -2,8 +2,10 @@
 #
 # SPDX-License-Identifier: Apache-2.0
 
-import numpy as np
 import math
+
+import numpy as np
+
 
 def knn(
     x_train,
@@ -15,7 +17,7 @@ def knn(
     test_size,
     predictions,
     votes_to_classes,
-    data_dim
+    data_dim,
 ):
     for i in range(test_size):
         queue_neighbors = np.empty((k, 2))  # queue_neighbors_lst[i]

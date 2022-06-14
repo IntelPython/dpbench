@@ -3,8 +3,11 @@
 # SPDX-License-Identifier: Apache-2.0
 
 import math
+
 import numpy as np
+
 import numba
+
 
 @numba.njit(parallel=True)
 def knn(
@@ -17,11 +20,11 @@ def knn(
     train_size,
     predictions,
     votes_to_classes,
-    data_dim
+    data_dim,
 ):
 
     for i in numba.prange(test_size):
-        queue_neighbors = np.empty(shape=(k,2))
+        queue_neighbors = np.empty(shape=(k, 2))
 
         for j in range(k):
             x1 = x_train[j]
@@ -70,12 +73,14 @@ def knn(
                 new_neighbor_label = queue_neighbors[k - 1, 1]
                 index = k - 1
 
-                while index > 0 and new_distance < queue_neighbors[index - 1, 0]:
+                while (
+                    index > 0 and new_distance < queue_neighbors[index - 1, 0]
+                ):
                     queue_neighbors[index, 0] = queue_neighbors[index - 1, 0]
                     queue_neighbors[index, 1] = queue_neighbors[index - 1, 1]
 
                     index = index - 1
-                    
+
                     queue_neighbors[index, 0] = new_distance
                     queue_neighbors[index, 1] = new_neighbor_label
 

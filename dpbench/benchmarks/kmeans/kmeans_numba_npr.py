@@ -46,7 +46,7 @@ def _updateCentroids(arrayC, arrayCsum, arrayCnumpoint, num_centroids):
         arrayC[i, 1] = arrayCsum[i, 1] / arrayCnumpoint[i]
 
 
-@nb.jit(nopython=True, parallel=True, fastmath=True)
+@nb.jit(nopython=True)
 def _kmeans_impl(
     arrayP,
     arrayPcluster,

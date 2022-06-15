@@ -3,14 +3,17 @@
 # SPDX-License-Identifier: Apache 2.0
 
 
-from numpy import exp, log, sqrt
 from math import erf
+
+from numpy import exp, log, sqrt
+
 import numba as nb
 
 
 @nb.vectorize(nopython=True)
 def _nberf(x):
     return erf(x)
+
 
 @nb.njit(parallel=True, fastmath=True)
 def black_scholes(nopt, price, strike, t, rate, vol, call, put):

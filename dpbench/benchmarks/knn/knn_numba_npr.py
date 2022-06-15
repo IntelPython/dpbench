@@ -9,7 +9,7 @@ import numpy as np
 import numba
 
 
-@numba.njit(parallel=True)
+@numba.njit(parallel=True, fastmath=True)
 def knn(
     x_train,
     y_train,
@@ -30,6 +30,7 @@ def knn(
             x1 = x_train[j]
             x2 = x_test[i]
 
+            # Compute Euclidean distance between x1 and x2
             distance = 0.0
             for jj in range(data_dim):
                 diff = x1[jj] - x2[jj]
@@ -39,7 +40,7 @@ def knn(
             queue_neighbors[j, 0] = dist
             queue_neighbors[j, 1] = y_train[j]
 
-        # sort_queue(queue_neighbors)
+        # sort queue of neighbors
         for j in range(k):
             new_distance = queue_neighbors[j, 0]
             new_neighbor_label = queue_neighbors[j, 1]
@@ -55,10 +56,10 @@ def knn(
                 queue_neighbors[index, 1] = new_neighbor_label
 
         for j in range(k, train_size):
-            # dist = euclidean_dist(x_train[j], x_test[i])
             x1 = x_train[j]
             x2 = x_test[i]
 
+            # Compute Euclidean distance between x1 and x2
             distance = 0.0
             for jj in range(data_dim):
                 diff = x1[jj] - x2[jj]
@@ -68,7 +69,6 @@ def knn(
             if dist < queue_neighbors[k - 1][0]:
                 queue_neighbors[k - 1][0] = dist
                 queue_neighbors[k - 1][1] = y_train[j]
-                # push_queue(queue_neighbors, queue_neighbors[k - 1])
                 new_distance = queue_neighbors[k - 1, 0]
                 new_neighbor_label = queue_neighbors[k - 1, 1]
                 index = k - 1

@@ -95,3 +95,11 @@ class NumbaFramework(Framework):
                 continue
 
         return implementations
+
+    def __eq__(self, other):
+        if not isinstance(other, type(self)):
+            return NotImplemented
+        return self.fname == other.fname
+
+    def __hash__(self):
+        return hash((self.fname))

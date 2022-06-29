@@ -6,7 +6,7 @@ import argparse
 import os
 
 import numpy as np
-import run_utils as utils
+import utils as utils
 from dpbench_datagen.knn import (
     CLASSES_NUM,
     DATA_DIM,

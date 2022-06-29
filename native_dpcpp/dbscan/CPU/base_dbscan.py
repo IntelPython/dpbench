@@ -27,7 +27,7 @@
 import os
 
 import numpy as np
-import run_utils as utils
+import utils as utils
 from dpbench_datagen.dbscan import gen_data_to_file, gen_rand_data
 from dpbench_python.dbscan.dbscan_python import dbscan_python
 

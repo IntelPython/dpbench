@@ -26,7 +26,7 @@
 
 import base_dbscan
 import dpctl
-import numba_dppy as nb
+import numba_dpex as nb
 import numpy as np
 from device_selector import get_device_selector
 

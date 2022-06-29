@@ -6,7 +6,7 @@ import argparse
 import os
 
 import numpy as np
-import run_utils as utils
+import utils as utils
 from dpbench_datagen.gaussian_elim import gen_data_to_file, gen_matrix, gen_vec
 
 

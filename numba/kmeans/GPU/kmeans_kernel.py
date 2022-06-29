@@ -1,8 +1,8 @@
 import base_kmeans
 import dpctl
-import numba_dppy as nb
+import numba_dpex as nb
 import numpy
-from numba_dppy import atomic
+from numba_dpex import atomic
 
 REPEAT = 1
 ITERATIONS = 30

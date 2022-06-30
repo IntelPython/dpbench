@@ -81,7 +81,7 @@ def run(name, alg, sizes=3, step=2, nopt=2**13):
         default=__file__.replace("py", "json"),
         help="output json data filename",
     )
-
+    
     args = parser.parse_args()
     sizes = int(args.steps)
     step = int(args.step)

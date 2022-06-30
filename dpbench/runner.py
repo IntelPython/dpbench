@@ -2,6 +2,9 @@
 #
 # SPDX-License-Identifier: Apache 2.0 License
 
+import os
+import os.path
+
 import warnings
 
 import pkg_resources
@@ -11,8 +14,8 @@ import dpbench.infrastructure as dpbi
 
 def list_available_benchmarks():
     """Return the list of available benchmarks"""
-
-    return pkg_resources.resource_listdir(__name__, "benchmarks")
+    #print(os.path.join(os.path.dirname(__file__), "benchmarks"))
+    return os.listdir(os.path.join(os.path.dirname(__file__), "benchmarks"))
 
 
 def run_benchmarks(

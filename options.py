@@ -183,7 +183,7 @@ class workloads:
                 "numba": "rambo.py",
                 "kernel": "rambo_kernel.py",
             },
-            all_workloads.gpairs.value: {   #mwang: same .py file??
+            all_workloads.gpairs.value: {
                 "numba": "run_gpairs.py",
                 "kernel": "run_gpairs.py",
             },

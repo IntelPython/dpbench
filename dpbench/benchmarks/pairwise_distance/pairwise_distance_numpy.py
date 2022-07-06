@@ -4,8 +4,11 @@
 
 import numpy as np
 
-# Pairwise Numpy implementation using the equation (a-b)^2 = a^2 + b^2 - 2*a*b
 def pairwise_distance(X1, X2, D):
+    """Pairwise Numpy implementation using the equation:
+    (a-b)^2 = a^2 + b^2 - 2*a*b
+    """
+
     M = X1.shape[0]
     N = X2.shape[0]
     O = X1.shape[1]

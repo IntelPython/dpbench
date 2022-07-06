@@ -14,7 +14,7 @@ _impl = {
 }
 
 
-class NumbaDppyFramework(Framework):
+class NumbaDpexFramework(Framework):
     """A class for reading and processing framework information."""
 
     def __init__(self, fname: str, device: str = None):

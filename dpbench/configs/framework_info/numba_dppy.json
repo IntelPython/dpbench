@@ -1,9 +1,0 @@
-{
-    "framework": {
-        "simple_name": "numba_dppy",
-        "full_name": "numba_dppy",
-        "prefix": "dppy",
-        "class": "NumbaDppyFramework",
-        "arch": "gpu"
-    }
-}

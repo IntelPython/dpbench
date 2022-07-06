@@ -2,11 +2,13 @@
 #
 # SPDX-License-Identifier: MIT
 
-import dpctl
 import base_pair_wise
+import dpctl
 import numpy as np
 from device_selector import get_device_selector
+
 import numba as nb
+
 
 # Naieve pairwise distance impl - take an array representing M points in N dimensions, and return the M x M matrix of Euclidean distances
 @nb.njit(parallel=True, fastmath=True)

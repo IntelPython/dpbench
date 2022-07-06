@@ -26,7 +26,6 @@
 
 import numpy as np
 
-
 # @numba.jit(nopython=True)
 # def euclidean_dist(x1, x2):
 #     return np.linalg.norm(x1-x2)
@@ -39,7 +38,7 @@ def euclidean_dist(x1, x2):
         diff = x1[i] - x2[i]
         distance += diff * diff
 
-    result = distance ** 0.5
+    result = distance**0.5
     # result = np.sqrt(distance)
     return result
 

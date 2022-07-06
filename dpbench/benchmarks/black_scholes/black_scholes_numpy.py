@@ -2,7 +2,7 @@
 #
 # SPDX-License-Identifier: Apache 2.0
 
-from math import log, sqrt, exp, erf
+from math import erf, exp, log, sqrt
 
 
 def invsqrt(x):

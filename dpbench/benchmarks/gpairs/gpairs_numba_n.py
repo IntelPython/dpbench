@@ -30,7 +30,7 @@ def gpairs(x1, y1, z1, w1, x2, y2, z2, w2, rbins, results):
 
             k = nbins - 1
             while dsq <= rbins[k]:
-                results[k - 1] += wprod
+                results[k] += wprod
                 k = k - 1
-                if k <= 0:
+                if k < 0:
                     break

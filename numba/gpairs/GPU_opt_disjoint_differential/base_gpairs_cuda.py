@@ -2,12 +2,14 @@
 #
 # SPDX-License-Identifier: MIT
 
-import os, json
-import numpy as np
-from numba import cuda
+import json
+import os
 
-from dpbench_python.gpairs.gpairs_python import gpairs_python
+import numpy as np
 from dpbench_datagen.gpairs import gen_rand_data
+from dpbench_python.gpairs.gpairs_python import gpairs_python
+
+from numba import cuda
 
 try:
     import itimer as it
@@ -60,7 +62,18 @@ def gen_data_device(npoints, dtype=np.float64):
     d_rbins_squared = cuda.to_device(DEFAULT_RBINS_SQUARED.astype(dtype))
     d_result = cuda.to_device(result.astype(dtype))
 
-    return (d_x1, d_y1, d_z1, d_w1, d_x2, d_y2, d_z2, d_w2, d_rbins_squared, d_result)
+    return (
+        d_x1,
+        d_y1,
+        d_z1,
+        d_w1,
+        d_x2,
+        d_y2,
+        d_z2,
+        d_w2,
+        d_rbins_squared,
+        d_result,
+    )
 
 
 def copy_d2h(d_result):
@@ -70,7 +83,7 @@ def copy_d2h(d_result):
 ##############################################
 
 
-def run(name, alg, sizes=10, step=2, nopt=2 ** 10):
+def run(name, alg, sizes=10, step=2, nopt=2**10):
     import argparse
 
     parser = argparse.ArgumentParser()
@@ -125,10 +138,21 @@ def run(name, alg, sizes=10, step=2, nopt=2 ** 10):
     output["metrics"] = []
 
     if args.test:
-        x1, y1, z1, w1, x2, y2, z2, w2, DEFAULT_RBINS_SQUARED, result_p = gen_data_np(
-            nopt
+        (
+            x1,
+            y1,
+            z1,
+            w1,
+            x2,
+            y2,
+            z2,
+            w2,
+            DEFAULT_RBINS_SQUARED,
+            result_p,
+        ) = gen_data_np(nopt)
+        gpairs_python(
+            x1, y1, z1, w1, x2, y2, z2, w2, DEFAULT_RBINS_SQUARED, result_p
         )
-        gpairs_python(x1, y1, z1, w1, x2, y2, z2, w2, DEFAULT_RBINS_SQUARED, result_p)
 
         if args.device is True:  # test usm feature
             (
@@ -143,7 +167,18 @@ def run(name, alg, sizes=10, step=2, nopt=2 ** 10):
                 DEFAULT_RBINS_SQUARED,
                 result_device,
             ) = gen_data_device(nopt)
-            alg(x1, y1, z1, w1, x2, y2, z2, w2, DEFAULT_RBINS_SQUARED, result_device)
+            alg(
+                x1,
+                y1,
+                z1,
+                w1,
+                x2,
+                y2,
+                z2,
+                w2,
+                DEFAULT_RBINS_SQUARED,
+                result_device,
+            )
             result_n = copy_d2h(result_device)
         else:
             (
@@ -186,12 +221,23 @@ def run(name, alg, sizes=10, step=2, nopt=2 ** 10):
                 result,
             ) = gen_data_device(nopt)
         else:
-            x1, y1, z1, w1, x2, y2, z2, w2, DEFAULT_RBINS_SQUARED, result = gen_data_np(
-                nopt
-            )
+            (
+                x1,
+                y1,
+                z1,
+                w1,
+                x2,
+                y2,
+                z2,
+                w2,
+                DEFAULT_RBINS_SQUARED,
+                result,
+            ) = gen_data_np(nopt)
         iterations = xrange(repeat)
 
-        alg(x1, y1, z1, w1, x2, y2, z2, w2, DEFAULT_RBINS_SQUARED, result)  # warmup
+        alg(
+            x1, y1, z1, w1, x2, y2, z2, w2, DEFAULT_RBINS_SQUARED, result
+        )  # warmup
         t0 = now()
         for _ in iterations:
             alg(x1, y1, z1, w1, x2, y2, z2, w2, DEFAULT_RBINS_SQUARED, result)

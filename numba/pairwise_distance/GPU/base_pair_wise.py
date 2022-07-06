@@ -3,17 +3,21 @@
 # SPDX-License-Identifier: MIT
 
 
+import datetime
+import json
+import os
+import sys
+
+import dpctl
+import dpctl.tensor as dpt
 import numpy as np
 import numpy.random as rnd
-import sys, json, os, datetime
-import dpctl, dpctl.tensor as dpt
+from device_selector import get_device_selector
+from dpbench_datagen.pairwise_distance import gen_rand_data
+from dpbench_datagen.pairwise_distance.generate_data_random import SEED
 from dpbench_python.pairwise_distance.pairwise_distance_python import (
     pairwise_distance_python,
 )
-from dpbench_datagen.pairwise_distance import gen_rand_data
-from dpbench_datagen.pairwise_distance.generate_data_random import SEED
-
-from device_selector import get_device_selector
 
 try:
     import itimer as it
@@ -73,7 +77,7 @@ def gen_data_usm(nopt, dims):
 ##############################################
 
 
-def run(name, alg, sizes=6, step=2, nopt=2 ** 10):
+def run(name, alg, sizes=6, step=2, nopt=2**10):
     import argparse
 
     parser = argparse.ArgumentParser()
@@ -87,7 +91,10 @@ def run(name, alg, sizes=6, step=2, nopt=2 ** 10):
         "--size", required=False, default=nopt, help="Initial data size"
     )
     parser.add_argument(
-        "--repeat", required=False, default=1, help="Iterations inside measured region"
+        "--repeat",
+        required=False,
+        default=1,
+        help="Iterations inside measured region",
     )
     parser.add_argument(
         "--text", required=False, default="", help="Print with each result"

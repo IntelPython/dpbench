@@ -1,6 +1,9 @@
+import os
+import sys
+
 import run_utils as util
+
 import options
-import os, sys
 
 try:
     import pandas as pd
@@ -13,7 +16,9 @@ def get_runtime_data(app_name, cmds, platform):
 
     try:
         df = pd.read_csv(
-            "runtimes.csv", names=["input_size", "runtime"], index_col="input_size"
+            "runtimes.csv",
+            names=["input_size", "runtime"],
+            index_col="input_size",
         )
         return df.loc[cmds["ref_input"], "runtime"]
     except:

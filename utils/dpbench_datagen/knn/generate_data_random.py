@@ -14,7 +14,7 @@ SEED_TEST = 777777
 SEED_TRAIN = 0
 DATA_DIM = 16
 CLASSES_NUM = 3
-TRAIN_DATA_SIZE = 2 ** 10
+TRAIN_DATA_SIZE = 2**10
 N_NEIGHBORS = 5
 
 # write input data to a file in binary format

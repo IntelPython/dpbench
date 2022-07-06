@@ -1,8 +1,9 @@
 import base_pathfinder
-import numba_dppy
 import dpctl
-from numba import int64 as local_dtype
+import numba_dppy
 from device_selector import get_device_selector
+
+from numba import int64 as local_dtype
 
 IN_RANGE = lambda x, min, max: ((x) >= (min) and (x) <= (max))
 # CLAMP_RANGE = lambda x, min, max: (x = min if (x<(min)) else (max if (x>(max)) else x))
@@ -20,12 +21,14 @@ def min_dppy(a, b):
 
 
 @numba_dppy.kernel
-def pathfinder_kernel(gpuWall, gpuSrc, gpuResult, iteration, borderCols, cols, t):
+def pathfinder_kernel(
+    gpuWall, gpuSrc, gpuResult, iteration, borderCols, cols, t
+):
 
     BLOCK_SIZE = numba_dppy.get_local_size(0)
 
-    prev = numba_dppy.local.array(shape=2 ** 8, dtype=local_dtype)
-    result = numba_dppy.local.array(shape=2 ** 8, dtype=local_dtype)
+    prev = numba_dppy.local.array(shape=2**8, dtype=local_dtype)
+    result = numba_dppy.local.array(shape=2**8, dtype=local_dtype)
 
     bx = numba_dppy.get_group_id(0)
     tx = numba_dppy.get_local_id(0)

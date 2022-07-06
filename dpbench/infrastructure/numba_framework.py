@@ -4,9 +4,9 @@
 # SPDX-License-Identifier: BSD-3-Clause
 
 import pathlib
+from typing import Callable, Sequence, Tuple
 
 from dpbench.infrastructure import Benchmark, Framework
-from typing import Callable, Sequence, Tuple
 
 _impl = {
     "object-mode": "o",
@@ -95,3 +95,11 @@ class NumbaFramework(Framework):
                 continue
 
         return implementations
+
+    def __eq__(self, other):
+        if not isinstance(other, type(self)):
+            return NotImplemented
+        return self.fname == other.fname
+
+    def __hash__(self):
+        return hash((self.fname))

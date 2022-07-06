@@ -4,12 +4,13 @@
 # SPDX-License-Identifier: BSD-3-Clause
 
 import json
-import numpy as np
 import pathlib
+from typing import Any, Callable, Dict, Sequence, Tuple
+
+import numpy as np
 import pkg_resources
 
 from dpbench.infrastructure import Benchmark
-from typing import Any, Callable, Dict, Sequence, Tuple
 
 
 class Framework(object):

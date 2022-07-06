@@ -2,11 +2,13 @@
 #
 # SPDX-License-Identifier: MIT
 
-import dpctl
+from math import erf, exp, log, sqrt
+
 import base_bs_erf
+import dpctl
 import numba_dppy
 from device_selector import get_device_selector
-from math import log, sqrt, exp, erf
+
 
 # blackscholes implemented using dppy.kernel
 @numba_dppy.kernel

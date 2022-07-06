@@ -5,8 +5,9 @@
 
 import base_pair_wise
 import numpy as np
-import numba
 from dpbench_decorators import jit
+
+import numba
 
 
 @jit(nopython=True, parallel=True, fastmath=True)

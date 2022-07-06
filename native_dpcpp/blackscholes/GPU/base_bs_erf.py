@@ -3,8 +3,9 @@
 # SPDX-License-Identifier: MIT
 
 import os
-import run_utils as utils
+
 import numpy as np
+import run_utils as utils
 from dpbench_datagen.blackscholes import gen_data_to_file, gen_rand_data
 from dpbench_python.blackscholes.bs_python import black_scholes_python
 
@@ -34,7 +35,7 @@ RISK_FREE = 0.1
 VOLATILITY = 0.2
 
 # create input data, call blackscholes computation function (alg)
-def run(name, sizes=14, step=2, nopt=2 ** 15):
+def run(name, sizes=14, step=2, nopt=2**15):
     import argparse
 
     parser = argparse.ArgumentParser()
@@ -48,7 +49,10 @@ def run(name, sizes=14, step=2, nopt=2 ** 15):
         "--size", required=False, default=nopt, help="Initial data size"
     )
     parser.add_argument(
-        "--repeat", required=False, default=1, help="Iterations inside measured region"
+        "--repeat",
+        required=False,
+        default=1,
+        help="Iterations inside measured region",
     )
     parser.add_argument(
         "--usm",

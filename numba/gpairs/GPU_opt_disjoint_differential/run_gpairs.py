@@ -1,7 +1,8 @@
 import base_gpairs
-import numpy as np
+import dpctl
+import dpctl.tensor as dpt
 import gaussian_weighted_pair_counts as gwpc
-import dpctl, dpctl.tensor as dpt
+import numpy as np
 
 
 def ceiling_quotient(n, m):
@@ -9,7 +10,18 @@ def ceiling_quotient(n, m):
 
 
 def count_weighted_pairs_3d_intel_diff(
-    n, nbins, d_x1, d_y1, d_z1, d_w1, d_x2, d_y2, d_z2, d_w2, d_rbins_squared, d_result
+    n,
+    nbins,
+    d_x1,
+    d_y1,
+    d_z1,
+    d_w1,
+    d_x2,
+    d_y2,
+    d_z2,
+    d_w2,
+    d_rbins_squared,
+    d_result,
 ):
     with dpctl.device_context(base_gpairs.get_device_selector()):
         gwpc.count_weighted_pairs_3d_intel_diff_ker[n, 64](
@@ -32,7 +44,18 @@ def count_weighted_pairs_3d_intel_diff(
 
 
 def run_gpairs(
-    n, nbins, d_x1, d_y1, d_z1, d_w1, d_x2, d_y2, d_z2, d_w2, d_rbins_squared, d_result
+    n,
+    nbins,
+    d_x1,
+    d_y1,
+    d_z1,
+    d_w1,
+    d_x2,
+    d_y2,
+    d_z2,
+    d_w2,
+    d_rbins_squared,
+    d_result,
 ):
     count_weighted_pairs_3d_intel_diff(
         n,

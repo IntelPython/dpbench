@@ -24,11 +24,12 @@
 # EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 # *****************************************************************************
 
-import numpy as np
-from numba import prange
 import base_dbscan
-import utils
+import numpy as np
 from dpbench_decorators import jit
+
+import utils
+from numba import prange
 
 NOISE = -1
 UNDEFINED = -2

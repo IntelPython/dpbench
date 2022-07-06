@@ -2,9 +2,13 @@
 #
 # SPDX-License-Identifier: MIT
 
-from sklearn.datasets import make_classification, make_regression
-import sys, json, os, datetime
+import datetime
+import json
+import os
+import sys
+
 import numpy.random as rnd
+from sklearn.datasets import make_classification, make_regression
 
 try:
     import itimer as it
@@ -52,7 +56,7 @@ SEED = 7777777
 ##############################################
 
 
-def run(name, alg, sizes=10, step=2, nopt=2 ** 10):
+def run(name, alg, sizes=10, step=2, nopt=2**10):
     import argparse
 
     parser = argparse.ArgumentParser()
@@ -66,15 +70,20 @@ def run(name, alg, sizes=10, step=2, nopt=2 ** 10):
         "--size", required=False, default=nopt, help="Initial data size"
     )
     parser.add_argument(
-        "--repeat", required=False, default=1, help="Iterations inside measured region"
+        "--repeat",
+        required=False,
+        default=1,
+        help="Iterations inside measured region",
     )
     parser.add_argument(
         "--text", required=False, default="", help="Print with each result"
     )
     parser.add_argument(
-        "--dims", required=False, type=int, default=2 ** 7, help="Dimensions"
+        "--dims", required=False, type=int, default=2**7, help="Dimensions"
     )
-    parser.add_argument("--rand", required=False, type=bool, default=True, help="Rand?")
+    parser.add_argument(
+        "--rand", required=False, type=bool, default=True, help="Rand?"
+    )
     parser.add_argument(
         "--json",
         required=False,

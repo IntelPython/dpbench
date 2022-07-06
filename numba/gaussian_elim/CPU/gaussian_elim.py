@@ -1,8 +1,9 @@
 import base_gaussian_elim
-import numpy as np
-import numba
 import dpctl
 import numba_dppy
+import numpy as np
+
+import numba
 
 
 @numba_dppy.kernel
@@ -10,7 +11,9 @@ def compute_ratio_kernel(m, a, size, t):
     i = numba_dppy.get_global_id(0)
 
     if i < size - 1 - t:
-        m[size * (i + t + 1) + t] = a[size * (i + t + 1) + t] / a[size * t + t]  # ratio
+        m[size * (i + t + 1) + t] = (
+            a[size * (i + t + 1) + t] / a[size * t + t]
+        )  # ratio
 
 
 @numba_dppy.kernel
@@ -21,7 +24,8 @@ def forward_sub_kernel(m, a, b, size, t):
 
     if global_id_x < size - 1 - t and global_id_y < size - t:
         a[size * (global_id_x + 1 + t) + (global_id_y + t)] -= (
-            m[size * (global_id_x + 1 + t) + t] * a[size * t + (global_id_y + t)]
+            m[size * (global_id_x + 1 + t) + t]
+            * a[size * t + (global_id_y + t)]
         )
 
         if global_id_y == 0:
@@ -43,9 +47,9 @@ def run_gaussian_elim(
     # Setup and Run kernels
     for t in range(size - 1):
         with dpctl.device_context("opencl:cpu"):
-            compute_ratio_kernel[global_work_size_1[0], local_work_size_buf_1[0]](
-                extra_matrix, solve_matrix, size, t
-            )
+            compute_ratio_kernel[
+                global_work_size_1[0], local_work_size_buf_1[0]
+            ](extra_matrix, solve_matrix, size, t)
             forward_sub_kernel[
                 [global_work_size_2[0], global_work_size_2[1]],
                 [local_work_size_buf_2[0], local_work_size_buf_2[1]],

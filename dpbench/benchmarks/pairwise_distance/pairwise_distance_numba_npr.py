@@ -3,7 +3,9 @@
 # SPDX-License-Identifier: Apache-2.0
 
 import numpy as np
+
 import numba
+
 
 @numba.njit(parallel=True, fastmath=True)
 def pairwise_distance(X1, X2, D):

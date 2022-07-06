@@ -3,11 +3,16 @@
 # SPDX-License-Identifier: Apache 2.0
 
 
-from math import log, sqrt, exp, erf
+from math import erf, exp, log, sqrt
+
 import numba_dppy as nb
 
+
 @nb.kernel(
-    access_types={"read_only": ["price", "strike", "t"], "write_only": ["call", "put"]}
+    access_types={
+        "read_only": ["price", "strike", "t"],
+        "write_only": ["call", "put"],
+    }
 )
 def black_scholes_kernel(nopt, price, strike, t, rate, vol, call, put):
     mr = -rate
@@ -38,5 +43,8 @@ def black_scholes_kernel(nopt, price, strike, t, rate, vol, call, put):
     call[i] = r
     put[i] = r - P + Se
 
+
 def black_scholes(nopt, price, strike, t, rate, vol, call, put):
-    black_scholes_kernel[nopt,nb.DEFAULT_LOCAL_SIZE](nopt, price, strike, t, rate, vol, call, put)
+    black_scholes_kernel[nopt, nb.DEFAULT_LOCAL_SIZE](
+        nopt, price, strike, t, rate, vol, call, put
+    )

@@ -49,7 +49,7 @@ class Test(object):
                 out_text=report_str + " - " + mode,
                 repeat=repeat,
                 context=ldict,
-                output="__npb_result"
+                output="__npb_result",
             )
         except Exception as e:
             print("Failed to execute the {} implementation.".format(report_str))

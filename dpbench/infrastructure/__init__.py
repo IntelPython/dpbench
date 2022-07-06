@@ -3,10 +3,10 @@
 # SPDX-License-Identifier: Apache-2.0
 
 from .benchmark import Benchmark
-from .framework import Framework, generate_framework
-from .numba_framework import NumbaFramework
 from .dpnp_framework import DpnpFramework
+from .framework import Framework, generate_framework
 from .numba_dppy_framework import NumbaDppyFramework
+from .numba_framework import NumbaFramework
 from .test import Test
 from .utilities import (
     benchmark,

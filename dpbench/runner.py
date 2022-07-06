@@ -67,7 +67,7 @@ def run_benchmarks(
                 fws.add(dpbi.NumbaDpexFramework("numba_dpex"))
                 pass
             elif "_dpnp" in bimpl:
-                #fws.append(dpbi.DpnpFramework("dpnp"))
+                # fws.append(dpbi.DpnpFramework("dpnp"))
                 pass
 
         # Check if a NumPy implementation of the benchmark is there. The

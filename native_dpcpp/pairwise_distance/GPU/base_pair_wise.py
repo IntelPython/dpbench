@@ -8,11 +8,12 @@ import sys
 import dpctl
 import dpctl.tensor as dpt
 import numpy as np
-import utils as utils
 from dpbench_datagen.pairwise_distance import gen_data_to_file, gen_rand_data
 from dpbench_python.pairwise_distance.pairwise_distance_python import (
     pairwise_distance_python,
 )
+
+import utils as utils
 
 ######################################################
 # GLOBAL DECLARATIONS THAT WILL BE USED IN ALL FILES #

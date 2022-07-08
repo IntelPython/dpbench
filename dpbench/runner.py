@@ -31,6 +31,9 @@ def run_benchmarks(
     """
 
     for b in list_available_benchmarks():
+        print("")
+        print("===============================================================")
+        print("")
         bdir = "benchmarks/" + b
         if not pkg_resources.resource_isdir(__name__, bdir):
             continue

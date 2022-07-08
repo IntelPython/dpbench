@@ -9,8 +9,8 @@ from dpbench.infrastructure import Benchmark, Framework
 
 _impl = {
     "kernel-mode": "k",
-    # "numpy-mode": "n",
-    # "prange-mode": "p",
+    "numpy-mode": "n",
+    "prange-mode": "p",
 }
 
 

@@ -4,8 +4,8 @@
 
 from .benchmark import Benchmark
 from .framework import Framework, generate_framework
-from .numba_framework import NumbaFramework
 from .numba_dpex_framework import NumbaDpexFramework
+from .numba_framework import NumbaFramework
 from .dpnp_framework import DpnpFramework
 from .test import Test
 from .utilities import (

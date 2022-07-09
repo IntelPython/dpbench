@@ -30,7 +30,7 @@ import numpy as np
 import pandas as pd
 from sklearn.datasets import make_classification, make_regression
 
-import utils as utils
+import utils
 
 ######################################################
 # GLOBAL DECLARATIONS THAT WILL BE USED IN ALL FILES #

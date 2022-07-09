@@ -8,7 +8,7 @@ import os
 import numpy as np
 from dpbench_datagen.gaussian_elim import gen_data_to_file, gen_matrix, gen_vec
 
-import utils as utils
+import utils
 
 
 def run(name, sizes=1, step=2, nopt=2**2):

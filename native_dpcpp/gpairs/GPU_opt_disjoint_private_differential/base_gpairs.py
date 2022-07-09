@@ -11,7 +11,7 @@ import numpy.random as rnd
 from dpbench_datagen.gpairs import gen_data_to_file, gen_rand_data
 from dpbench_python.gpairs.gpairs_python import gpairs_python
 
-import utils as utils
+import utils
 
 try:
     import itimer as it

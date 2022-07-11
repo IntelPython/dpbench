@@ -115,11 +115,3 @@ class NumbaDpexFramework(Framework):
         arg_str = self.arg_str(bench, impl)
         main_exec_str = "__dpb_result = __dpb_impl({a})".format(a=arg_str)
         return dpctl_ctx_str + main_exec_str
-
-    def __eq__(self, other):
-        if not isinstance(other, type(self)):
-            return NotImplemented
-        return self.fname == other.fname
-
-    def __hash__(self):
-        return hash((self.fname))

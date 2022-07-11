@@ -30,6 +30,10 @@ def run_benchmarks(
         timeout (float, optional): Timeout setting. Defaults to 10.0.
     """
 
+    print("===============================================================")
+    print("")
+    print("***Start Running DPBech***");
+    
     for b in list_available_benchmarks():
         print("")
         print("===============================================================")
@@ -103,7 +107,13 @@ def run_benchmarks(
                         + b
                         + "."
                     )
-
+    print("")
+    print("===============================================================")
+    print("")
+    print("***All the Tests are Finished. DPBench is Done.***");
+    print("")
+    print("===============================================================")
+    print("")
 
 def all_benchmarks_passed_validation(dbfile):
     """Checks the results table of the output database to confirm if all

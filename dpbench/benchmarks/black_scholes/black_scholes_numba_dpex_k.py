@@ -5,7 +5,7 @@
 
 from math import erf, exp, log, sqrt
 
-import numba_dppy as nb
+import numba_dpex as nb
 
 
 @nb.kernel(

@@ -9,12 +9,12 @@ from dpbench.infrastructure import Benchmark, Framework
 
 _impl = {
     "kernel-mode": "k",
-    # "numpy-mode": "n",
-    # "prange-mode": "p",
+    "numpy-mode": "n",
+    "prange-mode": "p",
 }
 
 
-class NumbaDppyFramework(Framework):
+class NumbaDpexFramework(Framework):
     """A class for reading and processing framework information."""
 
     def __init__(self, fname: str, device: str = None):

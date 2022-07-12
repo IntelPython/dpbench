@@ -7,9 +7,10 @@ import os
 import sys
 
 import numpy as np
-import run_utils as utils
 from dpbench_datagen.l2_distance import gen_data, gen_data_to_file
 from dpbench_python.l2_distance.l2_distance_python import l2_distance_python
+
+import utils as utils
 
 # import numpy.random_intel as rnd
 

@@ -6,7 +6,6 @@ import argparse
 import os
 
 import numpy as np
-import run_utils as utils
 from dpbench_datagen.knn import (
     CLASSES_NUM,
     DATA_DIM,
@@ -17,6 +16,8 @@ from dpbench_datagen.knn import (
     gen_train_data,
 )
 from dpbench_python.knn.knn_python import knn_python
+
+import utils as utils
 
 # make xrange available in python 3
 try:

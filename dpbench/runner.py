@@ -32,7 +32,7 @@ def run_benchmarks(
 
     print("===============================================================")
     print("")
-    print("***Start Running DPBech***");
+    print("***Start Running DPBench***");
     
     for b in list_available_benchmarks():
         print("")

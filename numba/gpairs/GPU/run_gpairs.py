@@ -2,10 +2,10 @@ import base_gpairs
 import dpctl
 import dpctl.tensor as dpt
 import gaussian_weighted_pair_counts as gwpc
-import numba_dpex
+import numba_dppy
 import numpy as np
 from device_selector import get_device_selector
-from numba_dpex import DEFAULT_LOCAL_SIZE, atomic, kernel
+from numba_dppy import DEFAULT_LOCAL_SIZE, atomic, kernel
 
 atomic_add = atomic.add
 
@@ -18,8 +18,8 @@ def count_weighted_pairs_3d_intel(
     by a distance less than r, for each r**2 in the input rbins_squared.
     """
 
-    start = numba_dpex.get_global_id(0)
-    stride = numba_dpex.get_global_size(0)
+    start = numba_dppy.get_global_id(0)
+    stride = numba_dppy.get_global_size(0)
 
     n1 = x1.shape[0]
     n2 = x2.shape[0]
@@ -57,7 +57,7 @@ def count_weighted_pairs_3d_intel_ver2(
     by a distance less than r, for each r**2 in the input rbins_squared.
     """
 
-    i = numba_dpex.get_global_id(0)
+    i = numba_dppy.get_global_id(0)
     nbins = rbins_squared.shape[0]
     n2 = x2.shape[0]
 
@@ -215,4 +215,4 @@ def run_gpairs(
     )
 
 
-base_gpairs.run("Gpairs Dpex kernel", run_gpairs)
+base_gpairs.run("Gpairs Dppy kernel", run_gpairs)

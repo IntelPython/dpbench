@@ -7,7 +7,7 @@ from math import erf, exp, log, sqrt
 
 import base_bs_erf
 import dpctl
-import numba_dpex as nb
+import numba_dppy as nb
 from device_selector import get_device_selector
 
 

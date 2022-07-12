@@ -4,12 +4,12 @@
 
 
 import base_pca
-import dpex.core as ocldrv
+import dppy.core as ocldrv
 import numpy
 import numpy as np
 
 import numba
-from numba import dpex, jit, prange
+from numba import dppy, jit, prange
 
 
 @numba.njit(parallel={"spirv": True}, fastmath=True)
@@ -22,9 +22,9 @@ def matmul(X, Y):
     return result
 
 
-@dpex.kernel
+@dppy.kernel
 def compute_mean_axis_0(tdata, m):
-    i = dpex.get_global_id(0)
+    i = dppy.get_global_id(0)
     sum = 0.0
     for j in range(tdata.shape[1]):
         sum += tdata[i, j]

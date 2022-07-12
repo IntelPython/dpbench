@@ -8,10 +8,9 @@ import dpctl
 import dpctl.tensor as dpt
 import numpy as np
 import numpy.random as rnd
+import run_utils as utils
 from dpbench_datagen.gpairs import gen_data_to_file, gen_rand_data
 from dpbench_python.gpairs.gpairs_python import gpairs_python
-
-import utils
 
 try:
     import itimer as it

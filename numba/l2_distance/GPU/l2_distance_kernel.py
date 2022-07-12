@@ -7,16 +7,16 @@ import sys
 
 import base_l2_distance
 import dpctl
-import numba_dpex
-from numba_dpex import DEFAULT_LOCAL_SIZE, atomic, kernel
+import numba_dppy
+from numba_dppy import DEFAULT_LOCAL_SIZE, atomic, kernel
 
 atomic_add = atomic.add
 
 
 @kernel(access_types={"read_only": ["a", "b"], "write_only": ["c"]})
 def l2_distance_kernel(a, b, c):
-    i = numba_dpex.get_global_id(0)
-    j = numba_dpex.get_global_id(1)
+    i = numba_dppy.get_global_id(0)
+    j = numba_dppy.get_global_id(1)
     sub = a[i, j] - b[i, j]
     sq = sub**2
     atomic_add(c, 0, sq)

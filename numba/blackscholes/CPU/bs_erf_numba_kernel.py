@@ -6,17 +6,17 @@ from math import erf, exp, log, sqrt
 
 import base_bs_erf
 import dpctl
-import numba_dpex
+import numba_dppy
 from device_selector import get_device_selector
 
 
-# blackscholes implemented using dpex.kernel
-@numba_dpex.kernel
+# blackscholes implemented using dppy.kernel
+@numba_dppy.kernel
 def black_scholes(nopt, price, strike, t, rate, vol, call, put):
     mr = -rate
     sig_sig_two = vol * vol * 2
 
-    i = numba_dpex.get_global_id(0)
+    i = numba_dppy.get_global_id(0)
 
     P = price[i]
     S = strike[i]
@@ -45,7 +45,7 @@ def black_scholes(nopt, price, strike, t, rate, vol, call, put):
 def black_scholes_driver(nopt, price, strike, t, rate, vol, call, put):
     # offload blackscholes computation to CPU (toggle level0 or opencl driver).
     with dpctl.device_context(get_device_selector(is_gpu=False)):
-        black_scholes[nopt, numba_dpex.DEFAULT_LOCAL_SIZE](
+        black_scholes[nopt, numba_dppy.DEFAULT_LOCAL_SIZE](
             nopt, price, strike, t, rate, vol, call, put
         )
 

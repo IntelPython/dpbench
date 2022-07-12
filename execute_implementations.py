@@ -2,8 +2,9 @@ import os
 import shutil
 import sys
 
+import run_utils as util
+
 import options
-import utils as util
 
 
 def run_native_optimised_CPU(app_name, cmds, analysis):
@@ -604,9 +605,9 @@ def check_envvars_tools(opts):
     #         sys.exit()
     #     if opts.platform == options.platform.gpu or opts.platform == options.platform.all:
     #         try:
-    #             from numba import dpex
+    #             from numba import dppy
     #         except:
-    #             print("Numba DPEX not available. Exiting\n")
+    #             print("Numba DPPY not available. Exiting\n")
     #             sys.exit()
 
     from shutil import which

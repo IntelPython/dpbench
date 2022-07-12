@@ -604,9 +604,9 @@ def check_envvars_tools(opts):
     #         sys.exit()
     #     if opts.platform == options.platform.gpu or opts.platform == options.platform.all:
     #         try:
-    #             from numba import dppy
+    #             from numba import dpex
     #         except:
-    #             print("Numba DPPY not available. Exiting\n")
+    #             print("Numba DPEX not available. Exiting\n")
     #             sys.exit()
 
     from shutil import which

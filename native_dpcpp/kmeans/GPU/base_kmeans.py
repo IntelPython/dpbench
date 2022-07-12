@@ -9,7 +9,7 @@ import numpy as np
 from dpbench_datagen.kmeans import gen_data_to_file, gen_rand_data
 from dpbench_python.kmeans.kmeans_python import kmeans_python
 
-import utils as utils
+import utils
 
 # make xrange available in python 3
 try:

@@ -30,7 +30,7 @@ import numpy as np
 from dpbench_datagen.dbscan import gen_data_to_file, gen_rand_data
 from dpbench_python.dbscan.dbscan_python import dbscan_python
 
-import utils as utils
+import utils
 
 ######################################################
 # GLOBAL DECLARATIONS THAT WILL BE USED IN ALL FILES #

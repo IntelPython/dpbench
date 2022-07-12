@@ -17,7 +17,7 @@ from dpbench_datagen.knn import (
 )
 from dpbench_python.knn.knn_python import knn_python
 
-import utils as utils
+import utils
 
 # make xrange available in python 3
 try:

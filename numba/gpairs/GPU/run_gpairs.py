@@ -215,4 +215,4 @@ def run_gpairs(
     )
 
 
-base_gpairs.run("Gpairs Dppy kernel", run_gpairs)
+base_gpairs.run("Gpairs Dpex kernel", run_gpairs)

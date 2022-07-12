@@ -13,7 +13,7 @@ from dpbench_python.pairwise_distance.pairwise_distance_python import (
     pairwise_distance_python,
 )
 
-import utils as utils
+import utils
 
 ######################################################
 # GLOBAL DECLARATIONS THAT WILL BE USED IN ALL FILES #

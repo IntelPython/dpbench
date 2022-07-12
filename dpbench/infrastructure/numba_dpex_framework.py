@@ -1,31 +1,28 @@
-# Copyright 2021 ETH Zurich and the NPBench authors. All rights reserved.
 # Copyright 2022 Intel Corp.
 #
 # SPDX-License-Identifier: BSD-3-Clause
 
 import pathlib
-from typing import Callable, Sequence, Tuple
+from typing import Any, Callable, Dict, Sequence, Tuple
 
 from dpbench.infrastructure import Benchmark, Framework
 
 _impl = {
-    "object-mode": "o",
-    "object-mode-parallel": "op",
-    "object-mode-parallel-range": "opr",
-    "nopython-mode": "n",
-    "nopython-mode-parallel": "np",
-    "nopython-mode-parallel-range": "npr",
+    "kernel-mode": "k",
+    "numpy-mode": "n",
+    "prange-mode": "p",
 }
 
 
-class NumbaFramework(Framework):
+class NumbaDpexFramework(Framework):
     """A class for reading and processing framework information."""
 
-    def __init__(self, fname: str):
+    def __init__(self, fname: str, device: str = None):
         """Reads framework information.
         :param fname: The framework name.
         """
 
+        self.device = "default" if device is None else device
         super().__init__(fname)
 
     def impl_files(self, bench: Benchmark) -> Sequence[Tuple[str, str]]:
@@ -95,3 +92,26 @@ class NumbaFramework(Framework):
                 continue
 
         return implementations
+
+    def imports(self) -> Dict[str, Any]:
+        """Returns a dictionary any modules and methods needed for running
+        a benchmark."""
+        import dpctl
+
+        return {"dpctl": dpctl}
+
+    def exec_str(self, bench: Benchmark, impl: Callable = None):
+        """Generates the execution-string that should be used to call
+        the benchmark implementation.
+        :param bench: A benchmark.
+        :param impl: A benchmark implementation.
+        """
+
+        dpctl_ctx_str = (
+            "with dpctl.device_context(dpctl.select_{d}_device()): ".format(
+                d=self.device
+            )
+        )
+        arg_str = self.arg_str(bench, impl)
+        main_exec_str = "__dpb_result = __dpb_impl({a})".format(a=arg_str)
+        return dpctl_ctx_str + main_exec_str

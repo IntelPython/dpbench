@@ -30,7 +30,14 @@ def run_benchmarks(
         timeout (float, optional): Timeout setting. Defaults to 10.0.
     """
 
+    print("===============================================================")
+    print("")
+    print("***Start Running DPBench***");
+    
     for b in list_available_benchmarks():
+        print("")
+        print("===============================================================")
+        print("")
         bdir = "benchmarks/" + b
         if not pkg_resources.resource_isdir(__name__, bdir):
             continue
@@ -58,14 +65,16 @@ def run_benchmarks(
         # Create the needed Frameworks by looking at the benchmark
         # implementations
         for bimpl in bench_impls:
-            if "_numba" in bimpl:
+            if "_numba" in bimpl and "_dpex" not in bimpl:
                 # create a Numba framework
                 fws.add(dpbi.NumbaFramework("numba"))
             elif "_numpy" in bimpl:
                 fws.add(dpbi.Framework("numpy"))
             elif "_dpex" in bimpl:
+                fws.add(dpbi.NumbaDpexFramework("numba_dpex"))
                 pass
             elif "_dpnp" in bimpl:
+                # fws.append(dpbi.DpnpFramework("dpnp"))
                 pass
 
         # Check if a NumPy implementation of the benchmark is there. The
@@ -98,7 +107,13 @@ def run_benchmarks(
                         + b
                         + "."
                     )
-
+    print("")
+    print("===============================================================")
+    print("")
+    print("***All the Tests are Finished. DPBench is Done.***");
+    print("")
+    print("===============================================================")
+    print("")
 
 def all_benchmarks_passed_validation(dbfile):
     """Checks the results table of the output database to confirm if all

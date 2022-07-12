@@ -39,7 +39,7 @@ class Test(object):
             print("Failed to load the {} implementation.".format(report_str))
             print(e)
             return None, None
-        ldict = {"__npb_impl": impl, "__npb_copy": copy, **bdata}
+        ldict = {"__dpb_impl": impl, "__dpb_copy": copy, **bdata}
         if setup_str:
             # Execute the copy of arrays into the "__npb_" prefix arrays
             exec(setup_str, ldict)
@@ -49,7 +49,7 @@ class Test(object):
                 out_text=report_str + " - " + mode,
                 repeat=repeat,
                 context=ldict,
-                output="__npb_result",
+                output="__dpb_result",
             )
         except Exception as e:
             print("Failed to execute the {} implementation.".format(report_str))

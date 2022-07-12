@@ -115,7 +115,7 @@ class Framework(object):
         """
 
         return [
-            "__npb_{pr}_{a}".format(pr=self.info["prefix"], a=a)
+            "__dpb_{pr}_{a}".format(pr=self.info["prefix"], a=a)
             if a in bench.info["array_args"]
             else a
             for a in bench.info["input_args"]
@@ -129,7 +129,7 @@ class Framework(object):
         """
 
         return [
-            "__npb_{pr}_{a}".format(pr=self.info["prefix"], a=a)
+            "__dpb_{pr}_{a}".format(pr=self.info["prefix"], a=a)
             for a in bench.info["array_args"]
         ]
 
@@ -162,7 +162,7 @@ class Framework(object):
         if len(bench.info["array_args"]):
             arg_str = self.out_arg_str(bench, impl)
             copy_args = [
-                "__npb_copy({})".format(a) for a in bench.info["array_args"]
+                "__dpb_copy({})".format(a) for a in bench.info["array_args"]
             ]
             return arg_str + " = " + ", ".join(copy_args)
         return "pass"
@@ -175,7 +175,16 @@ class Framework(object):
         """
 
         arg_str = self.arg_str(bench, impl)
-        return "__npb_result = __npb_impl({a})".format(a=arg_str)
+        return "__dpb_result = __dpb_impl({a})".format(a=arg_str)
+    
+    def __eq__(self, other):
+        if not isinstance(other, type(self)):
+            return NotImplemented
+        return self.fname == other.fname
+
+    def __hash__(self):
+        return hash((self.fname))
+
 
 
 def generate_framework(fname: str) -> Framework:

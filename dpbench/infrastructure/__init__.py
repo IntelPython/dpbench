@@ -4,7 +4,9 @@
 
 from .benchmark import Benchmark
 from .framework import Framework, generate_framework
+from .numba_dpex_framework import NumbaDpexFramework
 from .numba_framework import NumbaFramework
+from .dpnp_framework import DpnpFramework
 from .test import Test
 from .utilities import (
     benchmark,
@@ -18,6 +20,8 @@ __all__ = [
     "Benchmark",
     "Framework",
     "NumbaFramework",
+    "NumbaDpexFramework",
+    "DpnpFramework",
     "Test",
     "create_connection",
     "generate_framework",

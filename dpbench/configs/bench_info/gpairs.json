@@ -53,6 +53,8 @@
             ]
         },
         "input_args": [
+            "nopt",
+            "nbins",
             "x1",
             "y1",
             "z1",

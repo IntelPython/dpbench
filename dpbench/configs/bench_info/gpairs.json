@@ -9,7 +9,7 @@
         "domain": "Astrophysics",
         "parameters": {
             "S": {
-                "nopt": 4000,
+                "nopt": 128,
                 "seed": 123456789,
                 "nbins": 20,
                 "rmax": 50,

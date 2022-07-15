@@ -6,10 +6,11 @@
 def initialize(n_samples, n_features, centers, seed):
 
     from typing import NamedTuple
+
     import numpy as np
+    import numpy.random as rnd
     from sklearn.datasets import make_blobs
     from sklearn.preprocessing import StandardScaler
-    import numpy.random as rnd
 
     DEFAULT_EPS = 0.6
     DEFAULT_MINPTS = 20
@@ -52,7 +53,7 @@ def initialize(n_samples, n_features, centers, seed):
         DataSize(n_samples=2**16, n_features=3): Params(eps=0.108, minpts=6),
         DataSize(n_samples=2**16, n_features=10): Params(eps=0.6, minpts=20),
     }
-    
+
     X, *_ = make_blobs(
         n_samples=n_samples,
         n_features=n_features,
@@ -66,4 +67,9 @@ def initialize(n_samples, n_features, centers, seed):
         data_size, Params(eps=DEFAULT_EPS, minpts=DEFAULT_MINPTS)
     )
 
-    return (X.flatten().astype(dtype), np.empty(n_samples, dtype=np.int64), params.eps, params.minpts)
+    return (
+        X.flatten().astype(dtype),
+        np.empty(n_samples, dtype=np.int64),
+        params.eps,
+        params.minpts,
+    )

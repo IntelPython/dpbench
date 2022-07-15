@@ -6,7 +6,6 @@ from .benchmark import Benchmark
 from .framework import Framework, generate_framework
 from .numba_dpex_framework import NumbaDpexFramework
 from .numba_framework import NumbaFramework
-from .dpnp_framework import DpnpFramework
 from .test import Test
 from .utilities import (
     benchmark,
@@ -15,6 +14,8 @@ from .utilities import (
     time_to_ms,
     validate,
 )
+
+from .dpnp_framework import DpnpFramework  # isort:skip
 
 __all__ = [
     "Benchmark",

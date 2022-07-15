@@ -2,10 +2,11 @@
 #
 # SPDX-License-Identifier: Apache 2.0
 
+
 def dbscan(n, dim, data, eps, min_pts, assignments):
     import numpy as np
     from sklearn.cluster import DBSCAN
-    
+
     data = np.reshape(data, (n, dim))
 
     labels = DBSCAN(eps=eps, min_samples=min_pts).fit_predict(data)

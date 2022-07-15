@@ -2,13 +2,15 @@
 #
 # SPDX-License-Identifier: Apache 2.0
 
-import numpy as np
-import numba as nb
 import dbscan_utils
+import numpy as np
+
+import numba as nb
 
 NOISE = -1
 UNDEFINED = -2
 DEFAULT_QUEUE_CAPACITY = 10
+
 
 @nb.njit(parallel=True, fastmath=True)
 def get_neighborhood(n, dim, data, eps, ind_lst, sz_lst, assignments):

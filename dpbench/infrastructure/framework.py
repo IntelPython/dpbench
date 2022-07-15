@@ -176,7 +176,7 @@ class Framework(object):
 
         arg_str = self.arg_str(bench, impl)
         return "__dpb_result = __dpb_impl({a})".format(a=arg_str)
-    
+
     def __eq__(self, other):
         if not isinstance(other, type(self)):
             return NotImplemented
@@ -184,7 +184,6 @@ class Framework(object):
 
     def __hash__(self):
         return hash((self.fname))
-
 
 
 def generate_framework(fname: str) -> Framework:

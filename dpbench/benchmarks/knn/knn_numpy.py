@@ -83,7 +83,7 @@ def knn(
                     queue_neighbors[index, 0] = new_distance
                     queue_neighbors[index, 1] = new_neighbor_label
 
-        v_to_c_i = votes_to_classes[i]
+        v_to_c_i = np.copy(votes_to_classes[i])
 
         for j in range(len(queue_neighbors)):
             v_to_c_i[int(queue_neighbors[j, 1])] += 1

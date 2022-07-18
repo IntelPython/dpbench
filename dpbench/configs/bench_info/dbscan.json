@@ -1,0 +1,58 @@
+{
+    "benchmark": {
+        "name": "Density-based spatial clustering of applications with noise",
+        "short_name": "DBSCAN",
+        "relative_path": "dbscan",
+        "module_name": "dbscan",
+        "func_name": "dbscan",
+        "kind": "microbenchmark",
+        "domain": "Machine Learning",
+        "parameters": {
+            "S": {
+                "n_samples": 1024,
+		"n_features": 10,
+		"centers": 10,
+                "seed": 7777777
+            },
+            "M": {
+                "n_samples": 4096,
+		"n_features": 10,
+		"centers": 10,
+                "seed": 7777777
+            },
+            "L": {
+                "n_samples": 16384,
+		"n_features": 10,
+		"centers": 10,
+                "seed": 7777777
+            }
+        },
+        "init": {
+            "func_name": "initialize",
+            "input_args": [
+                "n_samples",
+		"n_features",
+                "centers",
+		"seed"
+            ],
+            "output_args": [
+                "data",
+		"assignments",
+                "eps",
+		"minpts"
+            ]
+        },
+        "input_args": [
+            "n_samples",
+            "n_features",
+            "data",
+	    "eps",
+	    "minpts",
+	    "assignments"
+        ],
+        "array_args": [
+            "data",
+            "assignments"
+        ]
+    }
+}

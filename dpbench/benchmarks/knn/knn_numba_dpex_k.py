@@ -7,8 +7,6 @@ import math
 import numba_dpex
 import numpy as np
 
-# from utils.dpbench_datagen.knn.generate_data_random import DATA_DIM
-
 
 @numba_dpex.kernel(
     access_types={

@@ -119,7 +119,7 @@ def run_knn_kernel(
         x2 = test[i]
 
         distance = 0.0
-        for jj in range(base_knn.DATA_DIM):
+        for jj in range(data_dim):
             diff = x1[jj] - x2[jj]
             distance += diff * diff
         dist = math.sqrt(distance)

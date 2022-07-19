@@ -11,53 +11,29 @@
             "S": {
                 "test_size": 1024,
                 "train_size": 1024,
-<<<<<<< HEAD
-		        "data_dim": 16,
-                "classes_num": 3,
-                "seed_test": 777777,
-                "seed_train": 0,
-		        "k": 5
-=======
                 "data_dim": 16,
                 "classes_num": 3,
                 "seed_test": 777777,
                 "seed_train": 0,
                 "k": 5
->>>>>>> origin/main
             },
             "M": {
                 "test_size": 8388608,
                 "train_size": 1024,
-<<<<<<< HEAD
-		        "data_dim": 16,
-                "classes_num": 3,
-                "seed_test": 777777,
-                "seed_train": 0,
-		        "k": 5
-=======
                 "data_dim": 16,
                 "classes_num": 3,
                 "seed_test": 777777,
                 "seed_train": 0,
                 "k": 5
->>>>>>> origin/main
             },
             "L": {
                 "test_size": 16777216,
                 "train_size": 1024,
-<<<<<<< HEAD
-		        "data_dim": 16,
-                "classes_num": 3,
-                "seed_test": 777777,
-                "seed_train": 0,
-		        "k": 5
-=======
                 "data_dim": 16,
                 "classes_num": 3,
                 "seed_test": 777777,
                 "seed_train": 0,
                 "k": 5
->>>>>>> origin/main
             }
         },
         "init": {
@@ -65,17 +41,10 @@
             "input_args": [
                 "test_size",
                 "train_size",
-<<<<<<< HEAD
-		        "data_dim",
-		        "classes_num",
-		        "seed_test",
-		        "seed_train"
-=======
                 "data_dim",
                 "classes_num",
                 "seed_test",
                 "seed_train"
->>>>>>> origin/main
             ],
             "output_args": [
                 "x_train",
@@ -94,13 +63,8 @@
             "train_size",
             "test_size",
             "predictions",
-<<<<<<< HEAD
-	        "votes_to_classes",
-	        "data_dim"
-=======
             "votes_to_classes",
             "data_dim"
->>>>>>> origin/main
         ],
         "array_args": [
             "x_train",

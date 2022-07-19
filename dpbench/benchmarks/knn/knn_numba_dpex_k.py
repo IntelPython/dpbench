@@ -6,12 +6,13 @@ import math
 
 import numba_dpex
 import numpy as np
-#from utils.dpbench_datagen.knn.generate_data_random import DATA_DIM
+
+# from utils.dpbench_datagen.knn.generate_data_random import DATA_DIM
 
 
 @numba_dpex.kernel(
     access_types={
-        "read_only": ["train", "train_labels", "test","votes_to_classes_lst"],
+        "read_only": ["train", "train_labels", "test", "votes_to_classes_lst"],
         "write_only": ["predictions"],
     }
 )
@@ -27,7 +28,7 @@ def run_knn_kernel(
     data_dim,
 ):
     i = numba_dpex.get_global_id(0)
-# here k has to be 5 in order to match with numpy    
+    # here k has to be 5 in order to match with numpy
     queue_neighbors = numba_dpex.private.array(shape=(5, 2), dtype=np.float64)
 
     for j in range(k):
@@ -79,7 +80,7 @@ def run_knn_kernel(
             new_neighbor_label = queue_neighbors[k - 1, 1]
             index = k - 1
 
-            while( index > 0 and new_distance < queue_neighbors[index - 1, 0]):
+            while index > 0 and new_distance < queue_neighbors[index - 1, 0]:
                 queue_neighbors[index, 0] = queue_neighbors[index - 1, 0]
                 queue_neighbors[index, 1] = queue_neighbors[index - 1, 1]
 
@@ -117,14 +118,13 @@ def knn(
     data_dim,
 ):
     run_knn_kernel[test_size, numba_dpex.DEFAULT_LOCAL_SIZE](
-            train,
-            train_labels,
-            test,
-            k,
-            classes_num,
-            train_size,
-            predictions,
-            votes_to_classes_lst,
-            data_dim,
+        train,
+        train_labels,
+        test,
+        k,
+        classes_num,
+        train_size,
+        predictions,
+        votes_to_classes_lst,
+        data_dim,
     )
-    

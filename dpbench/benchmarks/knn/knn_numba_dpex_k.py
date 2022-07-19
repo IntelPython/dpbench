@@ -44,10 +44,7 @@ def run_knn_kernel(
         queue_neighbors[j, 0] = dist
         queue_neighbors[j, 1] = train_labels[j]
 
-    # sort_queue(queue_neighbors)
-    # for j in range(len(queue_neighbors)):
     for j in range(k):
-        # push_queue(queue_neighbors, queue_neighbors[i], i)
         new_distance = queue_neighbors[j, 0]
         new_neighbor_label = queue_neighbors[j, 1]
         index = j
@@ -62,7 +59,6 @@ def run_knn_kernel(
             queue_neighbors[index, 1] = new_neighbor_label
 
     for j in range(k, train_size):
-        # dist = euclidean_dist(train[j], test[i])
         x1 = train[j]
         x2 = test[i]
 
@@ -75,7 +71,6 @@ def run_knn_kernel(
         if dist < queue_neighbors[k - 1][0]:
             queue_neighbors[k - 1][0] = dist
             queue_neighbors[k - 1][1] = train_labels[j]
-            # push_queue(queue_neighbors, queue_neighbors[k - 1])
             new_distance = queue_neighbors[k - 1, 0]
             new_neighbor_label = queue_neighbors[k - 1, 1]
             index = k - 1

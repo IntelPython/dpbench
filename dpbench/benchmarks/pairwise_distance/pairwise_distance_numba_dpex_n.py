@@ -6,11 +6,11 @@ import numpy as np
 
 import numba as nb
 
-#target implementation
-#commented due to dpnp is not supporting yet
+# target implementation
+# commented due to dpnp is not supporting yet
 
-#@nb.njit(parallel=True, fastmath=True)
-#def pairwise_distance(X1, X2, D):
+# @nb.njit(parallel=True, fastmath=True)
+# def pairwise_distance(X1, X2, D):
 #    """Pairwise Numpy implementation using numpy linalg norm"""
 #    np.copyto(D, np.linalg.norm(X1[:, None, :] - X2[None, :, :], axis=-1))
 

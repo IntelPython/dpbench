@@ -44,6 +44,7 @@ def generate_points(nevts, nout):
 
     return output_particles
 
+
 def rambo(evt_per_calc):
     ng = 4
     outint = 1

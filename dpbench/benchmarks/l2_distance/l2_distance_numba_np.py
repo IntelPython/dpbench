@@ -6,9 +6,8 @@ import numpy as np
 
 import numba as nb
 
-nb.njit(parallel=True, fastmath=True)
 
-
+@nb.njit(parallel=True, fastmath=True)
 def l2_distance(a, b, d):
     sub = a - b
     sq = np.square(sub)

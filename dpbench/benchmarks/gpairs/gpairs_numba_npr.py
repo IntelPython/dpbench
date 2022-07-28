@@ -3,7 +3,9 @@
 # SPDX-License-Identifier: Apache-2.0
 
 import numpy as np
+
 import numba as nb
+
 
 @nb.njit(parallel=True, fastmath=True)
 def count_weighted_pairs_3d_diff_ker(
@@ -38,21 +40,25 @@ def count_weighted_pairs_3d_diff_ker(
             for k in range(j + 1, nbins, 1):
                 result[i, k] += result[i, j]
 
+
 @nb.njit(parallel=True, fastmath=True)
 def count_weighted_pairs_3d_diff_agg_ker(nbins, result, n):
     for col_id in nb.prange(nbins):
         for i in range(1, n):
             result[0, col_id] += result[i, col_id]
 
-def gpairs(npoints, nbins, x1, y1, z1, w1, x2, y2, z2, w2, rbins, results):
-    #allocate per-work item private result vector in device global memory
-    results_disjoint = np.zeros((npoints, rbins.shape[0]), dtype=np.float32)
-    
-    #call gpairs compute kernel
-    count_weighted_pairs_3d_diff_ker(npoints, nbins, x1, y1, z1, w1, x2, y2, z2, w2, rbins, results_disjoint)
 
-    #aggregate the results from the compute kernel
+def gpairs(npoints, nbins, x1, y1, z1, w1, x2, y2, z2, w2, rbins, results):
+    # allocate per-work item private result vector in device global memory
+    results_disjoint = np.zeros((npoints, rbins.shape[0]), dtype=np.float32)
+
+    # call gpairs compute kernel
+    count_weighted_pairs_3d_diff_ker(
+        npoints, nbins, x1, y1, z1, w1, x2, y2, z2, w2, rbins, results_disjoint
+    )
+
+    # aggregate the results from the compute kernel
     count_weighted_pairs_3d_diff_agg_ker(nbins, results_disjoint, npoints)
 
-    #copy to results vector
+    # copy to results vector
     np.copyto(results, results_disjoint[0])

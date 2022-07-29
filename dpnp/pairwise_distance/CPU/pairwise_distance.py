@@ -2,8 +2,9 @@
 #
 # SPDX-License-Identifier: MIT
 
-import dpctl
 import base_pair_wise
+import dpctl
+
 import dpnp as np
 
 

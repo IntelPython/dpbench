@@ -24,8 +24,8 @@
 # EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 # *****************************************************************************
 
-import re
 import os
+import re
 import subprocess
 import sys
 import time
@@ -106,7 +106,9 @@ class ExperimentError(Exception):
         limit = 10000
         if len(output) > limit:
             self.output = (
-                output[: limit / 2] + "\n\n...TRUNCATED...\n\n" + output[-limit / 2 :]
+                output[: limit / 2]
+                + "\n\n...TRUNCATED...\n\n"
+                + output[-limit / 2 :]
             )
         else:
             self.output = output
@@ -116,7 +118,11 @@ class ExperimentError(Exception):
 
 
 def run_command(
-    command_string, verbose=False, echo=True, throw_exception=True, dry_run=False
+    command_string,
+    verbose=False,
+    echo=True,
+    throw_exception=True,
+    dry_run=False,
 ):
     command_string = [x for x in command_string if x is not None]
     if dry_run:
@@ -127,7 +133,9 @@ def run_command(
         print("executing:", subprocess.list2cmdline(command_string))
 
     try:
-        output = subprocess.check_output(command_string, universal_newlines=True)
+        output = subprocess.check_output(
+            command_string, universal_newlines=True
+        )
         if verbose == 1:
             print(output)
     except subprocess.CalledProcessError as e:

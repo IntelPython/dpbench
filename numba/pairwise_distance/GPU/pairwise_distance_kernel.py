@@ -2,19 +2,19 @@
 #
 # SPDX-License-Identifier: MIT
 
-import dpctl
-import base_pair_wise
 import os
+
+import base_pair_wise
+import dpctl
+import numba_dpex
 import numpy as np
 from device_selector import get_device_selector
-
-from numba_dppy import kernel, atomic, DEFAULT_LOCAL_SIZE
-import numba_dppy
+from numba_dpex import DEFAULT_LOCAL_SIZE, atomic, kernel
 
 
 @kernel
 def pairwise_python(X1, X2, D):
-    i = numba_dppy.get_global_id(0)
+    i = numba_dpex.get_global_id(0)
 
     N = X2.shape[0]
     O = X1.shape[1]

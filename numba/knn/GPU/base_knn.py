@@ -25,21 +25,23 @@
 # *****************************************************************************
 
 import argparse
-import sys, os, json
-import numpy as np
-import numpy.random as rnd
+import json
+import os
+import sys
 
-from dpbench_datagen.knn import (
-    gen_train_data,
-    gen_test_data,
-    CLASSES_NUM,
-    DATA_DIM,
-    TRAIN_DATA_SIZE,
-    N_NEIGHBORS,
-)
-from dpbench_python.knn.knn_python import knn_python
 import dpctl
 import dpctl.tensor as dpt
+import numpy as np
+import numpy.random as rnd
+from dpbench_datagen.knn import (
+    CLASSES_NUM,
+    DATA_DIM,
+    N_NEIGHBORS,
+    TRAIN_DATA_SIZE,
+    gen_test_data,
+    gen_train_data,
+)
+from dpbench_python.knn.knn_python import knn_python
 
 try:
     import itimer as it
@@ -125,7 +127,9 @@ def gen_data_usm(nopt):
     train_usm.usm_data.copy_from_host(x_train.reshape((-1)).view("|u1"))
     train_labels_usm.usm_data.copy_from_host(y_train.reshape((-1)).view("|u1"))
     test_usm.usm_data.copy_from_host(x_test.reshape((-1)).view("|u1"))
-    predictions_usm.usm_data.copy_from_host(predictions.reshape((-1)).view("|u1"))
+    predictions_usm.usm_data.copy_from_host(
+        predictions.reshape((-1)).view("|u1")
+    )
     votes_to_classes_lst_usm.usm_data.copy_from_host(
         votes_to_classes_lst.reshape((-1)).view("|u1")
     )
@@ -142,13 +146,22 @@ def gen_data_usm(nopt):
 ##############################################
 
 
-def run(name, alg, sizes=5, step=2, nopt=2 ** 20):
+def run(name, alg, sizes=5, step=2, nopt=2**20):
     parser = argparse.ArgumentParser()
-    parser.add_argument("--steps", type=int, default=sizes, help="Number of steps")
-    parser.add_argument("--step", type=int, default=step, help="Factor for each step")
-    parser.add_argument("--size", type=int, default=nopt, help="Initial data size")
     parser.add_argument(
-        "--repeat", type=int, default=1, help="Iterations inside measured region"
+        "--steps", type=int, default=sizes, help="Number of steps"
+    )
+    parser.add_argument(
+        "--step", type=int, default=step, help="Factor for each step"
+    )
+    parser.add_argument(
+        "--size", type=int, default=nopt, help="Initial data size"
+    )
+    parser.add_argument(
+        "--repeat",
+        type=int,
+        default=1,
+        help="Iterations inside measured region",
     )
     parser.add_argument("--text", default="", help="Print with each result")
     parser.add_argument(
@@ -259,7 +272,9 @@ def run(name, alg, sizes=5, step=2, nopt=2 ** 20):
             )
         return
 
-    with open("perf_output.csv", "w", 1) as fd, open("runtimes.csv", "w", 1) as fd2:
+    with open("perf_output.csv", "w", 1) as fd, open(
+        "runtimes.csv", "w", 1
+    ) as fd2:
 
         for _ in xrange(args.steps):
             sys.stdout.flush()

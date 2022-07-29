@@ -1,34 +1,37 @@
 import base_pathfinder
-import numba_dppy
 import dpctl
-from numba import int64 as local_dtype
+import numba_dpex
 from device_selector import get_device_selector
+
+from numba import int64 as local_dtype
 
 IN_RANGE = lambda x, min, max: ((x) >= (min) and (x) <= (max))
 # CLAMP_RANGE = lambda x, min, max: (x = min if (x<(min)) else (max if (x>(max)) else x))
 MIN = lambda a, b: ((a) if (a) <= (b) else (b))
 
 
-@numba_dppy.func
+@numba_dpex.func
 def in_range(x, min, max):
     return (x) >= (min) and (x) <= (max)
 
 
-@numba_dppy.func
-def min_dppy(a, b):
+@numba_dpex.func
+def min_dpex(a, b):
     return (a) if (a) <= (b) else (b)
 
 
-@numba_dppy.kernel
-def pathfinder_kernel(gpuWall, gpuSrc, gpuResult, iteration, borderCols, cols, t):
+@numba_dpex.kernel
+def pathfinder_kernel(
+    gpuWall, gpuSrc, gpuResult, iteration, borderCols, cols, t
+):
 
-    BLOCK_SIZE = numba_dppy.get_local_size(0)
+    BLOCK_SIZE = numba_dpex.get_local_size(0)
 
-    prev = numba_dppy.local.array(shape=2 ** 8, dtype=local_dtype)
-    result = numba_dppy.local.array(shape=2 ** 8, dtype=local_dtype)
+    prev = numba_dpex.local.array(shape=2**8, dtype=local_dtype)
+    result = numba_dpex.local.array(shape=2**8, dtype=local_dtype)
 
-    bx = numba_dppy.get_group_id(0)
-    tx = numba_dppy.get_local_id(0)
+    bx = numba_dpex.get_group_id(0)
+    tx = numba_dpex.get_local_id(0)
 
     ## Each block finally computes result for a small block after N iterations.
     ## it is the non-overlapping small blocks that cover all the input data
@@ -62,7 +65,7 @@ def pathfinder_kernel(gpuWall, gpuSrc, gpuResult, iteration, borderCols, cols, t
     if in_range(xidx, 0, cols - 1):
         prev[tx] = gpuSrc[xidx]
 
-    numba_dppy.barrier(numba_dppy.CLK_LOCAL_MEM_FENCE)
+    numba_dpex.barrier(numba_dpex.CLK_LOCAL_MEM_FENCE)
 
     computed = False
 
@@ -74,7 +77,7 @@ def pathfinder_kernel(gpuWall, gpuSrc, gpuResult, iteration, borderCols, cols, t
             left = prev[W]
             up = prev[tx]
             right = prev[E]
-            shortest = min_dppy(left, up)
+            shortest = min_dpex(left, up)
             # index = cols*(t+i)+xidx
             result[tx] = shortest + gpuWall[t + i, xidx]
 
@@ -84,7 +87,7 @@ def pathfinder_kernel(gpuWall, gpuSrc, gpuResult, iteration, borderCols, cols, t
             # bufIndex = gpuSrc[xidx]
             # outputBuffer[bufIndex] = 1
 
-        numba_dppy.barrier(numba_dppy.CLK_LOCAL_MEM_FENCE)
+        numba_dpex.barrier(numba_dpex.CLK_LOCAL_MEM_FENCE)
 
         if i == iteration - 1:
             break
@@ -92,7 +95,7 @@ def pathfinder_kernel(gpuWall, gpuSrc, gpuResult, iteration, borderCols, cols, t
         if computed is True:
             prev[tx] = result[tx]  ## Assign the computation range
 
-        numba_dppy.barrier(numba_dppy.CLK_LOCAL_MEM_FENCE)
+        numba_dpex.barrier(numba_dpex.CLK_LOCAL_MEM_FENCE)
 
     ## update the global memory
     ## after the last iteration, only threads coordinated within the

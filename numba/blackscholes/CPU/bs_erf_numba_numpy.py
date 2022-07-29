@@ -2,11 +2,13 @@
 #
 # SPDX-License-Identifier: MIT
 
+from math import erf
+
 import base_bs_erf
 import numpy as np
-from numpy import log, exp, sqrt
-from math import erf
 from dpbench_decorators import jit, vectorize
+from numpy import exp, log, sqrt
+
 
 # Numba does know erf function from numpy or scipy
 @vectorize(nopython=True)

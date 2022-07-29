@@ -2,14 +2,20 @@
 #
 # SPDX-License-Identifier: MIT
 
+import datetime
+import json
+import os
+import sys
+
+import dpctl
+import dpctl.memory as dpmem
+import dpctl.tensor as dpt
 import numpy as np
 import numpy.random as rnd
-import sys, json, os, datetime
-import dpctl, dpctl.memory as dpmem, dpctl.tensor as dpt
-from dpbench_python.kmeans.kmeans_python import kmeans_python
+from device_selector import get_device_selector
 from dpbench_datagen.kmeans import gen_rand_data
 from dpbench_datagen.kmeans.generate_data_random import SEED
-from device_selector import get_device_selector
+from dpbench_python.kmeans.kmeans_python import kmeans_python
 
 try:
     import itimer as it
@@ -102,13 +108,19 @@ def gen_data_usm(nopt):
     arrayCsum_usm.usm_data.copy_from_host(arrayCsum.reshape((-1)).view("u1"))
     arrayCnumpoint_usm.usm_data.copy_from_host(arrayCnumpoint.view("u1"))
 
-    return (X_usm, arrayPclusters_usm, arrayC_usm, arrayCsum_usm, arrayCnumpoint_usm)
+    return (
+        X_usm,
+        arrayPclusters_usm,
+        arrayC_usm,
+        arrayCsum_usm,
+        arrayCnumpoint_usm,
+    )
 
 
 ##############################################
 
 
-def run(name, alg, sizes=5, step=2, nopt=2 ** 18):
+def run(name, alg, sizes=5, step=2, nopt=2**18):
     import argparse
 
     parser = argparse.ArgumentParser()
@@ -122,7 +134,10 @@ def run(name, alg, sizes=5, step=2, nopt=2 ** 18):
         "--size", required=False, default=nopt, help="Initial data size"
     )
     parser.add_argument(
-        "--repeat", required=False, default=1, help="Iterations inside measured region"
+        "--repeat",
+        required=False,
+        default=1,
+        help="Iterations inside measured region",
     )
     parser.add_argument(
         "--text", required=False, default="", help="Print with each result"
@@ -167,7 +182,13 @@ def run(name, alg, sizes=5, step=2, nopt=2 ** 18):
     output["metrics"] = []
 
     if args.test:
-        X, arrayPclusters_p, arrayC_p, arrayCsum_p, arrayCnumpoint_p = gen_data_np(nopt)
+        (
+            X,
+            arrayPclusters_p,
+            arrayC_p,
+            arrayCsum_p,
+            arrayCnumpoint_p,
+        ) = gen_data_np(nopt)
         kmeans_python(
             X,
             arrayPclusters_p,
@@ -203,10 +224,14 @@ def run(name, alg, sizes=5, step=2, nopt=2 ** 18):
             arrayC_usm.usm_data.copy_to_host(arrayC_n.reshape((-1)).view("u1"))
 
             arrayCsum_n = np.empty((NUMBER_OF_CENTROIDS, 2), dtype=np.float32)
-            arrayCsum_usm.usm_data.copy_to_host(arrayCsum_n.reshape((-1)).view("u1"))
+            arrayCsum_usm.usm_data.copy_to_host(
+                arrayCsum_n.reshape((-1)).view("u1")
+            )
 
             arrayCnumpoint_n = np.empty(NUMBER_OF_CENTROIDS, dtype=np.int32)
-            arrayCnumpoint_usm.usm_data.copy_to_host(arrayCnumpoint_n.view("u1"))
+            arrayCnumpoint_usm.usm_data.copy_to_host(
+                arrayCnumpoint_n.view("u1")
+            )
         else:
             (
                 X_n,
@@ -267,9 +292,13 @@ def run(name, alg, sizes=5, step=2, nopt=2 ** 18):
 
     for i in xrange(sizes):
         if args.usm is True:
-            X, arrayPclusters, arrayC, arrayCsum, arrayCnumpoint = gen_data_usm(nopt)
+            X, arrayPclusters, arrayC, arrayCsum, arrayCnumpoint = gen_data_usm(
+                nopt
+            )
         else:
-            X, arrayPclusters, arrayC, arrayCsum, arrayCnumpoint = gen_data_np(nopt)
+            X, arrayPclusters, arrayC, arrayCsum, arrayCnumpoint = gen_data_np(
+                nopt
+            )
 
         iterations = xrange(repeat)
         sys.stdout.flush()

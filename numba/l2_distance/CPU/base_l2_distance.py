@@ -2,15 +2,15 @@
 #
 # SPDX-License-Identifier: MIT
 
-import numpy as np
-import json
 import datetime
+import json
+
+import numpy as np
 
 # import numpy.random_intel as rnd
 import numpy.random as rnd
-
-from dpbench_python.l2_distance.l2_distance_python import l2_distance_python
 from dpbench_datagen.l2_distance import gen_data
+from dpbench_python.l2_distance.l2_distance_python import l2_distance_python
 
 try:
     import itimer as it
@@ -34,7 +34,7 @@ except NameError:
     xrange = range
 
 
-def run(name, alg, sizes=10, step=2, nopt=2 ** 16):
+def run(name, alg, sizes=10, step=2, nopt=2**16):
     import argparse
 
     parser = argparse.ArgumentParser()
@@ -48,7 +48,10 @@ def run(name, alg, sizes=10, step=2, nopt=2 ** 16):
         "--size", required=False, default=nopt, help="Initial data size"
     )
     parser.add_argument(
-        "--repeat", required=False, default=1, help="Iterations inside measured region"
+        "--repeat",
+        required=False,
+        default=1,
+        help="Iterations inside measured region",
     )
     parser.add_argument(
         "--text", required=False, default="", help="Print with each result"
@@ -97,9 +100,17 @@ def run(name, alg, sizes=10, step=2, nopt=2 ** 16):
         # RMS error grows proportional to sqrt(n)
         # absolute(a - b) <= (atol + rtol * absolute(b))
         if np.allclose(n_dis, p_dis, rtol=1e-05 * np.sqrt(nopt)):
-            print("Test succeeded. Python dis: ", p_dis, " Numba dis: ", n_dis, "\n")
+            print(
+                "Test succeeded. Python dis: ",
+                p_dis,
+                " Numba dis: ",
+                n_dis,
+                "\n",
+            )
         else:
-            print("Test failed. Python dis: ", p_dis, " Numba dis: ", n_dis, "\n")
+            print(
+                "Test failed. Python dis: ", p_dis, " Numba dis: ", n_dis, "\n"
+            )
         return
 
     for i in xrange(sizes):

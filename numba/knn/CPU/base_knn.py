@@ -25,18 +25,21 @@
 # *****************************************************************************
 
 import argparse
-import sys, os, json, datetime
-import numpy as np
+import datetime
+import json
+import os
+import sys
 
-from knn_python import knn_python
+import numpy as np
 from dpbench_datagen.knn import (
-    gen_train_data,
-    gen_test_data,
     CLASSES_NUM,
     DATA_DIM,
-    TRAIN_DATA_SIZE,
     N_NEIGHBORS,
+    TRAIN_DATA_SIZE,
+    gen_test_data,
+    gen_train_data,
 )
+from knn_python import knn_python
 
 try:
     import itimer as it
@@ -63,13 +66,22 @@ except NameError:
 ###############################################
 
 
-def run(name, alg, sizes=10, step=2, nopt=2 ** 10):
+def run(name, alg, sizes=10, step=2, nopt=2**10):
     parser = argparse.ArgumentParser()
-    parser.add_argument("--steps", type=int, default=sizes, help="Number of steps")
-    parser.add_argument("--step", type=int, default=step, help="Factor for each step")
-    parser.add_argument("--size", type=int, default=nopt, help="Initial data size")
     parser.add_argument(
-        "--repeat", type=int, default=1, help="Iterations inside measured region"
+        "--steps", type=int, default=sizes, help="Number of steps"
+    )
+    parser.add_argument(
+        "--step", type=int, default=step, help="Factor for each step"
+    )
+    parser.add_argument(
+        "--size", type=int, default=nopt, help="Initial data size"
+    )
+    parser.add_argument(
+        "--repeat",
+        type=int,
+        default=1,
+        help="Iterations inside measured region",
     )
     parser.add_argument("--text", default="", help="Print with each result")
     parser.add_argument(
@@ -108,7 +120,9 @@ def run(name, alg, sizes=10, step=2, nopt=2 ** 10):
         print(y_train[:10])
         print(x_test[:10])
 
-        predictions_p = knn_python(x_train, y_train, x_test, N_NEIGHBORS, CLASSES_NUM)
+        predictions_p = knn_python(
+            x_train, y_train, x_test, N_NEIGHBORS, CLASSES_NUM
+        )
 
         predictions_n = alg(x_train, y_train, x_test, N_NEIGHBORS, CLASSES_NUM)
 
@@ -118,7 +132,9 @@ def run(name, alg, sizes=10, step=2, nopt=2 ** 10):
             print("Test failed\n")
         return
 
-    with open("perf_output.csv", "w", 1) as fd, open("runtimes.csv", "w", 1) as fd2:
+    with open("perf_output.csv", "w", 1) as fd, open(
+        "runtimes.csv", "w", 1
+    ) as fd2:
         for _ in xrange(args.steps):
 
             x_train, y_train = gen_train_data()

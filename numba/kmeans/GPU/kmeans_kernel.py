@@ -1,8 +1,8 @@
-import dpctl
 import base_kmeans
+import dpctl
+import numba_dpex as nb
 import numpy
-import numba_dppy as nb
-from numba_dppy import atomic
+from numba_dpex import atomic
 
 REPEAT = 1
 ITERATIONS = 30
@@ -56,7 +56,13 @@ def copy_arrayC(arrayC, arrayP):
 
 
 def kmeans(
-    arrayP, arrayPcluster, arrayC, arrayCsum, arrayCnumpoint, num_points, num_centroids
+    arrayP,
+    arrayPcluster,
+    arrayC,
+    arrayCsum,
+    arrayCnumpoint,
+    num_points,
+    num_centroids,
 ):
 
     copy_arrayC[num_centroids, nb.DEFAULT_LOCAL_SIZE](arrayC, arrayP)

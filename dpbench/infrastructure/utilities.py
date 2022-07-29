@@ -4,12 +4,12 @@
 # SPDX-License-Identifier: BSD-3-Clause
 
 import argparse
-import numpy as np
 import sqlite3
 import timeit
-
 from numbers import Number
 from typing import Union
+
+import numpy as np
 
 
 # From https://stackoverflow.com/questions/15008758/parsing-boolean-values-with-argparse
@@ -147,7 +147,6 @@ def benchmark(
     output=None,
     verbose=True,
 ):
-
     timeit.template = timeit_tmpl.format(
         init="{init}", setup="{setup}", stmt="{stmt}", output=output
     )

@@ -3,17 +3,22 @@
 # SPDX-License-Identifier: MIT
 
 
-from __future__ import print_function
+import datetime
+import json
+import os
+import sys
+
 import numpy as np
-import sys, json, os, datetime
 from device_selector import get_device_selector
 
 try:
-    import dpctl, dpctl.memory as dpmem, dpctl.tensor as dpt
+    import dpctl
+    import dpctl.memory as dpmem
+    import dpctl.tensor as dpt
 except ImportError:
     pass
-from dpbench_python.blackscholes.bs_python import black_scholes_python
 from dpbench_datagen.blackscholes.generate_data_random import SEED
+from dpbench_python.blackscholes.bs_python import black_scholes_python
 
 try:
     from numpy import erf
@@ -140,7 +145,7 @@ def gen_data_usm(nopt):
 ##############################################
 
 # create input data, call blackscholes computation function (alg)
-def run(name, alg, sizes=14, step=2, nopt=2 ** 15):
+def run(name, alg, sizes=14, step=2, nopt=2**15):
     import argparse
 
     parser = argparse.ArgumentParser()
@@ -154,7 +159,10 @@ def run(name, alg, sizes=14, step=2, nopt=2 ** 15):
         "--size", required=False, default=nopt, help="Initial data size"
     )
     parser.add_argument(
-        "--repeat", required=False, default=1, help="Iterations inside measured region"
+        "--repeat",
+        required=False,
+        default=1,
+        help="Iterations inside measured region",
     )
     parser.add_argument(
         "--text", required=False, default="", help="Print with each result"

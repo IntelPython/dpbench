@@ -4,16 +4,27 @@
 
 from .benchmark import Benchmark
 from .framework import Framework, generate_framework
+from .numba_dpex_framework import NumbaDpexFramework
 from .numba_framework import NumbaFramework
 from .test import Test
-from .utilities import benchmark, validate, time_to_ms, str2bool
+from .utilities import (
+    benchmark,
+    create_connection,
+    str2bool,
+    time_to_ms,
+    validate,
+)
 
+from .dpnp_framework import DpnpFramework  # isort:skip
 
 __all__ = [
     "Benchmark",
     "Framework",
     "NumbaFramework",
+    "NumbaDpexFramework",
+    "DpnpFramework",
     "Test",
+    "create_connection",
     "generate_framework",
     "benchmark",
     "validate",

@@ -3,7 +3,7 @@ import shutil
 import sys
 
 import options
-import run_utils as util
+import utils as util
 
 
 def run_native_optimised_CPU(app_name, cmds, analysis):
@@ -15,7 +15,11 @@ def run_native_optimised_CPU(app_name, cmds, analysis):
     # if advisor run
     # run advisor
     if not util.chdir("CPU"):
-        print("Native Optimized CPU version of " + str(app_name) + " not available")
+        print(
+            "Native Optimized CPU version of "
+            + str(app_name)
+            + " not available"
+        )
         return
 
     # compile
@@ -31,15 +35,21 @@ def run_native_optimised_CPU(app_name, cmds, analysis):
 
     if analysis == options.analysis.vtune or analysis == options.analysis.all:
         shutil.rmtree("vtune_dir", ignore_errors=True)
-        run_cmd = options.VTUNE_THREADING_CMD + cmds["NATIVE_OPTIMISED_VTUNE_CMD"]
+        run_cmd = (
+            options.VTUNE_THREADING_CMD + cmds["NATIVE_OPTIMISED_VTUNE_CMD"]
+        )
         util.run_command(run_cmd, verbose=True)
 
     if analysis == options.analysis.advisor or analysis == options.analysis.all:
         shutil.rmtree("roofline", ignore_errors=True)
-        run_cmd = options.ADVISOR_SURVEY_CMD + cmds["NATIVE_OPTIMISED_ADVISOR_CMD"]
+        run_cmd = (
+            options.ADVISOR_SURVEY_CMD + cmds["NATIVE_OPTIMISED_ADVISOR_CMD"]
+        )
         util.run_command(run_cmd, verbose=True)
 
-        run_cmd = options.ADVISOR_FLOP_CMD + cmds["NATIVE_OPTIMISED_ADVISOR_CMD"]
+        run_cmd = (
+            options.ADVISOR_FLOP_CMD + cmds["NATIVE_OPTIMISED_ADVISOR_CMD"]
+        )
         util.run_command(run_cmd, verbose=True)
 
         run_cmd = options.ADVISOR_ROOFLINE_CMD
@@ -62,7 +72,11 @@ def run_native_optimised_GPU(app_name, cmds, analysis):
     # if advisor run
     # run advisor
     if not util.chdir("GPU"):
-        print("Optimized Native GPU version of " + str(app_name) + " not available")
+        print(
+            "Optimized Native GPU version of "
+            + str(app_name)
+            + " not available"
+        )
         return
 
     # compile
@@ -78,18 +92,27 @@ def run_native_optimised_GPU(app_name, cmds, analysis):
 
     if analysis == options.analysis.vtune or analysis == options.analysis.all:
         shutil.rmtree("vtune_dir", ignore_errors=True)
-        run_cmd = options.VTUNE_GPU_OFFLOAD_CMD + cmds["NATIVE_OPTIMISED_VTUNE_CMD"]
+        run_cmd = (
+            options.VTUNE_GPU_OFFLOAD_CMD + cmds["NATIVE_OPTIMISED_VTUNE_CMD"]
+        )
         util.run_command(run_cmd, verbose=True)
         shutil.rmtree("vtune_hotspots_dir", ignore_errors=True)
-        run_cmd = options.VTUNE_GPU_HOTSPOTS_CMD + cmds["NATIVE_OPTIMISED_VTUNE_CMD"]
+        run_cmd = (
+            options.VTUNE_GPU_HOTSPOTS_CMD + cmds["NATIVE_OPTIMISED_VTUNE_CMD"]
+        )
         util.run_command(run_cmd, verbose=True)
 
     if analysis == options.analysis.advisor or analysis == options.analysis.all:
         shutil.rmtree("roofline", ignore_errors=True)
-        run_cmd = options.ADVISOR_GPU_SURVEY_CMD + cmds["NATIVE_OPTIMISED_ADVISOR_CMD"]
+        run_cmd = (
+            options.ADVISOR_GPU_SURVEY_CMD
+            + cmds["NATIVE_OPTIMISED_ADVISOR_CMD"]
+        )
         util.run_command(run_cmd, verbose=True)
 
-        run_cmd = options.ADVISOR_GPU_FLOP_CMD + cmds["NATIVE_OPTIMISED_ADVISOR_CMD"]
+        run_cmd = (
+            options.ADVISOR_GPU_FLOP_CMD + cmds["NATIVE_OPTIMISED_ADVISOR_CMD"]
+        )
         util.run_command(run_cmd, verbose=True)
 
         run_cmd = options.ADVISOR_GPU_ROOFLINE_CMD
@@ -581,9 +604,9 @@ def check_envvars_tools(opts):
     #         sys.exit()
     #     if opts.platform == options.platform.gpu or opts.platform == options.platform.all:
     #         try:
-    #             from numba import dppy
+    #             from numba import dpex
     #         except:
-    #             print("Numba DPPY not available. Exiting\n")
+    #             print("Numba DPEX not available. Exiting\n")
     #             sys.exit()
 
     from shutil import which
@@ -593,7 +616,9 @@ def check_envvars_tools(opts):
         or opts.impl == options.implementation.all
     ):
         if which("icx") is None:
-            print("ICX compiler is required to run native implementations. Exiting\n")
+            print(
+                "ICX compiler is required to run native implementations. Exiting\n"
+            )
             sys.exit()
 
         if (
@@ -604,7 +629,10 @@ def check_envvars_tools(opts):
                 os.environ["LIBOMPTARGET_DEVICETYPE"] = "gpu"
             print(os.environ["LIBOMPTARGET_DEVICETYPE"])
 
-    if opts.analysis == options.analysis.vtune or opts.analysis == options.analysis.all:
+    if (
+        opts.analysis == options.analysis.vtune
+        or opts.analysis == options.analysis.all
+    ):
         if which("vtune") is None:
             print(
                 "Intel VTune Profiler not available. Install Intel OpenAPI Base Toolkit and run the setvars.sh script in Intel OpenAPI Base Toolkit.\n"

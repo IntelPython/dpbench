@@ -2,14 +2,18 @@
 #
 # SPDX-License-Identifier: MIT
 
+import json
+import os
+import sys
+
 import numpy as np
-import sys, json, os
-import run_utils as utils
+from dpbench_datagen.l2_distance import gen_data, gen_data_to_file
+from dpbench_python.l2_distance.l2_distance_python import l2_distance_python
+
+import utils
 
 # import numpy.random_intel as rnd
 
-from dpbench_python.l2_distance.l2_distance_python import l2_distance_python
-from dpbench_datagen.l2_distance import gen_data, gen_data_to_file
 
 try:
     xrange
@@ -17,7 +21,7 @@ except NameError:
     xrange = range
 
 
-def run(name, sizes=5, step=2, nopt=2 ** 25):
+def run(name, sizes=5, step=2, nopt=2**25):
     import argparse
 
     parser = argparse.ArgumentParser()
@@ -31,7 +35,10 @@ def run(name, sizes=5, step=2, nopt=2 ** 25):
         "--size", required=False, default=nopt, help="Initial data size"
     )
     parser.add_argument(
-        "--repeat", required=False, default=1, help="Iterations inside measured region"
+        "--repeat",
+        required=False,
+        default=1,
+        help="Iterations inside measured region",
     )
     parser.add_argument("-d", type=int, default=1, help="Dimensions")
     parser.add_argument(
@@ -106,9 +113,17 @@ def run(name, sizes=5, step=2, nopt=2 ** 25):
         # RMS error grows proportional to sqrt(n)
         # absolute(a - b) <= (atol + rtol * absolute(b))
         if np.allclose(n_dis, p_dis, rtol=1e-05 * np.sqrt(nopt)):
-            print("Test succeeded. Python dis: ", p_dis, " Native dis: ", n_dis, "\n")
+            print(
+                "Test succeeded. Python dis: ",
+                p_dis,
+                " Native dis: ",
+                n_dis,
+                "\n",
+            )
         else:
-            print("Test failed. Python dis: ", p_dis, " Native dis: ", n_dis, "\n")
+            print(
+                "Test failed. Python dis: ", p_dis, " Native dis: ", n_dis, "\n"
+            )
         return
 
     if os.path.isfile("runtimes.csv"):

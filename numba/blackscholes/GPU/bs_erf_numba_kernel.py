@@ -3,15 +3,19 @@
 # SPDX-License-Identifier: MIT
 
 
-import dpctl
+from math import erf, exp, log, sqrt
+
 import base_bs_erf
+import dpctl
+import numba_dpex as nb
 from device_selector import get_device_selector
-from math import log, sqrt, exp, erf
-import numba_dppy as nb
 
 
 @nb.kernel(
-    access_types={"read_only": ["price", "strike", "t"], "write_only": ["call", "put"]}
+    access_types={
+        "read_only": ["price", "strike", "t"],
+        "write_only": ["call", "put"],
+    }
 )
 def black_scholes(nopt, price, strike, t, rate, vol, call, put):
     mr = -rate

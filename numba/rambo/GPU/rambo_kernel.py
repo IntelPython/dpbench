@@ -1,12 +1,13 @@
-import numpy
 import math
-import dpctl
-import numba
-import base_rambo
-from device_selector import get_device_selector
 
-from numba_dppy import kernel, get_global_id, atomic, DEFAULT_LOCAL_SIZE
-import numba_dppy
+import base_rambo
+import dpctl
+import numba_dpex
+import numpy
+from device_selector import get_device_selector
+from numba_dpex import DEFAULT_LOCAL_SIZE, atomic, get_global_id, kernel
+
+import numba
 
 
 @numba.njit()
@@ -27,7 +28,7 @@ def gen_rand_data(nevts, nout):
 
 @kernel
 def get_output_mom2(C1, F1, Q1, output, nout):
-    i = numba_dppy.get_global_id(0)
+    i = numba_dpex.get_global_id(0)
     for j in range(nout):
         C = 2.0 * C1[i, j] - 1.0
         S = math.sqrt(1 - C * C)

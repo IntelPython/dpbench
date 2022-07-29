@@ -24,21 +24,20 @@
 # EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 # *****************************************************************************
 
+import math
+
 import base_knn
 import dpctl
-import numba_dppy
-import math
-import numpy as np
-
 import dpctl.tensor as dpt
-
+import numba_dpex
+import numpy as np
 
 # @numba.jit(nopython=True)
 # def euclidean_dist(x1, x2):
 #     return np.linalg.norm(x1-x2)
 
 
-@numba_dppy.func
+@numba_dpex.func
 def euclidean_dist(x1, x2, data_dim):
     distance = 0
 
@@ -46,11 +45,11 @@ def euclidean_dist(x1, x2, data_dim):
         diff = x1[i] - x2[i]
         distance += diff * diff
 
-    result = distance ** 0.5
+    result = distance**0.5
     return result
 
 
-@numba_dppy.func
+@numba_dpex.func
 def push_queue(queue_neighbors, new_distance, index=4):  # 4: k-1
     while index > 0 and new_distance[0] < queue_neighbors[index - 1, 0]:
         queue_neighbors[index] = queue_neighbors[index - 1]
@@ -58,13 +57,13 @@ def push_queue(queue_neighbors, new_distance, index=4):  # 4: k-1
         queue_neighbors[index] = new_distance
 
 
-@numba_dppy.func
+@numba_dpex.func
 def sort_queue(queue_neighbors):
     for i in range(len(queue_neighbors)):
         push_queue(queue_neighbors, queue_neighbors[i], i)
 
 
-@numba_dppy.kernel(
+@numba_dpex.kernel(
     access_types={
         "read_only": ["train", "train_labels", "test", "votes_to_classes_lst"],
         "write_only": ["predictions"],
@@ -81,8 +80,8 @@ def run_knn_kernel(
     votes_to_classes_lst,
     data_dim,
 ):
-    i = numba_dppy.get_global_id(0)
-    queue_neighbors = numba_dppy.private.array(shape=(5, 2), dtype=np.float64)
+    i = numba_dpex.get_global_id(0)
+    queue_neighbors = numba_dpex.private.array(shape=(5, 2), dtype=np.float64)
 
     for j in range(k):
         x1 = train[j]
@@ -120,7 +119,7 @@ def run_knn_kernel(
         x2 = test[i]
 
         distance = 0.0
-        for jj in range(base_knn.DATA_DIM):
+        for jj in range(data_dim):
             diff = x1[jj] - x2[jj]
             distance += diff * diff
         dist = math.sqrt(distance)
@@ -171,7 +170,7 @@ def run_knn(
     data_dim,
 ):
     with dpctl.device_context(base_knn.get_device_selector()) as gpu_queue:
-        run_knn_kernel[test_size, numba_dppy.DEFAULT_LOCAL_SIZE](
+        run_knn_kernel[test_size, numba_dpex.DEFAULT_LOCAL_SIZE](
             train,
             train_labels,
             test,

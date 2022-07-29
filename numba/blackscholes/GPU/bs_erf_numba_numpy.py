@@ -2,12 +2,15 @@
 #
 # SPDX-License-Identifier: MIT
 
-import dpctl
-import base_bs_erf
-from device_selector import get_device_selector
-from numpy import log, exp, sqrt
 from math import erf
+
+import base_bs_erf
+import dpctl
+from device_selector import get_device_selector
+from numpy import exp, log, sqrt
+
 import numba as nb
+
 
 # Numba does know erf function from numpy or scipy
 @nb.vectorize(nopython=True)

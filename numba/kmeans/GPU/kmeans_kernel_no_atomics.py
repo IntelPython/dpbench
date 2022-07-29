@@ -1,7 +1,7 @@
-import dpctl
 import base_kmeans
+import dpctl
+import numba_dpex
 import numpy
-import numba_dppy
 from device_selector import get_device_selector
 
 REPEAT = 1
@@ -9,9 +9,9 @@ REPEAT = 1
 ITERATIONS = 30
 
 
-@numba_dppy.kernel
+@numba_dpex.kernel
 def groupByCluster(arrayP, arrayPcluster, arrayC, num_points, num_centroids):
-    idx = numba_dppy.get_global_id(0)
+    idx = numba_dpex.get_global_id(0)
     if idx < num_points:
         minor_distance = -1
         for i in range(num_centroids):
@@ -23,15 +23,17 @@ def groupByCluster(arrayP, arrayPcluster, arrayC, num_points, num_centroids):
                 arrayPcluster[idx] = i
 
 
-@numba_dppy.kernel
+@numba_dpex.kernel
 def calCentroidsSum1(arrayCsum, arrayCnumpoint):
-    i = numba_dppy.get_global_id(0)
+    i = numba_dpex.get_global_id(0)
     arrayCsum[i, 0] = 0
     arrayCsum[i, 1] = 0
     arrayCnumpoint[i] = 0
 
 
-def calCentroidsSum2(arrayP, arrayPcluster, arrayCsum, arrayCnumpoint, num_points):
+def calCentroidsSum2(
+    arrayP, arrayPcluster, arrayCsum, arrayCnumpoint, num_points
+):
     for i in range(num_points):
         ci = arrayPcluster[i]
         arrayCsum[ci, 0] += arrayP[i, 0]
@@ -39,31 +41,39 @@ def calCentroidsSum2(arrayP, arrayPcluster, arrayCsum, arrayCnumpoint, num_point
         arrayCnumpoint[ci] += 1
 
 
-@numba_dppy.kernel
+@numba_dpex.kernel
 def updateCentroids(arrayC, arrayCsum, arrayCnumpoint, num_centroids):
-    i = numba_dppy.get_global_id(0)
+    i = numba_dpex.get_global_id(0)
     arrayC[i, 0] = arrayCsum[i, 0] / arrayCnumpoint[i]
     arrayC[i, 1] = arrayCsum[i, 1] / arrayCnumpoint[i]
 
 
 def kmeans(
-    arrayP, arrayPcluster, arrayC, arrayCsum, arrayCnumpoint, num_points, num_centroids
+    arrayP,
+    arrayPcluster,
+    arrayC,
+    arrayCsum,
+    arrayCnumpoint,
+    num_points,
+    num_centroids,
 ):
 
     for i in range(ITERATIONS):
         with dpctl.device_context(get_device_selector(is_gpu=True)):
-            groupByCluster[num_points, numba_dppy.DEFAULT_LOCAL_SIZE](
+            groupByCluster[num_points, numba_dpex.DEFAULT_LOCAL_SIZE](
                 arrayP, arrayPcluster, arrayC, num_points, num_centroids
             )
 
-            calCentroidsSum1[num_centroids, numba_dppy.DEFAULT_LOCAL_SIZE](
+            calCentroidsSum1[num_centroids, numba_dpex.DEFAULT_LOCAL_SIZE](
                 arrayCsum, arrayCnumpoint
             )
 
-        calCentroidsSum2(arrayP, arrayPcluster, arrayCsum, arrayCnumpoint, num_points)
+        calCentroidsSum2(
+            arrayP, arrayPcluster, arrayCsum, arrayCnumpoint, num_points
+        )
 
         with dpctl.device_context("opencl:gpu"):
-            updateCentroids[num_centroids, numba_dppy.DEFAULT_LOCAL_SIZE](
+            updateCentroids[num_centroids, numba_dpex.DEFAULT_LOCAL_SIZE](
                 arrayC, arrayCsum, arrayCnumpoint, num_centroids
             )
 

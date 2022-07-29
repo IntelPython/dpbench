@@ -1,10 +1,9 @@
-import numpy
-import numba
-import dpctl
-
 import base_rambo
+import dpctl
+import numpy
 from device_selector import get_device_selector
 
+import numba
 import numba as nb
 
 __njit = nb.jit(nopython=True, parallel=False)

@@ -1,11 +1,11 @@
 import base_gpairs
-import numpy as np
-import gaussian_weighted_pair_counts as gwpc
-import dpctl, dpctl.tensor as dpt
-from device_selector import get_device_selector
 import dpctl
-from numba_dppy import kernel, atomic, DEFAULT_LOCAL_SIZE
-import numba_dppy
+import dpctl.tensor as dpt
+import gaussian_weighted_pair_counts as gwpc
+import numba_dpex
+import numpy as np
+from device_selector import get_device_selector
+from numba_dpex import DEFAULT_LOCAL_SIZE, atomic, kernel
 
 atomic_add = atomic.add
 
@@ -18,8 +18,8 @@ def count_weighted_pairs_3d_intel(
     by a distance less than r, for each r**2 in the input rbins_squared.
     """
 
-    start = numba_dppy.get_global_id(0)
-    stride = numba_dppy.get_global_size(0)
+    start = numba_dpex.get_global_id(0)
+    stride = numba_dpex.get_global_size(0)
 
     n1 = x1.shape[0]
     n2 = x2.shape[0]
@@ -57,7 +57,7 @@ def count_weighted_pairs_3d_intel_ver2(
     by a distance less than r, for each r**2 in the input rbins_squared.
     """
 
-    i = numba_dppy.get_global_id(0)
+    i = numba_dpex.get_global_id(0)
     nbins = rbins_squared.shape[0]
     n2 = x2.shape[0]
 
@@ -93,7 +93,18 @@ def ceiling_quotient(n, m):
 
 
 def count_weighted_pairs_3d_intel_no_slm(
-    n, nbins, d_x1, d_y1, d_z1, d_w1, d_x2, d_y2, d_z2, d_w2, d_rbins_squared, d_result
+    n,
+    nbins,
+    d_x1,
+    d_y1,
+    d_z1,
+    d_w1,
+    d_x2,
+    d_y2,
+    d_z2,
+    d_w2,
+    d_rbins_squared,
+    d_result,
 ):
     n_wi = 20
     private_hist_size = 16
@@ -109,7 +120,9 @@ def count_weighted_pairs_3d_intel_no_slm(
     gwsRange = n_groups0 * lws0, n_groups1 * lws1
     lwsRange = lws0, lws1
 
-    slm_hist_size = ceiling_quotient(nbins, private_hist_size) * private_hist_size
+    slm_hist_size = (
+        ceiling_quotient(nbins, private_hist_size) * private_hist_size
+    )
 
     with dpctl.device_context(base_gpairs.get_device_selector(is_gpu=True)):
         gwpc.count_weighted_pairs_3d_intel_no_slm_ker[gwsRange, lwsRange](
@@ -131,7 +144,18 @@ def count_weighted_pairs_3d_intel_no_slm(
 
 
 def count_weighted_pairs_3d_intel_orig(
-    n, nbins, d_x1, d_y1, d_z1, d_w1, d_x2, d_y2, d_z2, d_w2, d_rbins_squared, d_result
+    n,
+    nbins,
+    d_x1,
+    d_y1,
+    d_z1,
+    d_w1,
+    d_x2,
+    d_y2,
+    d_z2,
+    d_w2,
+    d_rbins_squared,
+    d_result,
 ):
 
     # create tmp result on device
@@ -162,7 +186,18 @@ def count_weighted_pairs_3d_intel_orig(
 
 
 def run_gpairs(
-    n, nbins, d_x1, d_y1, d_z1, d_w1, d_x2, d_y2, d_z2, d_w2, d_rbins_squared, d_result
+    n,
+    nbins,
+    d_x1,
+    d_y1,
+    d_z1,
+    d_w1,
+    d_x2,
+    d_y2,
+    d_z2,
+    d_w2,
+    d_rbins_squared,
+    d_result,
 ):
     count_weighted_pairs_3d_intel_no_slm(
         n,
@@ -180,4 +215,4 @@ def run_gpairs(
     )
 
 
-base_gpairs.run("Gpairs Dppy kernel", run_gpairs)
+base_gpairs.run("Gpairs Dpex kernel", run_gpairs)

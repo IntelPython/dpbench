@@ -15,7 +15,7 @@ The primary interface to running the benchmarks is `automate_run.py` script. It 
 * _-r, --run_ : "execute" the benchmark/s or "plot" performance data to generate graphs (Default: "all" if option unspecified. Runs both)
 * _-ws_ : name/s of benchmark/s to execute or "all" to execute every benchmark (Default: "all" if option unspecified)
 * _-i, --impl_ : execute "native" or "numba" or "dpnp" or "native_dpcpp" implementation (Default: "all" if option unspecified. Runs both implementations)
-* _-k_ : execute dppy.kernel implementation if available. This option can be used only if "-i" is set to "numba"
+* _-k_ : execute dpex.kernel implementation if available. This option can be used only if "-i" is set to "numba"
 * _-p, --platform_ : execute "cpu" or "gpu" implementation (Default: "all" if option unspecified. Runs both)
 * _-a, --analysis_ : selects the type of execution. Currently we support four analysis options. "test" runs the benchmark with the smallest input and is suitable for testing the functionality of the benchmark. "perf" runs the benchmark on varying inputs and generates performance data. "vtune" and "advisor" run the benchmark with Intel VTune and Intel Advisor profiling tools
 

@@ -51,7 +51,7 @@ def knn_python(
             for jj in range(data_dim):
                 diff = x1[jj] - x2[jj]
                 distance += diff * diff
-            dist = distance ** 0.5
+            dist = distance**0.5
 
             queue_neighbors[j, 0] = dist
             queue_neighbors[j, 1] = train_labels[j]
@@ -81,7 +81,7 @@ def knn_python(
             for jj in range(data_dim):
                 diff = x1[jj] - x2[jj]
                 distance += diff * diff
-            dist = distance ** 0.5
+            dist = distance**0.5
 
             if dist < queue_neighbors[k - 1][0]:
                 # queue_neighbors[k - 1] = new_neighbor
@@ -92,7 +92,9 @@ def knn_python(
                 new_neighbor_label = queue_neighbors[k - 1, 1]
                 index = k - 1
 
-                while index > 0 and new_distance < queue_neighbors[index - 1, 0]:
+                while (
+                    index > 0 and new_distance < queue_neighbors[index - 1, 0]
+                ):
                     queue_neighbors[index, 0] = queue_neighbors[index - 1, 0]
                     queue_neighbors[index, 1] = queue_neighbors[index - 1, 1]
 

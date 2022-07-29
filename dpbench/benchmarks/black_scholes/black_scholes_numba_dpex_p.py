@@ -3,16 +3,18 @@
 # SPDX-License-Identifier: Apache 2.0
 
 
-import numba as nb
-from math import log, sqrt, exp, erf
+from math import erf, exp, log, sqrt
+
+import numba
 
 
-@nb.njit(parallel=False, fastmath=True)
-def black_scholes(nopt, price, strike, t, rate, vol, call, put):
+# blackscholes implemented as a parallel loop using numba.prange
+@numba.njit(parallel=True, fastmath=True)
+def black_scholes_kernel(nopt, price, strike, t, rate, vol, call, put):
     mr = -rate
     sig_sig_two = vol * vol * 2
 
-    for i in nb.prange(nopt):
+    for i in numba.prange(nopt):
         P = price[i]
         S = strike[i]
         T = t[i]
@@ -35,3 +37,7 @@ def black_scholes(nopt, price, strike, t, rate, vol, call, put):
         r = P * d1 - Se * d2
         call[i] = r
         put[i] = r - P + Se
+
+
+def black_scholes(nopt, price, strike, t, rate, vol, call, put):
+    black_scholes_kernel(nopt, price, strike, t, rate, vol, call, put)

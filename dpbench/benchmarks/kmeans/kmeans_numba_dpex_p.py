@@ -54,6 +54,13 @@ def updateCentroids(arrayC, arrayCsum, arrayCnumpoint, num_centroids):
         arrayC[i, 1] = arrayCsum[i, 1] / arrayCnumpoint[i]
 
 
+@__njit
+def copy_arrayC(arrayC, arrayP, num_centroids):
+    for i in numba.prange(num_centroids):
+        arrayC[i, 0] = arrayP[i, 0]
+        arrayC[i, 1] = arrayP[i, 1]
+
+
 def kmeans_numba(
     arrayP,
     arrayPcluster,
@@ -94,9 +101,7 @@ def kmeans(
 ):
 
     for i in numba.prange(REPEAT):
-        for i1 in range(NUMBER_OF_CENTROIDS):
-            arrayC[i1, 0] = arrayP[i1, 0]
-            arrayC[i1, 1] = arrayP[i1, 1]
+        copy_arrayC(arrayC, arrayP, NUMBER_OF_CENTROIDS)
 
         arrayC, arrayCsum, arrayCnumpoint = kmeans_numba(
             arrayP,

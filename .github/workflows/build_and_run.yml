@@ -39,7 +39,7 @@ jobs:
       - name: Install dpbench dependencies
         shell: bash -l {0}
         run: |
-          conda install numpy numba tbb=2021.6.0 llvm-spirv -c intel
+          conda install numpy numba tbb=2021.6.0 llvm-spirv spirv-tools -c intel
           conda install scikit-learn
           conda install -c dppy/label/dev numba-dpex
           conda list

@@ -6,7 +6,7 @@ import numpy as np
 
 import numba as nb
 
-# This implementation is numba prange version without atomics.
+# This implementation is numba dpex prange version without atomics.
 
 
 @nb.njit(parallel=True, fastmath=True)

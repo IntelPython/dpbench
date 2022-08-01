@@ -7,6 +7,8 @@ import math
 import numba_dpex
 import numpy as np
 
+# This implementation is numba dpex kernel version with atomics.
+
 
 @numba_dpex.kernel
 def count_weighted_pairs_3d_intel_no_slm_ker(

@@ -10,28 +10,28 @@
         "parameters": {
             "S": {
                 "npoints": 1048576,
-		"dims": 1,
+                "dims": 1,
                 "seed": 7777777,
-		"d":0
+                "d":0
             },
             "M": {
                 "npoints": 268435456,
-		"dims": 1,
+                "dims": 1,
                 "seed": 7777777,
-		"d":0
+                "d":0
             },
             "L": {
                 "npoints": 536870912,
-		"dims": 1,
+                "dims": 1,
                 "seed": 7777777,
-		"d":0
+                "d":0
             }
         },
         "init": {
             "func_name": "initialize",
             "input_args": [
                 "npoints",
-		"dims",
+	            "dims",
                 "seed"
             ],
             "output_args": [
@@ -42,7 +42,7 @@
         "input_args": [
             "a",
             "b",
-	    "d"
+            "d"
         ],
         "array_args": [
             "a",

@@ -18,5 +18,5 @@ def l2_distance_kernel(a, b):
     return d
 
 
-def l2_distance(a, b, _):
+def l2_distance(a, b):
     return l2_distance_kernel(a, b)

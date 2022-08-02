@@ -5,7 +5,7 @@
 import numpy as np
 
 
-def l2_distance(a, b, d):
+def l2_distance(a, b):
     sub = a - b
     sq = np.square(sub)
     sum = np.sum(sq)

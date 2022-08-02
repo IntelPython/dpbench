@@ -8,7 +8,7 @@ import numba as nb
 
 
 @nb.njit(parallel=False, fastmath=True)
-def l2_distance(a, b, d):
+def l2_distance(a, b):
     sub = a - b
     sq = np.square(sub)
     sum = np.sum(sq)

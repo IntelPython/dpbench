@@ -3,10 +3,13 @@
 # SPDX-License-Identifier: Apache-2.0
 
 import math
+
 import numba_dpex
+import numpy as np
 from numba_dpex import DEFAULT_LOCAL_SIZE, kernel
 
 atomic_add = numba_dpex.atomic.add
+
 
 @kernel(access_types={"read_only": ["a", "b"], "write_only": ["c"]})
 def l2_distance_kernel(a, b, c):
@@ -17,9 +20,9 @@ def l2_distance_kernel(a, b, c):
     atomic_add(c, 0, sq)
 
 
-
-def l2_distance(a, b, distance):
+def l2_distance(a, b):
+    distance_np = np.asarray([0.0]).astype(np.float64)
     l2_distance_kernel[(a.shape[0], a.shape[1]), DEFAULT_LOCAL_SIZE](
-        a, b, distance
+        a, b, distance_np
     )
-    return math.sqrt(distance)
+    return math.sqrt(distance_np)

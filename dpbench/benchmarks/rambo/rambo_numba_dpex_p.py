@@ -4,8 +4,8 @@
 
 
 import numpy
-import numba
 
+import numba
 
 
 def gen_rand_data(nevts, nout):
@@ -42,7 +42,7 @@ def get_output_mom2(C1, F1, Q1, nevts, nout):
     return output
 
 
-def generate_points( nevts, nout):
+def generate_points(nevts, nout):
     C1, F1, Q1 = gen_rand_data(nevts, nout)
 
     output_particles = get_output_mom2(C1, F1, Q1, nevts, nout)

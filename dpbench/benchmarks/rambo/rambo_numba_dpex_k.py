@@ -3,10 +3,10 @@
 # SPDX-License-Identifier: Apache-2.0
 
 import math
+
 import numba_dpex
 import numpy
 from numba_dpex import DEFAULT_LOCAL_SIZE, kernel
-
 
 
 def gen_rand_data(nevts, nout):
@@ -57,4 +57,3 @@ def rambo(evt_per_calc):
     for i in range(nruns):
         e = GeneratePoints(evt_per_calc, ng)
     return e
-

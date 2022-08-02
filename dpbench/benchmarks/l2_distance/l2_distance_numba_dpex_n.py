@@ -6,10 +6,8 @@ import numpy as np
 
 import numba as nb
 
-__njit = nb.njit(parallel=False, fastmath=True)
 
-
-@__njit
+@nb.njit(parallel=False, fastmath=True)
 def l2_distance_kernel(a, b):
     sub = a - b
     sq = np.square(sub)

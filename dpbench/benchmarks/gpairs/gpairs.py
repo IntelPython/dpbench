@@ -17,17 +17,17 @@ def initialize(nopt, seed, nbins, rmax, rmin):
     import numpy.random as default_rng
 
     default_rng.seed(seed)
-    dtype = np.float64
-    x1 = np.random.randn(nopt).astype(np.float32)
-    y1 = np.random.randn(nopt).astype(np.float32)
-    z1 = np.random.randn(nopt).astype(np.float32)
-    w1 = np.random.rand(nopt).astype(np.float32)
+    dtype = np.float32
+    x1 = np.random.randn(nopt).astype(dtype)
+    y1 = np.random.randn(nopt).astype(dtype)
+    z1 = np.random.randn(nopt).astype(dtype)
+    w1 = np.random.rand(nopt).astype(dtype)
     w1 = w1 / np.sum(w1)
 
-    x2 = np.random.randn(nopt).astype(np.float32)
-    y2 = np.random.randn(nopt).astype(np.float32)
-    z2 = np.random.randn(nopt).astype(np.float32)
-    w2 = np.random.rand(nopt).astype(np.float32)
+    x2 = np.random.randn(nopt).astype(dtype)
+    y2 = np.random.randn(nopt).astype(dtype)
+    z2 = np.random.randn(nopt).astype(dtype)
+    w2 = np.random.rand(nopt).astype(dtype)
     w2 = w2 / np.sum(w2)
 
     rbins = _generate_rbins(dtype=dtype, rmin=rmin, rmax=rmax, nbins=nbins)

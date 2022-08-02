@@ -99,13 +99,13 @@ def run_benchmarks(
                         validate=validate,
                         timeout=timeout,
                     )
-                except Exception:
+                except Exception as e:
                     warnings.warn(
                         "ERROR: Failed to test the "
                         + fw.fname
                         + " implementation for "
                         + b
-                        + "."
+                        + ". The error is {}".format(e)
                     )
     print("")
     print("===============================================================")

@@ -1,0 +1,27 @@
+{
+    "benchmark": {
+        "name": "Rambo",
+        "short_name": "Rambo",
+        "relative_path": "rambo",
+        "module_name": "rambo",
+        "func_name": "rambo",
+        "kind": "microbenchmark",
+        "domain": "Particles Physics",
+        "parameters": {
+            "S": {
+                "evts": 1048576
+            },
+            "M": {
+                "evts": 8388608
+            },
+            "L": {
+                "evts": 16777216
+            }
+        },
+        "input_args": [
+            "evts"
+        ],
+        "array_args": [
+        ]
+    }
+}

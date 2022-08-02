@@ -6,7 +6,7 @@ import numba as nb
 
 
 @nb.njit(parallel=False, fastmath=True)
-def gpairs(x1, y1, z1, w1, x2, y2, z2, w2, rbins, results):
+def gpairs(nopt, nbins, x1, y1, z1, w1, x2, y2, z2, w2, rbins, results):
 
     n1 = x1.shape[0]
     n2 = x2.shape[0]

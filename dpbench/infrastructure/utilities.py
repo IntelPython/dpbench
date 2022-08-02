@@ -31,10 +31,12 @@ def time_to_ms(raw: float) -> int:
 def relative_error(
     ref: Union[Number, np.ndarray], val: Union[Number, np.ndarray]
 ) -> float:
+    if np.np.linalg.norm(ref) == 0.0:
+        return 0.0
     return np.linalg.norm(ref - val) / np.linalg.norm(ref)
 
 
-# Taken from shttps://www.sqlitetutorial.net/sqlite-python/create-tables/
+# Taken from https://www.sqlitetutorial.net/sqlite-python/create-tables/
 def create_connection(db_file) -> sqlite3.Connection:
     """create a database connection to the SQLite database
         specified by db_file

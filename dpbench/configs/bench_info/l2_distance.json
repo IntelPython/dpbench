@@ -1,0 +1,52 @@
+{
+    "benchmark": {
+        "name": "L2 Computation",
+        "short_name": "l2-distance",
+        "relative_path": "l2_distance",
+        "module_name": "l2_distance",
+        "func_name": "l2_distance",
+        "kind": "microbenchmark",
+        "domain": "Distance Compute",
+        "parameters": {
+            "S": {
+                "npoints": 1048576,
+		"dims": 1,
+                "seed": 7777777,
+		"d":0
+            },
+            "M": {
+                "npoints": 268435456,
+		"dims": 1,
+                "seed": 7777777,
+		"d":0
+            },
+            "L": {
+                "npoints": 536870912,
+		"dims": 1,
+                "seed": 7777777,
+		"d":0
+            }
+        },
+        "init": {
+            "func_name": "initialize",
+            "input_args": [
+                "npoints",
+		"dims",
+                "seed"
+            ],
+            "output_args": [
+                "a",
+                "b"
+            ]
+        },
+        "input_args": [
+            "a",
+            "b",
+	    "d"
+        ],
+        "array_args": [
+            "a",
+            "b"
+        ]
+    }
+}

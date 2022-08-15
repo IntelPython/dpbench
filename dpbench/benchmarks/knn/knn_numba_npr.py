@@ -4,9 +4,8 @@
 
 import math
 
-import numpy as np
-
 import numba
+import numpy as np
 
 
 @numba.njit(parallel=True, fastmath=True)

@@ -2,9 +2,8 @@
 #
 # SPDX-License-Identifier: Apache-2.0
 
-import numpy
-
 import numba
+import numpy
 
 REPEAT = 1
 

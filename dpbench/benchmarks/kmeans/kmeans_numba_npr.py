@@ -2,9 +2,8 @@
 #
 # SPDX-License-Identifier: Apache-2.0
 
-import numpy
-
 import numba as nb
+import numpy
 
 
 @nb.jit(nopython=True, parallel=True, fastmath=True)

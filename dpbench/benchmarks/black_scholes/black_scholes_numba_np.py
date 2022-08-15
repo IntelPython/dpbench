@@ -5,9 +5,8 @@
 
 from math import erf
 
-from numpy import exp, log, sqrt
-
 import numba as nb
+from numpy import exp, log, sqrt
 
 
 @nb.vectorize(nopython=True)

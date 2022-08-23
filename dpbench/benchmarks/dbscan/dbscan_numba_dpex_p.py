@@ -2,9 +2,8 @@
 #
 # SPDX-License-Identifier: Apache 2.0
 
-from numba.experimental import jitclass
-
 from numba import int64
+from numba.experimental import jitclass
 
 queue_spec = [
     ("capacity", int64),
@@ -51,9 +50,8 @@ class Queue:
         return self.tail - self.head
 
 
-import numpy as np
-
 import numba as nb
+import numpy as np
 from numba import jit, prange
 
 NOISE = -1

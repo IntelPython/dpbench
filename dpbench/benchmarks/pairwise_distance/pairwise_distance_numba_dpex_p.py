@@ -2,9 +2,8 @@
 #
 # SPDX-License-Identifier: Apache-2.0
 
-import numpy as np
-
 import numba as nb
+import numpy as np
 
 
 # Naieve pairwise distance impl - take an array representing M points in N dimensions, and return the M x M matrix of Euclidean distances

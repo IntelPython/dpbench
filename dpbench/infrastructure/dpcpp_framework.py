@@ -3,7 +3,7 @@
 # SPDX-License-Identifier: BSD-3-Clause
 
 import pathlib
-import os
+import subprocess
 from typing import Any, Callable, Dict, Sequence, Tuple
 
 from dpbench.infrastructure import Benchmark, Framework
@@ -30,5 +30,5 @@ class DpcppFramework(Framework):
 
     def version(self) -> str:
         """Returns the framework version."""
-        #hack the version 
-        return os.system("dpcpp --version | grep -Po '\(.*?\)' | grep '\.'");
+        #hack the dpcpp version, need validate dpcpp available first 
+        return subprocess.check_output("dpcpp --version | grep -Po '\(.*?\)' | grep '\.'", shell=True)

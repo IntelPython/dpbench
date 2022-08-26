@@ -4,7 +4,7 @@
         "short_name": "kmeans",
         "relative_path": "kmeans",
         "module_name": "kmeans",
-        "func_name": "kmeans",
+        "func_name": "kmeans1",
         "kind": "microbenchmark",
         "domain": "Machine Learning",
         "parameters": {

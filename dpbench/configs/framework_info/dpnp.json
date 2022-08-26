@@ -2,7 +2,7 @@
     "framework": {
         "simple_name": "dpnp",
         "full_name": "dpnp",
-        "prefix": "dp",
+        "prefix": "dpcpp",
         "postfix": "dpnp",
         "class": "Framework",
         "arch": "cpu"

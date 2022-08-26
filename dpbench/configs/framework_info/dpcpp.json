@@ -1,0 +1,10 @@
+{
+    "framework": {
+        "simple_name": "dpcpp",
+        "full_name": "Dpcpp",
+        "prefix": "dp",
+        "postfix": "dpcpp",
+        "class": "DpcppFramework",
+        "arch": "gpu"
+    }
+}

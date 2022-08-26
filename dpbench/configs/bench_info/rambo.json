@@ -4,7 +4,7 @@
         "short_name": "Rambo",
         "relative_path": "rambo",
         "module_name": "rambo",
-        "func_name": "rambo",
+        "func_name": "rambo1",
         "kind": "microbenchmark",
         "domain": "Particles Physics",
         "parameters": {

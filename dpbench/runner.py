@@ -71,8 +71,10 @@ def run_benchmarks(
             elif "_numpy" in bimpl:
                 fws.add(dpbi.Framework("numpy"))
             elif "_dpex" in bimpl:
-                fws.add(dpbi.NumbaDpexFramework("numba_dpex"))
+                #fws.add(dpbi.NumbaDpexFramework("numba_dpex"))
                 pass
+            elif "_dpcpp" in bimpl:
+                fws.add(dpbi.DpcppFramework("dpcpp"))
             elif "_dpnp" in bimpl:
                 # fws.append(dpbi.DpnpFramework("dpnp"))
                 pass

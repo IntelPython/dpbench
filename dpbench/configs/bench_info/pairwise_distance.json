@@ -4,7 +4,7 @@
         "short_name": "pairwise-distance",
         "relative_path": "pairwise_distance",
         "module_name": "pairwise_distance",
-        "func_name": "pairwise_distance",
+        "func_name": "pairwise_distance1",
         "kind": "microbenchmark",
         "domain": "Distance Compute",
         "parameters": {

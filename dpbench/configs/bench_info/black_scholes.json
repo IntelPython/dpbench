@@ -4,7 +4,7 @@
         "short_name": "black-scholes",
         "relative_path": "black_scholes",
         "module_name": "black_scholes",
-        "func_name": "black_scholes",
+        "func_name": "black_scholes1",
         "kind": "microbenchmark",
         "domain": "Finance",
         "parameters": {

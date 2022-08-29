@@ -14,6 +14,9 @@ from .utilities import (
     str2bool,
     time_to_ms,
     validate,
+    mkdir,
+    chdir,
+    run_command,
 )
 
 from .dpnp_framework import DpnpFramework  # isort:skip
@@ -32,4 +35,7 @@ __all__ = [
     "validate",
     "time_to_ms",
     "str2bool",
+    "mkdir",
+    "chdir",
+    "run_command",
 ]

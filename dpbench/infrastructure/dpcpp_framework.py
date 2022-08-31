@@ -33,16 +33,17 @@ class DpcppFramework(Framework):
 
         def _validator(ref, test):
             import dpctl.tensor as dpt
+
             np_test = []
             for t in test:
                 try:
-                    np_test.append(dpt.asnumpy(test))
+                    np_test.append(dpt.asnumpy(t))
                 except TypeError as e:
                     print(
                         "Failed to validate dpcpp results. Could not convert"
                         + " dpcpp output to numpy ndarray"
                     )
-                    return
+                    return False
             return utilities.validate(ref, np_test, framework=self.fname)
 
         return _validator

@@ -6,10 +6,12 @@ from .runner import (
     all_benchmarks_passed_validation,
     list_available_benchmarks,
     run_benchmarks,
+    run_benchmark,
 )
 
 __all__ = [
     "all_benchmarks_passed_validation",
     "run_benchmarks",
     "list_available_benchmarks",
+    "run_benchmark",
 ]

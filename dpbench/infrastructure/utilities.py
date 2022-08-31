@@ -140,6 +140,7 @@ def inner(_it, _timer{init}):
     return _t1 - _t0, {output}
 """
 
+
 def benchmark(
     stmt,
     setup="pass",
@@ -192,6 +193,7 @@ def validate(ref, val, framework="Unknown"):
         print("{} did not validate!".format(framework))
     return valid
 
+
 ########## utility functions ##########
 
 
@@ -208,7 +210,6 @@ def chdir(path):
         return True
     else:
         return False
-
 
 
 def run_command(

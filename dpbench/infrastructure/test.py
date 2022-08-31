@@ -75,7 +75,7 @@ class Test(object):
         :param repeat: The number of repetitions.
         """
         print(
-            "***** Testing {f} with {b} on the {p} dataset *****".format(
+            "***** Testing the {b} implementation using {f} on the {p} dataset *****".format(
                 b=self.bench.bname, f=self.frmwrk.info["full_name"], p=preset
             )
         )
@@ -142,9 +142,11 @@ class Test(object):
             valid = True
             if validate:
                 try:
-                    valid = util.validate(
-                        np_out, frmwrk_out, self.frmwrk.info["full_name"]
-                    )
+                    validator_fn = self.frmwrk.validator()
+                    print(frmwrk_out)
+                    print(np_out)
+                    validator_fn(np_out, frmwrk_out)
+
                     if valid:
                         print(
                             "{} - {} - validation: SUCCESS".format(

@@ -97,8 +97,9 @@ class NumbaDpexFramework(Framework):
         """Returns a dictionary any modules and methods needed for running
         a benchmark."""
         import dpctl
-        #check if dpctl is loaded, if yes, why need return?
-        modulename='dpctl'
+
+        # check if dpctl is loaded, if yes, why need return?
+        modulename = "dpctl"
         if modulename not in sys.modules:
             print("You have not imported the {} module".format(modulename))
         return {"dpctl": dpctl}

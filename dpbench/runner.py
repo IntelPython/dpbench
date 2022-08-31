@@ -15,6 +15,89 @@ def list_available_benchmarks():
     return pkg_resources.resource_listdir(__name__, "benchmarks")
 
 
+def run_benchmark(
+    bname, bconfig_path=None, preset="S", repeat=1, validate=True, timeout=10.0
+):
+    print("")
+    print("===============================================================")
+    print("")
+
+    bdir = "benchmarks/" + bname
+    if not pkg_resources.resource_isdir(__name__, bdir):
+        return
+    bench = None
+    try:
+        bench = dpbi.Benchmark(bname=bname, bconfig_path=bconfig_path)
+    except Exception:
+        warnings.warn(
+            "WARN: Skipping the benchmark "
+            + bname
+            + ". No configuration could not be found."
+        )
+        return
+
+    bench_impls = pkg_resources.resource_listdir(__name__, bdir)
+    if not bench_impls:
+        warnings.warn(
+            "WARN: Skipping the benchmark "
+            + bname
+            + ". No implementations exist for the benchmark."
+        )
+        return
+
+    fws = set()
+    # Create the needed Frameworks by looking at the benchmark
+    # implementations
+
+    # FIXME: Get the framework name from the framework JSON in the config
+    for bimpl in bench_impls:
+        if "_numba" in bimpl and "_dpex" not in bimpl:
+            # create a Numba framework
+            # fws.add(dpbi.NumbaFramework("numba"))
+            pass
+        elif "_numpy" in bimpl:
+            fws.add(dpbi.Framework("numpy"))
+        elif "_dpex" in bimpl:
+            # fws.add(dpbi.NumbaDpexFramework("numba_dpex"))
+            pass
+        elif "_dpcpp" in bimpl:
+            fws.add(dpbi.DpcppFramework("dpcpp"))
+        elif "_dpnp" in bimpl:
+            # fws.append(dpbi.DpnpFramework("dpnp"))
+            pass
+
+    # Check if a NumPy implementation of the benchmark is there. The
+    # NumPy implementation is used for validations.
+    fw_np = [fw for fw in fws if "numpy" in fw.fname]
+    if not fw_np:
+        warnings.warn(
+            "WARN: Skipping running "
+            + bname
+            + ". Missing NumPy implementation for "
+            + "the benchmark."
+        )
+        return
+
+    for fw in fws:
+        if fw not in fw_np:
+            test = dpbi.Test(bench=bench, frmwrk=fw, npfrmwrk=fw_np[0])
+            try:
+                test.run(
+                    preset=preset,
+                    repeat=repeat,
+                    validate=validate,
+                    timeout=timeout,
+                )
+            except Exception as e:
+                warnings.warn(
+                    "ERROR: Failed to test the "
+                    + fw.fname
+                    + " implementation for "
+                    + bname
+                    + ". The error is {}".format(e)
+                )
+
+
 def run_benchmarks(
     bconfig_path=None, preset="S", repeat=1, validate=True, timeout=10.0
 ):
@@ -35,80 +118,15 @@ def run_benchmarks(
     print("***Start Running DPBench***")
 
     for b in list_available_benchmarks():
-        print("")
-        print("===============================================================")
-        print("")
-        bdir = "benchmarks/" + b
-        if not pkg_resources.resource_isdir(__name__, bdir):
-            continue
-        bench = None
-        try:
-            bench = dpbi.Benchmark(bname=b, bconfig_path=bconfig_path)
-        except Exception:
-            warnings.warn(
-                "WARN: Skipping the benchmark "
-                + b
-                + ". No configuration could not be found."
-            )
-            continue
+        run_benchmark(
+            bname=b,
+            bconfig_path=bconfig_path,
+            preset=preset,
+            repeat=repeat,
+            validate=validate,
+            timeout=timeout,
+        )
 
-        bench_impls = pkg_resources.resource_listdir(__name__, bdir)
-        if not bench_impls:
-            warnings.warn(
-                "WARN: Skipping the benchmark "
-                + b
-                + ". No implementations exist for the benchmark."
-            )
-            continue
-
-        fws = set()
-        # Create the needed Frameworks by looking at the benchmark
-        # implementations
-        for bimpl in bench_impls:
-            if "_numba" in bimpl and "_dpex" not in bimpl:
-                # create a Numba framework
-                fws.add(dpbi.NumbaFramework("numba"))
-            elif "_numpy" in bimpl:
-                fws.add(dpbi.Framework("numpy"))
-            elif "_dpex" in bimpl:
-                #fws.add(dpbi.NumbaDpexFramework("numba_dpex"))
-                pass
-            elif "_dpcpp" in bimpl:
-                fws.add(dpbi.DpcppFramework("dpcpp"))
-            elif "_dpnp" in bimpl:
-                # fws.append(dpbi.DpnpFramework("dpnp"))
-                pass
-
-        # Check if a NumPy implementation of the benchmark is there. The
-        # NumPy implementation is used for validations.
-        fw_np = [fw for fw in fws if "numpy" in fw.fname]
-        if not fw_np:
-            warnings.warn(
-                "WARN: Skipping running "
-                + b
-                + ". Missing NumPy implementation for "
-                + "the benchmark."
-            )
-            continue
-
-        for fw in fws:
-            if fw not in fw_np:
-                test = dpbi.Test(bench=bench, frmwrk=fw, npfrmwrk=fw_np[0])
-                try:
-                    test.run(
-                        preset=preset,
-                        repeat=repeat,
-                        validate=validate,
-                        timeout=timeout,
-                    )
-                except Exception as e:
-                    warnings.warn(
-                        "ERROR: Failed to test the "
-                        + fw.fname
-                        + " implementation for "
-                        + b
-                        + ". The error is {}".format(e)
-                    )
     print("")
     print("===============================================================")
     print("")

@@ -43,17 +43,18 @@ namespace
 {
 
 template <typename FpTy>
-event black_scholes_impl(queue Queue,
-                         size_t nopt,
-                         const FpTy *price,
-                         const FpTy *strike,
-                         const FpTy *t,
-                         FpTy rate,
-                         FpTy volatility,
-                         FpTy *call,
-                         FpTy *put)
+void black_scholes_impl(queue Queue,
+                        size_t nopt,
+                        const FpTy *price,
+                        const FpTy *strike,
+                        const FpTy *t,
+                        FpTy rate,
+                        FpTy volatility,
+                        FpTy *call,
+                        FpTy *put)
 {
-    return Queue.submit([&](handler &h) {
+    // timer ON
+    auto e = Queue.submit([&](handler &h) {
         h.parallel_for<class BlackScholesKernel>(
             range<1>{nopt}, [=](id<1> myID) {
                 FpTy mr = -rate;
@@ -78,12 +79,13 @@ event black_scholes_impl(queue Queue,
                 put[i] = call[i] - price[i] + strike[i] * e;
             });
     });
+    e.wait();
+    // timer OFF
 }
 
 template <typename... Args> bool ensure_compatibility(const Args &...args)
 {
-    std::vector<dpctl::tensor::usm_ndarray> arrays = {
-        static_cast<dpctl::tensor::usm_ndarray>(args)...};
+    std::vector<dpctl::tensor::usm_ndarray> arrays = {args...};
 
     auto arr = arrays.at(0);
     auto q = arr.get_queue();
@@ -99,7 +101,7 @@ template <typename... Args> bool ensure_compatibility(const Args &...args)
             std::cerr << "All arrays should be in same SYCL queue.\n";
             return false;
         }
-        if (!(arr.get_typenum() != type_flag)) {
+        if (arr.get_typenum() != type_flag) {
             std::cerr << "All arrays should be of same elemental type.\n";
             return false;
         }
@@ -117,8 +119,9 @@ template <typename... Args> bool ensure_compatibility(const Args &...args)
 
 } // namespace
 
-std::pair<sycl::event, sycl::event>
-black_scholes_sycl(dpctl::tensor::usm_ndarray price,
+void
+black_scholes_sync(size_t /**/,
+                   dpctl::tensor::usm_ndarray price,
                    dpctl::tensor::usm_ndarray strike,
                    dpctl::tensor::usm_ndarray t,
                    double rate,
@@ -138,15 +141,10 @@ black_scholes_sycl(dpctl::tensor::usm_ndarray price,
         throw std::runtime_error("Expected a double precision FP array.");
     }
 
-    res_ev = black_scholes_impl(
+    black_scholes_impl(
         Queue, nopt, (double *)price.get_data(), (double *)strike.get_data(),
         (double *)t.get_data(), rate, volatility, (double *)call.get_data(),
         (double *)put.get_data());
-
-    sycl::event ht_event = dpctl::utils::keep_args_alive(
-        Queue, {price, strike, t, call, put}, {res_ev});
-
-    return std::make_pair(ht_event, res_ev);
 }
 
 PYBIND11_MODULE(_black_scholes_sycl, m)
@@ -154,8 +152,15 @@ PYBIND11_MODULE(_black_scholes_sycl, m)
     // Import the dpctl extensions
     import_dpctl();
 
-    m.def("black_scholes", &black_scholes_sycl,
-          "DPC++ implementation of the Black-Scholes formula", py::arg("price"),
-          py::arg("strike"), py::arg("t"), py::arg("rate"), py::arg("vol"),
-          py::arg("call"), py::arg("put"));
+    m.def("black_scholes", &black_scholes_sync,
+          "DPC++ implementation of the Black-Scholes formula",
+          py::arg("nopt"),
+          py::arg("price"),
+          py::arg("strike"),
+          py::arg("t"),
+          py::arg("rate"),
+          py::arg("vol"),
+          py::arg("call"),
+          py::arg("put")
+    );
 }

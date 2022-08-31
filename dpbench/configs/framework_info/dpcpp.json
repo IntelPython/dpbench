@@ -1,7 +1,7 @@
 {
     "framework": {
         "simple_name": "dpcpp",
-        "full_name": "Dpcpp",
+        "full_name": "dpcpp",
         "prefix": "dp",
         "postfix": "dpcpp",
         "class": "DpcppFramework",

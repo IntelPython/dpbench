@@ -77,7 +77,7 @@ class DpcppFramework(Framework):
             )
             raise e
 
-        return [(ldict["impl"], "dpcpp")]
+        return [(ldict["impl"], func_str)]
 
     def version(self) -> str:
         """Returns the framework version."""

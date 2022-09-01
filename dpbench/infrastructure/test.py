@@ -63,7 +63,12 @@ class Test(object):
         else:
             out = []
         if "output_args" in self.bench.info.keys():
-            out += [ldict[a] for b in self.bench.info["output_args"] for a in frmwrk.args(self.bench) if b in a]
+            out += [
+                ldict[a]
+                for b in self.bench.info["output_args"]
+                for a in frmwrk.args(self.bench)
+                if b in a
+            ]
         return out, timelist
 
     def run(

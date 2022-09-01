@@ -16,7 +16,12 @@ def list_available_benchmarks():
 
 
 def run_benchmark(
-    bname, bconfig_path=None, preset="S", repeat=1, validate=True, timeout=10.0
+    bname,
+    bconfig_path=None,
+    preset="S",
+    repeat=1,
+    validate=True,
+    timeout=10.0,
 ):
     print("")
     print("===============================================================")
@@ -73,8 +78,7 @@ def run_benchmark(
         warnings.warn(
             "WARN: Skipping running "
             + bname
-            + ". Missing NumPy implementation for "
-            + "the benchmark."
+            + ". Missing NumPy implementation for the benchmark."
         )
         return
 

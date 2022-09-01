@@ -65,10 +65,13 @@ class Benchmark(object):
             data[k] = v
         # 3. Import initialization function
         if "init" in self.info.keys() and self.info["init"]:
-            module_filename = "{m}.py".format(m=self.info["module_name"])
+            init_module=self.info["module_name"] + "_initialize"
+            module_filename = "{m}.py".format(
+                m=init_module
+            )
             module_pypath = "dpbench.benchmarks.{r}.{m}".format(
                 r=self.info["relative_path"].replace("/", "."),
-                m=self.info["module_name"],
+                m=init_module,
             )
             exec_str = "from {m} import {i}".format(
                 m=module_pypath, i=self.info["init"]["func_name"]

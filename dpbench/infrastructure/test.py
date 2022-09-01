@@ -84,7 +84,6 @@ class Test(object):
                 b=self.bench.bname, f=self.frmwrk.info["full_name"], p=preset
             )
         )
-
         bdata = self.bench.get_data(preset)
 
         # Run NumPy for validation

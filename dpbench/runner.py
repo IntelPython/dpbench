@@ -19,7 +19,7 @@ def run_benchmark(
     bname,
     bconfig_path=None,
     preset="S",
-    repeat=1,
+    repeat=3,
     validate=True,
     timeout=10.0,
 ):
@@ -62,6 +62,8 @@ def run_benchmark(
             pass
         elif "_numpy" in bimpl:
             fws.add(dpbi.Framework("numpy"))
+        elif "_python" in bimpl:
+            fws.add(dpbi.Framework("python"))
         elif "_dpex" in bimpl:
             # fws.add(dpbi.NumbaDpexFramework("numba_dpex"))
             pass
@@ -73,7 +75,7 @@ def run_benchmark(
 
     # Check if a NumPy implementation of the benchmark is there. The
     # NumPy implementation is used for validations.
-    fw_np = [fw for fw in fws if "numpy" in fw.fname]
+    fw_np = [fw for fw in fws if "numpy" in fw.fname or "python" in fw.fname]
     if not fw_np:
         warnings.warn(
             "WARN: Skipping running "

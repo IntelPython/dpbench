@@ -14,7 +14,7 @@
         $ conda activate dpbench
         $ conda install python=3.9 numpy cython cmake ninja scikit-build conda-forge::gtest conda-forge::gmock pytest
         $ conda install dpnp -c dppy/label/dev -c /opt/intel/oneapi/conda_channel --override-channels
-        $ conda install numba scipy scikit-learn spirv-tool
+        $ conda install numba scipy scikit-learn spirv-tools
         $ conda install pybind11
         $ conda install dpcpp_linux-64 -c intel
 

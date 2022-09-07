@@ -42,7 +42,7 @@ jobs:
           conda install tbb=2021.6.0 dpcpp_linux-64 -c intel
           conda install numpy numba cython cmake ninja scikit-build conda-forge::gtest conda-forge::gmock pytest
           conda install scipy spirv-tools scikit-learn pybind11
-          conda install -c dppy/label/dev dpnp numba-dpex
+          conda install -c dppy/label/dev dpctl=0.13.0 numba-dpex
           conda list
 
       - name: Build dpbench

@@ -30,6 +30,8 @@ def run_benchmark(
     bdir = "benchmarks/" + bname
     if not pkg_resources.resource_isdir(__name__, bdir):
         return
+    if bname == "__pycache__":
+        return
     bench = None
     try:
         bench = dpbi.Benchmark(bname=bname, bconfig_path=bconfig_path)

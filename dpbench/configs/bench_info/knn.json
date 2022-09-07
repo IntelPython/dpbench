@@ -4,7 +4,7 @@
         "short_name": "knn",
         "relative_path": "knn",
         "module_name": "knn",
-        "func_name": "knn1",
+        "func_name": "knn",
         "kind": "microbenchmark",
         "domain": "Supervised Learning",
         "parameters": {

@@ -4,7 +4,7 @@
         "short_name": "l2-distance",
         "relative_path": "l2_distance",
         "module_name": "l2_distance",
-        "func_name": "l2_distance1",
+        "func_name": "l2_distance",
         "kind": "microbenchmark",
         "domain": "Distance Compute",
         "parameters": {

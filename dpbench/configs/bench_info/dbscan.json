@@ -4,7 +4,7 @@
         "short_name": "DBSCAN",
         "relative_path": "dbscan",
         "module_name": "dbscan",
-        "func_name": "dbscan1",
+        "func_name": "dbscan",
         "kind": "microbenchmark",
         "domain": "Machine Learning",
         "parameters": {

@@ -19,7 +19,7 @@ def run_benchmark(
     bname,
     bconfig_path=None,
     preset="S",
-    repeat=3,
+    repeat=1,
     validate=True,
     timeout=10.0,
 ):
@@ -57,25 +57,23 @@ def run_benchmark(
     # FIXME: Get the framework name from the framework JSON in the config
     for bimpl in bench_impls:
         if "_numba" in bimpl and "_dpex" not in bimpl:
-            # create a Numba framework
-            # fws.add(dpbi.NumbaFramework("numba"))
-            pass
+            fws.add(dpbi.NumbaFramework("numba"))
         elif "_numpy" in bimpl:
             fws.add(dpbi.Framework("numpy"))
         elif "_python" in bimpl:
             fws.add(dpbi.Framework("python"))
         elif "_dpex" in bimpl:
-            # fws.add(dpbi.NumbaDpexFramework("numba_dpex"))
-            pass
+            fws.add(dpbi.NumbaDpexFramework("numba_dpex"))
         elif "_dpcpp" in bimpl:
             fws.add(dpbi.DpcppFramework("dpcpp"))
         elif "_dpnp" in bimpl:
-            # fws.append(dpbi.DpnpFramework("dpnp"))
+            #fws.append(dpbi.DpnpFramework("dpnp"))
             pass
 
     # Check if a NumPy implementation of the benchmark is there. The
     # NumPy implementation is used for validations.
     fw_np = [fw for fw in fws if "numpy" in fw.fname or "python" in fw.fname]
+
     if not fw_np:
         warnings.warn(
             "WARN: Skipping running "
@@ -108,7 +106,6 @@ def run_benchmarks(
     bconfig_path=None, preset="S", repeat=1, validate=True, timeout=10.0
 ):
     """Run all benchmarks in the dpbench benchmark directory
-
     Args:
         bconfig_path (str, optional): Path to benchmark configurations.
         Defaults to None.
@@ -145,7 +142,6 @@ def run_benchmarks(
 def all_benchmarks_passed_validation(dbfile):
     """Checks the results table of the output database to confirm if all
     benchmarks passed validation in the last run.
-
     Args:
         dbfile (str): Name of database with dpbench results
     """

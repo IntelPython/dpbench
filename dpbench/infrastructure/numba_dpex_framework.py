@@ -1,8 +1,8 @@
 # Copyright 2022 Intel Corp.
 #
 # SPDX-License-Identifier: BSD-3-Clause
-
 import pathlib
+import sys
 from typing import Any, Callable, Dict, Sequence, Tuple
 
 from dpbench.infrastructure import Benchmark, Framework

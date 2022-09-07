@@ -4,12 +4,13 @@
 # SPDX-License-Identifier: BSD-3-Clause
 
 import argparse
+import os
 import sqlite3
+import subprocess
 import timeit
 from numbers import Number
 from typing import Union
-import os
-import subprocess
+
 import numpy as np
 
 

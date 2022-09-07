@@ -8,20 +8,20 @@
 /// The files implements a SYCL-based Python native extension for the
 /// black-scholes benchmark.
 
+#include "_black_scholes_kernel.hpp"
 #include <CL/sycl.hpp>
 #include <dpctl4pybind11.hpp>
+#include <iostream>
 #include <stdlib.h>
 #include <type_traits>
 #include <vector>
-#include <iostream>
-#include "_black_scholes_kernel.hpp"
 
 using namespace sycl;
 namespace py = pybind11;
 namespace
 {
 
-template <typename... Args> bool ensure_compatibility(const Args &...args)
+template <typename... Args> bool ensure_compatibility(const Args &... args)
 {
     std::vector<dpctl::tensor::usm_ndarray> arrays = {args...};
 
@@ -57,15 +57,14 @@ template <typename... Args> bool ensure_compatibility(const Args &...args)
 
 } // namespace
 
-void
-black_scholes_sync(size_t /**/,
-                   dpctl::tensor::usm_ndarray price,
-                   dpctl::tensor::usm_ndarray strike,
-                   dpctl::tensor::usm_ndarray t,
-                   double rate,
-                   double volatility,
-                   dpctl::tensor::usm_ndarray call,
-                   dpctl::tensor::usm_ndarray put)
+void black_scholes_sync(size_t /**/,
+                        dpctl::tensor::usm_ndarray price,
+                        dpctl::tensor::usm_ndarray strike,
+                        dpctl::tensor::usm_ndarray t,
+                        double rate,
+                        double volatility,
+                        dpctl::tensor::usm_ndarray call,
+                        dpctl::tensor::usm_ndarray put)
 {
     sycl::event res_ev;
     auto Queue = price.get_queue();
@@ -79,10 +78,10 @@ black_scholes_sync(size_t /**/,
         throw std::runtime_error("Expected a double precision FP array.");
     }
 
-    black_scholes_impl(
-        Queue, nopt, price.get_data<double>(), strike.get_data<double>(),
-        t.get_data<double>(), rate, volatility, call.get_data<double>(),
-        put.get_data<double>());
+    black_scholes_impl(Queue, nopt, price.get_data<double>(),
+                       strike.get_data<double>(), t.get_data<double>(), rate,
+                       volatility, call.get_data<double>(),
+                       put.get_data<double>());
 }
 
 PYBIND11_MODULE(_black_scholes_sycl, m)
@@ -91,14 +90,7 @@ PYBIND11_MODULE(_black_scholes_sycl, m)
     import_dpctl();
 
     m.def("black_scholes", &black_scholes_sync,
-          "DPC++ implementation of the Black-Scholes formula",
-          py::arg("nopt"),
-          py::arg("price"),
-          py::arg("strike"),
-          py::arg("t"),
-          py::arg("rate"),
-          py::arg("vol"),
-          py::arg("call"),
-          py::arg("put")
-    );
+          "DPC++ implementation of the Black-Scholes formula", py::arg("nopt"),
+          py::arg("price"), py::arg("strike"), py::arg("t"), py::arg("rate"),
+          py::arg("vol"), py::arg("call"), py::arg("put"));
 }

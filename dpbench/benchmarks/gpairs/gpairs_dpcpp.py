@@ -3,6 +3,7 @@
 # SPDX-License-Identifier: Apache-2.0
 
 import numpy as np
+
 from dpbench.benchmarks.gpairs.gpairs_sycl_native_ext.sycl_gpairs import (
     sycl_gpairs,
 )

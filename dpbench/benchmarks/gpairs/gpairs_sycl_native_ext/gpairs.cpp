@@ -21,13 +21,13 @@
  *  Group histograms are added together as a post-processing step.
  */
 
+#include "gpairs.hpp"
 #include <CL/sycl.hpp>
 #include <iostream>
 #include <vector>
-#include "gpairs.hpp"
 
-#include <pybind11/pybind11.h>
 #include <pybind11/numpy.h>
+#include <pybind11/pybind11.h>
 #include <pybind11/stl.h>
 //#include "dpctl_sycl_types.h"
 #include "dpctl4pybind11.hpp"
@@ -35,16 +35,16 @@
 //#include "../_sycl_queue.h"
 
 #ifdef __DO_FLOAT__
-    typedef float tfloat;
+typedef float tfloat;
 #else
-    typedef double tfloat;
+typedef double tfloat;
 #endif
 
 namespace py = pybind11;
 
 /* Python wrapper for gpairs_usm */
 std::pair<py::array_t<tfloat, py::array::c_style>, double> py_gpairs(
-								     //    sycl::queue q,
+    //    sycl::queue q,
     py::array_t<tfloat, py::array::c_style> x0_arr,
     py::array_t<tfloat, py::array::c_style> y0_arr,
     py::array_t<tfloat, py::array::c_style> z0_arr,
@@ -69,21 +69,19 @@ std::pair<py::array_t<tfloat, py::array::c_style>, double> py_gpairs(
     py::buffer_info rbins_pybuf = rbins_arr.request();
     size_t n = x0_pybuf.size;
     size_t nbins = rbins_pybuf.size;
-    if ((x0_pybuf.ndim == 1 && y0_pybuf.ndim == 1 &&
-         z0_pybuf.ndim == 1 && w0_pybuf.ndim == 1 &&
-         x1_pybuf.ndim == 1 && y1_pybuf.ndim == 1 &&
-         z1_pybuf.ndim == 1 && w1_pybuf.ndim == 1 &&
-         rbins_pybuf.ndim == 1))
+    if ((x0_pybuf.ndim == 1 && y0_pybuf.ndim == 1 && z0_pybuf.ndim == 1 &&
+         w0_pybuf.ndim == 1 && x1_pybuf.ndim == 1 && y1_pybuf.ndim == 1 &&
+         z1_pybuf.ndim == 1 && w1_pybuf.ndim == 1 && rbins_pybuf.ndim == 1))
     {
         if (!(n == y0_pybuf.size && n == z0_pybuf.size && n == w0_pybuf.size &&
               n == x1_pybuf.size && n == y1_pybuf.size && n == z1_pybuf.size &&
               n == w1_pybuf.size))
         {
-            throw std::runtime_error("Expecting x, y, z, w to be vectors of the same length");
+            throw std::runtime_error(
+                "Expecting x, y, z, w to be vectors of the same length");
         }
     }
-    else
-    {
+    else {
         throw std::runtime_error("Expecting inputs to be vectors");
     }
 
@@ -98,7 +96,6 @@ std::pair<py::array_t<tfloat, py::array::c_style>, double> py_gpairs(
     tfloat *w1 = static_cast<tfloat *>(w1_pybuf.ptr);
 
     tfloat *rbins = static_cast<tfloat *>(rbins_pybuf.ptr);
-
 
     tfloat *x0_usm = sycl::malloc_device<tfloat>(n, q);
     sycl::event cp_x0 = q.copy(/*src */ x0, /*dest */ x0_usm, n);
@@ -130,32 +127,31 @@ std::pair<py::array_t<tfloat, py::array::c_style>, double> py_gpairs(
     tfloat *hist_usm = sycl::malloc_device<tfloat>(nbins, q);
     sycl::event init_hist_ev = q.fill<tfloat>(hist_usm, tfloat(0), nbins);
 
-    sycl::kernel_id gpairs_kernel_id =
-        sycl::get_kernel_id<eff_gpairs_kernel>();
+    sycl::kernel_id gpairs_kernel_id = sycl::get_kernel_id<eff_gpairs_kernel>();
 
     auto kb = sycl::get_kernel_bundle<sycl::bundle_state::executable>(
         q.get_context(), {gpairs_kernel_id});
 
     sycl::kernel eff_gpairs_kern_obj = kb.get_kernel(gpairs_kernel_id);
 
-    size_t private_mem_size = eff_gpairs_kern_obj.get_info<
-        sycl::info::kernel_device_specific::private_mem_size>(q.get_device());
+    size_t private_mem_size =
+        eff_gpairs_kern_obj
+            .get_info<sycl::info::kernel_device_specific::private_mem_size>(
+                q.get_device());
 
-    std::cout << "Kernel's private mem size is: " << private_mem_size << std::endl;
+    std::cout << "Kernel's private mem size is: " << private_mem_size
+              << std::endl;
     auto t1 = std::chrono::steady_clock::now();
     sycl::event gpairs_ev = gpairs_usm<tfloat, tfloat>(
-        q, n,
-        x0_usm, y0_usm, z0_usm, w0_usm,
-        x1_usm, y1_usm, z1_usm, w1_usm,
+        q, n, x0_usm, y0_usm, z0_usm, w0_usm, x1_usm, y1_usm, z1_usm, w1_usm,
         nbins, rbins_usm, hist_usm,
-        {cp_x0, cp_y0, cp_z0, cp_w0,
-         cp_x1, cp_y1, cp_z1, cp_w1,
-         cp_rbins, init_hist_ev});
+        {cp_x0, cp_y0, cp_z0, cp_w0, cp_x1, cp_y1, cp_z1, cp_w1, cp_rbins,
+         init_hist_ev});
     auto t2 = std::chrono::steady_clock::now();
     std::chrono::duration<double> diff = t2 - t1;
-    auto totTime=std::chrono::duration_cast<std::chrono::microseconds>(diff).count();
+    auto totTime =
+        std::chrono::duration_cast<std::chrono::microseconds>(diff).count();
 
-  
     auto hist_arr = py::array_t<tfloat>(nbins);
     py::buffer_info hist_pybuf = hist_arr.request();
     tfloat *hist = static_cast<tfloat *>(hist_pybuf.ptr);
@@ -180,16 +176,16 @@ std::pair<py::array_t<tfloat, py::array::c_style>, double> py_gpairs(
     return {hist_arr, totTime};
 }
 
-py::array_t<tfloat, py::array::c_style> py_gpairs_host(
-    py::array_t<tfloat, py::array::c_style> x0_arr,
-    py::array_t<tfloat, py::array::c_style> y0_arr,
-    py::array_t<tfloat, py::array::c_style> z0_arr,
-    py::array_t<tfloat, py::array::c_style> w0_arr,
-    py::array_t<tfloat, py::array::c_style> x1_arr,
-    py::array_t<tfloat, py::array::c_style> y1_arr,
-    py::array_t<tfloat, py::array::c_style> z1_arr,
-    py::array_t<tfloat, py::array::c_style> w1_arr,
-    py::array_t<tfloat, py::array::c_style> rbins_arr)
+py::array_t<tfloat, py::array::c_style>
+py_gpairs_host(py::array_t<tfloat, py::array::c_style> x0_arr,
+               py::array_t<tfloat, py::array::c_style> y0_arr,
+               py::array_t<tfloat, py::array::c_style> z0_arr,
+               py::array_t<tfloat, py::array::c_style> w0_arr,
+               py::array_t<tfloat, py::array::c_style> x1_arr,
+               py::array_t<tfloat, py::array::c_style> y1_arr,
+               py::array_t<tfloat, py::array::c_style> z1_arr,
+               py::array_t<tfloat, py::array::c_style> w1_arr,
+               py::array_t<tfloat, py::array::c_style> rbins_arr)
 {
 
     py::buffer_info x0_pybuf = x0_arr.request();
@@ -206,18 +202,19 @@ py::array_t<tfloat, py::array::c_style> py_gpairs_host(
 
     size_t n = x0_pybuf.size;
     size_t nbins = rbins_pybuf.size;
-    if ((x0_pybuf.ndim == 1 && y0_pybuf.ndim == 1 && z0_pybuf.ndim == 1 && w0_pybuf.ndim == 1 &&
-         x1_pybuf.ndim == 1 && y1_pybuf.ndim == 1 && z1_pybuf.ndim == 1 && w1_pybuf.ndim == 1 &&
-         rbins_pybuf.ndim == 1))
+    if ((x0_pybuf.ndim == 1 && y0_pybuf.ndim == 1 && z0_pybuf.ndim == 1 &&
+         w0_pybuf.ndim == 1 && x1_pybuf.ndim == 1 && y1_pybuf.ndim == 1 &&
+         z1_pybuf.ndim == 1 && w1_pybuf.ndim == 1 && rbins_pybuf.ndim == 1))
     {
         if (!(n == y0_pybuf.size && n == z0_pybuf.size && n == w0_pybuf.size &&
-              n == x1_pybuf.size && n == y1_pybuf.size && n == z1_pybuf.size && n == w1_pybuf.size))
+              n == x1_pybuf.size && n == y1_pybuf.size && n == z1_pybuf.size &&
+              n == w1_pybuf.size))
         {
-            throw std::runtime_error("Expecting x, y, z, w to be vectors of the same length");
+            throw std::runtime_error(
+                "Expecting x, y, z, w to be vectors of the same length");
         }
     }
-    else
-    {
+    else {
         throw std::runtime_error("Expecting inputs to be vectors");
     }
 
@@ -237,16 +234,12 @@ py::array_t<tfloat, py::array::c_style> py_gpairs_host(
     py::buffer_info hist_pybuf = hist_arr.request();
     tfloat *hist = static_cast<tfloat *>(hist_pybuf.ptr);
 
-    for (size_t i = 0; i < nbins; ++i)
-    {
+    for (size_t i = 0; i < nbins; ++i) {
         hist[i] = tfloat(0);
     }
 
-    gpairs_host_data_naive<tfloat, tfloat>(
-        n,
-        x0, y0, z0, w0,
-        x1, y1, z1, w1,
-        nbins, rbins, hist);
+    gpairs_host_data_naive<tfloat, tfloat>(n, x0, y0, z0, w0, x1, y1, z1, w1,
+                                           nbins, rbins, hist);
 
     return hist_arr;
 }
@@ -374,12 +367,9 @@ py::array_t<tfloat, py::array::c_style> py_gpairs_dpbench(
 PYBIND11_MODULE(sycl_gpairs, m)
 {
     import_dpctl();
-    m.def("sycl_gpairs",
-          &py_gpairs,
+    m.def("sycl_gpairs", &py_gpairs,
           "Evaluate g-pairs algorithm on SYCL queue");
-    m.def("host_gpairs",
-          &py_gpairs_host,
-          "Evaluate g-pairs algorithm on host");
+    m.def("host_gpairs", &py_gpairs_host, "Evaluate g-pairs algorithm on host");
     // m.def("dpbench_gpairs",
     //       &py_gpairs_dpbench,
     //       "Evaluate g-pairs algorithms using dpbench implementation");

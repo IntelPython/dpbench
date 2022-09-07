@@ -67,7 +67,7 @@ def run_benchmark(
         elif "_dpcpp" in bimpl:
             fws.add(dpbi.DpcppFramework("dpcpp"))
         elif "_dpnp" in bimpl:
-            #fws.append(dpbi.DpnpFramework("dpnp"))
+            # fws.append(dpbi.DpnpFramework("dpnp"))
             pass
 
     # Check if a NumPy implementation of the benchmark is there. The

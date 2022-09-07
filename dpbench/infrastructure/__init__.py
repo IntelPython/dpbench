@@ -6,20 +6,20 @@ from .benchmark import Benchmark
 from .framework import Framework, generate_framework
 from .numba_dpex_framework import NumbaDpexFramework
 from .numba_framework import NumbaFramework
-from .dpcpp_framework import DpcppFramework
 from .test import Test
 from .utilities import (
     benchmark,
+    chdir,
     create_connection,
+    mkdir,
+    run_command,
     str2bool,
     time_to_ms,
     validate,
-    mkdir,
-    chdir,
-    run_command,
 )
 
 from .dpnp_framework import DpnpFramework  # isort:skip
+from .dpcpp_framework import DpcppFramework  # isort:skip
 
 __all__ = [
     "Benchmark",

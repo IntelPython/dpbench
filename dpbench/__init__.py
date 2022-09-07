@@ -7,7 +7,6 @@ from .runner import (
     list_available_benchmarks,
     run_benchmark,
     run_benchmarks,
-    run_benchmark,
 )
 
 __all__ = [

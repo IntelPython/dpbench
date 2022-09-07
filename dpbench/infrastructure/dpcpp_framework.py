@@ -2,10 +2,11 @@
 #
 # SPDX-License-Identifier: BSD-3-Clause
 
+import os
 import pathlib
 import subprocess
 from typing import Any, Callable, Dict, Sequence, Tuple
-import os
+
 from dpbench.infrastructure import Benchmark, Framework, utilities
 
 

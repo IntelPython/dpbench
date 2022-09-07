@@ -72,4 +72,3 @@ void black_scholes_impl(queue Queue,
     });
     e.wait();
 }
-

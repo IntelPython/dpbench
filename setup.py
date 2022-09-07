@@ -4,9 +4,9 @@
 
 #!/usr/bin/env python
 
-from skbuild import setup
-from setuptools import find_packages
 import dpctl
+from setuptools import find_packages
+from skbuild import setup
 
 dpctl_include_dir = dpctl.get_include()
 

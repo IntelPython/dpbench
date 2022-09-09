@@ -30,8 +30,6 @@ def run_benchmark(
     bdir = "benchmarks/" + bname
     if not pkg_resources.resource_isdir(__name__, bdir):
         return
-    if bname == "__pycache__":
-        return
     bench = None
     try:
         bench = dpbi.Benchmark(bname=bname, bconfig_path=bconfig_path)
@@ -69,7 +67,12 @@ def run_benchmark(
         elif "_dpcpp" in bimpl:
             fws.add(dpbi.DpcppFramework("dpcpp"))
         elif "_dpnp" in bimpl:
+            # FIXME: dpnp framework needs to be fixed before uncommenting this
+            # step.
             # fws.append(dpbi.DpnpFramework("dpnp"))
+            warnings.warn(
+                "DPNP Framework is broken, skipping dpnp implementation"
+            )
             pass
 
     # Check if a NumPy implementation of the benchmark is there. The

@@ -9,10 +9,7 @@ from .numba_framework import NumbaFramework
 from .test import Test
 from .utilities import (
     benchmark,
-    chdir,
     create_connection,
-    mkdir,
-    run_command,
     str2bool,
     time_to_ms,
     validate,
@@ -35,7 +32,4 @@ __all__ = [
     "validate",
     "time_to_ms",
     "str2bool",
-    "mkdir",
-    "chdir",
-    "run_command",
 ]

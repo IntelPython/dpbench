@@ -4,9 +4,7 @@
 # SPDX-License-Identifier: BSD-3-Clause
 
 import argparse
-import os
 import sqlite3
-import subprocess
 import timeit
 from numbers import Number
 from typing import Union
@@ -193,49 +191,3 @@ def validate(ref, val, framework="Unknown"):
     if not valid:
         print("{} did not validate!".format(framework))
     return valid
-
-
-########## utility functions ##########
-
-
-def mkdir(path):
-    if not os.path.exists(path):
-        print("Creating directory `{}`".format(path))
-        os.mkdir(path)
-
-
-def chdir(path):
-    if os.path.exists(path):
-        print("Changing to directory `%s`" % path)
-        os.chdir(path)
-        return True
-    else:
-        return False
-
-
-def run_command(
-    command_string,
-    verbose=False,
-    echo=True,
-    throw_exception=True,
-    dry_run=False,
-):
-    command_string = [x for x in command_string if x is not None]
-    if dry_run:
-        print("dry-run executing:", subprocess.list2cmdline(command_string))
-        return None
-
-    if echo:
-        print("executing:", subprocess.list2cmdline(command_string))
-
-    try:
-        output = subprocess.check_output(
-            command_string, universal_newlines=True
-        )
-        if verbose == 1:
-            print(output)
-    except subprocess.CalledProcessError as e:
-        if throw_exception:
-            raise ExperimentError(command_string, e.output)
-    else:
-        return output

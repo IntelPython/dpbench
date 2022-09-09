@@ -21,7 +21,7 @@ namespace py = pybind11;
 namespace
 {
 
-template <typename... Args> bool ensure_compatibility(const Args &... args)
+template <typename... Args> bool ensure_compatibility(const Args &...args)
 {
     std::vector<dpctl::tensor::usm_ndarray> arrays = {args...};
 

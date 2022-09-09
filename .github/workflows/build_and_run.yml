@@ -39,22 +39,24 @@ jobs:
       - name: Install dpbench dependencies
         shell: bash -l {0}
         run: |
-          conda install numpy numba tbb=2021.6.0 -c intel
-          conda install scikit-learn
-          conda install -c dppy/label/dev numba-dpex
+          conda install tbb=2021.6.0 dpcpp_linux-64 -c intel
+          conda install numpy numba cython cmake ninja scikit-build conda-forge::gtest conda-forge::gmock pytest
+          conda install scipy spirv-tools scikit-learn pybind11
+          conda install libgcc-ng>=11.2.0 libstdcxx-ng>=11.2.0 libgomp>=11.2.0 -c pkgs/main
+          conda install -c dppy/label/dev -c intel dpctl=0.13.0 numba-dpex=0.18.1 dpnp=0.10.1
           conda list
 
       - name: Build dpbench
         shell: bash -l {0}
         run: |
-          python setup.py develop
+          CC=icx CXX=icpx python setup.py develop -- -Dpybind11_DIR=$(python -m pybind11 --cmakedir) -DDPCTL_MODULE_PATH=$(python -m dpctl --cmakedir)
 
       - name: Validate dpbench
         shell: bash -l {0}
         run: |
           export OCL_ICD_FILENAMES=libintelocl.so
-          python -c "import dpbench; dpbench.run_benchmarks()" || exit 1
-          python -c "import dpbench; dpbench.all_benchmarks_passed_validation(\"dpbench.db\");"
+          LD_PRELOAD="${CONDA_PREFIX}/lib/libmkl_intel_ilp64.so ${CONDA_PREFIX}/lib/libmkl_tbb_thread.so ${CONDA_PREFIX}/lib/libmkl_core.so" python -c "import dpbench; dpbench.run_benchmarks()" || exit 1
+          LD_PRELOAD="${CONDA_PREFIX}/lib/libmkl_intel_ilp64.so ${CONDA_PREFIX}/lib/libmkl_tbb_thread.so ${CONDA_PREFIX}/lib/libmkl_core.so" python -c "import dpbench; dpbench.all_benchmarks_passed_validation(\"dpbench.db\");"
           res=`                                                                    \
             printf "%s"                                                            \
             "$(python -c "import dpbench;                                          \

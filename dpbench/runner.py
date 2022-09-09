@@ -57,20 +57,28 @@ def run_benchmark(
     # FIXME: Get the framework name from the framework JSON in the config
     for bimpl in bench_impls:
         if "_numba" in bimpl and "_dpex" not in bimpl:
-            # create a Numba framework
             fws.add(dpbi.NumbaFramework("numba"))
         elif "_numpy" in bimpl:
             fws.add(dpbi.Framework("numpy"))
+        elif "_python" in bimpl:
+            fws.add(dpbi.Framework("python"))
         elif "_dpex" in bimpl:
             fws.add(dpbi.NumbaDpexFramework("numba_dpex"))
         elif "_dpcpp" in bimpl:
             fws.add(dpbi.DpcppFramework("dpcpp"))
         elif "_dpnp" in bimpl:
-            fws.add(dpbi.DpnpFramework("dpnp"))
+            # FIXME: dpnp framework needs to be fixed before uncommenting this
+            # step.
+            # fws.append(dpbi.DpnpFramework("dpnp"))
+            warnings.warn(
+                "DPNP Framework is broken, skipping dpnp implementation"
+            )
+            pass
 
     # Check if a NumPy implementation of the benchmark is there. The
     # NumPy implementation is used for validations.
-    fw_np = [fw for fw in fws if "numpy" in fw.fname]
+    fw_np = [fw for fw in fws if "numpy" in fw.fname or "python" in fw.fname]
+
     if not fw_np:
         warnings.warn(
             "WARN: Skipping running "

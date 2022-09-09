@@ -16,6 +16,7 @@ from .utilities import (
 )
 
 from .dpnp_framework import DpnpFramework  # isort:skip
+from .dpcpp_framework import DpcppFramework  # isort:skip
 
 __all__ = [
     "Benchmark",
@@ -23,6 +24,7 @@ __all__ = [
     "NumbaFramework",
     "NumbaDpexFramework",
     "DpnpFramework",
+    "DpcppFramework",
     "Test",
     "create_connection",
     "generate_framework",

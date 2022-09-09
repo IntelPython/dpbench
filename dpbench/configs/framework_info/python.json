@@ -1,0 +1,10 @@
+{
+    "framework": {
+        "simple_name": "python",
+        "full_name": "Python",
+        "prefix": "python",
+        "postfix": "python",
+        "class": "Framework",
+        "arch": "cpu"
+    }
+}

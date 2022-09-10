@@ -1,0 +1,1 @@
+add_subdirectory(pairwise_distance_sycl_native_ext)

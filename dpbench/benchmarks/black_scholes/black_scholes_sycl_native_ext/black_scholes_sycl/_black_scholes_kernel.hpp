@@ -1,13 +1,13 @@
 //
 // Copyright 2022 Intel Corp.
 //
-// SPDX - License - Identifier : BSD - 3 - Clause
+// SPDX - License - Identifier : Apache 2.0
 ///
 /// The files implements a SYCL-based Python native extension for the
 /// black-scholes benchmark.
 
-#include <CL/sycl.hpp>
 #include <stdlib.h>
+#include <sycl.hpp>
 #include <type_traits>
 
 #ifdef __DO_FLOAT__

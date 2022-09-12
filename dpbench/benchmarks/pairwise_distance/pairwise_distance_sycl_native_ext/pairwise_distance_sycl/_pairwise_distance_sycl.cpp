@@ -3,17 +3,17 @@
 //
 // Copyright 2022 Intel Corp.
 //
-// SPDX - License - Identifier : BSD - 3 - Clause
+// SPDX - License - Identifier : Apache 2.0
 ///
 /// \file
 /// The files implements a SYCL-based Python native extension for the
 /// pairwise_distance benchmark.
 
 #include "_pairwise_distance_kernel.hpp"
-#include <CL/sycl.hpp>
 #include <dpctl4pybind11.hpp>
 #include <iostream>
 #include <stdlib.h>
+#include <sycl.hpp>
 #include <type_traits>
 #include <vector>
 

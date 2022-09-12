@@ -1,15 +1,15 @@
 //
 // Copyright 2022 Intel Corp.
 //
-// SPDX - License - Identifier : BSD - 3 - Clause
+// SPDX - License - Identifier : Apache 2.0
 ///
 /// The files implements a SYCL-based Python native extension for the
 /// pairwise_distance benchmark.
 
-#include <CL/sycl.hpp>
 #include <mathimf.h>
+#include <sycl.hpp>
 
-using namespace cl::sycl;
+using namespace sycl;
 
 #ifdef __DO_FLOAT__
 #define SQRT(x) sqrtf(x)

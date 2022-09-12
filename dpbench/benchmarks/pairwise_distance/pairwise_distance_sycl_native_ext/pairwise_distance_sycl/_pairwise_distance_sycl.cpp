@@ -10,10 +10,10 @@
 /// pairwise_distance benchmark.
 
 #include "_pairwise_distance_kernel.hpp"
+#include <CL/sycl.hpp>
 #include <dpctl4pybind11.hpp>
 #include <iostream>
 #include <stdlib.h>
-#include <sycl.hpp>
 #include <type_traits>
 #include <vector>
 

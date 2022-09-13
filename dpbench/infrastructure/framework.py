@@ -20,6 +20,7 @@ class Framework(object):
         """Reads framework information.
         :param fname: The framework name.
         """
+        import dpctl
 
         self.fname = fname
 
@@ -31,7 +32,6 @@ class Framework(object):
         try:
             with open(frmwrk_path) as json_file:
                 self.info = json.load(json_file)["framework"]
-                # print(self.info)
         except Exception as e:
             print(
                 "Framework JSON file {f} could not be opened.".format(
@@ -39,6 +39,23 @@ class Framework(object):
                 )
             )
             raise (e)
+
+        self.device = self.info["arch"]
+
+        try:
+            dpctl.SyclDevice(self.device)
+        except Exception:
+            print(
+                "A {} device is not available on the system".format(
+                    self.info["arch"]
+                )
+            )
+
+    def device_filter_string(self) -> str:
+        """Returns the framework version."""
+        import dpctl
+
+        return dpctl.SyclDevice(self.device).get_filter_string()
 
     def version(self) -> str:
         """Returns the framework version."""
@@ -49,9 +66,16 @@ class Framework(object):
         a benchmark."""
         return {}
 
-    def copy_func(self) -> Callable:
+    def copy_to_func(self) -> Callable:
         """Returns the copy-method that should be used
-        for copying the benchmark arguments."""
+        for copying the benchmark arguments from host
+        to device."""
+        return np.copy
+
+    def copy_from_func(self) -> Callable:
+        """Returns the copy-method that should be used
+        for copying the benchmark arguments from device
+        to host."""
         return np.copy
 
     def validator(self) -> Callable:

@@ -63,7 +63,7 @@ class DpcppFramework(Framework):
         ).replace(".", "/")
 
         func_str = bench.info["func_name"] + "_sycl"
-        module_str = module_pypath.replace("/", ".") + "." + func_str
+        module_str = module_pypath.replace("/", ".")
         ldict = dict()
         try:
             exec(

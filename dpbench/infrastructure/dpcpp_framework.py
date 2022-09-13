@@ -22,7 +22,7 @@ class DpcppFramework(Framework):
 
     def copy_to_func(self) -> Callable:
         """Returns the copy-method that should be used
-        for copying the benchmark arguments."""
+        for copying the benchmark arguments to device."""
 
         def _copy_to_func_impl(ref_array):
             import dpctl.tensor as dpt
@@ -47,7 +47,9 @@ class DpcppFramework(Framework):
 
     def copy_from_func(self) -> Callable:
         """Returns the copy-method that should be used
-        for copying the benchmark arguments."""
+        for copying results back to NumPy (host) from
+        any array created by the framework possibly on
+        a device memory domain."""
 
         import dpctl.tensor as dpt
 

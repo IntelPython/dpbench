@@ -5,6 +5,6 @@
         "prefix": "dp",
         "postfix": "dpcpp",
         "class": "DpcppFramework",
-        "arch": "gpu"
+        "arch": "cpu"
     }
 }

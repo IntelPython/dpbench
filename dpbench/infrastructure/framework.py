@@ -68,12 +68,14 @@ class Framework(object):
 
     def copy_to_func(self) -> Callable:
         """Returns the copy-method that should be used
-        for copying the benchmark arguments."""
+        for copying the benchmark arguments from host
+        to device."""
         return np.copy
 
     def copy_from_func(self) -> Callable:
         """Returns the copy-method that should be used
-        for copying the benchmark arguments."""
+        for copying the benchmark arguments from device
+        to host."""
         return np.copy
 
     def validator(self) -> Callable:

@@ -10,20 +10,16 @@ from typing import Any, Dict
 
 class Benchmark(object):
     """A class for reading and benchmark information and initializing
-    benchmark data."""
+    benchmark data.
+    """
 
-    def __init__(self, bname: str, bconfig_path: str = None):
-        """Reads benchmark information.
-        :param bname: The benchmark name.
-        "param config_path: Optional location of the config JSON file for the
-        benchmark. If none is provided, the default config inside the
-        package's bench_info directory is used.
+    def _load_benchmark_info(self, bconfig_path: str = None):
+        """Reads the benchmark configuration and loads into a member dict.
+
+        Args:
+            bconfig_path (str, optional): _description_. Defaults to None.
         """
-
-        self.bname = bname
-        self.bdata = dict()
-
-        bench_filename = "{b}.json".format(b=bname)
+        bench_filename = "{b}.json".format(b=self.bname)
         bench_path = None
 
         if bconfig_path:
@@ -45,6 +41,38 @@ class Benchmark(object):
             )
             raise (e)
 
+    def _get_data_initialization_fn(self, bmodule):
+        """Loads the "initialize" function from the provided module.
+
+        Raises:
+            RuntimeError: If the module's initialize function could not be
+            loaded.
+        """
+
+        if "init" in self.info.keys() and self.info["init"]:
+            init_fn_name = self.info["init"]["func_name"]
+            self.initialize_fn = getattr(bmodule, init_fn_name)
+        else:
+            raise RuntimeError(
+                "Initialization function could not be loaded for benchmark "
+                + self.bname
+            )
+
+    def __init__(self, bmodule: object, bconfig_path: str = None):
+        """Reads benchmark information.
+        :param bname: The benchmark name.
+        "param config_path: Optional location of the config JSON file for the
+        benchmark. If none is provided, the default config inside the
+        package's bench_info directory is used.
+        """
+        self.bname = bmodule.__name__.split(".")[-1]
+        self.bdata = dict()
+        try:
+            self._load_benchmark_info(bconfig_path)
+            self._get_data_initialization_fn(bmodule)
+        except Exception as e:
+            raise (e)
+
     def get_data(self, preset: str = "L") -> Dict[str, Any]:
         """Initializes the benchmark data.
         :param preset: The data-size preset (S, M, L, paper).
@@ -55,51 +83,30 @@ class Benchmark(object):
 
         # 1. Create data dictionary
         data = dict()
-        # 2. Add parameters to data dictionary
+
+        # 2. Check if the provided preset configuration is available in the
+        #    config file.
         if preset not in self.info["parameters"].keys():
             raise NotImplementedError(
                 "{b} doesn't have a {p} preset.".format(b=self.bname, p=preset)
             )
+
+        # 3. Store the input preset args in the "data" dict.
         parameters = self.info["parameters"][preset]
         for k, v in parameters.items():
             data[k] = v
-        # 3. Import initialization function
-        if "init" in self.info.keys() and self.info["init"]:
-            init_module = self.info["module_name"] + "_initialize"
-            module_filename = "{m}.py".format(m=init_module)
-            module_pypath = "dpbench.benchmarks.{r}.{m}".format(
-                r=self.info["relative_path"].replace("/", "."),
-                m=init_module,
-            )
-            exec_str = "from {m} import {i}".format(
-                m=module_pypath, i=self.info["init"]["func_name"]
-            )
-            try:
-                exec(exec_str, data)
-            except Exception as e:
-                print(
-                    "Module Python file {m} could not be opened.".format(
-                        m=module_filename
-                    )
-                )
-                raise (e)
-            # 4. Execute initialization
-            init_str = "{oargs} = {i}({iargs})".format(
-                oargs=",".join(self.info["init"]["output_args"]),
-                i=self.info["init"]["func_name"],
-                iargs=",".join(self.info["init"]["input_args"]),
-            )
-            try:
-                exec(init_str, data)
-            except Exception as e:
-                print(
-                    "Benchmark {m} could not be initialized with data.".format(
-                        m=module_filename
-                    )
-                )
-                raise (e)
-            finally:
-                del data[self.info["init"]["func_name"]]
 
+        # 4. Call the initialize_fn with the input args and store the results
+        #    in the "data" dict.
+        initialized_output = self.initialize_fn(*data.values())
+
+        # 5. Store the initialized output in the "data" dict. Note that the
+        #    implementation depends on Python dicts being ordered. Thus, the
+        #    code will not work with Python older than 3.7.
+        for idx, out in enumerate(self.info["init"]["output_args"]):
+            data.update({out: initialized_output[idx]})
+
+        # 6. Update the benchmark data (self.bdata) with the generated data
+        #    for the provided preset.
         self.bdata[preset] = data
         return self.bdata[preset]

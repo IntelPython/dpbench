@@ -2,17 +2,36 @@
 #
 # SPDX-License-Identifier: Apache 2.0 License
 
+import importlib
+import pkgutil
 import warnings
 
-import pkg_resources
-
+import dpbench.benchmarks as dp_bms
 import dpbench.infrastructure as dpbi
 
 
 def list_available_benchmarks():
-    """Return the list of available benchmarks"""
+    """Return the list of available benchmarks that ae in the
+    dpbench.benchmarks module.
+    """
 
-    return pkg_resources.resource_listdir(__name__, "benchmarks")
+    submods = [
+        submod.name
+        for submod in pkgutil.iter_modules(dp_bms.__path__)
+        if submod.ispkg
+    ]
+
+    return submods
+
+
+def list_available_implementations(benchmark):
+    impls = [
+        impl.name
+        for impl in pkgutil.iter_modules(benchmark.__path__)
+        if not impl.ispkg
+    ]
+
+    return impls
 
 
 def run_benchmark(
@@ -28,23 +47,19 @@ def run_benchmark(
     print("===============================================================")
     print("")
 
-    bdir = "benchmarks/" + bname
-    if not pkg_resources.resource_isdir(__name__, bdir):
-        return
-    if bname == "__pycache__":
-        return
-    bench = None
     try:
-        bench = dpbi.Benchmark(bname=bname, bconfig_path=bconfig_path)
+        benchmod = importlib.import_module("dpbench.benchmarks." + bname)
+        bench = dpbi.Benchmark(benchmod, bconfig_path=bconfig_path)
     except Exception:
         warnings.warn(
             "WARN: Skipping the benchmark "
             + bname
-            + ". No configuration could not be found."
+            + ". Could not create a Benchmark object."
         )
         return
 
-    bench_impls = pkg_resources.resource_listdir(__name__, bdir)
+    bench_impls = list_available_implementations(benchmod)
+
     if not bench_impls:
         warnings.warn(
             "WARN: Skipping the benchmark "

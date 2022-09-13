@@ -17,12 +17,11 @@ _impl = {
 class NumbaDpexFramework(Framework):
     """A class for reading and processing framework information."""
 
-    def __init__(self, fname: str, device: str = None):
+    def __init__(self, fname: str):
         """Reads framework information.
         :param fname: The framework name.
         """
 
-        self.device = "default" if device is None else device
         super().__init__(fname)
 
     def impl_files(self, bench: Benchmark) -> Sequence[Tuple[str, str]]:

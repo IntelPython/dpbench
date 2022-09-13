@@ -2,7 +2,7 @@
 //
 // Copyright 2022 Intel Corp.
 //
-// SPDX - License - Identifier : BSD - 3 - Clause
+// SPDX - License - Identifier : Apache 2.0
 ///
 /// \file
 /// The files implements a SYCL-based Python native extension for the
@@ -21,7 +21,7 @@ namespace py = pybind11;
 namespace
 {
 
-template <typename... Args> bool ensure_compatibility(const Args &... args)
+template <typename... Args> bool ensure_compatibility(const Args &...args)
 {
     std::vector<dpctl::tensor::usm_ndarray> arrays = {args...};
 

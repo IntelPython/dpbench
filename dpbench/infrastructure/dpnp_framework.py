@@ -13,12 +13,11 @@ from dpbench.infrastructure import Benchmark, Framework
 class DpnpFramework(Framework):
     """A class for reading and processing framework information."""
 
-    def __init__(self, fname: str, device: str = None):
+    def __init__(self, fname: str):
         """Reads framework information.
         :param fname: The framework name.
         """
 
-        self.device = "default" if device is None else device
         super().__init__(fname)
 
     def version(self) -> str:
@@ -32,7 +31,14 @@ class DpnpFramework(Framework):
 
         return {"dpctl": dpctl}
 
-    def copy_func(self) -> Callable:
+    def copy_to_func(self) -> Callable:
+        """Returns the copy-method that should be used
+        for copying the benchmark arguments."""
+        import dpnp
+
+        return dpnp.copy
+
+    def copy_from_func(self) -> Callable:
         """Returns the copy-method that should be used
         for copying the benchmark arguments."""
         import dpnp

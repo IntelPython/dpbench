@@ -16,7 +16,7 @@ def black_scholes(nopt, price, strike, t, rate, vol, call, put):
     options using partial differential equations.
     This function is an implementation of Black-Scholes in pure Python.
     """
-    
+
     mr = -rate
     sig_sig_two = vol * vol * 2
 

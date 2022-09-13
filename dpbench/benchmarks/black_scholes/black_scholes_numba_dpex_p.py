@@ -11,10 +11,10 @@ import numba
 # blackscholes implemented as a parallel loop using numba.prange
 @numba.njit(parallel=True, fastmath=True)
 def black_scholes_kernel(nopt, price, strike, t, rate, vol, call, put):
-    '''
+    """
     Blackscholes implementation using numba paralle-for loops
-    '''
-    
+    """
+
     mr = -rate
     sig_sig_two = vol * vol * 2
 
@@ -46,12 +46,12 @@ def black_scholes_kernel(nopt, price, strike, t, rate, vol, call, put):
 def black_scholes(nopt, price, strike, t, rate, vol, call, put):
     """Documentation for black_scholes function
 
-    The Black-Scholes program computes the price of a portfolio of 
+    The Black-Scholes program computes the price of a portfolio of
     options using partial differential equations.
-    The entire computation performed by Black-Scholes is data-parallel 
+    The entire computation performed by Black-Scholes is data-parallel
     where each option can be priced independent of other options.
     This function is an implementation of Black-Scholes in Python.
     It is jit-compiled using numba and executes in parallel on device.
     """
-    
+
     black_scholes_kernel(nopt, price, strike, t, rate, vol, call, put)

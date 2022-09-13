@@ -12,7 +12,7 @@ def invsqrt(x):
 def black_scholes(nopt, price, strike, t, rate, vol, call, put):
     """Documentation for black_scholes function
 
-    The Black-Scholes program computes the price of a portfolio of 
+    The Black-Scholes program computes the price of a portfolio of
     options using partial differential equations.
     This function is an implementation of Black-Scholes in pure Python.
     """

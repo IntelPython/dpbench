@@ -40,7 +40,7 @@ jobs:
         shell: bash -l {0}
         run: |
           conda install tbb=2021.6.0 dpcpp_linux-64 -c intel
-          conda install numpy numba cython cmake ninja scikit-build conda-forge::gtest conda-forge::gmock pytest
+          conda install numpy numba cython cmake ninja scikit-build
           conda install scipy spirv-tools scikit-learn pybind11
           conda install libgcc-ng>=11.2.0 libstdcxx-ng>=11.2.0 libgomp>=11.2.0 -c pkgs/main
           conda install -c dppy/label/dev -c intel dpctl=0.13.0 numba-dpex=0.18.1 dpnp=0.10.1

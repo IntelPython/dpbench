@@ -32,7 +32,7 @@ class Test(object):
     ) -> Tuple[Any, Sequence[float]]:
         report_str = frmwrk.info["full_name"] + " - " + impl_name
         try:
-            copy = frmwrk.copy_func()
+            copy = frmwrk.copy_to_func()
             setup_str = frmwrk.setup_str(self.bench, impl)
             exec_str = frmwrk.exec_str(self.bench, impl)
         except Exception as e:

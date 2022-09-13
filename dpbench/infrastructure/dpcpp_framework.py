@@ -13,20 +13,45 @@ from dpbench.infrastructure import Benchmark, Framework, utilities
 class DpcppFramework(Framework):
     """A class for reading and processing framework information."""
 
-    def __init__(self, fname: str, device: str = None):
+    def __init__(self, fname: str):
         """Reads framework information.
         :param fname: The framework name.
         """
 
-        self.device = "default" if device is None else device
         super().__init__(fname)
 
-    def copy_func(self) -> Callable:
+    def copy_to_func(self) -> Callable:
         """Returns the copy-method that should be used
         for copying the benchmark arguments."""
+
+        def _copy_to_func_impl(ref_array):
+            import dpctl.tensor as dpt
+
+            if ref_array.flags["C_CONTIGUOUS"]:
+                order = "C"
+            elif ref_array.flags["F_CONTIGUOUS"]:
+                order = "F"
+            else:
+                order = "K"
+            return dpt.asarray(
+                obj=ref_array,
+                dtype=ref_array.dtype,
+                device=self.device_filter_string(),
+                copy=None,
+                usm_type=None,
+                sycl_queue=None,
+                order=order,
+            )
+
+        return _copy_to_func_impl
+
+    def copy_from_func(self) -> Callable:
+        """Returns the copy-method that should be used
+        for copying the benchmark arguments."""
+
         import dpctl.tensor as dpt
 
-        return dpt.asarray
+        return dpt.asnumpy
 
     def validator(self) -> Callable:
         """ """

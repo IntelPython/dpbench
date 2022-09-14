@@ -14,7 +14,7 @@ import numpy as np
         "write_only": ["predictions"],
     }
 )
-def run_knn_kernel(
+def _knn_kernel(
     train,
     train_labels,
     test,
@@ -110,7 +110,7 @@ def knn(
     votes_to_classes_lst,
     data_dim,
 ):
-    run_knn_kernel[test_size, numba_dpex.DEFAULT_LOCAL_SIZE](
+    _knn_kernel[test_size, numba_dpex.DEFAULT_LOCAL_SIZE](
         train,
         train_labels,
         test,

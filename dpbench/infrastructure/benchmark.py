@@ -164,7 +164,13 @@ class Benchmark(object):
 
         # 4. Call the initialize_fn with the input args and store the results
         #    in the "data" dict.
-        initialized_output = self.initialize_fn(*data.values())
+
+        init_input_args_list = self.info["init"]["input_args"]
+        init_input_args_val_list = []
+        for arg in init_input_args_list:
+            init_input_args_val_list.append(data[arg])
+
+        initialized_output = self.initialize_fn(*init_input_args_val_list)
 
         # 5. Store the initialized output in the "data" dict. Note that the
         #    implementation depends on Python dicts being ordered. Thus, the

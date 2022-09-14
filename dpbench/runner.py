@@ -40,7 +40,8 @@ def run_benchmark(
     try:
         benchmod = importlib.import_module("dpbench.benchmarks." + bname)
         bench = dpbi.Benchmark(benchmod, bconfig_path=bconfig_path)
-    except Exception:
+    except Exception as e:
+        print(e)
         warnings.warn(
             "WARN: Skipping the benchmark "
             + bname
@@ -59,9 +60,9 @@ def run_benchmark(
         return
 
     fws = set()
+
     # Create the needed Frameworks by looking at the benchmark
     # implementations
-
     # FIXME: Get the framework name from the framework JSON in the config
     for bimpl in bench_impls:
         if "_numba" in bimpl[0] and "_dpex" not in bimpl[0]:

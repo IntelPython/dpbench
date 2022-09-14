@@ -67,13 +67,13 @@ class Benchmark(object):
         try:
             with open(bench_path) as json_file:
                 self.info = json.load(json_file)["benchmark"]
-        except Exception as e:
-            print(
+        except Exception:
+            warnings.warn(
                 "Benchmark JSON file {b} could not be opened.".format(
                     b=bench_filename
                 )
             )
-            raise (e)
+            raise
 
     def _set_data_initialization_fn(self, bmodule):
         """Loads the "initialize" function from the provided module.
@@ -88,7 +88,8 @@ class Benchmark(object):
             self.initialize_fn = getattr(bmodule, init_fn_name)
         else:
             raise RuntimeError(
-                "Initialization function could not be loaded for benchmark "
+                "Initialization function not specified in JSON configuration"
+                + " for "
                 + self.bname
             )
 
@@ -105,8 +106,8 @@ class Benchmark(object):
             self._load_benchmark_info(bconfig_path)
             self._set_data_initialization_fn(bmodule)
             self._set_implementation_fn_list(bmodule)
-        except Exception as e:
-            raise (e)
+        except Exception:
+            raise
 
     def get_impl_fnlist(self):
         """Returns a list of function objects each for a single implementation

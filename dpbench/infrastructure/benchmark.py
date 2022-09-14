@@ -27,7 +27,7 @@ class Benchmark(object):
         bench_path = None
 
         if bconfig_path:
-            bench_path = bconfig_path.joinpath(bench_filename)
+            bench_path = pathlib.Path(bconfig_path).joinpath(bench_filename)
         else:
             parent_folder = pathlib.Path(__file__).parent.absolute()
             bench_path = parent_folder.joinpath(

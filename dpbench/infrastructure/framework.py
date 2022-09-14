@@ -16,7 +16,7 @@ from dpbench.infrastructure import Benchmark, utilities
 class Framework(object):
     """A class for reading and processing framework information."""
 
-    def __init__(self, fname: str):
+    def __init__(self, fname: str, fconfig_path: str = None):
         """Reads framework information.
         :param fname: The framework name.
         """
@@ -24,11 +24,17 @@ class Framework(object):
 
         self.fname = fname
 
-        parent_folder = pathlib.Path(__file__).parent.absolute()
         frmwrk_filename = "{f}.json".format(f=fname)
-        frmwrk_path = parent_folder.joinpath(
-            "..", "configs", "framework_info", frmwrk_filename
-        )
+        frmwrk_path = None
+
+        if fconfig_path:
+            frmwrk_path = pathlib.Path(fconfig_path).joinpath(frmwrk_filename)
+        else:
+            parent_folder = pathlib.Path(__file__).parent.absolute()
+            frmwrk_path = parent_folder.joinpath(
+                "..", "configs", "framework_info", frmwrk_filename
+            )
+
         try:
             with open(frmwrk_path) as json_file:
                 self.info = json.load(json_file)["framework"]

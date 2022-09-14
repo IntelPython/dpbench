@@ -13,12 +13,12 @@ from dpbench.infrastructure import Benchmark, Framework, utilities
 class DpcppFramework(Framework):
     """A class for reading and processing framework information."""
 
-    def __init__(self, fname: str):
+    def __init__(self, fname: str, fconfig_path: str = None):
         """Reads framework information.
         :param fname: The framework name.
         """
 
-        super().__init__(fname)
+        super().__init__(fname, fconfig_path)
 
     def copy_to_func(self) -> Callable:
         """Returns the copy-method that should be used

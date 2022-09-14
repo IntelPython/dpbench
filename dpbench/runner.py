@@ -17,6 +17,7 @@ def list_available_benchmarks():
 
 def run_benchmark(
     bname,
+    fconfig_path=None,
     bconfig_path=None,
     preset="S",
     repeat=1,
@@ -65,9 +66,9 @@ def run_benchmark(
         elif "_python" in bimpl:
             fws.add(dpbi.Framework("python"))
         elif "_dpex" in bimpl:
-            fws.add(dpbi.NumbaDpexFramework("numba_dpex"))
+            fws.add(dpbi.NumbaDpexFramework("numba_dpex", fconfig_path))
         elif "_dpcpp" in bimpl:
-            fws.add(dpbi.DpcppFramework("dpcpp"))
+            fws.add(dpbi.DpcppFramework("dpcpp", fconfig_path))
         elif "_dpnp" in bimpl:
             # FIXME: dpnp framework needs to be fixed before uncommenting this
             # step.
@@ -110,7 +111,12 @@ def run_benchmark(
 
 
 def run_benchmarks(
-    bconfig_path=None, preset="S", repeat=1, validate=True, timeout=10.0
+    fconfig_path=None,
+    bconfig_path=None,
+    preset="S",
+    repeat=1,
+    validate=True,
+    timeout=10.0,
 ):
     """Run all benchmarks in the dpbench benchmark directory
     Args:
@@ -130,6 +136,7 @@ def run_benchmarks(
     for b in list_available_benchmarks():
         run_benchmark(
             bname=b,
+            fconfig_path=fconfig_path,
             bconfig_path=bconfig_path,
             preset=preset,
             repeat=repeat,

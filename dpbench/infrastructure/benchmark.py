@@ -34,7 +34,7 @@ class Benchmark(object):
     benchmark data.
     """
 
-    def _get_implementation_fn_list(self, bmod):
+    def _set_implementation_fn_list(self, bmod):
 
         self.impl_fnlist = [
             fn
@@ -75,7 +75,7 @@ class Benchmark(object):
             )
             raise (e)
 
-    def _get_data_initialization_fn(self, bmodule):
+    def _set_data_initialization_fn(self, bmodule):
         """Loads the "initialize" function from the provided module.
 
         Raises:
@@ -103,8 +103,8 @@ class Benchmark(object):
         self.bdata = dict()
         try:
             self._load_benchmark_info(bconfig_path)
-            self._get_data_initialization_fn(bmodule)
-            self._get_implementation_fn_list(bmodule)
+            self._set_data_initialization_fn(bmodule)
+            self._set_implementation_fn_list(bmodule)
         except Exception as e:
             raise (e)
 

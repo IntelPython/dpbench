@@ -5,13 +5,45 @@
 
 import json
 import pathlib
+import warnings
+from inspect import getmembers, isbuiltin, isfunction
 from typing import Any, Dict
+
+
+def get_supported_implementation_postfixes():
+    """Returns as a dictionary all the supported postfixes for filenames
+    that implement a specific version of a benchmark.
+
+    Returns:
+        Dict: Key is the string providing the supported postfix and value is a
+        string describing when to use the postfix.
+    """
+    parent_folder = pathlib.Path(__file__).parent.absolute()
+    impl_postfix_json = parent_folder.joinpath("..", "configs", "impl_postfix")
+
+    try:
+        with open(impl_postfix_json) as json_file:
+            return json.load(json_file)["impl_postfix"]
+    except Exception as e:
+        warnings.warn("impl_postfix.json file not found")
+        raise (e)
 
 
 class Benchmark(object):
     """A class for reading and benchmark information and initializing
     benchmark data.
     """
+
+    def _get_implementation_fn_list(self, bmod):
+
+        self.impl_fnlist = [
+            fn
+            for fn in getmembers(bmod, isfunction)
+            if "initialize" not in fn[0]
+        ]
+        self.impl_fnlist.append(
+            [fn for fn in getmembers(bmod, isbuiltin) if "_sycl" in fn[0]]
+        )
 
     def _load_benchmark_info(self, bconfig_path: str = None):
         """Reads the benchmark configuration and loads into a member dict.
@@ -70,8 +102,36 @@ class Benchmark(object):
         try:
             self._load_benchmark_info(bconfig_path)
             self._get_data_initialization_fn(bmodule)
+            self._get_implementation_fn_list(bmodule)
         except Exception as e:
             raise (e)
+
+    def get_impl_fnlist(self):
+        """Returns a list of function objects each for a single implementation
+        of the benchmark.
+
+        Returns:
+            list[tuple(str, object)]: A list of 2-tuple. The first element of
+            the tuple is the string function name and the second element is
+            the actual function object.
+        """
+        return self.impl_fnlist
+
+    def get_impl(self, impl_postfix: str):
+        impl_postfixes = get_supported_implementation_postfixes()
+        if impl_postfix in impl_postfixes:
+            fn = [
+                impl[1] for impl in self.impl_fnlist if impl_postfix in impl[0]
+            ]
+            if len(fn) > 1:
+                raise RuntimeError(
+                    "Multiple implementations for " + impl_postfix
+                )
+            return fn[0]
+        else:
+            raise RuntimeError(
+                "Implementation postfix " + impl_postfix + " not supported."
+            )
 
     def get_data(self, preset: str = "L") -> Dict[str, Any]:
         """Initializes the benchmark data.

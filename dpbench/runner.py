@@ -24,16 +24,6 @@ def list_available_benchmarks():
     return submods
 
 
-def list_available_implementations(benchmark):
-    impls = [
-        impl.name
-        for impl in pkgutil.iter_modules(benchmark.__path__)
-        if not impl.ispkg
-    ]
-
-    return impls
-
-
 def run_benchmark(
     bname,
     fconfig_path=None,
@@ -58,7 +48,7 @@ def run_benchmark(
         )
         return
 
-    bench_impls = list_available_implementations(benchmod)
+    bench_impls = bench.get_impl_fnlist()
 
     if not bench_impls:
         warnings.warn(
@@ -74,11 +64,11 @@ def run_benchmark(
 
     # FIXME: Get the framework name from the framework JSON in the config
     for bimpl in bench_impls:
-        if "_numba" in bimpl and "_dpex" not in bimpl:
+        if "_numba" in bimpl[0] and "_dpex" not in bimpl[0]:
             fws.add(dpbi.NumbaFramework("numba"))
-        elif "_numpy" in bimpl:
+        elif "_numpy" in bimpl[0]:
             fws.add(dpbi.Framework("numpy"))
-        elif "_python" in bimpl:
+        elif "_python" in bimpl[0]:
             fws.add(dpbi.Framework("python"))
         elif "_dpex" in bimpl:
             fws.add(dpbi.NumbaDpexFramework("numba_dpex", fconfig_path))

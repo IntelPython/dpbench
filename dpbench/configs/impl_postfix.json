@@ -1,0 +1,14 @@
+{
+    "impl_postfix": {
+        "dpnp": "Data-parallel Numeric Python implementation",
+        "numba_dpex_k": "Numba-dpex kernel implementation",
+        "numba_dpex_p": "Numba-dpex prange implementation",
+        "numba_dpex_n": "Numba-dpex NumPy array expression implementation",
+        "numba_n": "Numba nopython implementation",
+        "numba_np": "Numba nopython and Parallel=True implementation",
+        "numba_npr": "Numba nopython and Parallel=True and prange implementation",
+        "numpy": "NumPy implementation",
+        "python": "Python implementation",
+        "sycl": "DPCPP native implementation"
+    }
+}

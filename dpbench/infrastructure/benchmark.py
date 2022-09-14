@@ -41,9 +41,11 @@ class Benchmark(object):
             for fn in getmembers(bmod, isfunction)
             if "initialize" not in fn[0]
         ]
-        self.impl_fnlist.append(
-            [fn for fn in getmembers(bmod, isbuiltin) if "_sycl" in fn[0]]
-        )
+        sycl_impl = [
+            fn for fn in getmembers(bmod, isbuiltin) if "_sycl" in fn[0]
+        ]
+        if sycl_impl:
+            self.impl_fnlist.append(sycl_impl)
 
     def _load_benchmark_info(self, bconfig_path: str = None):
         """Reads the benchmark configuration and loads into a member dict.

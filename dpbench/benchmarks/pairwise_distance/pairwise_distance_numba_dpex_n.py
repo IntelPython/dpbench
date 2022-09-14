@@ -14,10 +14,17 @@ import numpy as np
 #    np.copyto(D, np.linalg.norm(X1[:, None, :] - X2[None, :, :], axis=-1))
 
 
-# Naieve pairwise distance impl - take an array representing M points in N dimensions, and return the M x M matrix of Euclidean distances
 @nb.njit(parallel=True, fastmath=True)
-def pw_distance_kernel(X1, X2, D):
-    # Size of imputs
+def pairwise_distance(X1, X2, D):
+    """Naïve pairwise distance impl - take an array representing M points in N
+    dimensions, and return the M x M matrix of Euclidean distances
+
+    Args:
+        X1 : Set of points
+        X2 : Set of points
+        D  : Outputted distance matrix
+    """
+    # Size of inputs
     M = X1.shape[0]
     N = X2.shape[0]
     O = X1.shape[1]
@@ -33,7 +40,3 @@ def pw_distance_kernel(X1, X2, D):
                 d += tmp * tmp
             # Write computed distance to distance matrix
             D[i, j] = np.sqrt(d)
-
-
-def pairwise_distance(X1, X2, D):
-    pw_distance_kernel(X1, X2, D)

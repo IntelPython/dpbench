@@ -2,17 +2,26 @@
 #
 # SPDX-License-Identifier: Apache 2.0 License
 
+import importlib
+import pkgutil
 import warnings
 
-import pkg_resources
-
+import dpbench.benchmarks as dp_bms
 import dpbench.infrastructure as dpbi
 
 
 def list_available_benchmarks():
-    """Return the list of available benchmarks"""
+    """Return the list of available benchmarks that ae in the
+    dpbench.benchmarks module.
+    """
 
-    return pkg_resources.resource_listdir(__name__, "benchmarks")
+    submods = [
+        submod.name
+        for submod in pkgutil.iter_modules(dp_bms.__path__)
+        if submod.ispkg
+    ]
+
+    return submods
 
 
 def run_benchmark(
@@ -25,26 +34,21 @@ def run_benchmark(
     timeout=10.0,
 ):
     print("")
-    print("===============================================================")
+    print("================ Benchmark " + bname + " ========================")
     print("")
 
-    bdir = "benchmarks/" + bname
-    if not pkg_resources.resource_isdir(__name__, bdir):
-        return
-    if bname == "__pycache__":
-        return
-    bench = None
     try:
-        bench = dpbi.Benchmark(bname=bname, bconfig_path=bconfig_path)
-    except Exception:
+        benchmod = importlib.import_module("dpbench.benchmarks." + bname)
+        bench = dpbi.Benchmark(benchmod, bconfig_path=bconfig_path)
+    except Exception as e:
         warnings.warn(
-            "WARN: Skipping the benchmark "
-            + bname
-            + ". No configuration could not be found."
+            "Skipping the benchmark execution due to the following error: "
+            + e.__str__
         )
         return
 
-    bench_impls = pkg_resources.resource_listdir(__name__, bdir)
+    bench_impls = bench.get_impl_fnlist()
+
     if not bench_impls:
         warnings.warn(
             "WARN: Skipping the benchmark "
@@ -54,20 +58,20 @@ def run_benchmark(
         return
 
     fws = set()
+
     # Create the needed Frameworks by looking at the benchmark
     # implementations
-
     # FIXME: Get the framework name from the framework JSON in the config
     for bimpl in bench_impls:
-        if "_numba" in bimpl and "_dpex" not in bimpl:
+        if "_numba" in bimpl[0] and "_dpex" not in bimpl[0]:
             fws.add(dpbi.NumbaFramework("numba"))
-        elif "_numpy" in bimpl:
+        elif "_numpy" in bimpl[0]:
             fws.add(dpbi.Framework("numpy"))
-        elif "_python" in bimpl:
+        elif "_python" in bimpl[0]:
             fws.add(dpbi.Framework("python"))
         elif "_dpex" in bimpl:
             fws.add(dpbi.NumbaDpexFramework("numba_dpex", fconfig_path))
-        elif "_dpcpp" in bimpl:
+        elif "_sycl" in bimpl:
             fws.add(dpbi.DpcppFramework("dpcpp", fconfig_path))
         elif "_dpnp" in bimpl:
             # FIXME: dpnp framework needs to be fixed before uncommenting this

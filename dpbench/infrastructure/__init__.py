@@ -2,7 +2,7 @@
 #
 # SPDX-License-Identifier: Apache-2.0
 
-from .benchmark import Benchmark
+from .benchmark import Benchmark, get_supported_implementation_postfixes
 from .framework import Framework, generate_framework
 from .numba_dpex_framework import NumbaDpexFramework
 from .numba_framework import NumbaFramework
@@ -32,4 +32,5 @@ __all__ = [
     "validate",
     "time_to_ms",
     "str2bool",
+    "get_supported_implementation_postfixes",
 ]

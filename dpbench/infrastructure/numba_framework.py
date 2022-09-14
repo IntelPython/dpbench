@@ -21,12 +21,12 @@ _impl = {
 class NumbaFramework(Framework):
     """A class for reading and processing framework information."""
 
-    def __init__(self, fname: str):
+    def __init__(self, fname: str, fconfig_path: str = None):
         """Reads framework information.
         :param fname: The framework name.
         """
 
-        super().__init__(fname)
+        super().__init__(fname, fconfig_path)
 
     def impl_files(self, bench: Benchmark) -> Sequence[Tuple[str, str]]:
         """Returns the framework's implementation files for a particular

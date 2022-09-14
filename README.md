@@ -31,3 +31,24 @@
         $  CC=icx CXX=icpx python setup.py develop -- -Dpybind11_DIR=$(python -m pybind11 --cmakedir) -DDPCTL_MODULE_PATH=$(python -m dpctl --cmakedir)
         #To run, taking black_scholes for example:
         $  python -c "import dpbench; dpbench.run_benchmark(\"black_scholes\")"
+
+4. Device Customization
+
+        #Device can be selected via providing customized arch in framework Json file. Here is an example:
+
+```json
+        {
+            "framework": {
+                "simple_name": "dpcpp",
+                "full_name": "dpcpp",
+                "prefix": "dp",
+                "postfix": "dpcpp",
+                "class": "DpcppFramework",
+                "arch": "gpu"
+            }
+        }
+```
+
+        #To run with custimized Json file:
+
+        $ python -c "import dpbench; dpbench.run_benchmark(\"black_scholes\", "<absolute path to json file>")"

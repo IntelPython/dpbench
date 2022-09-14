@@ -13,12 +13,12 @@ from dpbench.infrastructure import Benchmark, Framework
 class DpnpFramework(Framework):
     """A class for reading and processing framework information."""
 
-    def __init__(self, fname: str):
+    def __init__(self, fname: str, fconfig_path: str = None):
         """Reads framework information.
         :param fname: The framework name.
         """
 
-        super().__init__(fname)
+        super().__init__(fname, fconfig_path)
 
     def version(self) -> str:
         """Returns the framework version."""

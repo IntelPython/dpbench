@@ -34,18 +34,21 @@ class Benchmark(object):
     benchmark data.
     """
 
-    def _set_implementation_fn_list(self, bmod):
+    def _set_implementation_fn_list(self, bmod, initialize_fname):
+        """Selects all the callables from the __all__ list for the module
+        excluding the initialize function that we know is not a benchmark
+        implementation.
+
+        Args:
+            bmod : A benchmark module
+            initialize_fname : Name of the initialization function
+        """
 
         self.impl_fnlist = [
             fn
-            for fn in getmembers(bmod, isfunction)
-            if "initialize" not in fn[0]
+            for fn in getmembers(bmod, callable)
+            if initialize_fname not in fn[0]
         ]
-        sycl_impl = [
-            fn for fn in getmembers(bmod, isbuiltin) if "_sycl" in fn[0]
-        ]
-        if sycl_impl:
-            self.impl_fnlist.append(sycl_impl)
 
     def _load_benchmark_info(self, bconfig_path: str = None):
         """Reads the benchmark configuration and loads into a member dict.
@@ -84,8 +87,8 @@ class Benchmark(object):
         """
 
         if "init" in self.info.keys() and self.info["init"]:
-            init_fn_name = self.info["init"]["func_name"]
-            self.initialize_fn = getattr(bmodule, init_fn_name)
+            self.init_fn_name = self.info["init"]["func_name"]
+            self.initialize_fn = getattr(bmodule, self.init_fn_name)
         else:
             raise RuntimeError(
                 "Initialization function not specified in JSON configuration"
@@ -105,7 +108,7 @@ class Benchmark(object):
         try:
             self._load_benchmark_info(bconfig_path)
             self._set_data_initialization_fn(bmodule)
-            self._set_implementation_fn_list(bmodule)
+            self._set_implementation_fn_list(bmodule, self.init_fn_name)
         except Exception:
             raise
 

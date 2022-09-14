@@ -73,7 +73,7 @@ def run_benchmark(
             fws.add(dpbi.Framework("python"))
         elif "_dpex" in bimpl:
             fws.add(dpbi.NumbaDpexFramework("numba_dpex", fconfig_path))
-        elif "_dpcpp" in bimpl:
+        elif "_sycl" in bimpl:
             fws.add(dpbi.DpcppFramework("dpcpp", fconfig_path))
         elif "_dpnp" in bimpl:
             # FIXME: dpnp framework needs to be fixed before uncommenting this

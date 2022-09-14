@@ -41,11 +41,9 @@ def run_benchmark(
         benchmod = importlib.import_module("dpbench.benchmarks." + bname)
         bench = dpbi.Benchmark(benchmod, bconfig_path=bconfig_path)
     except Exception as e:
-        print(e)
         warnings.warn(
-            "WARN: Skipping the benchmark "
-            + bname
-            + ". Could not create a Benchmark object."
+            "Skipping the benchmark execution due to the following error: "
+            + e.__str__
         )
         return
 

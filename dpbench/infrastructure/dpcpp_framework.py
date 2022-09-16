@@ -1,6 +1,6 @@
 # Copyright 2022 Intel Corp.
 #
-# SPDX-License-Identifier: BSD-3-Clause
+# SPDX-License-Identifier: Apache 2.0
 
 import os
 import pathlib
@@ -57,7 +57,6 @@ class DpcppFramework(Framework):
 
     def validator(self) -> Callable:
         """ """
-        from . import utilities
 
         def _validator(ref, test):
             import dpctl.tensor as dpt
@@ -66,7 +65,7 @@ class DpcppFramework(Framework):
             for t in test:
                 try:
                     np_test.append(dpt.asnumpy(t))
-                except TypeError as e:
+                except TypeError:
                     print(
                         "Failed to validate dpcpp results. Could not convert"
                         + " dpcpp output to numpy ndarray"

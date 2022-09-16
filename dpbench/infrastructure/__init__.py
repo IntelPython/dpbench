@@ -3,7 +3,7 @@
 # SPDX-License-Identifier: Apache-2.0
 
 from .benchmark import Benchmark, get_supported_implementation_postfixes
-from .framework import Framework, generate_framework
+from .framework import Framework
 from .numba_dpex_framework import NumbaDpexFramework
 from .numba_framework import NumbaFramework
 from .test import Test
@@ -27,7 +27,6 @@ __all__ = [
     "DpcppFramework",
     "Test",
     "create_connection",
-    "generate_framework",
     "benchmark",
     "validate",
     "time_to_ms",

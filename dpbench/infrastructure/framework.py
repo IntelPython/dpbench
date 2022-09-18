@@ -5,7 +5,8 @@
 
 import json
 import pathlib
-from typing import Any, Callable, Dict, Sequence, Tuple
+import warnings
+from typing import Callable
 
 import dpctl
 import numpy as np
@@ -46,16 +47,19 @@ class Framework(object):
             )
             raise (e)
 
-        self.device = self.info["arch"]
-
         try:
-            dpctl.SyclDevice(self.device)
-        except Exception:
-            print(
-                "A {} device is not available on the system".format(
-                    self.info["arch"]
+            self.sycl_device = self.info["sycl_device"]
+            dpctl.SyclDevice(self.sycl_device)
+        except KeyError:
+            pass
+        except dpctl.SyclDeviceCreationError as sdce:
+            warnings.warn(
+                "Could not create a Sycl device using filter {} string".format(
+                    self.info["sycl_device"]
                 )
             )
+            print(sdce)
+            raise sdce
 
     def device_filter_string(self) -> str:
         """Returns the sycl device's filter string if the framework has an
@@ -68,7 +72,10 @@ class Framework(object):
 
     def version(self) -> str:
         """Returns the framework version."""
-        return pkg_resources.get_distribution(self.fname).version
+        try:
+            return pkg_resources.get_distribution(self.fname).version
+        except pkg_resources.DistributionNotFound:
+            return "unknown"
 
     def copy_to_func(self) -> Callable:
         """Returns the copy-method that should be used

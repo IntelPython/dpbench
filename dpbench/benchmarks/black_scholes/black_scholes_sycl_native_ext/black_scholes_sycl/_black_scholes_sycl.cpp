@@ -92,5 +92,5 @@ PYBIND11_MODULE(_black_scholes_sycl, m)
     m.def("black_scholes", &black_scholes_sync,
           "DPC++ implementation of the Black-Scholes formula", py::arg("nopt"),
           py::arg("price"), py::arg("strike"), py::arg("t"), py::arg("rate"),
-          py::arg("vol"), py::arg("call"), py::arg("put"));
+          py::arg("volatility"), py::arg("call"), py::arg("put"));
 }

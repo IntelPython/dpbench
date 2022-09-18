@@ -36,7 +36,7 @@ class DpcppFramework(Framework):
             return dpt.asarray(
                 obj=ref_array,
                 dtype=ref_array.dtype,
-                device=self.device_filter_string(),
+                device=self.sycl_device,
                 copy=None,
                 usm_type=None,
                 sycl_queue=None,

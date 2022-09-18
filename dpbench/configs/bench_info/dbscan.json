@@ -10,20 +10,20 @@
         "parameters": {
             "S": {
                 "n_samples": 1024,
-		"n_features": 10,
-		"centers": 10,
+                "n_features": 10,
+                "centers": 10,
                 "seed": 7777777
             },
             "M": {
                 "n_samples": 4096,
-		"n_features": 10,
-		"centers": 10,
+                "n_features": 10,
+                "centers": 10,
                 "seed": 7777777
             },
             "L": {
                 "n_samples": 16384,
-		"n_features": 10,
-		"centers": 10,
+                "n_features": 10,
+                "centers": 10,
                 "seed": 7777777
             }
         },
@@ -31,24 +31,24 @@
             "func_name": "initialize",
             "input_args": [
                 "n_samples",
-		"n_features",
+                "n_features",
                 "centers",
-		"seed"
+                "seed"
             ],
             "output_args": [
                 "data",
-		"assignments",
+                "assignments",
                 "eps",
-		"minpts"
+                "min_pts"
             ]
         },
         "input_args": [
             "n_samples",
             "n_features",
             "data",
-	    "eps",
-	    "minpts",
-	    "assignments"
+            "eps",
+            "min_pts",
+            "assignments"
         ],
         "array_args": [
             "data",

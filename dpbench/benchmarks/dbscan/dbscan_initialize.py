@@ -8,7 +8,6 @@ def initialize(n_samples, n_features, centers, seed):
     from typing import NamedTuple
 
     import numpy as np
-    import numpy.random as rnd
     from sklearn.datasets import make_blobs
     from sklearn.preprocessing import StandardScaler
 

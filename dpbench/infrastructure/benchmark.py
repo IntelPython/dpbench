@@ -355,6 +355,16 @@ class BenchmarkRunner:
         with timer.timer() as t:
             try:
                 warmup(self.impl_fn, inputs)
+            except KeyboardInterrupt as kbie:
+                warnings.warn(
+                    "Benchmark {0} execution failed due to a timeout".format(
+                        self.bench.bname
+                    )
+                )
+                print(kbie)
+                self.results.error_state = -3
+                self.results.error_msg = "Execution failed"
+                return
             except Exception as e:
                 warnings.warn("Benchmark execution failed")
                 print(e)
@@ -587,6 +597,14 @@ class Benchmark(object):
             validator_fn = frmwrk.validator()
             for key in ref_out.keys():
                 valid = validator_fn(ref_out[key], frmwrk_out[key])
+                if not valid:
+                    print(
+                        (
+                            "Output did not match for {0}. "
+                            + "Expected: {1} Actual: {2}"
+                        ).format(key, ref_out[key], frmwrk_out[key]),
+                        file=sys.stderr,
+                    )
             return valid
         except Exception:
             return False

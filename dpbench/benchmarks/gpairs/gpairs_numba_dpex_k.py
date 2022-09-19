@@ -119,18 +119,18 @@ def ceiling_quotient(n, m):
 
 
 def gpairs(
-    n,
+    nopt,
     nbins,
-    d_x1,
-    d_y1,
-    d_z1,
-    d_w1,
-    d_x2,
-    d_y2,
-    d_z2,
-    d_w2,
-    d_rbins_squared,
-    d_result,
+    x1,
+    y1,
+    z1,
+    w1,
+    x2,
+    y2,
+    z2,
+    w2,
+    rbins,
+    results,
 ):
     n_wi = 20
     private_hist_size = 16
@@ -140,8 +140,8 @@ def gpairs(
     m0 = n_wi * lws0
     m1 = n_wi * lws1
 
-    n_groups0 = ceiling_quotient(n, m0)
-    n_groups1 = ceiling_quotient(n, m1)
+    n_groups0 = ceiling_quotient(nopt, m0)
+    n_groups1 = ceiling_quotient(nopt, m1)
 
     gwsRange = n_groups0 * lws0, n_groups1 * lws1
     lwsRange = lws0, lws1
@@ -151,18 +151,18 @@ def gpairs(
     )
 
     count_weighted_pairs_3d_intel_no_slm_ker[gwsRange, lwsRange](
-        n,
+        nopt,
         nbins,
         slm_hist_size,
         private_hist_size,
-        d_x1,
-        d_y1,
-        d_z1,
-        d_w1,
-        d_x2,
-        d_y2,
-        d_z2,
-        d_w2,
-        d_rbins_squared,
-        d_result,
+        x1,
+        y1,
+        z1,
+        w1,
+        x2,
+        y2,
+        z2,
+        w2,
+        rbins,
+        results,
     )

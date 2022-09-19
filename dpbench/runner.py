@@ -38,6 +38,7 @@ def run_benchmark(
     print("================ Benchmark " + bname + " ========================")
     print("")
 
+    bench = None
     try:
         benchmod = importlib.import_module("dpbench.benchmarks." + bname)
         bench = dpbi.Benchmark(benchmod, bconfig_path=bconfig_path)
@@ -49,13 +50,34 @@ def run_benchmark(
         return
 
     try:
-        bench.run(
+        results = bench.run(
             implementation_postfix=implementation_postfix,
             preset=preset,
             repeat=repeat,
             validate=validate,
             timeout=timeout,
         )
+
+        for result in results:
+            print("=========================================================")
+
+            if result.error_state == 0:
+                print("implementation:", result.benchmark_impl_postfix)
+                print("framework:", result.framework_name)
+                print("framework version:", result.framework_version)
+                print("setup time:", result.setup_time)
+                print("warmup time:", result.warmup_time)
+                print("teardown time:", result.teardown_time)
+                print("max execution times:", result.max_exec_time)
+                print("min execution times:", result.min_exec_time)
+                print("median execution times:", result.median_exec_time)
+                print("repeats:", result.num_repeats)
+                print("preset:", result.preset)
+                print("validated:", result.validation_state)
+            else:
+                print("implementation:", result.benchmark_impl_postfix)
+                print("error states:", result.error_state)
+                print("error msg:", result.error_msg)
     except Exception as e:
         warnings.warn(
             "Benchmark execution failed due to the following error: "
@@ -68,9 +90,9 @@ def run_benchmarks(
     fconfig_path=None,
     bconfig_path=None,
     preset="S",
-    repeat=1,
+    repeat=10,
     validate=True,
-    timeout=10.0,
+    timeout=200.0,
 ):
     """Run all benchmarks in the dpbench benchmark directory
     Args:

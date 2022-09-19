@@ -88,12 +88,12 @@ def kmeans(
     arrayCsum,
     arrayCnumpoint,
     niters,
-    NUMBER_OF_POINTS,
-    NUMBER_OF_CENTROIDS,
+    nopt,
+    ncentroids,
 ):
 
     for i in range(REPEAT):
-        for i1 in range(NUMBER_OF_CENTROIDS):
+        for i1 in range(ncentroids):
             arrayC[i1, 0] = arrayP[i1, 0]
             arrayC[i1, 1] = arrayP[i1, 1]
 
@@ -104,6 +104,6 @@ def kmeans(
             arrayCsum,
             arrayCnumpoint,
             niters,
-            NUMBER_OF_POINTS,
-            NUMBER_OF_CENTROIDS,
+            nopt,
+            ncentroids,
         )

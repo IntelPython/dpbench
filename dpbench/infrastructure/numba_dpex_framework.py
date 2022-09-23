@@ -2,7 +2,9 @@
 #
 # SPDX-License-Identifier: Apache 2.0
 
-from typing import Any, Dict
+from typing import Any, Callable, Dict
+
+import dpctl
 
 from dpbench.infrastructure import Framework
 
@@ -29,3 +31,8 @@ class NumbaDpexFramework(Framework):
         import dpctl
 
         return {"dpctl": dpctl}
+
+    def execute(self, impl_fn: Callable, input_args: Dict):
+
+        with dpctl.device_context(self.sycl_device):
+            return impl_fn(**input_args)

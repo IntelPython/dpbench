@@ -602,8 +602,7 @@ class Benchmark(object):
                         (
                             "Output did not match for {0}. "
                             + "Expected: {1} Actual: {2}"
-                        ).format(key, ref_out[key], frmwrk_out[key]),
-                        file=sys.stderr,
+                        ).format(key, ref_out[key], frmwrk_out[key])
                     )
             return valid
         except Exception:

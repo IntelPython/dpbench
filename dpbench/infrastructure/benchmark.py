@@ -350,7 +350,7 @@ class BenchmarkRunner:
         # Warmup
         @tout.exit_after(self.timeout)
         def warmup(impl_fn, inputs):
-            impl_fn(**inputs)
+            self.fmwrk.execute(impl_fn, inputs)
 
         with timer.timer() as t:
             try:
@@ -379,7 +379,7 @@ class BenchmarkRunner:
         retval = None
         for i in range(self.repeat):
             with timer.timer() as t:
-                retval = self.impl_fn(**inputs)
+                retval = self.fmwrk.execute(self.impl_fn, inputs)
             exec_times[i] = t.get_elapsed_time()
             # Do not reset the output from the last repeat
             if i < self.repeat - 1:

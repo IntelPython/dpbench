@@ -2,12 +2,12 @@
 #
 # SPDX-License-Identifier: Apache 2.0
 
-import pathlib
-from typing import Any, Callable, Dict, Sequence, Tuple
+
+from typing import Any, Callable, Dict
 
 import pkg_resources
 
-from dpbench.infrastructure import Benchmark, Framework
+from .framework import Framework
 
 
 class DpnpFramework(Framework):
@@ -44,21 +44,3 @@ class DpnpFramework(Framework):
         import dpnp
 
         return dpnp.copy
-
-    def exec_str(self, bench: Benchmark, impl: Callable = None):
-        """Generates the execution-string that should be used to call
-        the benchmark implementation.
-        :param bench: A benchmark.
-        :param impl: A benchmark implementation.
-        """
-
-        dpctl_ctx_str = (
-            "with dpctl.device_context(dpctl.select_{d}_device()): ".format(
-                d=self.device
-            )
-        )
-        arg_str = self.arg_str(bench, impl)
-        main_exec_str = "__dpb_result = __dpb_impl[4000000,]({a})".format(
-            a=arg_str
-        )
-        return dpctl_ctx_str + main_exec_str

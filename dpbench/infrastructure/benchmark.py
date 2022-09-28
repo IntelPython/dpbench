@@ -11,11 +11,14 @@ from typing import Any, Dict
 
 import numpy as np
 
-import dpbench.infrastructure as dpbi
-from dpbench.infrastructure import timeout_decorator as tout
 from dpbench.infrastructure import timer
 
+from . import timeout_decorator as tout
+from .datamodel import store_results
+from .dpcpp_framework import DpcppFramework
 from .framework import Framework
+from .numba_dpex_framework import NumbaDpexFramework
+from .numba_framework import NumbaFramework
 
 
 def get_supported_implementation_postfixes():
@@ -43,6 +46,23 @@ class BenchmarkResults:
     """A helper class to store the results and timing from running a
     benchmark.
     """
+
+    def __init__(self, bench, repeat, impl_postfix, preset):
+        """Initialize defaults."""
+        self._fmwrk = None
+        self._setup_time = -1
+        self._warmup_time = -1
+        self._teardown_time = -1
+        self._validation_state = -4
+        self._error_state = -1
+        self._error_msg = "Not implemented"
+        self._results = dict()
+        self._bench = bench
+        self._repeats = repeat
+        self._impl_postfix = impl_postfix
+        self._preset = preset
+
+        self.exec_times = np.zeros(repeat, np.float64)
 
     @property
     def benchmark(self):
@@ -86,14 +106,17 @@ class BenchmarkResults:
         Returns:
             str: The name of the Framework used for execution
         """
-        return self._fmwrk.fname
+        if self._fmwrk:
+            return self._fmwrk.fname
+        else:
+            return "Not available"
 
     @property
     def framework(self):
         return self._fmwrk
 
     @framework.setter
-    def framework(self, fmwrk):
+    def framework(self, fmwrk=None):
         self._fmwrk = fmwrk
 
     @property
@@ -103,7 +126,10 @@ class BenchmarkResults:
         Returns:
             str: The version of the Framework used for execution
         """
-        return self._fmwrk.version()
+        if self._fmwrk:
+            return self._fmwrk.version()
+        else:
+            return "Not available"
 
     @property
     def setup_time(self):
@@ -248,7 +274,7 @@ class BenchmarkResults:
         return self._results
 
     @results.setter
-    def results(self, results):
+    def results(self, results=None):
         self._results = results
 
     @property
@@ -264,7 +290,7 @@ class BenchmarkResults:
         return self._error_state
 
     @error_state.setter
-    def error_state(self, error_state):
+    def error_state(self, error_state=-1):
         self._error_state = error_state
 
     @property
@@ -272,7 +298,7 @@ class BenchmarkResults:
         return self._error_msg
 
     @error_msg.setter
-    def error_msg(self, error_msg):
+    def error_msg(self, error_msg="Not implemented"):
         self._error_msg = error_msg
 
 
@@ -283,16 +309,12 @@ class BenchmarkRunner:
         self.repeat = repeat
         self.timeout = timeout
         self.copied_args = dict()
-        self.results = BenchmarkResults()
+        self.results = BenchmarkResults(bench, repeat, impl_postfix, preset)
+
         self.impl_fn = self.bench.get_impl(impl_postfix)
         self.fmwrk = self.bench.get_framework(impl_postfix)
-
         self.results.benchmark = self.bench
         self.results.framework = self.fmwrk
-        self.results.benchmark_impl_postfix = impl_postfix
-        self.results.num_repeats = repeat
-        self.results.preset = preset
-        self.results.results = dict()
 
         if not self.impl_fn:
             self.results.error_state = -1
@@ -532,14 +554,14 @@ class Benchmark(object):
         for bimpl in impl_fnlist:
 
             if "_numba" in bimpl[0] and "_dpex" not in bimpl[0]:
-                impl_to_fw_map.update({bimpl[0]: dpbi.NumbaFramework("numba")})
+                impl_to_fw_map.update({bimpl[0]: NumbaFramework("numba")})
             elif "_numpy" in bimpl[0]:
-                impl_to_fw_map.update({bimpl[0]: dpbi.Framework("numpy")})
+                impl_to_fw_map.update({bimpl[0]: Framework("numpy")})
             elif "_python" in bimpl[0]:
-                impl_to_fw_map.update({bimpl[0]: dpbi.Framework("python")})
+                impl_to_fw_map.update({bimpl[0]: Framework("python")})
             elif "_dpex" in bimpl[0]:
                 try:
-                    fw = dpbi.NumbaDpexFramework("numba_dpex")
+                    fw = NumbaDpexFramework("numba_dpex")
                     impl_to_fw_map.update({bimpl[0]: fw})
                 except Exception as e:
                     warnings.warn(
@@ -548,7 +570,7 @@ class Benchmark(object):
                     )
             elif "_sycl" in bimpl[0]:
                 try:
-                    fw = dpbi.DpcppFramework("dpcpp")
+                    fw = DpcppFramework("dpcpp")
                     impl_to_fw_map.update({bimpl[0]: fw})
                 except Exception as e:
                     warnings.warn(
@@ -743,13 +765,20 @@ class Benchmark(object):
 
     def run(
         self,
+        conn=None,
         implementation_postfix: str = None,
         preset: str = "S",
         repeat: int = 10,
         validate: bool = True,
         timeout: float = 200.0,
+        run_datetime=None,
     ):
         results = []
+        if not run_datetime:
+            from datetime import datetime
+
+            run_datetime = datetime.now().strftime("%m.%d.%Y_%H.%M.%S")
+
         if implementation_postfix:
             # Run the benchmark for a specific implementation
             runner = BenchmarkRunner(
@@ -767,9 +796,10 @@ class Benchmark(object):
                     result.validation_state = 0
                 else:
                     result.validation_state = -1
-                    result.error_state = -3
+                    result.error_state = -4
                     result.error_msg = "Validation failed"
-
+            if conn:
+                store_results(conn, result, run_datetime)
             results.append(result)
 
         else:
@@ -795,6 +825,7 @@ class Benchmark(object):
                         result.validation_state = -1
                         result.error_state = -3
                         result.error_msg = "Validation failed"
-
+                if conn:
+                    store_results(conn, result, run_datetime)
                 results.append(result)
         return results

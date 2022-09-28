@@ -2,55 +2,40 @@
 #
 # SPDX-License-Identifier: Apache 2.0
 
-import hashlib
 import sqlite3
-
-
-def _generate_primary_key(sval: str):
-    return int(
-        hashlib.sha224(sval).hexdigest(),
-        16,
-    )
-
+from sys import implementation
 
 _sql_create_results_table = """
 CREATE TABLE IF NOT EXISTS results (
-    id integer PRIMARY KEY,
     timestamp integer NOT NULL,
     benchmark text NOT NULL,
     implementation text NOT NULL,
     platform text NOT NULL,
     framework_version text NOT NULL,
-    error_state integer NOT NULL,
+    error_state text NOT NULL,
     problem_preset text,
     setup_time real,
     warmup_time real,
-    repeats integer,
+    repeats text,
     min_exec_time real,
     max_exec_time real,
     median_exec_time real,
     quartile25_exec_time real,
     quartile75_exec_time real,
     teardown_time real,
-    validated integer
+    validated text,
+    PRIMARY KEY (timestamp, benchmark, implementation)
 );
 """
 
 _sql_insert_into_results_table = """
 INSERT INTO results(
-    id,
     timestamp,
     benchmark,
     implementation,
     platform,
     framework_version,
-    CASE error_state
-        WHEN -1 THEN "Unimplemented"
-        WHEN -2 THEN "Framework unavailable"
-        WHEN -3 THEN "Failed Execution"
-        WHEN -4 THEN "Failed Validation"
-        ELSE "SUCCESS"
-    END status,
+    error_state,
     problem_preset,
     repeats,
     setup_time,
@@ -61,11 +46,76 @@ INSERT INTO results(
     quartile25_exec_time,
     quartile75_exec_time,
     teardown_time,
-    CASE validated
-        WHEN 0 THEN "PASS"
-        ELSE "FAIL"
-    END validation_state
-) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
+    validated
+) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
+"""
+
+_sql_latest_implementation_summary = """
+SELECT
+    MAX(timestamp),
+    benchmark,
+    MAX(
+        CASE
+            WHEN implementation == "numba_dpex_k" THEN error_state
+            ELSE "N/A"
+        END
+    ) as numba_dpex_k,
+    MAX(
+        CASE
+            WHEN implementation == "numba_dpex_p" THEN error_state
+            ELSE "N/A"
+        END
+    ) as numba_dpex_p,
+    MAX(
+        CASE
+            WHEN implementation == "numba_dpex_n" THEN error_state
+            ELSE "N/A"
+        END
+    ) as numba_dpex_n,
+    MAX(
+        CASE
+            WHEN implementation == "dpnp" THEN error_state
+            ELSE "N/A"
+        END
+    ) as dpnp,
+    MAX(
+        CASE
+            WHEN implementation == "numpy" THEN error_state
+            ELSE "N/A"
+        END
+    ) as numpy,
+    MAX(
+        CASE
+            WHEN implementation == "python" THEN error_state
+            ELSE "N/A"
+        END
+    ) as python,
+    MAX(
+        CASE
+            WHEN implementation == "numba_n" THEN error_state
+            ELSE "N/A"
+        END
+    ) as numba_n,
+    MAX(
+        CASE
+            WHEN implementation == "numba_np" THEN error_state
+            ELSE "N/A"
+        END
+    ) as numba_np,
+    MAX(
+        CASE
+            WHEN implementation == "numba_npr" THEN error_state
+            ELSE "N/A"
+        END
+    ) as numba_npr,
+    MAX(
+        CASE
+            WHEN implementation == "sycl" THEN error_state
+            ELSE "N/A"
+        END
+    ) as dpcpp
+    FROM results
+    GROUP BY benchmark;
 """
 
 
@@ -98,20 +148,29 @@ def create_results_table(conn):
         print(e)
 
 
-def store_results(conn, result):
+def store_results(conn, result, run_timestamp):
     data = []
-    data.append(
-        _generate_primary_key(
-            result.benchmark_name + result.benchmark_impl_postfix
-        )
-    )
+
+    data.append(run_timestamp)
     data.append(result.benchmark_name)
     data.append(result.benchmark_impl_postfix)
     data.append("TODO")
     data.append(result.framework_name + " " + result.framework_version)
-    data.append(result.error_state)
+
+    if result.error_state == -1:
+        error_state_str = "Unimplemented"
+    elif result.error_state == -2:
+        error_state_str = "Framework unavailable"
+    elif result.error_state == -3:
+        error_state_str = "Failed Execution"
+    elif result.error_state == -4:
+        error_state_str = "Failed Validation"
+    else:
+        error_state_str = "Success"
+
+    data.append(error_state_str)
     data.append(result.preset)
-    data.append(result.num_repeats)
+    data.append(str(result.num_repeats))
     data.append(result.setup_time)
     data.append(result.warmup_time)
     data.append(result.min_exec_time)
@@ -120,8 +179,20 @@ def store_results(conn, result):
     data.append(result.quartile25_exec_time)
     data.append(result.quartile75_exec_time)
     data.append(result.teardown_time)
-    data.append(result.validation_state)
+
+    if result.validation_state == 0:
+        validation_str = "Success"
+    else:
+        validation_str = "Fail"
+    data.append(validation_str)
 
     cur = conn.cursor()
     cur.execute(_sql_insert_into_results_table, data)
     conn.commit()
+
+
+def print_implementation_summary(conn):
+    import pandas as pd
+
+    df = pd.read_sql_query(_sql_latest_implementation_summary, conn)
+    print(df.to_string())

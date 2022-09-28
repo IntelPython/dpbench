@@ -13,6 +13,34 @@ import dpbench.benchmarks as dp_bms
 import dpbench.infrastructure as dpbi
 
 
+def _print_results(result):
+    print("")
+    print(
+        "================ Benchmark "
+        + result.benchmark_name
+        + " ========================"
+    )
+    print("")
+
+    if result.error_state == 0:
+        print("implementation:", result.benchmark_impl_postfix)
+        print("framework:", result.framework_name)
+        print("framework version:", result.framework_version)
+        print("setup time:", result.setup_time)
+        print("warmup time:", result.warmup_time)
+        print("teardown time:", result.teardown_time)
+        print("max execution times:", result.max_exec_time)
+        print("min execution times:", result.min_exec_time)
+        print("median execution times:", result.median_exec_time)
+        print("repeats:", result.num_repeats)
+        print("preset:", result.preset)
+        print("validated:", result.validation_state)
+    else:
+        print("implementation:", result.benchmark_impl_postfix)
+        print("error states:", result.error_state)
+        print("error msg:", result.error_msg)
+
+
 def list_available_benchmarks():
     """Return the list of available benchmarks that ae in the
     dpbench.benchmarks module.
@@ -57,11 +85,8 @@ def run_benchmark(
     timeout=200.0,
     conn=None,
     run_datetime=None,
+    print_results=True,
 ):
-    print("")
-    print("================ Benchmark " + bname + " ========================")
-    print("")
-
     bench = None
     try:
         benchmod = importlib.import_module("dpbench.benchmarks." + bname)
@@ -83,27 +108,10 @@ def run_benchmark(
             conn=conn,
             run_datetime=run_datetime,
         )
+        if print_results:
+            for result in results:
+                _print_results(result)
 
-        for result in results:
-            print("=========================================================")
-
-            if result.error_state == 0:
-                print("implementation:", result.benchmark_impl_postfix)
-                print("framework:", result.framework_name)
-                print("framework version:", result.framework_version)
-                print("setup time:", result.setup_time)
-                print("warmup time:", result.warmup_time)
-                print("teardown time:", result.teardown_time)
-                print("max execution times:", result.max_exec_time)
-                print("min execution times:", result.min_exec_time)
-                print("median execution times:", result.median_exec_time)
-                print("repeats:", result.num_repeats)
-                print("preset:", result.preset)
-                print("validated:", result.validation_state)
-            else:
-                print("implementation:", result.benchmark_impl_postfix)
-                print("error states:", result.error_state)
-                print("error msg:", result.error_msg)
     except Exception as e:
         warnings.warn(
             "Benchmark execution failed due to the following error: "
@@ -120,6 +128,7 @@ def run_benchmarks(
     validate=True,
     timeout=200.0,
     dbfile=None,
+    print_results=True,
 ):
     """Run all benchmarks in the dpbench benchmark directory
     Args:
@@ -157,6 +166,7 @@ def run_benchmarks(
                 timeout=timeout,
                 conn=conn,
                 run_datetime=datetime_str,
+                print_results=print_results,
             )
 
     print("")

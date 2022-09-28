@@ -50,68 +50,70 @@ INSERT INTO results(
 ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
 """
 
+# Note the space before N/A is deliberate so that the MAX operator always
+# picks the error_state rather than N/A.
 _sql_latest_implementation_summary = """
 SELECT
-    MAX(timestamp),
+    MAX(timestamp) as As_of,
     benchmark,
     MAX(
         CASE
             WHEN implementation == "numba_dpex_k" THEN error_state
-            ELSE "N/A"
+            ELSE " N/A"
         END
     ) as numba_dpex_k,
     MAX(
         CASE
             WHEN implementation == "numba_dpex_p" THEN error_state
-            ELSE "N/A"
+            ELSE " N/A"
         END
     ) as numba_dpex_p,
     MAX(
         CASE
             WHEN implementation == "numba_dpex_n" THEN error_state
-            ELSE "N/A"
+            ELSE " N/A"
         END
     ) as numba_dpex_n,
     MAX(
         CASE
             WHEN implementation == "dpnp" THEN error_state
-            ELSE "N/A"
+            ELSE " N/A"
         END
     ) as dpnp,
     MAX(
         CASE
             WHEN implementation == "numpy" THEN error_state
-            ELSE "N/A"
+            ELSE " N/A"
         END
     ) as numpy,
     MAX(
         CASE
             WHEN implementation == "python" THEN error_state
-            ELSE "N/A"
+            ELSE " N/A"
         END
     ) as python,
     MAX(
         CASE
             WHEN implementation == "numba_n" THEN error_state
-            ELSE "N/A"
+            ELSE " N/A"
         END
     ) as numba_n,
     MAX(
         CASE
             WHEN implementation == "numba_np" THEN error_state
-            ELSE "N/A"
+            ELSE " N/A"
         END
     ) as numba_np,
     MAX(
         CASE
             WHEN implementation == "numba_npr" THEN error_state
-            ELSE "N/A"
+            ELSE " N/A"
         END
     ) as numba_npr,
     MAX(
         CASE
             WHEN implementation == "sycl" THEN error_state
-            ELSE "N/A"
+            ELSE " N/A"
         END
     ) as dpcpp
     FROM results

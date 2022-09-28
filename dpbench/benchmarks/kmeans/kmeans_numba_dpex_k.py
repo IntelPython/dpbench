@@ -95,8 +95,8 @@ def kmeans(
     arrayCsum,
     arrayCnumpoint,
     niters,
-    NUMBER_OF_POINTS,
-    NUMBER_OF_CENTROIDS,
+    nopt,
+    ncentroids,
 ):
 
     for i in range(REPEAT):
@@ -107,6 +107,6 @@ def kmeans(
             arrayCsum,
             arrayCnumpoint,
             niters,
-            NUMBER_OF_POINTS,
-            NUMBER_OF_CENTROIDS,
+            nopt,
+            ncentroids,
         )

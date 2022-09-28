@@ -52,14 +52,14 @@ template <typename... Args> bool ensure_compatibility(const Args &...args)
 
 void pairwise_distance_sync(dpctl::tensor::usm_ndarray X1,
                             dpctl::tensor::usm_ndarray X2,
-                            dpctl::tensor::usm_ndarray distance_op)
+                            dpctl::tensor::usm_ndarray D)
 {
     sycl::event res_ev;
     auto Queue = X1.get_queue();
     auto ndims = 3;
     auto npoints = X1.get_size() / ndims;
 
-    if (!ensure_compatibility(X1, X2, distance_op))
+    if (!ensure_compatibility(X1, X2, D))
         throw std::runtime_error("Input arrays are not acceptable.");
 
     if (X1.get_typenum() != UAR_DOUBLE || X2.get_typenum() != UAR_DOUBLE) {
@@ -67,8 +67,7 @@ void pairwise_distance_sync(dpctl::tensor::usm_ndarray X1,
     }
 
     pairwise_distance_impl(Queue, npoints, ndims, X1.get_data<double>(),
-                           X2.get_data<double>(),
-                           distance_op.get_data<double>());
+                           X2.get_data<double>(), D.get_data<double>());
 }
 
 PYBIND11_MODULE(_pairwise_distance_sycl, m)
@@ -78,5 +77,5 @@ PYBIND11_MODULE(_pairwise_distance_sycl, m)
 
     m.def("pairwise_distance", &pairwise_distance_sync,
           "DPC++ implementation of the pairwise_distance formula",
-          py::arg("X1"), py::arg("X1"), py::arg("distance_op"));
+          py::arg("X1"), py::arg("X2"), py::arg("D"));
 }

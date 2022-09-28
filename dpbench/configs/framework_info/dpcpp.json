@@ -5,6 +5,7 @@
         "prefix": "dp",
         "postfix": "dpcpp",
         "class": "DpcppFramework",
-        "arch": "cpu"
+        "arch": "cpu",
+        "sycl_device": "cpu"
     }
 }

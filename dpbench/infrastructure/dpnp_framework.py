@@ -1,6 +1,6 @@
 # Copyright 2022 Intel Corp.
 #
-# SPDX-License-Identifier: BSD-3-Clause
+# SPDX-License-Identifier: Apache 2.0
 
 import pathlib
 from typing import Any, Callable, Dict, Sequence, Tuple

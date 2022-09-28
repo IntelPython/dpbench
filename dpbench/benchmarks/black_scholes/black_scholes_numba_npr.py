@@ -9,9 +9,9 @@ import numba as nb
 
 
 @nb.njit(parallel=True, fastmath=True)
-def black_scholes(nopt, price, strike, t, rate, vol, call, put):
+def black_scholes(nopt, price, strike, t, rate, volatility, call, put):
     mr = -rate
-    sig_sig_two = vol * vol * 2
+    sig_sig_two = volatility * volatility * 2
 
     for i in nb.prange(nopt):
         P = price[i]

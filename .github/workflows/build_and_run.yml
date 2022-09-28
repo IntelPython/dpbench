@@ -56,11 +56,11 @@ jobs:
         run: |
           export OCL_ICD_FILENAMES=libintelocl.so
           LD_PRELOAD="${CONDA_PREFIX}/lib/libmkl_intel_ilp64.so ${CONDA_PREFIX}/lib/libmkl_tbb_thread.so ${CONDA_PREFIX}/lib/libmkl_core.so" python -c "import dpbench; dpbench.run_benchmarks()" || exit 1
-          LD_PRELOAD="${CONDA_PREFIX}/lib/libmkl_intel_ilp64.so ${CONDA_PREFIX}/lib/libmkl_tbb_thread.so ${CONDA_PREFIX}/lib/libmkl_core.so" python -c "import dpbench; dpbench.all_benchmarks_passed_validation(\"dpbench.db\");"
-          res=`                                                                    \
-            printf "%s"                                                            \
-            "$(python -c "import dpbench;                                          \
-                res=int(dpbench.all_benchmarks_passed_validation(\"dpbench.db\")); \
-                print(\"Validation:\",res)"                                        \
-              )" | grep Validation | cut -f 2 -d ":"` || exit 1
-          if [ ${res} == 0 ]; then exit 1; fi
+          # LD_PRELOAD="${CONDA_PREFIX}/lib/libmkl_intel_ilp64.so ${CONDA_PREFIX}/lib/libmkl_tbb_thread.so ${CONDA_PREFIX}/lib/libmkl_core.so" python -c "import dpbench; dpbench.all_benchmarks_passed_validation(\"dpbench.db\");"
+          # res=`                                                                    \
+          #   printf "%s"                                                            \
+          #   "$(python -c "import dpbench;                                          \
+          #       res=int(dpbench.all_benchmarks_passed_validation(\"dpbench.db\")); \
+          #       print(\"Validation:\",res)"                                        \
+          #     )" | grep Validation | cut -f 2 -d ":"` || exit 1
+          # if [ ${res} == 0 ]; then exit 1; fi

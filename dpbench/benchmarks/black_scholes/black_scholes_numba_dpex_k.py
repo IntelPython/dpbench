@@ -14,9 +14,9 @@ import numba_dpex as nb
         "write_only": ["call", "put"],
     }
 )
-def _black_scholes_kernel(nopt, price, strike, t, rate, vol, call, put):
+def _black_scholes_kernel(nopt, price, strike, t, rate, volatility, call, put):
     mr = -rate
-    sig_sig_two = vol * vol * 2
+    sig_sig_two = volatility * volatility * 2
 
     i = nb.get_global_id(0)
 
@@ -44,7 +44,7 @@ def _black_scholes_kernel(nopt, price, strike, t, rate, vol, call, put):
     put[i] = r - P + Se
 
 
-def black_scholes(nopt, price, strike, t, rate, vol, call, put):
+def black_scholes(nopt, price, strike, t, rate, volatility, call, put):
     _black_scholes_kernel[nopt, nb.DEFAULT_LOCAL_SIZE](
-        nopt, price, strike, t, rate, vol, call, put
+        nopt, price, strike, t, rate, volatility, call, put
     )

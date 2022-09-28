@@ -95,12 +95,12 @@ def kmeans(
     arrayCsum,
     arrayCnumpoint,
     niters,
-    NUMBER_OF_POINTS,
-    NUMBER_OF_CENTROIDS,
+    nopt,
+    ncentroids,
 ):
 
     for i in numba.prange(REPEAT):
-        copy_arrayC(arrayC, arrayP, NUMBER_OF_CENTROIDS)
+        copy_arrayC(arrayC, arrayP, ncentroids)
 
         arrayC, arrayCsum, arrayCnumpoint = kmeans_numba(
             arrayP,
@@ -109,6 +109,6 @@ def kmeans(
             arrayCsum,
             arrayCnumpoint,
             niters,
-            NUMBER_OF_POINTS,
-            NUMBER_OF_CENTROIDS,
+            nopt,
+            ncentroids,
         )

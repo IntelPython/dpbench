@@ -26,17 +26,19 @@ def list_available_benchmarks():
 
 def run_benchmark(
     bname,
+    implementation_postfix=None,
     fconfig_path=None,
     bconfig_path=None,
     preset="S",
-    repeat=1,
+    repeat=10,
     validate=True,
-    timeout=10.0,
+    timeout=200.0,
 ):
     print("")
     print("================ Benchmark " + bname + " ========================")
     print("")
 
+    bench = None
     try:
         benchmod = importlib.import_module("dpbench.benchmarks." + bname)
         bench = dpbi.Benchmark(benchmod, bconfig_path=bconfig_path)
@@ -47,80 +49,50 @@ def run_benchmark(
         )
         return
 
-    bench_impls = bench.get_impl_fnlist()
+    try:
+        results = bench.run(
+            implementation_postfix=implementation_postfix,
+            preset=preset,
+            repeat=repeat,
+            validate=validate,
+            timeout=timeout,
+        )
 
-    if not bench_impls:
+        for result in results:
+            print("=========================================================")
+
+            if result.error_state == 0:
+                print("implementation:", result.benchmark_impl_postfix)
+                print("framework:", result.framework_name)
+                print("framework version:", result.framework_version)
+                print("setup time:", result.setup_time)
+                print("warmup time:", result.warmup_time)
+                print("teardown time:", result.teardown_time)
+                print("max execution times:", result.max_exec_time)
+                print("min execution times:", result.min_exec_time)
+                print("median execution times:", result.median_exec_time)
+                print("repeats:", result.num_repeats)
+                print("preset:", result.preset)
+                print("validated:", result.validation_state)
+            else:
+                print("implementation:", result.benchmark_impl_postfix)
+                print("error states:", result.error_state)
+                print("error msg:", result.error_msg)
+    except Exception as e:
         warnings.warn(
-            "WARN: Skipping the benchmark "
-            + bname
-            + ". No implementations exist for the benchmark."
+            "Benchmark execution failed due to the following error: "
+            + e.__str__
         )
         return
-
-    fws = set()
-
-    # Create the needed Frameworks by looking at the benchmark
-    # implementations
-    # FIXME: Get the framework name from the framework JSON in the config
-    for bimpl in bench_impls:
-        if "_numba" in bimpl[0] and "_dpex" not in bimpl[0]:
-            fws.add(dpbi.NumbaFramework("numba"))
-        elif "_numpy" in bimpl[0]:
-            fws.add(dpbi.Framework("numpy"))
-        elif "_python" in bimpl[0]:
-            fws.add(dpbi.Framework("python"))
-        elif "_dpex" in bimpl[0]:
-            fws.add(dpbi.NumbaDpexFramework("numba_dpex", fconfig_path))
-        elif "_sycl" in bimpl[0]:
-            fws.add(dpbi.DpcppFramework("dpcpp", fconfig_path))
-        elif "_dpnp" in bimpl[0]:
-            # FIXME: dpnp framework needs to be fixed before uncommenting this
-            # step.
-            # fws.append(dpbi.DpnpFramework("dpnp"))
-            warnings.warn(
-                "DPNP Framework is broken, skipping dpnp implementation"
-            )
-            pass
-
-    # Check if a NumPy implementation of the benchmark is there. The
-    # NumPy implementation is used for validations.
-    fw_np = [fw for fw in fws if "numpy" in fw.fname or "python" in fw.fname]
-
-    if not fw_np:
-        warnings.warn(
-            "WARN: Skipping running "
-            + bname
-            + ". Missing NumPy implementation for the benchmark."
-        )
-        return
-
-    for fw in fws:
-        if fw not in fw_np:
-            test = dpbi.Test(bench=bench, frmwrk=fw, npfrmwrk=fw_np[0])
-            try:
-                test.run(
-                    preset=preset,
-                    repeat=repeat,
-                    validate=validate,
-                    timeout=timeout,
-                )
-            except Exception as e:
-                warnings.warn(
-                    "ERROR: Failed to test the "
-                    + fw.fname
-                    + " implementation for "
-                    + bname
-                    + ". The error is {}".format(e)
-                )
 
 
 def run_benchmarks(
     fconfig_path=None,
     bconfig_path=None,
     preset="S",
-    repeat=1,
+    repeat=10,
     validate=True,
-    timeout=10.0,
+    timeout=200.0,
 ):
     """Run all benchmarks in the dpbench benchmark directory
     Args:

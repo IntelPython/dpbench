@@ -14,14 +14,6 @@ import dpbench.infrastructure as dpbi
 
 
 def _print_results(result):
-    print("")
-    print(
-        "================ Benchmark "
-        + result.benchmark_name
-        + " ========================"
-    )
-    print("")
-
     if result.error_state == 0:
         print("implementation:", result.benchmark_impl_postfix)
         print("framework:", result.framework_name)
@@ -87,6 +79,9 @@ def run_benchmark(
     run_datetime=None,
     print_results=True,
 ):
+    print("")
+    print("================ Benchmark " + bname + " ========================")
+    print("")
     bench = None
     try:
         benchmod = importlib.import_module("dpbench.benchmarks." + bname)
@@ -121,7 +116,7 @@ def run_benchmark(
 def run_benchmarks(
     fconfig_path=None,
     bconfig_path=None,
-    preset="M",
+    preset="S",
     repeat=10,
     validate=True,
     timeout=200.0,

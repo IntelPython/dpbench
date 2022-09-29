@@ -347,7 +347,7 @@ class BenchmarkRunner:
         try:
             output_args = self.bench.info["output_args"]
         except KeyError:
-            logging.warning(
+            logging.info(
                 "No output args to reset as benchmarks has no array output."
             )
             return

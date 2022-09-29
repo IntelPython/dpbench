@@ -6,7 +6,7 @@ from typing import Any, Callable, Dict
 
 import dpctl
 
-from dpbench.infrastructure import Framework
+from .framework import Framework
 
 _impl = {
     "kernel-mode": "k",

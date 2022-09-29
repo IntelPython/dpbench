@@ -4,9 +4,9 @@
 
 import importlib
 import json
+import logging
 import pathlib
 import pkgutil
-import warnings
 from datetime import datetime
 
 import dpbench.benchmarks as dp_bms
@@ -66,7 +66,7 @@ def list_possible_implementations():
             impl_postfix_list = info.keys()
             return impl_postfix_list
     except Exception:
-        warnings.warn(
+        logging.exception(
             "impl postfix JSON file {b} could not be opened.".format(
                 b="impl_post_fix.json"
             )
@@ -91,10 +91,9 @@ def run_benchmark(
     try:
         benchmod = importlib.import_module("dpbench.benchmarks." + bname)
         bench = dpbi.Benchmark(benchmod, bconfig_path=bconfig_path)
-    except Exception as e:
-        warnings.warn(
+    except Exception:
+        logging.exception(
             "Skipping the benchmark execution due to the following error: "
-            + e.__str__
         )
         return
 
@@ -112,10 +111,9 @@ def run_benchmark(
             for result in results:
                 _print_results(result)
 
-    except Exception as e:
-        warnings.warn(
+    except Exception:
+        logging.exception(
             "Benchmark execution failed due to the following error: "
-            + e.__str__
         )
         return
 
@@ -123,7 +121,7 @@ def run_benchmark(
 def run_benchmarks(
     fconfig_path=None,
     bconfig_path=None,
-    preset="S",
+    preset="M",
     repeat=10,
     validate=True,
     timeout=200.0,
@@ -154,6 +152,7 @@ def run_benchmarks(
     impl_postfixes = list_possible_implementations()
 
     for b in list_available_benchmarks():
+
         for impl in impl_postfixes:
             run_benchmark(
                 bname=b,

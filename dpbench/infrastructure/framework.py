@@ -4,8 +4,8 @@
 # SPDX-License-Identifier: BSD-3-Clause
 
 import json
+import logging
 import pathlib
-import warnings
 from typing import Callable, Dict
 
 import dpctl
@@ -40,12 +40,12 @@ class Framework(object):
             with open(frmwrk_path) as json_file:
                 self.info = json.load(json_file)["framework"]
         except Exception as e:
-            print(
+            logging.exception(
                 "Framework JSON file {f} could not be opened.".format(
                     f=frmwrk_filename
                 )
             )
-            raise (e)
+            raise e
 
         try:
             self.sycl_device = self.info["sycl_device"]
@@ -53,12 +53,11 @@ class Framework(object):
         except KeyError:
             pass
         except dpctl.SyclDeviceCreationError as sdce:
-            warnings.warn(
+            logging.exception(
                 "Could not create a Sycl device using filter {} string".format(
                     self.info["sycl_device"]
                 )
             )
-            print(sdce)
             raise sdce
 
     def device_filter_string(self) -> str:
@@ -68,13 +67,15 @@ class Framework(object):
         try:
             return dpctl.SyclDevice(self.device).get_filter_string()
         except Exception:
-            return ""
+            logging.exception("No device string exists for device")
+            return "unknown"
 
     def version(self) -> str:
         """Returns the framework version."""
         try:
             return pkg_resources.get_distribution(self.fname).version
         except pkg_resources.DistributionNotFound:
+            logging.exception("No version information exists for framework")
             return "unknown"
 
     def copy_to_func(self) -> Callable:

@@ -2,8 +2,8 @@
 #
 # SPDX-License-Identifier: Apache 2.0
 
+import logging
 import sqlite3
-from sys import implementation
 
 _sql_create_results_table = """
 CREATE TABLE IF NOT EXISTS results (
@@ -132,8 +132,10 @@ def create_connection(db_file) -> sqlite3.Connection:
     try:
         conn = sqlite3.connect(db_file)
         return conn
-    except sqlite3.Error as e:
-        print(e)
+    except sqlite3.Error:
+        logging.exception(
+            "Failed to create a connection to database specified as " + db_file
+        )
 
     return conn
 
@@ -147,8 +149,11 @@ def create_results_table(conn):
     try:
         c = conn.cursor()
         c.execute(_sql_create_results_table)
-    except sqlite3.Error as e:
-        print(e)
+    except sqlite3.Error:
+        logging.exception(
+            "Failed to create the results table using "
+            + _sql_create_results_table
+        )
 
 
 def store_results(conn, result, run_timestamp):

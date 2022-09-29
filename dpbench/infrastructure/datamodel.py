@@ -56,6 +56,7 @@ _sql_latest_implementation_summary = """
 SELECT
     MAX(timestamp) as As_of,
     benchmark,
+    problem_preset as problem_size,
     MAX(
         CASE
             WHEN implementation == "numba_dpex_k" THEN error_state
@@ -117,7 +118,7 @@ SELECT
         END
     ) as dpcpp
     FROM results
-    GROUP BY benchmark;
+    GROUP BY benchmark, problem_preset;
 """
 
 

@@ -4,8 +4,8 @@
 # SPDX-License-Identifier: BSD-3-Clause
 
 import json
+import logging
 import pathlib
-import warnings
 from inspect import getmembers
 from typing import Any, Dict
 
@@ -38,7 +38,7 @@ def get_supported_implementation_postfixes():
         with open(impl_postfix_json) as json_file:
             return json.load(json_file)["impl_postfix"]
     except Exception as e:
-        warnings.warn("impl_postfix.json file not found")
+        logging.exception("impl_postfix.json file not found")
         raise (e)
 
 
@@ -347,7 +347,7 @@ class BenchmarkRunner:
         try:
             output_args = self.bench.info["output_args"]
         except KeyError:
-            warnings.warn(
+            logging.warning(
                 "No output args to reset as benchmarks has no array output."
             )
             return
@@ -377,19 +377,17 @@ class BenchmarkRunner:
         with timer.timer() as t:
             try:
                 warmup(self.impl_fn, inputs)
-            except KeyboardInterrupt as kbie:
-                warnings.warn(
+            except KeyboardInterrupt:
+                logging.exception(
                     "Benchmark {0} execution failed due to a timeout".format(
                         self.bench.bname
                     )
                 )
-                print(kbie)
                 self.results.error_state = -3
                 self.results.error_msg = "Execution failed"
                 return
-            except Exception as e:
-                warnings.warn("Benchmark execution failed")
-                print(e)
+            except Exception:
+                logging.exception("Benchmark execution failed.")
                 self.results.error_state = -3
                 self.results.error_msg = "Execution failed"
                 return
@@ -492,7 +490,7 @@ class Benchmark(object):
             with open(bench_path) as json_file:
                 self.info = json.load(json_file)["benchmark"]
         except Exception:
-            warnings.warn(
+            logging.exception(
                 "Benchmark JSON file {b} could not be opened.".format(
                     b=bench_filename
                 )
@@ -563,23 +561,21 @@ class Benchmark(object):
                 try:
                     fw = NumbaDpexFramework("numba_dpex")
                     impl_to_fw_map.update({bimpl[0]: fw})
-                except Exception as e:
-                    warnings.warn(
+                except Exception:
+                    logging.exception(
                         "Framework could not be created for numba_dpex due to:"
-                        + e.__str__
                     )
             elif "_sycl" in bimpl[0]:
                 try:
                     fw = DpcppFramework("dpcpp")
                     impl_to_fw_map.update({bimpl[0]: fw})
-                except Exception as e:
-                    warnings.warn(
+                except Exception:
+                    logging.exception(
                         "Framework could not be created for dpcpp due to:"
-                        + e.__str__
                     )
             elif "_dpnp" in bimpl[0]:
                 # FIXME: Fix the dpnp framework and implementations
-                warnings.warn(
+                logging.error(
                     "DPNP Framework is broken, skipping dpnp implementation"
                 )
 
@@ -604,7 +600,7 @@ class Benchmark(object):
             self.refdata.update({preset: ref_results.results})
             return ref_results.results
         else:
-            warnings.warn(
+            logging.error(
                 "Validation data unavailable as reference implementation "
                 + "could not be executed."
             )
@@ -620,7 +616,7 @@ class Benchmark(object):
             for key in ref_out.keys():
                 valid = validator_fn(ref_out[key], frmwrk_out[key])
                 if not valid:
-                    print(
+                    logging.error(
                         (
                             "Output did not match for {0}. "
                             + "Expected: {1} Actual: {2}"
@@ -692,14 +688,14 @@ class Benchmark(object):
             if self.bname + "_" + impl_postfix == impl[0]
         ]
         if len(fn) > 1:
-            warnings.warn(
+            logging.error(
                 "Unable to select any implementation as there are "
                 + "multiple implementations for "
                 + impl_postfix
             )
             return None
         elif not fn:
-            warnings.warn(
+            logging.error(
                 "No implementation exists for postfix: " + impl_postfix
             )
             return None
@@ -710,7 +706,7 @@ class Benchmark(object):
         try:
             return self.impl_to_fw_map[self.bname + "_" + impl_postfix]
         except KeyError:
-            warnings.warn(
+            logging.exception(
                 "No framework found for the implementation "
                 + self.bname
                 + "_"

@@ -2,6 +2,7 @@
 #
 # SPDX-License-Identifier: Apache 2.0
 
+from .black_scholes_dpnp import black_scholes as black_scholes_dpnp
 from .black_scholes_initialize import initialize
 from .black_scholes_numba_dpex_k import (
     black_scholes as black_scholes_numba_dpex_k,
@@ -21,6 +22,7 @@ from .black_scholes_sycl_native_ext import black_scholes_sycl
 
 __all__ = [
     "initialize",
+    "black_scholes_dpnp",
     "black_scholes_numba_dpex_k",
     "black_scholes_numba_dpex_n",
     "black_scholes_numba_dpex_p",

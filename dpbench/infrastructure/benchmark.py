@@ -574,10 +574,13 @@ class Benchmark(object):
                         "Framework could not be created for dpcpp due to:"
                     )
             elif "_dpnp" in bimpl[0]:
-                # FIXME: Fix the dpnp framework and implementations
-                logging.error(
-                    "DPNP Framework is broken, skipping dpnp implementation"
-                )
+                try:
+                    fw = DpcppFramework("dpnp")
+                    impl_to_fw_map.update({bimpl[0]: fw})
+                except Exception:
+                    logging.exception(
+                        "Framework could not be created for dpcpp due to:"
+                    )
 
         return impl_to_fw_map
 
@@ -819,7 +822,7 @@ class Benchmark(object):
                         result.validation_state = 0
                     else:
                         result.validation_state = -1
-                        result.error_state = -3
+                        result.error_state = -4
                         result.error_msg = "Validation failed"
                 if conn:
                     store_results(conn, result, run_datetime)

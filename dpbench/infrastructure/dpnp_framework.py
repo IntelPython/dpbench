@@ -34,13 +34,31 @@ class DpnpFramework(Framework):
     def copy_to_func(self) -> Callable:
         """Returns the copy-method that should be used
         for copying the benchmark arguments."""
-        import dpnp
 
-        return dpnp.copy
+        def _copy_to_func_impl(ref_array):
+            import dpnp
+
+            if ref_array.flags["C_CONTIGUOUS"]:
+                order = "C"
+            elif ref_array.flags["F_CONTIGUOUS"]:
+                order = "F"
+            else:
+                order = "K"
+            return dpnp.asarray(
+                obj=ref_array,
+                dtype=ref_array.dtype,
+                device=self.sycl_device,
+                copy=None,
+                usm_type=None,
+                sycl_queue=None,
+                order=order,
+            )
+
+        return _copy_to_func_impl
 
     def copy_from_func(self) -> Callable:
         """Returns the copy-method that should be used
         for copying the benchmark arguments."""
         import dpnp
 
-        return dpnp.copy
+        return dpnp.asnumpy

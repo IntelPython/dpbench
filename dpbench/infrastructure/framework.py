@@ -72,6 +72,10 @@ class Framework(object):
 
     def version(self) -> str:
         """Returns the framework version."""
+        if self.fname == "python":
+            import platform
+
+            return platform.python_version()
         try:
             return pkg_resources.get_distribution(self.fname).version
         except pkg_resources.DistributionNotFound:

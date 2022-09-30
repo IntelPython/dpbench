@@ -14,6 +14,11 @@ import dpbench.infrastructure as dpbi
 
 
 def _print_results(result):
+    print(
+        "================ implementation "
+        + result.benchmark_impl_postfix
+        + " ========================"
+    )
     if result.error_state == 0:
         print("implementation:", result.benchmark_impl_postfix)
         print("framework:", result.framework_name)

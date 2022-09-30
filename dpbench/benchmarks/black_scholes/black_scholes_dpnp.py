@@ -4,7 +4,7 @@
 
 import dpnp
 
-invsqrt = lambda x: np.true_divide(1.0, np.sqrt(x))
+invsqrt = lambda x: dpnp.true_divide(1.0, dpnp.sqrt(x))
 
 
 def black_scholes(nopt, price, strike, t, rate, volatility, call, put):

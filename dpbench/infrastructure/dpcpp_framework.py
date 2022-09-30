@@ -5,7 +5,7 @@
 import subprocess
 from typing import Callable
 
-from dpbench.infrastructure import Framework
+from .framework import Framework
 
 
 class DpcppFramework(Framework):
@@ -58,4 +58,4 @@ class DpcppFramework(Framework):
         # hack the dpcpp version, need validate dpcpp available first
         return subprocess.check_output(
             "dpcpp --version | grep -Po '\(.*?\)' | grep '\.'", shell=True
-        )
+        ).decode()

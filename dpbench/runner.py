@@ -3,11 +3,34 @@
 # SPDX-License-Identifier: Apache 2.0 License
 
 import importlib
+import json
+import logging
+import pathlib
 import pkgutil
-import warnings
+from datetime import datetime
 
 import dpbench.benchmarks as dp_bms
 import dpbench.infrastructure as dpbi
+
+
+def _print_results(result):
+    if result.error_state == 0:
+        print("implementation:", result.benchmark_impl_postfix)
+        print("framework:", result.framework_name)
+        print("framework version:", result.framework_version)
+        print("setup time:", result.setup_time)
+        print("warmup time:", result.warmup_time)
+        print("teardown time:", result.teardown_time)
+        print("max execution times:", result.max_exec_time)
+        print("min execution times:", result.min_exec_time)
+        print("median execution times:", result.median_exec_time)
+        print("repeats:", result.num_repeats)
+        print("preset:", result.preset)
+        print("validated:", result.validation_state)
+    else:
+        print("implementation:", result.benchmark_impl_postfix)
+        print("error states:", result.error_state)
+        print("error msg:", result.error_msg)
 
 
 def list_available_benchmarks():
@@ -24,6 +47,25 @@ def list_available_benchmarks():
     return submods
 
 
+def list_possible_implementations():
+
+    parent_folder = pathlib.Path(__file__).parent.absolute()
+    impl_postfix_json = parent_folder.joinpath("configs", "impl_postfix.json")
+
+    try:
+        with open(impl_postfix_json) as json_file:
+            info = json.load(json_file)["impl_postfix"]
+            impl_postfix_list = info.keys()
+            return impl_postfix_list
+    except Exception:
+        logging.exception(
+            "impl postfix JSON file {b} could not be opened.".format(
+                b="impl_post_fix.json"
+            )
+        )
+        raise
+
+
 def run_benchmark(
     bname,
     implementation_postfix=None,
@@ -33,19 +75,20 @@ def run_benchmark(
     repeat=10,
     validate=True,
     timeout=200.0,
+    conn=None,
+    run_datetime=None,
+    print_results=True,
 ):
     print("")
     print("================ Benchmark " + bname + " ========================")
     print("")
-
     bench = None
     try:
         benchmod = importlib.import_module("dpbench.benchmarks." + bname)
         bench = dpbi.Benchmark(benchmod, bconfig_path=bconfig_path)
-    except Exception as e:
-        warnings.warn(
+    except Exception:
+        logging.exception(
             "Skipping the benchmark execution due to the following error: "
-            + e.__str__
         )
         return
 
@@ -56,32 +99,16 @@ def run_benchmark(
             repeat=repeat,
             validate=validate,
             timeout=timeout,
+            conn=conn,
+            run_datetime=run_datetime,
         )
+        if print_results:
+            for result in results:
+                _print_results(result)
 
-        for result in results:
-            print("=========================================================")
-
-            if result.error_state == 0:
-                print("implementation:", result.benchmark_impl_postfix)
-                print("framework:", result.framework_name)
-                print("framework version:", result.framework_version)
-                print("setup time:", result.setup_time)
-                print("warmup time:", result.warmup_time)
-                print("teardown time:", result.teardown_time)
-                print("max execution times:", result.max_exec_time)
-                print("min execution times:", result.min_exec_time)
-                print("median execution times:", result.median_exec_time)
-                print("repeats:", result.num_repeats)
-                print("preset:", result.preset)
-                print("validated:", result.validation_state)
-            else:
-                print("implementation:", result.benchmark_impl_postfix)
-                print("error states:", result.error_state)
-                print("error msg:", result.error_msg)
-    except Exception as e:
-        warnings.warn(
+    except Exception:
+        logging.exception(
             "Benchmark execution failed due to the following error: "
-            + e.__str__
         )
         return
 
@@ -93,6 +120,8 @@ def run_benchmarks(
     repeat=10,
     validate=True,
     timeout=200.0,
+    dbfile=None,
+    print_results=True,
 ):
     """Run all benchmarks in the dpbench benchmark directory
     Args:
@@ -108,17 +137,31 @@ def run_benchmarks(
     print("===============================================================")
     print("")
     print("***Start Running DPBench***")
+    datetime_str = datetime.now().strftime("%m.%d.%Y_%H.%M.%S")
+    if not dbfile:
+        dbfile = "results_" + datetime_str + ".db"
+
+    conn = dpbi.create_connection(db_file=dbfile)
+    dpbi.create_results_table(conn)
+
+    impl_postfixes = list_possible_implementations()
 
     for b in list_available_benchmarks():
-        run_benchmark(
-            bname=b,
-            fconfig_path=fconfig_path,
-            bconfig_path=bconfig_path,
-            preset=preset,
-            repeat=repeat,
-            validate=validate,
-            timeout=timeout,
-        )
+
+        for impl in impl_postfixes:
+            run_benchmark(
+                bname=b,
+                implementation_postfix=impl,
+                fconfig_path=fconfig_path,
+                bconfig_path=bconfig_path,
+                preset=preset,
+                repeat=repeat,
+                validate=validate,
+                timeout=timeout,
+                conn=conn,
+                run_datetime=datetime_str,
+                print_results=print_results,
+            )
 
     print("")
     print("===============================================================")
@@ -127,6 +170,8 @@ def run_benchmarks(
     print("")
     print("===============================================================")
     print("")
+
+    dpbi.print_implementation_summary(conn=conn)
 
 
 def all_benchmarks_passed_validation(dbfile):

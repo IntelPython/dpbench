@@ -1,0 +1,1 @@
+add_subdirectory(l2_norm_sycl_native_ext)

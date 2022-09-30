@@ -8,12 +8,6 @@ import dpctl
 
 from .framework import Framework
 
-_impl = {
-    "kernel-mode": "k",
-    "numpy-mode": "n",
-    "prange-mode": "p",
-}
-
 
 class NumbaDpexFramework(Framework):
     """A class for reading and processing framework information."""
@@ -28,11 +22,13 @@ class NumbaDpexFramework(Framework):
     def imports(self) -> Dict[str, Any]:
         """Returns a dictionary any modules and methods needed for running
         a benchmark."""
-        import dpctl
 
         return {"dpctl": dpctl}
 
     def execute(self, impl_fn: Callable, input_args: Dict):
-
+        """The njit implementations for numba_dpex require calling the
+        functions inside a dpctl.device_context contextmanager to trigger
+        offload.
+        """
         with dpctl.device_context(self.sycl_device):
             return impl_fn(**input_args)

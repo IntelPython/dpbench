@@ -2,15 +2,15 @@
 #
 # SPDX-License-Identifier: Apache 2.0
 
-
+import logging
 from typing import Any, Callable, Dict
 
 import pkg_resources
 
-from .framework import Framework
+from .numba_dpex_framework import NumbaDpexFramework
 
 
-class DpnpFramework(Framework):
+class NumbaDpexKernelFramework(NumbaDpexFramework):
     """A class for reading and processing framework information."""
 
     def __init__(self, fname: str, fconfig_path: str = None):
@@ -19,10 +19,6 @@ class DpnpFramework(Framework):
         """
 
         super().__init__(fname, fconfig_path)
-
-    def version(self) -> str:
-        """Returns the framework version."""
-        return pkg_resources.get_distribution(self.fname).version
 
     def imports(self) -> Dict[str, Any]:
         """Returns a dictionary any modules and methods needed for running
@@ -33,10 +29,10 @@ class DpnpFramework(Framework):
 
     def copy_to_func(self) -> Callable:
         """Returns the copy-method that should be used
-        for copying the benchmark arguments."""
+        for copying the benchmark arguments to device."""
 
         def _copy_to_func_impl(ref_array):
-            import dpnp
+            import dpctl.tensor as dpt
 
             if ref_array.flags["C_CONTIGUOUS"]:
                 order = "C"
@@ -44,7 +40,7 @@ class DpnpFramework(Framework):
                 order = "F"
             else:
                 order = "K"
-            return dpnp.asarray(
+            return dpt.asarray(
                 obj=ref_array,
                 dtype=ref_array.dtype,
                 device=self.sycl_device,
@@ -58,7 +54,30 @@ class DpnpFramework(Framework):
 
     def copy_from_func(self) -> Callable:
         """Returns the copy-method that should be used
-        for copying the benchmark arguments."""
-        import dpnp
+        for copying results back to NumPy (host) from
+        any array created by the framework possibly on
+        a device memory domain."""
 
-        return dpnp.asnumpy
+        import dpctl.tensor as dpt
+
+        return dpt.asnumpy
+
+    def execute(self, impl_fn: Callable, input_args: Dict):
+        """Numba_dpex kernels support directly passing in
+        dpctl.tensor.usm_ndarray and compute follows data. No need for a
+        device_context.
+
+
+        :param impl_fn: A benchmark implementation.
+        :param input_args: Parameters to be passed to the kernel
+        """
+        return impl_fn(**input_args)
+
+    def version(self) -> str:
+        """Returns the numba-dpex version."""
+
+        try:
+            return pkg_resources.get_distribution("numba_dpex").version
+        except pkg_resources.DistributionNotFound:
+            logging.exception("No version information exists for framework")
+            return "unknown"

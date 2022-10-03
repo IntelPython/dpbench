@@ -24,13 +24,15 @@ void l2_norm_sync(dpctl::tensor::usm_ndarray a, dpctl::tensor::usm_ndarray d)
     // sycl::event res_ev;
     auto Queue = a.get_queue();
 
-    auto ndims = a.get_size();
+    auto dims = 3;
+    auto npoints = a.get_size() / dims;
 
     if (a.get_typenum() != UAR_DOUBLE) {
         throw std::runtime_error("Expected a double precision FP array.");
     }
 
-    l2_norm_impl(Queue, ndims, a.get_data<double>(), d.get_data<double>());
+    l2_norm_impl(Queue, npoints, dims, a.get_data<double>(),
+                 d.get_data<double>());
 }
 
 PYBIND11_MODULE(_l2_norm_sycl, m)

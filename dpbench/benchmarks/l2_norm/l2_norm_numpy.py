@@ -6,4 +6,4 @@ import numpy as np
 
 
 def l2_norm(a, d):
-    d[:] = np.linalg.norm(a)
+    d[:] = np.linalg.norm(a, axis=1)

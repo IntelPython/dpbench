@@ -9,22 +9,26 @@
         "domain": "Distance Compute",
         "parameters": {
             "S": {
-               "ndims": 32768,
+                "npoints": 32768,
+                "dims": 3,
                 "seed": 7777777
             },
             "M": {
-                "ndims": 268435456,
+                "npoints": 268435456,
+                "dims": 3,
                 "seed": 7777777
             },
             "L": {
-                "ndims": 536870912,
+                "npoints": 536870912,
+                "dims": 3,
                 "seed": 7777777
             }
         },
         "init": {
             "func_name": "initialize",
             "input_args": [
-                "ndims",
+                "npoints",
+	            "dims",
                 "seed"
             ],
             "output_args": [

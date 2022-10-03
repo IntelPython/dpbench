@@ -14,24 +14,26 @@
 using namespace sycl;
 
 template <typename FpTy>
-void l2_norm_impl(queue Queue, size_t ndims, const FpTy *a, FpTy *d)
+void l2_norm_impl(queue Queue,
+                  size_t npoints,
+                  size_t dims,
+                  const FpTy *a,
+                  FpTy *d)
 {
-    FpTy *sum = malloc_device<FpTy>(1, Queue);
+    // FpTy *sum = malloc_device<FpTy>(npoints, Queue);
 
-    Queue.fill<FpTy>(sum, 0., 1).wait();
+    Queue.fill<FpTy>(d, 0., npoints).wait();
 
     Queue
         .submit([&](handler &h) {
-            auto sumr = sycl::reduction(sum, sycl::plus<>());
-            h.parallel_for<class theKernel>(range<1>{ndims}, sumr,
-                                            [=](id<1> myID, auto &sumr_arg) {
-                                                size_t i = myID[0];
-                                                sumr_arg += a[i] * a[i];
-                                            });
+            h.parallel_for<class theKernel>(range<1>{npoints}, [=](id<1> myID) {
+                size_t i = myID[0];
+                for (size_t k = 0; k < dims; k++) {
+                    d[i] += a[i * dims + k] * a[i * dims + k];
+                }
+                d[i] = sqrt(d[i]);
+            });
         })
         .wait();
-
-    Queue.copy<FpTy>(sum, d, 1).wait();
-    sycl::free(sum, Queue);
-    *d = sqrt(*d);
+    //    Queue.copy<FpTy>(sum, d, 1).wait();
 }

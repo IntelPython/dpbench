@@ -5,21 +5,20 @@
 
 from math import erf
 
-from numpy import exp, log, sqrt
-
 import numba as nb
+from numpy import exp, log, sqrt
 
 
 @nb.vectorize(nopython=True)
-def nberf(x):
+def _nberf(x):
     return erf(x)
 
 
 # blackscholes implemented using numpy function calls
 @nb.njit(parallel=True, fastmath=True)
-def black_scholes_kernel(price, strike, t, rate, vol, call, put):
+def _black_scholes(price, strike, t, rate, volatility, call, put):
     mr = -rate
-    sig_sig_two = vol * vol * 2
+    sig_sig_two = volatility * volatility * 2
 
     P = price
     S = strike
@@ -35,8 +34,8 @@ def black_scholes_kernel(price, strike, t, rate, vol, call, put):
     w1 = (a - b + c) * y
     w2 = (a - b - c) * y
 
-    d1 = 0.5 + 0.5 * nberf(w1)
-    d2 = 0.5 + 0.5 * nberf(w2)
+    d1 = 0.5 + 0.5 * _nberf(w1)
+    d2 = 0.5 + 0.5 * _nberf(w2)
 
     Se = exp(b) * S
 
@@ -45,5 +44,5 @@ def black_scholes_kernel(price, strike, t, rate, vol, call, put):
     put[:] = r - P + Se
 
 
-def black_scholes(nopt, price, strike, t, rate, vol, call, put):
-    black_scholes_kernel(price, strike, t, rate, vol, call, put)
+def black_scholes(nopt, price, strike, t, rate, volatility, call, put):
+    _black_scholes(price, strike, t, rate, volatility, call, put)

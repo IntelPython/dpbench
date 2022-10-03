@@ -2,9 +2,8 @@
 #
 # SPDX-License-Identifier: Apache-2.0
 
-import numpy as np
-
 import numba as nb
+import numpy as np
 
 # This implementation is numba prange version without atomics.
 
@@ -50,17 +49,17 @@ def count_weighted_pairs_3d_diff_agg_ker(nbins, result, n):
             result[0, col_id] += result[i, col_id]
 
 
-def gpairs(npoints, nbins, x1, y1, z1, w1, x2, y2, z2, w2, rbins, results):
+def gpairs(nopt, nbins, x1, y1, z1, w1, x2, y2, z2, w2, rbins, results):
     # allocate per-work item private result vector in device global memory
-    results_disjoint = np.zeros((npoints, rbins.shape[0]), dtype=np.float32)
+    results_disjoint = np.zeros((nopt, rbins.shape[0]), dtype=np.float32)
 
     # call gpairs compute kernel
     count_weighted_pairs_3d_diff_ker(
-        npoints, nbins, x1, y1, z1, w1, x2, y2, z2, w2, rbins, results_disjoint
+        nopt, nbins, x1, y1, z1, w1, x2, y2, z2, w2, rbins, results_disjoint
     )
 
     # aggregate the results from the compute kernel
-    count_weighted_pairs_3d_diff_agg_ker(nbins, results_disjoint, npoints)
+    count_weighted_pairs_3d_diff_agg_ker(nbins, results_disjoint, nopt)
 
     # copy to results vector
     np.copyto(results, results_disjoint[0])

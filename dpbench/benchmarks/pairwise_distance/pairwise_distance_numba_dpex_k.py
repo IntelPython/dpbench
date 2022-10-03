@@ -7,7 +7,7 @@ import numpy as np
 
 
 @numba_dpex.kernel
-def pairwise_kernel(X1, X2, D):
+def _pairwise_distance_kernel(X1, X2, D):
     i = numba_dpex.get_global_id(0)
 
     N = X2.shape[0]
@@ -21,4 +21,6 @@ def pairwise_kernel(X1, X2, D):
 
 
 def pairwise_distance(X1, X2, D):
-    pairwise_kernel[X1.shape[0], numba_dpex.DEFAULT_LOCAL_SIZE](X1, X2, D)
+    _pairwise_distance_kernel[X1.shape[0], numba_dpex.DEFAULT_LOCAL_SIZE](
+        X1, X2, D
+    )

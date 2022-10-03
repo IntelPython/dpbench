@@ -3,9 +3,10 @@
 # SPDX-License-Identifier: Apache 2.0
 
 
+import numba_dpex as nb
+import numpy as np
+from numba import int64, jit
 from numba.experimental import jitclass
-
-from numba import int64
 
 queue_spec = [
     ("capacity", int64),
@@ -51,11 +52,6 @@ class Queue:
     def size(self):
         return self.tail - self.head
 
-
-import numba_dpex as nb
-import numpy as np
-
-from numba import jit
 
 NOISE = -1
 UNDEFINED = -2
@@ -142,10 +138,20 @@ def compute_clusters(n, min_pts, assignments, sizes, indices_list):
     return nclusters
 
 
-def dbscan(n, dim, data, eps, min_pts, assignments):
-    indices_list = np.empty(n * n, dtype=np.int64)
-    sizes = np.zeros(n, dtype=np.int64)
-    get_neighborhood[n, nb.DEFAULT_LOCAL_SIZE](
-        n, dim, data, eps, indices_list, sizes, assignments, 1, n
+def dbscan(n_samples, n_features, data, eps, min_pts, assignments):
+    indices_list = np.empty(n_samples * n_samples, dtype=np.int64)
+    sizes = np.zeros(n_samples, dtype=np.int64)
+    get_neighborhood[n_samples, nb.DEFAULT_LOCAL_SIZE](
+        n_samples,
+        n_features,
+        data,
+        eps,
+        indices_list,
+        sizes,
+        assignments,
+        1,
+        n_samples,
     )
-    return compute_clusters(n, min_pts, assignments, sizes, indices_list)
+    return compute_clusters(
+        n_samples, min_pts, assignments, sizes, indices_list
+    )

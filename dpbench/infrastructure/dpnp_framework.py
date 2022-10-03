@@ -1,25 +1,24 @@
 # Copyright 2022 Intel Corp.
 #
-# SPDX-License-Identifier: BSD-3-Clause
+# SPDX-License-Identifier: Apache 2.0
 
-import pathlib
-from typing import Any, Callable, Dict, Sequence, Tuple
+
+from typing import Any, Callable, Dict
 
 import pkg_resources
 
-from dpbench.infrastructure import Benchmark, Framework
+from .framework import Framework
 
 
 class DpnpFramework(Framework):
     """A class for reading and processing framework information."""
 
-    def __init__(self, fname: str, device: str = None):
+    def __init__(self, fname: str, fconfig_path: str = None):
         """Reads framework information.
         :param fname: The framework name.
         """
 
-        self.device = "default" if device is None else device
-        super().__init__(fname)
+        super().__init__(fname, fconfig_path)
 
     def version(self) -> str:
         """Returns the framework version."""
@@ -32,27 +31,34 @@ class DpnpFramework(Framework):
 
         return {"dpctl": dpctl}
 
-    def copy_func(self) -> Callable:
+    def copy_to_func(self) -> Callable:
+        """Returns the copy-method that should be used
+        for copying the benchmark arguments."""
+
+        def _copy_to_func_impl(ref_array):
+            import dpnp
+
+            if ref_array.flags["C_CONTIGUOUS"]:
+                order = "C"
+            elif ref_array.flags["F_CONTIGUOUS"]:
+                order = "F"
+            else:
+                order = "K"
+            return dpnp.asarray(
+                obj=ref_array,
+                dtype=ref_array.dtype,
+                device=self.sycl_device,
+                copy=None,
+                usm_type=None,
+                sycl_queue=None,
+                order=order,
+            )
+
+        return _copy_to_func_impl
+
+    def copy_from_func(self) -> Callable:
         """Returns the copy-method that should be used
         for copying the benchmark arguments."""
         import dpnp
 
-        return dpnp.copy
-
-    def exec_str(self, bench: Benchmark, impl: Callable = None):
-        """Generates the execution-string that should be used to call
-        the benchmark implementation.
-        :param bench: A benchmark.
-        :param impl: A benchmark implementation.
-        """
-
-        dpctl_ctx_str = (
-            "with dpctl.device_context(dpctl.select_{d}_device()): ".format(
-                d=self.device
-            )
-        )
-        arg_str = self.arg_str(bench, impl)
-        main_exec_str = "__dpb_result = __dpb_impl[4000000,]({a})".format(
-            a=arg_str
-        )
-        return dpctl_ctx_str + main_exec_str
+        return dpnp.asnumpy

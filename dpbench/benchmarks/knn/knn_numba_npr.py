@@ -4,9 +4,8 @@
 
 import math
 
-import numpy as np
-
 import numba
+import numpy as np
 
 
 @numba.njit(parallel=True, fastmath=True)
@@ -84,7 +83,8 @@ def knn(
                     queue_neighbors[index, 0] = new_distance
                     queue_neighbors[index, 1] = new_neighbor_label
 
-        # Deep copy is added to avoid divided by zero during validation: return np.linalg.norm(ref - val) / np.linalg.norm(ref)
+        # Deep copy is added to avoid divided by zero during
+        # validation: return np.linalg.norm(ref - val) / np.linalg.norm(ref)
         v_to_c_i = np.copy(votes_to_classes[i])
 
         for j in range(k):

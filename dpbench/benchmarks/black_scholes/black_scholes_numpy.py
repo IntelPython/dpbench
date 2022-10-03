@@ -1,37 +1,35 @@
-# Copyright 2022 Intel Corporation
+# Copyright 2022 Intel Corp.
 #
-# SPDX-License-Identifier: Apache 2.0
+# SPDX-License-Identifier: Apache-2.0
 
-from math import erf, exp, log, sqrt
+import numpy as np
+from scipy.special import erf
+
+invsqrt = lambda x: np.true_divide(1.0, np.sqrt(x))
 
 
-def invsqrt(x):
-    return 1.0 / sqrt(x)
-
-
-def black_scholes(nopt, price, strike, t, rate, vol, call, put):
+def black_scholes(nopt, price, strike, t, rate, volatility, call, put):
     mr = -rate
-    sig_sig_two = vol * vol * 2
+    sig_sig_two = volatility * volatility * 2
 
-    for i in range(nopt):
-        P = float(price[i])
-        S = strike[i]
-        T = t[i]
+    P = price
+    S = strike
+    T = t
 
-        a = log(P / S)
-        b = T * mr
+    a = np.log(P / S)
+    b = T * mr
 
-        z = T * sig_sig_two
-        c = 0.25 * z
-        y = invsqrt(z)
+    z = T * sig_sig_two
+    c = 0.25 * z
+    y = invsqrt(z)
 
-        w1 = (a - b + c) * y
-        w2 = (a - b - c) * y
+    w1 = (a - b + c) * y
+    w2 = (a - b - c) * y
 
-        d1 = 0.5 + 0.5 * erf(w1)
-        d2 = 0.5 + 0.5 * erf(w2)
+    d1 = 0.5 + 0.5 * erf(w1)
+    d2 = 0.5 + 0.5 * erf(w2)
 
-        Se = exp(b) * S
+    Se = np.exp(b) * S
 
-        call[i] = P * d1 - Se * d2
-        put[i] = call[i] - P + Se
+    call[:] = P * d1 - Se * d2
+    put[:] = call - P + Se

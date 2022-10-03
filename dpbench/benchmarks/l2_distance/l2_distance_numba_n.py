@@ -2,13 +2,12 @@
 #
 # SPDX-License-Identifier: Apache-2.0
 
-import numpy as np
-
 import numba as nb
+import numpy as np
 
 
 @nb.njit(parallel=False, fastmath=True)
-def l2_distance(a, b, d):
+def l2_distance(a, b):
     sub = a - b
     sq = np.square(sub)
     sum = np.sum(sq)

@@ -1,2 +1,3 @@
 add_subdirectory(black_scholes)
 add_subdirectory(pairwise_distance)
+add_subdirectory(l2_norm)

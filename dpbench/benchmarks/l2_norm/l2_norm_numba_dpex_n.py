@@ -7,9 +7,7 @@ import numpy as np
 
 
 @nb.njit(parallel=True, fastmath=True)
-def l2_distance(a, b):
-    sub = a - b
-    sq = np.square(sub)
-    sum = np.sum(sq)
-    d = np.sqrt(sum)
-    return d
+def l2_norm(a, d):
+    sq = np.square(a)
+    sum = sq.sum(axis=1)
+    d[:] = np.sqrt(sum)

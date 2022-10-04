@@ -55,7 +55,13 @@ class DpcppFramework(Framework):
 
     def version(self) -> str:
         """Returns the framework version."""
-        # hack the dpcpp version, need validate dpcpp available first
-        return subprocess.check_output(
-            "dpcpp --version | grep -Po '\(.*?\)' | grep '\.'", shell=True
-        ).decode()
+        import json
+        import pathlib
+
+        parent_folder = pathlib.Path(__file__).parent.absolute()
+        version_file = parent_folder.joinpath(
+            "..", "configs", "framework_info", "dpcpp_version.json"
+        )
+        with open(version_file) as json_file:
+            version = json.load(json_file)["dpcpp_version"]
+        return version

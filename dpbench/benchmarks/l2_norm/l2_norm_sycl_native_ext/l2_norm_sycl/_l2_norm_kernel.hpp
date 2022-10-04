@@ -20,10 +20,6 @@ void l2_norm_impl(queue Queue,
                   const FpTy *a,
                   FpTy *d)
 {
-    // FpTy *sum = malloc_device<FpTy>(npoints, Queue);
-
-    Queue.fill<FpTy>(d, 0., npoints).wait();
-
     Queue
         .submit([&](handler &h) {
             h.parallel_for<class theKernel>(range<1>{npoints}, [=](id<1> myID) {
@@ -35,5 +31,4 @@ void l2_norm_impl(queue Queue,
             });
         })
         .wait();
-    //    Queue.copy<FpTy>(sum, d, 1).wait();
 }

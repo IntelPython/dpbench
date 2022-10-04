@@ -13,5 +13,5 @@ def initialize(npoints, dims, seed):
 
     return (
         default_rng.random((npoints, dims)).astype(dtype),
-        np.empty(npoints),
+        np.zeros(npoints).astype(dtype),
     )

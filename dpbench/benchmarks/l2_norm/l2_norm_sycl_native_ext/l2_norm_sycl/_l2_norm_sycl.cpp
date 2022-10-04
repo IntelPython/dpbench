@@ -21,7 +21,6 @@ namespace py = pybind11;
 
 void l2_norm_sync(dpctl::tensor::usm_ndarray a, dpctl::tensor::usm_ndarray d)
 {
-    // sycl::event res_ev;
     auto Queue = a.get_queue();
 
     auto dims = 3;
@@ -37,7 +36,6 @@ void l2_norm_sync(dpctl::tensor::usm_ndarray a, dpctl::tensor::usm_ndarray d)
 
 PYBIND11_MODULE(_l2_norm_sycl, m)
 {
-    // Import the dpctl extensions
     import_dpctl();
 
     m.def("l2_norm", &l2_norm_sync,

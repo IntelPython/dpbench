@@ -1,26 +1,26 @@
 {
     "benchmark": {
         "name": "L2 Computation",
-        "short_name": "l2-distance",
-        "relative_path": "l2_distance",
-        "module_name": "l2_distance",
-        "func_name": "l2_distance",
+        "short_name": "l2-norm",
+        "relative_path": "l2_norm",
+        "module_name": "l2_norm",
+        "func_name": "l2_norm",
         "kind": "microbenchmark",
         "domain": "Distance Compute",
         "parameters": {
             "S": {
                 "npoints": 32768,
-                "dims": 1,
+                "dims": 3,
                 "seed": 7777777
             },
             "M": {
                 "npoints": 268435456,
-                "dims": 1,
+                "dims": 3,
                 "seed": 7777777
             },
             "L": {
                 "npoints": 536870912,
-                "dims": 1,
+                "dims": 3,
                 "seed": 7777777
             }
         },
@@ -33,16 +33,19 @@
             ],
             "output_args": [
                 "a",
-                "b"
+                "d"
             ]
         },
         "input_args": [
             "a",
-            "b"
+            "d"
         ],
         "array_args": [
             "a",
-            "b"
+            "d"
+        ],
+        "output_args": [
+            "d"
         ]
     }
 }

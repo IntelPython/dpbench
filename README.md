@@ -10,15 +10,17 @@
 ## Examples of setting up and running the benchmarks
 1. Setting up conda environment and installing dependencies:
 
-        $ conda create -n dpbench
-        $ conda activate dpbench
-        $ conda install python=3.9 numpy cython cmake ninja scikit-build conda-forge::gtest conda-forge::gmock pytest
-        $ conda install dpnp -c dppy/label/dev -c /opt/intel/oneapi/conda_channel --override-channels
-        $ conda install numba scipy scikit-learn spirv-tools
-        $ conda install pybind11
-        $ conda install dpcpp_linux-64 -c intel
+        $ conda create -n dpbench-dev
+        $ conda activate dpbench-dev
+        $ conda install python=3.9 
+        $ conda install -c intel tbb=2021.6.0 dpcpp_linux-64
+        $ conda install numpy numba cython cmake ninja scikit-build pandas
+        $ conda install scipy spirv-tools scikit-learn pybind11
+        # do not miss the quotes!
+        $ conda install -c pkgs/main libgcc-ng">=11.2.0" libstdcxx-ng">=11.2.0" libgomp">=11.2.0"
+        $ conda install -c dppy/label/dev -c intel dpctl=0.13.0 numba-dpex=0.18.1 dpnp=0.10.1
 
-2. Build Numba-Dpex
+2. Build Numba-Dpex (If you want to use your own numba-dpex)
 
         $ git clone https://github.com/IntelPython/numba-dpex.git
         $ cd numba-dpex/
@@ -26,17 +28,19 @@
         $ cd ..
 
 3. Build and run DPBench
-
-        #To build:
+    - To build:
+        ```bash
         $  CC=icx CXX=icpx python setup.py develop -- -Dpybind11_DIR=$(python -m pybind11 --cmakedir) -DDPCTL_MODULE_PATH=$(python -m dpctl --cmakedir)
-        #To run, taking black_scholes for example:
+        ```
+    - To run, taking black_scholes for example:
+        ```bash
         $  python -c "import dpbench; dpbench.run_benchmark(\"black_scholes\")"
+        ```
 
 4. Device Customization
 
-        #Device can be selected via providing customized arch in framework Json file. Here is an example:
-
-```json
+   Device can be selected via providing customized arch in framework Json file. Here is an example:
+    ```json
         {
             "framework": {
                 "simple_name": "dpcpp",
@@ -47,8 +51,9 @@
                 "arch": "gpu"
             }
         }
-```
+    ```
 
-        #To run with custimized Json file:
-
-        $ python -c "import dpbench; dpbench.run_benchmark(\"black_scholes\", "<absolute path to json file>")"
+   To run with custimized Json file:
+    ```bash
+    $ python -c "import dpbench; dpbench.run_benchmark(\"black_scholes\", "<absolute path to json file>")"
+    ```

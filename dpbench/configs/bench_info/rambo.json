@@ -9,19 +9,40 @@
         "domain": "Particles Physics",
         "parameters": {
             "S": {
-                "evts": 1048576
+                "nevts": 32768,
+                "nout": 4
             },
             "M": {
-                "evts": 8388608
+                "nevts": 8388608,
+                "nout": 4
             },
             "L": {
-                "evts": 16777216
+                "nevts": 16777216,
+                "nout": 4
             }
         },
+        "init": {
+            "func_name": "initialize",
+            "input_args": [
+                "nevts",
+                "nout"
+            ],
+            "output_args": [
+                "nevts",
+                "nout",
+                "output"
+            ]
+        },
         "input_args": [
-            "evts"
+            "nevts",
+            "nout",
+            "output"
         ],
         "array_args": [
+            "output"
+        ],
+        "output_args": [
+            "output"
         ]
     }
 }

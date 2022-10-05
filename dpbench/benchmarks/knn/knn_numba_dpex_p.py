@@ -4,6 +4,7 @@
 
 from .knn_numba_npr import knn as knn_npr
 
+
 def knn(
     x_train,
     y_train,
@@ -14,9 +15,9 @@ def knn(
     train_size,
     predictions,
     votes_to_classes,
-    data_dim
+    data_dim,
 ):
-    knn_npr (
+    knn_npr(
         x_train,
         y_train,
         x_test,
@@ -26,5 +27,5 @@ def knn(
         train_size,
         predictions,
         votes_to_classes,
-        data_dim
+        data_dim,
     )

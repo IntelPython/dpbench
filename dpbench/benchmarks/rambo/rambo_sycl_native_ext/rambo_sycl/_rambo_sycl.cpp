@@ -53,11 +53,7 @@ template <typename... Args> bool ensure_compatibility(const Args &...args)
 
 } // namespace
 
-
-
-void rambo_sync(size_t nevts,
-                size_t nout,
-                dpctl::tensor::usm_ndarray output)
+void rambo_sync(size_t nevts, size_t nout, dpctl::tensor::usm_ndarray output)
 {
     auto Queue = output.get_queue();
 
@@ -67,29 +63,28 @@ void rambo_sync(size_t nevts,
         throw std::runtime_error("Expected a double precision FP array.");
     }
 
-    const size_t inputSize=nevts * nout;
+    const size_t inputSize = nevts * nout;
     std::vector<double> C1(inputSize), F1(inputSize), Q1(inputSize);
 
     e2.seed(777);
-    for(auto i=0; i<nevts; i++) {
-        for(auto j=0; j<nout; j++) {
-            C1[i*nout+j]=genRand<double>();
-            F1[i*nout+j]=genRand<double>();
-            Q1[i*nout+j]=genRand<double>()*genRand<double>();
+    for (auto i = 0; i < nevts; i++) {
+        for (auto j = 0; j < nout; j++) {
+            C1[i * nout + j] = genRand<double>();
+            F1[i * nout + j] = genRand<double>();
+            Q1[i * nout + j] = genRand<double>() * genRand<double>();
         }
     }
-    
+
     double *usmC1 = malloc_device<double>(inputSize, Queue);
     double *usmF1 = malloc_device<double>(inputSize, Queue);
     double *usmQ1 = malloc_device<double>(inputSize, Queue);
 
     Queue.copy<double>(&C1[0], usmC1, inputSize).wait();
     Queue.copy<double>(&F1[0], usmF1, inputSize).wait();
-    Queue.copy<double>(&Q1[0], usmQ1, inputSize).wait();   
-    
-    rambo_impl(Queue, nevts, nout, usmC1,
-                       usmF1, usmQ1, 
-                       output.get_data<double>());
+    Queue.copy<double>(&Q1[0], usmQ1, inputSize).wait();
+
+    rambo_impl(Queue, nevts, nout, usmC1, usmF1, usmQ1,
+               output.get_data<double>());
 
     free(usmC1, Queue);
     free(usmF1, Queue);
@@ -100,7 +95,6 @@ PYBIND11_MODULE(_rambo_sycl, m)
 {
     import_dpctl();
 
-    m.def("rambo", &rambo_sync,
-          "DPC++ implementation of the Rambo formula", py::arg("nevts"),
-          py::arg("nout"), py::arg("output"));
+    m.def("rambo", &rambo_sync, "DPC++ implementation of the Rambo formula",
+          py::arg("nevts"), py::arg("nout"), py::arg("output"));
 }

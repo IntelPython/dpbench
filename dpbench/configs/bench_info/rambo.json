@@ -9,7 +9,7 @@
         "domain": "Particles Physics",
         "parameters": {
             "S": {
-                "nevts": 2,
+                "nevts": 32768,
                 "nout": 4
             },
             "M": {

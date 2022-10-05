@@ -9,6 +9,7 @@ from .rambo_numba_dpex_p import rambo as rambo_numba_dpex_p
 from .rambo_numba_n import rambo as rambo_numba_n
 from .rambo_numba_npr import rambo as rambo_numba_npr
 from .rambo_numpy import rambo as rambo_numpy
+from .rambo_sycl_native_ext import rambo_sycl
 
 __all__ = [
     "initialize",
@@ -18,4 +19,5 @@ __all__ = [
     "rambo_numba_n",
     "rambo_numba_npr",
     "rambo_numpy",
+    "rambo_sycl",
 ]

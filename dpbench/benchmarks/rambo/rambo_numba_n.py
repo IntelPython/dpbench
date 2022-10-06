@@ -9,7 +9,7 @@ import numpy as np
 @nb.njit(parallel=False, fastmath=True)
 def rambo(nevts, nout, C1, F1, Q1, output):
 
-    for i in nb.prange(nevts):
+    for i in range(nevts):
         for j in range(nout):
             C = 2.0 * C1[i, j] - 1.0
             S = np.sqrt(1 - np.square(C))

@@ -7,23 +7,8 @@ import numba
 import numpy
 
 
-def gen_rand_data(nevts, nout):
-    C1 = numpy.empty((nevts, nout))
-    F1 = numpy.empty((nevts, nout))
-    Q1 = numpy.empty((nevts, nout))
-
-    numpy.random.seed(777)
-    for i in range(nevts):
-        for j in range(nout):
-            C1[i, j] = numpy.random.rand()
-            F1[i, j] = numpy.random.rand()
-            Q1[i, j] = numpy.random.rand() * numpy.random.rand()
-
-    return C1, F1, Q1
-
-
 @numba.jit(nopython=True, parallel=True, fastmath=True)
-def _rambo(C1, F1, Q1, nevts, nout, output):
+def rambo(nevts, nout, C1, F1, Q1, output):
 
     for i in numba.prange(nevts):
         for j in range(nout):
@@ -36,9 +21,3 @@ def _rambo(C1, F1, Q1, nevts, nout, output):
             output[i, j, 1] = Q * S * numpy.sin(F)
             output[i, j, 2] = Q * S * numpy.cos(F)
             output[i, j, 3] = Q * C
-
-
-def rambo(nevts, nout, output):
-    C1, F1, Q1 = gen_rand_data(nevts, nout)
-
-    _rambo(C1, F1, Q1, nevts, nout, output)

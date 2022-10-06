@@ -30,15 +30,24 @@
             "output_args": [
                 "nevts",
                 "nout",
+                "C1",
+                "F1",
+                "Q1",
                 "output"
             ]
         },
         "input_args": [
             "nevts",
             "nout",
+            "C1",
+            "F1",
+            "Q1",
             "output"
         ],
         "array_args": [
+            "C1",
+            "F1",
+            "Q1",
             "output"
         ],
         "output_args": [

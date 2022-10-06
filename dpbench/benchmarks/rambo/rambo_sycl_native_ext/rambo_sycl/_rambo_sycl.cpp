@@ -39,10 +39,6 @@ template <typename... Args> bool ensure_compatibility(const Args &...args)
             std::cerr << "All arrays should be of same elemental type.\n";
             return false;
         }
-        if (arr.get_ndim() > 1) {
-            std::cerr << "All arrays expected to be single-dimensional.\n";
-            return false;
-        }
         if (arr.get_size() != arr_size) {
             std::cerr << "All arrays expected to be of same size.\n";
             return false;
@@ -53,42 +49,26 @@ template <typename... Args> bool ensure_compatibility(const Args &...args)
 
 } // namespace
 
-void rambo_sync(size_t nevts, size_t nout, dpctl::tensor::usm_ndarray output)
+void rambo_sync(size_t nevts,
+                size_t nout,
+                dpctl::tensor::usm_ndarray C1,
+                dpctl::tensor::usm_ndarray F1,
+                dpctl::tensor::usm_ndarray Q1,
+                dpctl::tensor::usm_ndarray output)
 {
     auto Queue = output.get_queue();
 
-    auto typenum = output.get_typenum();
+    if (!ensure_compatibility(C1, F1, Q1))
+        throw std::runtime_error("Input arrays are not acceptable.");
 
-    if (typenum != UAR_DOUBLE) {
+    if (C1.get_typenum() != UAR_DOUBLE || F1.get_typenum() != UAR_DOUBLE ||
+        Q1.get_typenum() != UAR_DOUBLE || output.get_typenum() != UAR_DOUBLE)
+    {
         throw std::runtime_error("Expected a double precision FP array.");
     }
 
-    const size_t inputSize = nevts * nout;
-    std::vector<double> C1(inputSize), F1(inputSize), Q1(inputSize);
-
-    e2.seed(777);
-    for (auto i = 0; i < nevts; i++) {
-        for (auto j = 0; j < nout; j++) {
-            C1[i * nout + j] = genRand<double>();
-            F1[i * nout + j] = genRand<double>();
-            Q1[i * nout + j] = genRand<double>() * genRand<double>();
-        }
-    }
-
-    double *usmC1 = malloc_device<double>(inputSize, Queue);
-    double *usmF1 = malloc_device<double>(inputSize, Queue);
-    double *usmQ1 = malloc_device<double>(inputSize, Queue);
-
-    Queue.copy<double>(&C1[0], usmC1, inputSize).wait();
-    Queue.copy<double>(&F1[0], usmF1, inputSize).wait();
-    Queue.copy<double>(&Q1[0], usmQ1, inputSize).wait();
-
-    rambo_impl(Queue, nevts, nout, usmC1, usmF1, usmQ1,
-               output.get_data<double>());
-
-    free(usmC1, Queue);
-    free(usmF1, Queue);
-    free(usmQ1, Queue);
+    rambo_impl(Queue, nevts, nout, C1.get_data<double>(), F1.get_data<double>(),
+               Q1.get_data<double>(), output.get_data<double>());
 }
 
 PYBIND11_MODULE(_rambo_sycl, m)
@@ -96,5 +76,6 @@ PYBIND11_MODULE(_rambo_sycl, m)
     import_dpctl();
 
     m.def("rambo", &rambo_sync, "DPC++ implementation of the Rambo formula",
-          py::arg("nevts"), py::arg("nout"), py::arg("output"));
+          py::arg("nevts"), py::arg("nout"), py::arg("C1"), py::arg("F1"),
+          py::arg("Q1"), py::arg("output"));
 }

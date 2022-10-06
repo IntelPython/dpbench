@@ -1,0 +1,1 @@
+add_subdirectory(rambo_sycl_native_ext)

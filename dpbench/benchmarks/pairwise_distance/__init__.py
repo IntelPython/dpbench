@@ -6,17 +6,17 @@ from .pairwise_distance_initialize import initialize
 from .pairwise_distance_numba_dpex_k import (
     pairwise_distance as pairwise_distance_numba_dpex_k,
 )
-from .pairwise_distance_numba_dpex_p import (
-    pairwise_distance as pairwise_distance_numba_dpex_p,
-)
 from .pairwise_distance_numba_dpex_n import (
     pairwise_distance as pairwise_distance_numba_dpex_n,
 )
-from .pairwise_distance_numba_npr import (
-    pairwise_distance as pairwise_distance_numba_npr,
+from .pairwise_distance_numba_dpex_p import (
+    pairwise_distance as pairwise_distance_numba_dpex_p,
 )
 from .pairwise_distance_numba_np import (
     pairwise_distance as pairwise_distance_numba_np,
+)
+from .pairwise_distance_numba_npr import (
+    pairwise_distance as pairwise_distance_numba_npr,
 )
 from .pairwise_distance_numpy import (
     pairwise_distance as pairwise_distance_numpy,

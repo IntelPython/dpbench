@@ -16,7 +16,7 @@ def _nberf(x):
 
 @nb.njit(parallel=True, fastmath=True)
 def black_scholes(nopt, price, strike, t, rate, volatility, call, put):
-   """Documentation for black_scholes function
+    """Documentation for black_scholes function
 
     The Black-Scholes program computes the price of a portfolio of
     options using partial differential equations.

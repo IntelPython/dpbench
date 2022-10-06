@@ -99,28 +99,3 @@ def knn(
                 max_ind = j
 
         predictions[i] = max_ind
-
-# def knn(
-#     x_train,
-#     y_train,
-#     x_test,
-#     k,
-#     classes_num,
-#     test_size,
-#     train_size,
-#     predictions,
-#     votes_to_classes,
-#     data_dim,
-# ):
-#     knn_npr(
-#         x_train,
-#         y_train,
-#         x_test,
-#         k,
-#         classes_num,
-#         test_size,
-#         train_size,
-#         predictions,
-#         votes_to_classes,
-#         data_dim,
-#     )

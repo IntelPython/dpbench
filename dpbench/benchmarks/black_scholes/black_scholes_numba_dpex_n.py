@@ -14,9 +14,12 @@ def _nberf(x):
     return erf(x)
 
 
-# blackscholes implemented using numpy function calls
 @nb.njit(parallel=True, fastmath=True)
 def _black_scholes(price, strike, t, rate, volatility, call, put):
+    """
+    Blackscholes implementation using numpy vector functions
+    """
+
     mr = -rate
     sig_sig_two = volatility * volatility * 2
 
@@ -45,4 +48,14 @@ def _black_scholes(price, strike, t, rate, volatility, call, put):
 
 
 def black_scholes(nopt, price, strike, t, rate, volatility, call, put):
+    """Documentation for black_scholes function
+
+    The Black-Scholes program computes the price of a portfolio of
+    options using partial differential equations.
+    The entire computation performed by Black-Scholes is data-parallel
+    where each option can be priced independent of other options.
+    This function is an implementation of Black-Scholes in Python.
+    It is jit-compiled using numba and executes in parallel on device.
+    """
+
     _black_scholes(price, strike, t, rate, volatility, call, put)

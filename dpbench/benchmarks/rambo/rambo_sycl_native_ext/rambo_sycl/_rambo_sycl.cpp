@@ -67,8 +67,10 @@ void rambo_sync(size_t nevts,
         throw std::runtime_error("Expected a double precision FP array.");
     }
 
-    rambo_impl(Queue, nevts, nout, C1.get_data<double>(), F1.get_data<double>(),
-               Q1.get_data<double>(), output.get_data<double>());
+    auto e = rambo_impl(Queue, nevts, nout, C1.get_data<double>(),
+                        F1.get_data<double>(), Q1.get_data<double>(),
+                        output.get_data<double>());
+    e.wait();
 }
 
 PYBIND11_MODULE(_rambo_sycl, m)

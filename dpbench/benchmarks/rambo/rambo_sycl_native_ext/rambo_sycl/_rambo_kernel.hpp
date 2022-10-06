@@ -7,8 +7,6 @@
 /// rambo benchmark.
 
 #include <CL/sycl.hpp>
-#include <iomanip>
-#include <random>
 #include <stdlib.h>
 #include <type_traits>
 
@@ -19,25 +17,16 @@
 
 using namespace sycl;
 
-std::mt19937 e2(777);
-
-template <typename FpTy> FpTy genRand()
-{
-    int a = e2() >> 5;
-    int b = e2() >> 6;
-    return (FpTy)(a * 67108864.0 + b) / 9007199254740992.0;
-}
-
 template <typename FpTy>
-void rambo_impl(queue Queue,
-                size_t nevts,
-                size_t nout,
-                const FpTy *usmC1,
-                const FpTy *usmF1,
-                const FpTy *usmQ1,
-                FpTy *usmOutput)
+event rambo_impl(queue Queue,
+                 size_t nevts,
+                 size_t nout,
+                 const FpTy *usmC1,
+                 const FpTy *usmF1,
+                 const FpTy *usmQ1,
+                 FpTy *usmOutput)
 {
-    auto e = Queue.submit([&](handler &h) {
+    return Queue.submit([&](handler &h) {
         h.parallel_for<class RamboKernel>(range<1>{nevts}, [=](id<1> myID) {
             for (size_t j = 0; j < nout; j++) {
                 int i = myID[0];
@@ -55,5 +44,4 @@ void rambo_impl(queue Queue,
             }
         });
     });
-    e.wait();
 }

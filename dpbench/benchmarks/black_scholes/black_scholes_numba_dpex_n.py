@@ -14,7 +14,6 @@ def _nberf(x):
     return erf(x)
 
 
-# blackscholes implemented using numpy function calls
 @nb.njit(parallel=True, fastmath=True)
 def _black_scholes(price, strike, t, rate, volatility, call, put):
     mr = -rate

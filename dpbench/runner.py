@@ -60,7 +60,7 @@ def list_possible_implementations():
     try:
         with open(impl_postfix_json) as json_file:
             info = json.load(json_file)["impl_postfix"]
-            impl_postfix_list = info.keys()
+            impl_postfix_list = list(info.values())
             return impl_postfix_list
     except Exception:
         logging.exception(

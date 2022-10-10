@@ -7,15 +7,12 @@ import numpy as np
 
 
 @nb.njit(parallel=True, fastmath=True)
-def _pairwise_distance(X1, X2):
+def pairwise_distance(X1, X2, D):
     x1 = np.sum(np.square(X1), axis=1)
     x2 = np.sum(np.square(X2), axis=1)
-    D = -2 * np.dot(X1, X2.T)
+    np.dot(X1, X2.T, D)
+    D *= -2
     x3 = x1.reshape(x1.size, 1)
-    D = D + x3
-    D = D + x2
-    return np.sqrt(D)
-
-
-def pairwise_distance(X1, X2, D):
-    np.copyto(D, _pairwise_distance(X1, X2))
+    np.add(D, x3, D)
+    np.add(D, x2, D)
+    np.sqrt(D, D)

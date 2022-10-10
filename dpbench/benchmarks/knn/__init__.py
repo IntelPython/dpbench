@@ -5,11 +5,11 @@
 from .knn_initialize import initialize
 from .knn_numba_dpex_k import knn as knn_numba_dpex_k
 from .knn_numba_npr import knn as knn_numba_npr
-from .knn_numpy import knn as knn_numpy
+from .knn_python import knn as knn_python
 
 __all__ = [
     "initialize",
     "knn_numba_dpex_k",
     "knn_numba_npr",
-    "knn_numpy",
+    "knn_python",
 ]

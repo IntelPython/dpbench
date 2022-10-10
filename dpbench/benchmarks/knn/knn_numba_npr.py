@@ -81,7 +81,7 @@ def knn(
                     queue_neighbors[index, 1] = new_neighbor_label
 
         v_to_c_i = votes_to_classes[i]
-                    
+
         for j in range(k):
             v_to_c_i[int(queue_neighbors[j, 1])] += 1
 

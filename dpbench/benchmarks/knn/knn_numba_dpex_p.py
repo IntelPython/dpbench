@@ -29,7 +29,6 @@ def knn(
             x1 = x_train[j]
             x2 = x_test[i]
 
-            # Compute Euclidean distance between x1 and x2
             distance = 0.0
             for jj in range(data_dim):
                 diff = x1[jj] - x2[jj]
@@ -39,7 +38,6 @@ def knn(
             queue_neighbors[j, 0] = dist
             queue_neighbors[j, 1] = y_train[j]
 
-        # sort queue of neighbors
         for j in range(k):
             new_distance = queue_neighbors[j, 0]
             new_neighbor_label = queue_neighbors[j, 1]
@@ -58,7 +56,6 @@ def knn(
             x1 = x_train[j]
             x2 = x_test[i]
 
-            # Compute Euclidean distance between x1 and x2
             distance = 0.0
             for jj in range(data_dim):
                 diff = x1[jj] - x2[jj]
@@ -83,9 +80,7 @@ def knn(
                     queue_neighbors[index, 0] = new_distance
                     queue_neighbors[index, 1] = new_neighbor_label
 
-        # Deep copy is added to avoid divided by zero during
-        # validation: return np.linalg.norm(ref - val) / np.linalg.norm(ref)
-        v_to_c_i = np.copy(votes_to_classes[i])
+        v_to_c_i = votes_to_classes[i]
 
         for j in range(k):
             v_to_c_i[int(queue_neighbors[j, 1])] += 1

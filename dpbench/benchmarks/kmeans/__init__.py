@@ -9,6 +9,7 @@ from .kmeans_numba_dpex_p import kmeans as kmeans_numba_dpex_p
 from .kmeans_numba_n import kmeans as kmeans_numba_n
 from .kmeans_numba_npr import kmeans as kmeans_numba_npr
 from .kmeans_numpy import kmeans as kmeans_numpy
+from .kmeans_python import kmeans as kmeans_python
 
 __all__ = [
     "initialize",
@@ -18,4 +19,5 @@ __all__ = [
     "kmeans_numba_n",
     "kmeans_numba_npr",
     "kmeans_numpy",
+    "kmeans_python",
 ]

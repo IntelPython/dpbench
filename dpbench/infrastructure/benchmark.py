@@ -345,16 +345,9 @@ class BenchmarkRunner:
         self.results.setup_time = t.get_elapsed_time()
 
     def _reset_output_args(self, inputs):
-        try:
-            output_args = self.bench.info["output_args"]
-        except KeyError:
-            logging.info(
-                "No output args to reset as benchmarks has no array output."
-            )
-            return
         array_args = self.bench.info["array_args"]
         for arg in inputs.keys():
-            if arg in output_args and arg in array_args:
+            if arg in array_args:
                 original_data = self.bench.get_data(preset=self.preset)[arg]
                 inputs.update({arg: self.fmwrk.copy_to_func()(original_data)})
 

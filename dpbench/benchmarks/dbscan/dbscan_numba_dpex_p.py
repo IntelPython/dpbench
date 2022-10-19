@@ -4,60 +4,44 @@
 
 import numba as nb
 import numpy as np
-from numba import int64, jit, prange
-from numba.experimental import jitclass
-
-queue_spec = [
-    ("capacity", int64),
-    ("head", int64),
-    ("tail", int64),
-    ("values", int64[:]),
-]
-
-
-@jitclass(queue_spec)
-class Queue:
-    def __init__(self, capacity):
-        self.capacity = capacity
-        self.head = self.tail = 0
-        self.values = np.empty(capacity, dtype=np.int64)
-
-    def resize(self, new_capacity):
-        self.capacity = new_capacity
-        self.tail = min(self.tail, new_capacity)
-
-        new_values = np.empty(new_capacity, dtype=np.int64)
-        new_values[: self.tail] = self.values[: self.tail]
-        self.values = new_values
-
-    def push(self, value):
-        if self.tail == self.capacity:
-            self.resize(2 * self.capacity)
-
-        self.values[self.tail] = value
-        self.tail += 1
-
-    def pop(self):
-        if self.head < self.tail:
-            self.head += 1
-            return self.values[self.head - 1]
-
-        return -1
-
-    def empty(self):
-        return self.head == self.tail
-
-    @property
-    def size(self):
-        return self.tail - self.head
-
 
 NOISE = -1
 UNDEFINED = -2
 DEFAULT_QUEUE_CAPACITY = 10
 
+@nb.njit()
+def _queue_create(capacity):
+    return (np.empty(capacity, dtype=np.int64), 0, 0)
 
-@nb.jit(nopython=True, parallel=True, fastmath=True)
+@nb.njit()
+def _queue_resize(qu, tail, new_capacity):
+    tail = min(tail, new_capacity)
+    
+    new_qu = np.empty(new_capacity, dtype=np.int64)
+    new_qu[: tail] = qu[: tail]
+    return new_qu, tail
+
+@nb.njit()
+def _queue_push(qu, value, tail, capacity):
+    if tail == capacity:
+        capacity = 2 * capacity
+        qu, tail = _queue_resize(qu, tail, capacity)
+
+    qu[tail] = value
+    tail += 1
+
+    return qu, tail, capacity
+
+@nb.njit()
+def _queue_pop(qu, head, tail):
+    head += 1
+    return qu[head - 1], head
+
+@nb.njit()
+def _queue_empty(head, tail):
+    return head == tail
+
+@nb.njit(parallel=True, fastmath=True)
 def get_neighborhood(n, dim, data, eps, ind_lst, sz_lst, assignments):
     block_size = 1
     nblocks = n // block_size + int(n % block_size > 0)
@@ -82,11 +66,9 @@ def get_neighborhood(n, dim, data, eps, ind_lst, sz_lst, assignments):
                     if dist <= eps2:
                         size = sz_lst[j]
                         ind_lst[j * n + size] = k
-                        # dist_lst[j * n + size] = dist
                         sz_lst[j] = size + 1
 
-
-@nb.jit(nopython=True)
+@nb.njit(parallel=False, fastmath=True)
 def compute_clusters(n, min_pts, assignments, sizes, indices_list):
     nclusters = 0
     nnoise = 0
@@ -101,7 +83,8 @@ def compute_clusters(n, min_pts, assignments, sizes, indices_list):
         nclusters += 1
         assignments[i] = nclusters - 1
 
-        qu = Queue(DEFAULT_QUEUE_CAPACITY)
+        qu_capacity = DEFAULT_QUEUE_CAPACITY
+        qu, head, tail = _queue_create(qu_capacity)
         for j in range(size):
             next_point = indices_list[i * n + j]
             if assignments[next_point] == NOISE:
@@ -109,10 +92,10 @@ def compute_clusters(n, min_pts, assignments, sizes, indices_list):
                 assignments[next_point] = nclusters - 1
             elif assignments[next_point] == UNDEFINED:
                 assignments[next_point] = nclusters - 1
-                qu.push(next_point)
+                qu, tail, qu_capacity = _queue_push(qu, next_point, tail, qu_capacity)
 
-        while not qu.empty():
-            cur_point = qu.pop()
+        while not _queue_empty(head, tail):
+            cur_point, head = _queue_pop(qu, head, tail)
             size = sizes[cur_point]
             assignments[cur_point] = nclusters - 1
             if size < min_pts:
@@ -125,15 +108,12 @@ def compute_clusters(n, min_pts, assignments, sizes, indices_list):
                     assignments[next_point] = nclusters - 1
                 elif assignments[next_point] == UNDEFINED:
                     assignments[next_point] = nclusters - 1
-                    qu.push(next_point)
+                    qu, tail, qu_capacity = _queue_push(qu, next_point, tail, qu_capacity)
 
     return nclusters
 
 
-def dbscan(n_samples, n_features, data, eps, min_pts, assignments):
-    indices_list = np.empty(n_samples * n_samples, dtype=np.int64)
-    sizes = np.zeros(n_samples, dtype=np.int64)
-
+def dbscan(n_samples, n_features, data, eps, min_pts, assignments, indices_list, sizes):
     get_neighborhood(
         n_samples, n_features, data, eps, indices_list, sizes, assignments
     )

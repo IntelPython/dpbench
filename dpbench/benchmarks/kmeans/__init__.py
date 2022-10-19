@@ -1,7 +1,8 @@
 # Copyright 2022 Intel Corporation
 #
 # SPDX-License-Identifier: Apache 2.0
-
+from .kmeans_dpnp import kmeans as kmeans_dpnp
+from .kmeans_dpnp import kmeans as kmeans_dpnp
 from .kmeans_initialize import initialize
 from .kmeans_numba_dpex_k import kmeans as kmeans_numba_dpex_k
 from .kmeans_numba_dpex_n import kmeans as kmeans_numba_dpex_n
@@ -13,6 +14,7 @@ from .kmeans_python import kmeans as kmeans_python
 
 __all__ = [
     "initialize",
+    "kmeans_dpnp",
     "kmeans_numba_dpex_k",
     "kmeans_numba_dpex_n",
     "kmeans_numba_dpex_p",

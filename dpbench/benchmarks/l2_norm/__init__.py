@@ -2,6 +2,7 @@
 #
 # SPDX-License-Identifier: Apache 2.0
 
+from .l2_norm_dpnp import l2_norm as l2_norm_dpnp
 from .l2_norm_initialize import initialize
 from .l2_norm_numba_dpex_k import l2_norm as l2_norm_numba_dpex_k
 from .l2_norm_numba_dpex_n import l2_norm as l2_norm_numba_dpex_n
@@ -12,6 +13,7 @@ from .l2_norm_sycl_native_ext import l2_norm_sycl
 
 __all__ = [
     "initialize",
+    "l2_norm_dpnp",
     "l2_norm_numba_dpex_k",
     "l2_norm_numba_dpex_n",
     "l2_norm_numba_n",

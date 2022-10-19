@@ -39,7 +39,9 @@
                 "data",
                 "assignments",
                 "eps",
-                "min_pts"
+                "min_pts",
+		"indices_list",
+		"sizes"
             ]
         },
         "input_args": [
@@ -48,11 +50,15 @@
             "data",
             "eps",
             "min_pts",
-            "assignments"
+            "assignments",
+	    "indices_list",
+	    "sizes"
         ],
         "array_args": [
             "data",
-            "assignments"
+            "assignments",
+	    "indices_list",
+	    "sizes"
         ]
     }
 }

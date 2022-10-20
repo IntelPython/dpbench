@@ -77,59 +77,16 @@ def get_neighborhood(
                     ind_lst[j * n + size] = k
                     sz_lst[j] = size + 1
 
-@nbd.kernel(
-    access_types={
-        "read_only": ["assignments", "sizes", "indices_list"]
-    }
-)                    
-def _compute_clusters_kernel(n, min_pts, assignments, sizes, indices_list):
-    i = nbd.get_global_id(0)
-    
-    if assignments[i] != UNDEFINED:
-        continue
-    size = sizes[i]
-    if size < min_pts:
-        assignments[i] = NOISE
-        continue
-    nclusters += 1
-    assignments[i] = nclusters - 1
-
-    qu_capacity = DEFAULT_QUEUE_CAPACITY
-    qu, head, tail = _queue_create(qu_capacity)
-    for j in range(size):
-        next_point = indices_list[i * n + j]
-        if assignments[next_point] == NOISE:
-            assignments[next_point] = nclusters - 1
-        elif assignments[next_point] == UNDEFINED:
-            assignments[next_point] = nclusters - 1
-            qu, tail, qu_capacity = _queue_push(qu, next_point, tail, qu_capacity)
-
-    while not _queue_empty(head, tail):
-        cur_point, head = _queue_pop(qu, head, tail)
-        size = sizes[cur_point]
-        assignments[cur_point] = nclusters - 1
-        if size < min_pts:
-            continue
-
-        for j in range(size):
-            next_point = indices_list[cur_point * n + j]
-            if assignments[next_point] == NOISE:
-                assignments[next_point] = nclusters - 1
-            elif assignments[next_point] == UNDEFINED:
-                assignments[next_point] = nclusters - 1
-                qu, tail, qu_capacity = _queue_push(qu, next_point, tail, qu_capacity)
-
-    return nclusters
-
-    
 @nb.njit(parallel=False, fastmath=True)
 def compute_clusters(n, min_pts, assignments, sizes, indices_list):
     nclusters = 0
+    nnoise = 0
     for i in range(n):
         if assignments[i] != UNDEFINED:
             continue
         size = sizes[i]
         if size < min_pts:
+            nnoise += 1
             assignments[i] = NOISE
             continue
         nclusters += 1
@@ -140,6 +97,7 @@ def compute_clusters(n, min_pts, assignments, sizes, indices_list):
         for j in range(size):
             next_point = indices_list[i * n + j]
             if assignments[next_point] == NOISE:
+                nnoise -= 1
                 assignments[next_point] = nclusters - 1
             elif assignments[next_point] == UNDEFINED:
                 assignments[next_point] = nclusters - 1
@@ -155,17 +113,13 @@ def compute_clusters(n, min_pts, assignments, sizes, indices_list):
             for j in range(size):
                 next_point = indices_list[cur_point * n + j]
                 if assignments[next_point] == NOISE:
+                    nnoise -= 1
                     assignments[next_point] = nclusters - 1
                 elif assignments[next_point] == UNDEFINED:
                     assignments[next_point] = nclusters - 1
                     qu, tail, qu_capacity = _queue_push(qu, next_point, tail, qu_capacity)
 
     return nclusters
-
-def compute_clusters(n, min_pts, assignments, sizes, indices_list):
-    _compute_clusters_kernel[n_samples, nbd.DEFAULT_LOCAL_SIZE](
-        n, min_pts, assignments, sizes, indices_list
-    )
 
 def dbscan(n_samples, n_features, data, eps, min_pts, assignments, indices_list, sizes):
     get_neighborhood[n_samples, nbd.DEFAULT_LOCAL_SIZE](

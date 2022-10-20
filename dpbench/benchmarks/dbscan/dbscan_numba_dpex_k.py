@@ -3,25 +3,28 @@
 # SPDX-License-Identifier: Apache 2.0
 
 
+import numba as nb
 import numba_dpex as nbd
 import numpy as np
-import numba as nb
 
 NOISE = -1
 UNDEFINED = -2
 DEFAULT_QUEUE_CAPACITY = 10
 
+
 @nb.njit()
 def _queue_create(capacity):
     return (np.empty(capacity, dtype=np.int64), 0, 0)
 
+
 @nb.njit()
 def _queue_resize(qu, tail, new_capacity):
     tail = min(tail, new_capacity)
-    
+
     new_qu = np.empty(new_capacity, dtype=np.int64)
-    new_qu[: tail] = qu[: tail]
+    new_qu[:tail] = qu[:tail]
     return new_qu, tail
+
 
 @nb.njit()
 def _queue_push(qu, value, tail, capacity):
@@ -34,14 +37,17 @@ def _queue_push(qu, value, tail, capacity):
 
     return qu, tail, capacity
 
+
 @nb.njit()
 def _queue_pop(qu, head, tail):
     head += 1
     return qu[head - 1], head
 
+
 @nb.njit()
 def _queue_empty(head, tail):
     return head == tail
+
 
 @nbd.kernel(
     access_types={
@@ -77,6 +83,7 @@ def get_neighborhood(
                     ind_lst[j * n + size] = k
                     sz_lst[j] = size + 1
 
+
 @nb.njit(parallel=False, fastmath=True)
 def compute_clusters(n, min_pts, assignments, sizes, indices_list):
     nclusters = 0
@@ -101,7 +108,9 @@ def compute_clusters(n, min_pts, assignments, sizes, indices_list):
                 assignments[next_point] = nclusters - 1
             elif assignments[next_point] == UNDEFINED:
                 assignments[next_point] = nclusters - 1
-                qu, tail, qu_capacity = _queue_push(qu, next_point, tail, qu_capacity)
+                qu, tail, qu_capacity = _queue_push(
+                    qu, next_point, tail, qu_capacity
+                )
 
         while not _queue_empty(head, tail):
             cur_point, head = _queue_pop(qu, head, tail)
@@ -117,11 +126,16 @@ def compute_clusters(n, min_pts, assignments, sizes, indices_list):
                     assignments[next_point] = nclusters - 1
                 elif assignments[next_point] == UNDEFINED:
                     assignments[next_point] = nclusters - 1
-                    qu, tail, qu_capacity = _queue_push(qu, next_point, tail, qu_capacity)
+                    qu, tail, qu_capacity = _queue_push(
+                        qu, next_point, tail, qu_capacity
+                    )
 
     return nclusters
 
-def dbscan(n_samples, n_features, data, eps, min_pts, assignments, indices_list, sizes):
+
+def dbscan(
+    n_samples, n_features, data, eps, min_pts, assignments, indices_list, sizes
+):
     get_neighborhood[n_samples, nbd.DEFAULT_LOCAL_SIZE](
         n_samples,
         n_features,

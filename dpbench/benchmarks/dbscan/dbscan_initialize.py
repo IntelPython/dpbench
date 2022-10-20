@@ -72,5 +72,5 @@ def initialize(n_samples, n_features, centers, seed):
         params.eps,
         params.minpts,
         np.empty(n_samples * n_samples, dtype=np.int64),
-        np.zeros(n_samples, dtype=np.int64)
+        np.zeros(n_samples, dtype=np.int64),
     )

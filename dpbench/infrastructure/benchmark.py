@@ -163,7 +163,7 @@ def get_supported_implementation_postfixes():
 
     try:
         with open(impl_postfix_json) as json_file:
-            return json.load(json_file)["impl_postfix"]
+            return [entry["impl_postfix"] for entry in json.load(json_file)]
     except Exception as e:
         logging.exception("impl_postfix.json file not found")
         raise (e)

@@ -56,6 +56,8 @@ jobs:
         run: |
           export OCL_ICD_FILENAMES=libintelocl.so
 
+          # Turn off numba-dpex autofall back
+          export NUMBA_DPEX_FALLBACK_ON_CPU=0
           # Make sure numba-dpex is using native atomics in github CI
           export NUMBA_DPEX_ACTIVATE_ATOMICS_FP_NATIVE=1
           ls $(dirname $(dirname `which icx`))/bin-llvm || exit 1

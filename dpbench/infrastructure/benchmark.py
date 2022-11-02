@@ -20,6 +20,7 @@ from dpbench.infrastructure import timer
 from . import timeout_decorator as tout
 from .datamodel import store_results
 from .dpcpp_framework import DpcppFramework
+from .enums import ErrorCodes, ValidationStatusCodes
 from .framework import Framework
 from .numba_dpex_framework import NumbaDpexFramework
 from .numba_dpex_kernel_framework import NumbaDpexKernelFramework
@@ -84,25 +85,15 @@ def _exec(
             inputs.update({arg: args[arg]})
 
     # Warmup
-    @tout.exit_after(timeout)
     def warmup(impl_fn, inputs):
         fmwrk.execute(impl_fn, inputs)
 
     with timer.timer() as t:
         try:
             warmup(impl_fn, inputs)
-        except KeyboardInterrupt:
-            logging.exception(
-                "Benchmark {0} execution failed due to a timeout".format(
-                    bench.bname
-                )
-            )
-            results_dict["error_state"] = -3
-            results_dict["error_msg"] = "Execution failed"
-            return
         except Exception:
             logging.exception("Benchmark execution failed at the warmup step.")
-            results_dict["error_state"] = -3
+            results_dict["error_state"] = ErrorCodes.FAILED_EXECUTION
             results_dict["error_msg"] = "Execution failed"
             return
 
@@ -148,13 +139,12 @@ def _exec(
 
     # Special case: if the benchmark implementation returns anything, then
     # add that to the results dict
-
     if retval:
         results_dict["return-value"] = retval
     else:
         results_dict["return-value"] = None
 
-    results_dict["error_state"] = 0
+    results_dict["error_state"] = ErrorCodes.SUCCESS
     results_dict["error_msg"] = ""
 
 
@@ -187,11 +177,11 @@ class BenchmarkResults:
     def __init__(self, bench, repeat, impl_postfix, preset):
         """Initialize defaults."""
         self._fmwrk = bench.get_framework(impl_postfix)
-        self._setup_time = -1
-        self._warmup_time = -1
-        self._teardown_time = -1
-        self._validation_state = -4
-        self._error_state = -1
+        self._setup_time = 0.0
+        self._warmup_time = 0.0
+        self._teardown_time = 0.0
+        self._validation_state = ValidationStatusCodes.FAILURE
+        self._error_state = ErrorCodes.UNIMPLEMENTED
         self._error_msg = "Not implemented"
         self._results = dict()
         self._bench = bench
@@ -427,7 +417,7 @@ class BenchmarkResults:
         return self._error_state
 
     @error_state.setter
-    def error_state(self, error_state=-1):
+    def error_state(self, error_state=ErrorCodes.UNIMPLEMENTED):
         self._error_state = error_state
 
     @property
@@ -453,10 +443,10 @@ class BenchmarkRunner:
         )
 
         if not self.impl_fn:
-            self.results.error_state = -1
+            self.results.error_state = ErrorCodes.UNIMPLEMENTED
             self.results.error_msg = "No implementation"
         elif not self.fmwrk:
-            self.results.error_state = -2
+            self.results.error_state = ErrorCodes.NO_FRAMEWORK
             self.results.error_msg = "No framework"
         else:
             # Run setup step
@@ -465,7 +455,7 @@ class BenchmarkRunner:
             with Manager() as manager:
                 results_dict = manager.dict()
                 p = Process(
-                    target=_exec,
+                    target=tout.exit_after(timeout)(_exec),
                     args=(
                         self.bench,
                         self.fmwrk,
@@ -478,7 +468,7 @@ class BenchmarkRunner:
                     ),
                 )
                 p.start()
-                res = p.join(timeout)
+                res = p.join(timeout * 1.2)
                 if res is None and p.exitcode is None:
                     logging.error(
                         "Terminating process due to timeout in the execution "
@@ -486,12 +476,12 @@ class BenchmarkRunner:
                         f"for the {impl_postfix} implementation"
                     )
                     p.kill()
-                    self.results.error_state = results_dict["error_state"]
-                    self.results.error_msg = results_dict["error_msg"]
+                    self.results.error_state = ErrorCodes.EXECUTION_TIMEOUT
+                    self.results.error_msg = "Execution timed out"
                 else:
                     self.results.error_state = results_dict["error_state"]
                     self.results.error_msg = results_dict["error_msg"]
-                    if self.results.error_state == 0:
+                    if self.results.error_state == ErrorCodes.SUCCESS:
                         self.results.warmup_time = results_dict["warmup_time"]
                         self.results.exec_times = np.asarray(
                             results_dict["exec_times"]
@@ -708,7 +698,7 @@ class Benchmark(object):
             validate=False,
         )[0]
 
-        if ref_results.error_state == 0:
+        if ref_results.error_state == ErrorCodes.SUCCESS:
             self.refdata.update({preset: ref_results.results})
             return ref_results.results
         else:
@@ -895,14 +885,14 @@ class Benchmark(object):
                 timeout=timeout,
             )
             result = runner.get_results()
-            if validate and result.error_state == 0:
+            if validate and result.error_state == ErrorCodes.SUCCESS:
                 if self._validate_results(
                     preset, result.framework, result.results
                 ):
-                    result.validation_state = 0
+                    result.validation_state = ValidationStatusCodes.SUCCESS
                 else:
-                    result.validation_state = -1
-                    result.error_state = -4
+                    result.validation_state = ValidationStatusCodes.FAILURE
+                    result.error_state = ErrorCodes.FAILED_VALIDATION
                     result.error_msg = "Validation failed"
             if conn:
                 store_results(conn, result, run_datetime)
@@ -922,14 +912,14 @@ class Benchmark(object):
                     timeout=timeout,
                 )
                 result = runner.get_results()
-                if validate and result.error_state == 0:
+                if validate and result.error_state == ErrorCodes.SUCCESS:
                     if self._validate_results(
                         preset, result.framework, result.results
                     ):
-                        result.validation_state = 0
+                        result.validation_state = ValidationStatusCodes.SUCCESS
                     else:
-                        result.validation_state = -1
-                        result.error_state = -4
+                        result.validation_state = ValidationStatusCodes.FAILURE
+                        result.error_state = ErrorCodes.FAILED_VALIDATION
                         result.error_msg = "Validation failed"
                 if conn:
                     store_results(conn, result, run_datetime)

@@ -10,6 +10,7 @@ from .kmeans_numba_n import kmeans as kmeans_numba_n
 from .kmeans_numba_npr import kmeans as kmeans_numba_npr
 from .kmeans_numpy import kmeans as kmeans_numpy
 from .kmeans_python import kmeans as kmeans_python
+from .kmeans_sycl_native_ext import kmeans_sycl
 
 __all__ = [
     "initialize",
@@ -20,4 +21,5 @@ __all__ = [
     "kmeans_numba_npr",
     "kmeans_numpy",
     "kmeans_python",
+    "kmeans_sycl",
 ]

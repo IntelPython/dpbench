@@ -51,6 +51,28 @@ def _exec(
     args,
     results_dict,
 ):
+    """Executes a benchmark for a given implementation.
+
+    A helper function to execute a benchmark. The function is called in a
+    separate sub-process by a BenchmarkRunner instance. The ``_exec`` function
+    first runs the benchmark implementation function once as a warmup and then
+    performs the specified number of repetitions. The output results are reset
+    before each repetition and the final output is serialized into a npz
+    (compressed NumPy data file) file.
+
+    All timing results and the path to the serialized results are written to
+    the results_dict input argument that is managed by the calling process.
+
+    Args:
+        bench : A Benchmark object representing the benchmark to be executed.
+        fmwrk : A Framework for which the benchmark is to be executed.
+        impl_postfix : The identifier for the benchmark implementation.
+        preset : A problem size entry defined in the bench_info JSON.
+        timeout : Number of seconds after which the execution is killed.
+        repeat : Number of repetitions of the benchmark execution.
+        args : Input arguments to benchmark implementation function.
+        results_dict : A dictionary where timing and other results are stored.
+    """
     input_args = bench.info["input_args"]
     array_args = bench.info["array_args"]
     impl_fn = bench.get_impl(impl_postfix)

@@ -13,6 +13,24 @@
 
 #include <iostream>
 
+template <typename... Args> bool ensure_compatibility(const Args &...args)
+{
+    std::vector<dpctl::tensor::usm_ndarray> arrays = {args...};
+
+    auto arr = arrays.at(0);
+    auto q = arr.get_queue();
+    auto type_flag = arr.get_typenum();
+    auto arr_size = arr.get_size();
+
+    for (auto &arr : arrays) {
+        if (!(arr.get_flags() & (USM_ARRAY_C_CONTIGUOUS))) {
+            std::cerr << "All arrays need to be C contiguous.\n";
+            return false;
+        }
+    }
+    return true;
+}
+
 void knn_sync(dpctl::tensor::usm_ndarray x_train,
               dpctl::tensor::usm_ndarray y_train,
               dpctl::tensor::usm_ndarray x_test,
@@ -24,22 +42,21 @@ void knn_sync(dpctl::tensor::usm_ndarray x_train,
               dpctl::tensor::usm_ndarray votes_to_classes,
               size_t data_dim)
 {
+
+    if (!ensure_compatibility(x_train, y_train, x_test, predictions,
+                              votes_to_classes))
+        throw std::runtime_error("Input arrays are not acceptable.");
+
+    if (x_train.get_typenum() != UAR_DOUBLE) {
+        throw std::runtime_error("Expected a double precision FP array.");
+    }
+
     sycl::event res_ev = knn_impl(
         x_train.get_queue(), x_train.get_data<double>(),
         y_train.get_data<size_t>(), x_test.get_data<double>(), k, classes_num,
         train_size, test_size, predictions.get_data<size_t>(),
         votes_to_classes.get_data<double>(), data_dim);
     res_ev.wait();
-
-    // size_t *d_predictions = predictions.get_data<size_t>();
-    // size_t *h_predictions = new size_t[test_size];
-    // sycl::queue q = x_train.get_queue();
-    // q.memcpy(h_predictions, d_predictions, test_size * sizeof(size_t));
-    // q.wait();
-
-    // for (size_t i = 0; i < test_size; i++) {
-    //   std::cout << h_predictions[i] << std::endl;
-    // }
 }
 
 PYBIND11_MODULE(_knn_sycl, m)

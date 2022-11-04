@@ -53,16 +53,28 @@ void gpairs_sync(size_t nopt,
     if (!ensure_compatibility(x1, y1, z1, w1, x2, y2, z2, w2, rbins, results))
         throw std::runtime_error("Input arrays are not acceptable.");
 
-    if (x1.get_typenum() != UAR_FLOAT) {
-        throw std::runtime_error("Expected a double precision FP array.");
+    if (x1.get_typenum() != UAR_FLOAT || x1.get_typenum() != UAR_DOUBLE) {
+        throw std::runtime_error("Expected a FP array.");
     }
 
-    sycl::event res_ev = gpairs_impl(
-        x1.get_queue(), nopt, nbins, x1.get_data<float>(), y1.get_data<float>(),
-        z1.get_data<float>(), w1.get_data<float>(), x2.get_data<float>(),
-        y2.get_data<float>(), z2.get_data<float>(), w2.get_data<float>(),
-        rbins.get_data<float>(), results.get_data<float>());
-    res_ev.wait();
+    if (x1.get_typenum() == UAR_FLOAT) {
+        sycl::event res_ev = gpairs_impl(
+            x1.get_queue(), nopt, nbins, x1.get_data<float>(),
+            y1.get_data<float>(), z1.get_data<float>(), w1.get_data<float>(),
+            x2.get_data<float>(), y2.get_data<float>(), z2.get_data<float>(),
+            w2.get_data<float>(), rbins.get_data<float>(),
+            results.get_data<float>());
+        res_ev.wait();
+    }
+    else {
+        sycl::event res_ev = gpairs_impl(
+            x1.get_queue(), nopt, nbins, x1.get_data<double>(),
+            y1.get_data<double>(), z1.get_data<double>(), w1.get_data<double>(),
+            x2.get_data<double>(), y2.get_data<double>(), z2.get_data<double>(),
+            w2.get_data<double>(), rbins.get_data<double>(),
+            results.get_data<double>());
+        res_ev.wait();
+    }
 }
 
 PYBIND11_MODULE(_gpairs_sycl, m)

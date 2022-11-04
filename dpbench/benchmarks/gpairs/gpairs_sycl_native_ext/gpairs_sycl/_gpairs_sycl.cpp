@@ -53,7 +53,7 @@ void gpairs_sync(size_t nopt,
     if (!ensure_compatibility(x1, y1, z1, w1, x2, y2, z2, w2, rbins, results))
         throw std::runtime_error("Input arrays are not acceptable.");
 
-    if (x1.get_typenum() != UAR_FLOAT || x1.get_typenum() != UAR_DOUBLE) {
+    if (x1.get_typenum() != UAR_FLOAT && x1.get_typenum() != UAR_DOUBLE) {
         throw std::runtime_error("Expected a FP array.");
     }
 

@@ -19,7 +19,7 @@ def _print_results(result):
         + result.benchmark_impl_postfix
         + " ========================"
     )
-    if result.error_state == 0:
+    if result.error_state == dpbi.enums.ErrorCodes.SUCCESS:
         print("implementation:", result.benchmark_impl_postfix)
         print("framework:", result.framework_name)
         print("framework version:", result.framework_version)

@@ -3,6 +3,7 @@
 #
 # SPDX-License-Identifier: BSD-3-Clause
 
+import importlib
 import json
 import logging
 import os
@@ -468,7 +469,8 @@ class BenchmarkRunner:
             with Manager() as manager:
                 results_dict = manager.dict()
                 p = Process(
-                    target=tout.exit_after(timeout)(_exec),
+                    # target=tout.exit_after(timeout)(_exec),
+                    target=_exec,
                     args=(
                         self.bench,
                         self.fmwrk,
@@ -520,7 +522,10 @@ class BenchmarkRunner:
                                 self.results.results.update(
                                     {outarr: npzfile[outarr]}
                                 )
-                            os.remove(output_npz)
+                            try:
+                                os.remove(output_npz)
+                            except:
+                                pass
                         if results_dict["return-value"]:
                             self.results.results.update(
                                 {"return-value": results_dict["return-value"]}
@@ -786,13 +791,33 @@ class Benchmark(object):
         else:
             return False
 
+    def _get_updated_fnlist(self, impl_postfix: str):
+        name = self.bname + "_" + impl_postfix
+        for n, _ in self.impl_fnlist:
+            if n == name:
+                return self.impl_fnlist
+
+        try:
+            mod = importlib.import_module(
+                "dpbench.benchmarks." + self.bname + "." + name
+            )
+        except ImportError:
+            logging.exception("Cannot import " + name)
+            return None
+
+        return self.impl_fnlist + [(name, getattr(mod, self.bname))]
+
     def get_impl(self, impl_postfix: str):
         if not impl_postfix:
             return None
 
+        impl_fnlist = self._get_updated_fnlist(impl_postfix)
+        if impl_fnlist is None:
+            return None
+
         fn = [
             impl[1]
-            for impl in self.impl_fnlist
+            for impl in impl_fnlist
             if self.bname + "_" + impl_postfix == impl[0]
         ]
         if len(fn) > 1:
@@ -812,7 +837,13 @@ class Benchmark(object):
 
     def get_framework(self, impl_postfix: str) -> Framework:
         try:
-            return self.impl_to_fw_map[self.bname + "_" + impl_postfix]
+            impl_fnlist = self._get_updated_fnlist(impl_postfix)
+            if impl_fnlist is None:
+                return None
+
+            impl_to_fw_map = self._set_impl_to_framework_map(impl_fnlist)
+
+            return impl_to_fw_map[self.bname + "_" + impl_postfix]
         except KeyError:
             logging.exception(
                 "No framework found for the implementation "

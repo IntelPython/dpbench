@@ -11,6 +11,7 @@ from .dpnp_framework import DpnpFramework
 from .framework import Framework
 from .numba_dpex_framework import NumbaDpexFramework
 from .numba_framework import NumbaFramework
+from .numba_mlir_framework import NumbaMlirFramework
 
 
 # TODO: do initialization only once for all benchmarks
@@ -33,6 +34,7 @@ def build_framework_map() -> dict[str, Framework]:
         DpnpFramework,
         NumbaFramework,
         NumbaDpexFramework,
+        NumbaMlirFramework,
     ]
 
     available_classes = {_cls.__name__: _cls for _cls in available_classes}

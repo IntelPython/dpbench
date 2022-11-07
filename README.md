@@ -74,3 +74,26 @@ SPDX-License-Identifier: Apache-2.0
     ```bash
     $ python -c "import dpbench; dpbench.run_benchmark(\"black_scholes\", "<absolute path to json file>")"
     ```
+
+## Running numba-mlir benchmarks
+1. Setting up conda environment and installing dependencies:
+
+    Use same instructions as for usual dpbench setup, but do not install numba-dpex.
+
+    Install latest `numba-mlir` dev package:
+
+        $ conda install numba-mlir -c dppy/label/dev -c intel
+
+2. Build and run DPBench
+
+    Use same commands to setup and run dpbench:
+
+        $ python -c "import dpbench; dpbench.run_benchmark(\"black_scholes\")" 2> /dev/null
+
+    or, to run specific version:
+
+        $ python -c "import dpbench; dpbench.run_benchmark(\"black_scholes\",implementation_postfix=\"numba_mlir_k\")" 2> /dev/null
+
+    to run all `numba-mlir` benchmarks:
+
+        $ python -c "import dpbench; dpbench.run_benchmarks(implementations=[\"numba_mlir_n\",\"numba_mlir_p\",\"numba_mlir_k\"])" 2> /dev/null

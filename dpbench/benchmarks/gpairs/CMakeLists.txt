@@ -1,0 +1,1 @@
+add_subdirectory(gpairs_sycl_native_ext)

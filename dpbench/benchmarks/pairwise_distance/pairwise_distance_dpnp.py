@@ -7,8 +7,9 @@ import dpnp
 def pairwise_distance(X1, X2, D):
     x1 = dpnp.sum(dpnp.square(X1), axis=1)
     x2 = dpnp.sum(dpnp.square(X2), axis=1)
-    D = -2 * dpnp.dot(X1, X2.T)
+    dpnp.copyto(D, dpnp.dot(X1, X2.T))
+    dpnp.copyto(D, dpnp.multiply(D, -2))
     x3 = x1.reshape(x1.size, 1)
-    D += x3  # x1[:,None] Not supported by Numba
-    D += x2
-    D = dpnp.sqrt(D)
+    dpnp.copyto(D, dpnp.add(D, x3))
+    dpnp.copyto(D, dpnp.add(D, x2))
+    dpnp.copyto(D, dpnp.sqrt(D))

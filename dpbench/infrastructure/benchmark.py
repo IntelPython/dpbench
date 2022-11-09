@@ -5,8 +5,12 @@
 
 import json
 import logging
+import os
 import pathlib
+import tempfile
+from datetime import datetime
 from inspect import getmembers
+from multiprocessing import Manager, Process
 from typing import Any, Dict
 
 import numpy as np
@@ -16,10 +20,132 @@ from dpbench.infrastructure import timer
 from . import timeout_decorator as tout
 from .datamodel import store_results
 from .dpcpp_framework import DpcppFramework
+from .enums import ErrorCodes, ValidationStatusCodes
 from .framework import Framework
 from .numba_dpex_framework import NumbaDpexFramework
 from .numba_dpex_kernel_framework import NumbaDpexKernelFramework
 from .numba_framework import NumbaFramework
+
+
+def _reset_output_args(bench, fmwrk, inputs, preset):
+    try:
+        output_args = bench.info["output_args"]
+    except KeyError:
+        logging.info(
+            "No output args to reset as benchmarks has no array output."
+        )
+        return
+    array_args = bench.info["array_args"]
+    for arg in inputs.keys():
+        if arg in output_args and arg in array_args:
+            original_data = bench.get_data(preset=preset)[arg]
+            inputs.update({arg: fmwrk.copy_to_func()(original_data)})
+
+
+def _exec(
+    bench,
+    fmwrk,
+    impl_postfix,
+    preset,
+    timeout,
+    repeat,
+    args,
+    results_dict,
+):
+    """Executes a benchmark for a given implementation.
+
+    A helper function to execute a benchmark. The function is called in a
+    separate sub-process by a BenchmarkRunner instance. The ``_exec`` function
+    first runs the benchmark implementation function once as a warmup and then
+    performs the specified number of repetitions. The output results are reset
+    before each repetition and the final output is serialized into a npz
+    (compressed NumPy data file) file.
+
+    All timing results and the path to the serialized results are written to
+    the results_dict input argument that is managed by the calling process.
+
+    Args:
+        bench : A Benchmark object representing the benchmark to be executed.
+        fmwrk : A Framework for which the benchmark is to be executed.
+        impl_postfix : The identifier for the benchmark implementation.
+        preset : A problem size entry defined in the bench_info JSON.
+        timeout : Number of seconds after which the execution is killed.
+        repeat : Number of repetitions of the benchmark execution.
+        args : Input arguments to benchmark implementation function.
+        results_dict : A dictionary where timing and other results are stored.
+    """
+    input_args = bench.info["input_args"]
+    array_args = bench.info["array_args"]
+    impl_fn = bench.get_impl(impl_postfix)
+    inputs = dict()
+    for arg in input_args:
+        if arg not in array_args:
+            inputs.update({arg: bench.get_data(preset=preset)[arg]})
+        else:
+            inputs.update({arg: args[arg]})
+
+    # Warmup
+    def warmup(impl_fn, inputs):
+        fmwrk.execute(impl_fn, inputs)
+
+    with timer.timer() as t:
+        try:
+            warmup(impl_fn, inputs)
+        except Exception:
+            logging.exception("Benchmark execution failed at the warmup step.")
+            results_dict["error_state"] = ErrorCodes.FAILED_EXECUTION
+            results_dict["error_msg"] = "Execution failed"
+            return
+
+    results_dict["warmup_time"] = t.get_elapsed_time()
+    _reset_output_args(bench=bench, fmwrk=fmwrk, inputs=inputs, preset=preset)
+    exec_times = [0] * repeat
+
+    retval = None
+    for i in range(repeat):
+        with timer.timer() as t:
+            retval = fmwrk.execute(impl_fn, inputs)
+        exec_times[i] = t.get_elapsed_time()
+        # Do not reset the output from the last repeat
+        if i < repeat - 1:
+            _reset_output_args(
+                bench=bench, fmwrk=fmwrk, inputs=inputs, preset=preset
+            )
+
+    results_dict["exec_times"] = exec_times
+
+    # Get the output data
+    try:
+        out_args = bench.info["output_args"]
+    except KeyError:
+        out_args = []
+
+    array_args = bench.info["array_args"]
+    output_arrays = dict()
+    with timer.timer() as t:
+        for out_arg in out_args:
+            if out_arg in array_args:
+                output_arrays.update(
+                    {out_arg: fmwrk.copy_from_func()(inputs[out_arg])}
+                )
+    run_datetime = datetime.now().strftime("%m.%d.%Y_%H.%M.%S")
+    out_filename = (
+        bench.bname + "_" + impl_postfix + "_" + preset + "." + run_datetime
+    )
+    out_filename = tempfile.gettempdir() + "/" + out_filename
+    np.savez_compressed(out_filename, **output_arrays)
+    results_dict["outputs"] = out_filename + ".npz"
+    results_dict["teardown_time"] = t.get_elapsed_time()
+
+    # Special case: if the benchmark implementation returns anything, then
+    # add that to the results dict
+    if retval:
+        results_dict["return-value"] = retval
+    else:
+        results_dict["return-value"] = None
+
+    results_dict["error_state"] = ErrorCodes.SUCCESS
+    results_dict["error_msg"] = ""
 
 
 def get_supported_implementation_postfixes():
@@ -50,12 +176,12 @@ class BenchmarkResults:
 
     def __init__(self, bench, repeat, impl_postfix, preset):
         """Initialize defaults."""
-        self._fmwrk = None
-        self._setup_time = -1
-        self._warmup_time = -1
-        self._teardown_time = -1
-        self._validation_state = -4
-        self._error_state = -1
+        self._fmwrk = bench.get_framework(impl_postfix)
+        self._setup_time = 0.0
+        self._warmup_time = 0.0
+        self._teardown_time = 0.0
+        self._validation_state = ValidationStatusCodes.FAILURE
+        self._error_state = ErrorCodes.UNIMPLEMENTED
         self._error_msg = "Not implemented"
         self._results = dict()
         self._bench = bench
@@ -291,7 +417,7 @@ class BenchmarkResults:
         return self._error_state
 
     @error_state.setter
-    def error_state(self, error_state=-1):
+    def error_state(self, error_state=ErrorCodes.UNIMPLEMENTED):
         self._error_state = error_state
 
     @property
@@ -310,26 +436,72 @@ class BenchmarkRunner:
         self.repeat = repeat
         self.timeout = timeout
         self.copied_args = dict()
-        self.results = BenchmarkResults(bench, repeat, impl_postfix, preset)
-
         self.impl_fn = self.bench.get_impl(impl_postfix)
         self.fmwrk = self.bench.get_framework(impl_postfix)
-        self.results.benchmark = self.bench
-        self.results.framework = self.fmwrk
+        self.results = BenchmarkResults(
+            self.bench, self.repeat, impl_postfix, self.preset
+        )
 
         if not self.impl_fn:
-            self.results.error_state = -1
+            self.results.error_state = ErrorCodes.UNIMPLEMENTED
             self.results.error_msg = "No implementation"
         elif not self.fmwrk:
-            self.results.error_state = -2
+            self.results.error_state = ErrorCodes.NO_FRAMEWORK
             self.results.error_msg = "No framework"
         else:
-            self.results.error_state = 0
-            self.results.error_msg = ""
             # Run setup step
             self._setup()
             # Execute the benchmark
-            self._exec()
+            with Manager() as manager:
+                results_dict = manager.dict()
+                p = Process(
+                    target=tout.exit_after(timeout)(_exec),
+                    args=(
+                        self.bench,
+                        self.fmwrk,
+                        impl_postfix,
+                        preset,
+                        timeout,
+                        repeat,
+                        self.copied_args,
+                        results_dict,
+                    ),
+                )
+                p.start()
+                res = p.join(timeout * 1.2)
+                if res is None and p.exitcode is None:
+                    logging.error(
+                        "Terminating process due to timeout in the execution "
+                        f"phase of {self.bench.bname} "
+                        f"for the {impl_postfix} implementation"
+                    )
+                    p.kill()
+                    self.results.error_state = ErrorCodes.EXECUTION_TIMEOUT
+                    self.results.error_msg = "Execution timed out"
+                else:
+                    self.results.error_state = results_dict["error_state"]
+                    self.results.error_msg = results_dict["error_msg"]
+                    if self.results.error_state == ErrorCodes.SUCCESS:
+                        self.results.warmup_time = results_dict["warmup_time"]
+                        self.results.exec_times = np.asarray(
+                            results_dict["exec_times"]
+                        )
+                        self.results.teardown_time = results_dict[
+                            "teardown_time"
+                        ]
+
+                        output_npz = results_dict["outputs"]
+                        if output_npz:
+                            npzfile = np.load(output_npz)
+                            for outarr in npzfile.files:
+                                self.results.results.update(
+                                    {outarr: npzfile[outarr]}
+                                )
+                            os.remove(output_npz)
+                        if results_dict["return-value"]:
+                            self.results.results.update(
+                                {"return-value": results_dict["return-value"]}
+                            )
 
     def _setup(self):
         initialized_data = self.bench.get_data(preset=self.preset)
@@ -343,91 +515,6 @@ class BenchmarkRunner:
                 )
 
         self.results.setup_time = t.get_elapsed_time()
-
-    def _reset_output_args(self, inputs):
-        try:
-            output_args = self.bench.info["output_args"]
-        except KeyError:
-            logging.info(
-                "No output args to reset as benchmarks has no array output."
-            )
-            return
-        array_args = self.bench.info["array_args"]
-        for arg in inputs.keys():
-            if arg in output_args and arg in array_args:
-                original_data = self.bench.get_data(preset=self.preset)[arg]
-                inputs.update({arg: self.fmwrk.copy_to_func()(original_data)})
-
-    def _exec(self):
-        input_args = self.bench.info["input_args"]
-        array_args = self.bench.info["array_args"]
-        inputs = dict()
-        for arg in input_args:
-            if arg not in array_args:
-                inputs.update(
-                    {arg: self.bench.get_data(preset=self.preset)[arg]}
-                )
-            else:
-                inputs.update({arg: self.copied_args[arg]})
-
-        # Warmup
-        @tout.exit_after(self.timeout)
-        def warmup(impl_fn, inputs):
-            self.fmwrk.execute(impl_fn, inputs)
-
-        with timer.timer() as t:
-            try:
-                warmup(self.impl_fn, inputs)
-            except KeyboardInterrupt:
-                logging.exception(
-                    "Benchmark {0} execution failed due to a timeout".format(
-                        self.bench.bname
-                    )
-                )
-                self.results.error_state = -3
-                self.results.error_msg = "Execution failed"
-                return
-            except Exception:
-                logging.exception("Benchmark execution failed.")
-                self.results.error_state = -3
-                self.results.error_msg = "Execution failed"
-                return
-
-        self.results.warmup_time = t.get_elapsed_time()
-        self._reset_output_args(inputs=inputs)
-        exec_times = np.empty(self.repeat, dtype=np.float64)
-
-        retval = None
-        for i in range(self.repeat):
-            with timer.timer() as t:
-                retval = self.fmwrk.execute(self.impl_fn, inputs)
-            exec_times[i] = t.get_elapsed_time()
-            # Do not reset the output from the last repeat
-            if i < self.repeat - 1:
-                self._reset_output_args(inputs=inputs)
-
-        self.results.exec_times = exec_times
-
-        # Get the output data
-        try:
-            out_args = self.bench.info["output_args"]
-        except KeyError:
-            out_args = []
-
-        array_args = self.bench.info["array_args"]
-        with timer.timer() as t:
-            for out_arg in out_args:
-                if out_arg in array_args:
-                    self.results.results.update(
-                        {out_arg: self.fmwrk.copy_from_func()(inputs[out_arg])}
-                    )
-        self.results.teardown_time = t.get_elapsed_time()
-
-        # Special case: if the benchmark implementation returns anything, then
-        # add that to the results dict
-
-        if retval:
-            self.results.results.update({"return-value": retval})
 
     def get_results(self):
         return self.results
@@ -611,7 +698,7 @@ class Benchmark(object):
             validate=False,
         )[0]
 
-        if ref_results.error_state == 0:
+        if ref_results.error_state == ErrorCodes.SUCCESS:
             self.refdata.update({preset: ref_results.results})
             return ref_results.results
         else:
@@ -786,8 +873,6 @@ class Benchmark(object):
     ):
         results = []
         if not run_datetime:
-            from datetime import datetime
-
             run_datetime = datetime.now().strftime("%m.%d.%Y_%H.%M.%S")
 
         if implementation_postfix:
@@ -800,14 +885,14 @@ class Benchmark(object):
                 timeout=timeout,
             )
             result = runner.get_results()
-            if validate and result.error_state == 0:
+            if validate and result.error_state == ErrorCodes.SUCCESS:
                 if self._validate_results(
                     preset, result.framework, result.results
                 ):
-                    result.validation_state = 0
+                    result.validation_state = ValidationStatusCodes.SUCCESS
                 else:
-                    result.validation_state = -1
-                    result.error_state = -4
+                    result.validation_state = ValidationStatusCodes.FAILURE
+                    result.error_state = ErrorCodes.FAILED_VALIDATION
                     result.error_msg = "Validation failed"
             if conn:
                 store_results(conn, result, run_datetime)
@@ -827,14 +912,14 @@ class Benchmark(object):
                     timeout=timeout,
                 )
                 result = runner.get_results()
-                if validate and result.error_state == 0:
+                if validate and result.error_state == ErrorCodes.SUCCESS:
                     if self._validate_results(
                         preset, result.framework, result.results
                     ):
-                        result.validation_state = 0
+                        result.validation_state = ValidationStatusCodes.SUCCESS
                     else:
-                        result.validation_state = -1
-                        result.error_state = -4
+                        result.validation_state = ValidationStatusCodes.FAILURE
+                        result.error_state = ErrorCodes.FAILED_VALIDATION
                         result.error_msg = "Validation failed"
                 if conn:
                     store_results(conn, result, run_datetime)

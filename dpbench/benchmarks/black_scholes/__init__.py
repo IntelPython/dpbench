@@ -3,13 +3,9 @@
 # SPDX-License-Identifier: Apache 2.0
 
 from .black_scholes_initialize import initialize
-from .black_scholes_numpy import black_scholes as black_scholes_numpy
-from .black_scholes_python import black_scholes as black_scholes_python
 
 __all__ = [
     "initialize",
-    "black_scholes_numpy",
-    "black_scholes_python",
 ]
 
 """

@@ -469,7 +469,6 @@ class BenchmarkRunner:
             with Manager() as manager:
                 results_dict = manager.dict()
                 p = Process(
-                    # target=tout.exit_after(timeout)(_exec),
                     target=_exec,
                     args=(
                         self.bench,
@@ -488,7 +487,7 @@ class BenchmarkRunner:
                     ),
                 )
                 p.start()
-                res = p.join(timeout * 1.2)
+                res = p.join(timeout)
                 if res is None and p.exitcode is None:
                     logging.error(
                         "Terminating process due to timeout in the execution "

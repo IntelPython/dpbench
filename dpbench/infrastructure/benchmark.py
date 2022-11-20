@@ -628,13 +628,19 @@ class Benchmark(object):
             impl_fnlist : The list of implementation function for the
             benchmark.
         """
+
+        ref_names = ["python", "numpy"]
+
+        impl_fnlist = self.impl_fnlist
+        for name in ref_names:
+            impl_fnlist = self._get_updated_fnlist(name, impl_fnlist)
+
         ref_impl_fn = None
 
         for fn in impl_fnlist:
-            if "python" in fn[0]:
-                ref_impl_fn = fn
-            elif "numpy" in fn[0]:
-                ref_impl_fn = fn
+            for name in ref_names:
+                if name in fn[0]:
+                    ref_impl_fn = fn
 
         return ref_impl_fn
 
@@ -790,11 +796,11 @@ class Benchmark(object):
         else:
             return False
 
-    def _get_updated_fnlist(self, impl_postfix: str):
+    def _get_updated_fnlist(self, impl_postfix: str, impl_fnlist):
         name = self.bname + "_" + impl_postfix
-        for n, _ in self.impl_fnlist:
+        for n, _ in impl_fnlist:
             if n == name:
-                return self.impl_fnlist
+                return impl_fnlist
 
         try:
             mod = importlib.import_module(
@@ -802,15 +808,15 @@ class Benchmark(object):
             )
         except ImportError:
             logging.exception("Cannot import " + name)
-            return None
+            return impl_fnlist
 
-        return self.impl_fnlist + [(name, getattr(mod, self.bname))]
+        return impl_fnlist + [(name, getattr(mod, self.bname))]
 
     def get_impl(self, impl_postfix: str):
         if not impl_postfix:
             return None
 
-        impl_fnlist = self._get_updated_fnlist(impl_postfix)
+        impl_fnlist = self._get_updated_fnlist(impl_postfix, self.impl_fnlist)
         if impl_fnlist is None:
             return None
 
@@ -836,10 +842,9 @@ class Benchmark(object):
 
     def get_framework(self, impl_postfix: str) -> Framework:
         try:
-            impl_fnlist = self._get_updated_fnlist(impl_postfix)
-            if impl_fnlist is None:
-                return None
-
+            impl_fnlist = self._get_updated_fnlist(
+                impl_postfix, self.impl_fnlist
+            )
             impl_to_fw_map = self._set_impl_to_framework_map(impl_fnlist)
 
             return impl_to_fw_map[self.bname + "_" + impl_postfix]

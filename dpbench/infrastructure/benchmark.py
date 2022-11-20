@@ -817,8 +817,6 @@ class Benchmark(object):
             return None
 
         impl_fnlist = self._get_updated_fnlist(impl_postfix, self.impl_fnlist)
-        if impl_fnlist is None:
-            return None
 
         fn = [
             impl[1]

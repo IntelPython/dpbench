@@ -9,6 +9,7 @@ import os
 import pathlib
 import tempfile
 from datetime import datetime
+from functools import partial
 from inspect import getmembers
 from multiprocessing import Manager, Process
 from typing import Any, Dict
@@ -43,6 +44,14 @@ def _reset_output_args(bench, fmwrk, inputs, preset):
             inputs.update({arg: fmwrk.copy_to_func()(original_data)})
 
 
+def _setup_func(initialized_data, array_args, framework):
+    copied_args = {}
+    for arg in array_args:
+        npdata = initialized_data[arg]
+        copied_args.update({arg: framework.copy_to_func()(npdata)})
+    return copied_args
+
+
 def _exec(
     bench,
     fmwrk,
@@ -50,7 +59,7 @@ def _exec(
     preset,
     timeout,
     repeat,
-    args,
+    get_args,
     results_dict,
 ):
     """Executes a benchmark for a given implementation.
@@ -79,6 +88,7 @@ def _exec(
     array_args = bench.info["array_args"]
     impl_fn = bench.get_impl(impl_postfix)
     inputs = dict()
+    args = get_args()
     for arg in input_args:
         if arg not in array_args:
             inputs.update({arg: bench.get_data(preset=preset)[arg]})
@@ -464,7 +474,12 @@ class BenchmarkRunner:
                         preset,
                         timeout,
                         repeat,
-                        self.copied_args,
+                        partial(
+                            _setup_func,
+                            self.bench.get_data(preset=self.preset),
+                            self.bench.info["array_args"],
+                            self.fmwrk,
+                        ),
                         results_dict,
                     ),
                 )

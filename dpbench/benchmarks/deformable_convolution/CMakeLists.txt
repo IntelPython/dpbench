@@ -1,0 +1,1 @@
+add_subdirectory(deformable_convolution_sycl_native_ext)

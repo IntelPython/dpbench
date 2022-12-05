@@ -4,8 +4,22 @@
 
 from .black_scholes_initialize import initialize
 
+all_benchmarks = [
+    "dpnp",
+    "numba_dpex_k",
+    "numba_dpex_p",
+    "numba_dpex_n",
+    "numba_n",
+    "numba_np",
+    "numba_npr",
+    "numpy",
+    "python",
+    "sycl",
+]
+
 __all__ = [
     "initialize",
+    "all_benchmarks",
 ]
 
 """

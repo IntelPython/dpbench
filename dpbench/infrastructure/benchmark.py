@@ -938,11 +938,11 @@ class Benchmark(object):
             results.append(result)
 
         else:
+            mod = importlib.import_module("dpbench.benchmarks." + self.bname)
+            bench_list = mod.all_benchmarks
+
             # Run the benchmark for all available implementations
-            for impl in self.get_impl_fnlist():
-                impl_postfix = impl[0][
-                    (len(self.bname) - len(impl[0]) + 1) :  # noqa: E203
-                ]
+            for impl_postfix in bench_list:
                 runner = BenchmarkRunner(
                     bench=self,
                     impl_postfix=impl_postfix,

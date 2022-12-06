@@ -4,6 +4,10 @@
 
 from .black_scholes_initialize import initialize
 
+# List of all available benchmarks, each element must either a postfix string
+# (in this case specific benchmark module name will be deduced from postfix and
+# benchmark name) or 2-element tuple where first elemtn is potfix and second is
+# module name.
 all_benchmarks = [
     "dpnp",
     "numba_dpex_k",
@@ -14,7 +18,7 @@ all_benchmarks = [
     "numba_npr",
     "numpy",
     "python",
-    "sycl",
+    ("sycl", "black_scholes_sycl_native_ext"),
 ]
 
 __all__ = [

@@ -796,8 +796,26 @@ class Benchmark(object):
         else:
             return False
 
+    def _get_impl_names(self):
+        mod = importlib.import_module("dpbench.benchmarks." + self.bname)
+        bench_list = mod.all_benchmarks
+
+        result = {}
+        for bench in bench_list:
+            if isinstance(bench, tuple):
+                postfix = bench[0]
+                name = bench[1]
+            else:
+                postfix = bench
+                name = self.bname + "_" + postfix
+
+            result[postfix] = name
+
+        return result
+
     def _get_updated_fnlist(self, impl_postfix: str, impl_fnlist):
-        name = self.bname + "_" + impl_postfix
+        name = self._get_impl_names()[impl_postfix]
+
         for n, _ in impl_fnlist:
             if n == name:
                 return impl_fnlist
@@ -938,8 +956,7 @@ class Benchmark(object):
             results.append(result)
 
         else:
-            mod = importlib.import_module("dpbench.benchmarks." + self.bname)
-            bench_list = mod.all_benchmarks
+            bench_list = self._get_impl_names().keys()
 
             # Run the benchmark for all available implementations
             for impl_postfix in bench_list:

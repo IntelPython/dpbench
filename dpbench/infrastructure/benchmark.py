@@ -826,7 +826,7 @@ class Benchmark(object):
         if names:
             name = names[impl_postfix]
         else:
-            name = name = self.bname + "_" + postfix
+            name = name = self.bname + "_" + impl_postfix
 
         for n, _ in impl_fnlist:
             if n == name:

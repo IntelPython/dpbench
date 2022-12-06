@@ -822,11 +822,14 @@ class Benchmark(object):
         return result
 
     def _get_updated_fnlist(self, impl_postfix: str, impl_fnlist):
+        print("0-0-0-0-0-0 1 ", impl_postfix)
         names = self._get_impl_names()
         if names:
             name = names[impl_postfix]
         else:
             name = name = self.bname + "_" + impl_postfix
+
+        print("0-0-0-0-0-0 2 ", name)
 
         for n, _ in impl_fnlist:
             if n == name:
@@ -840,7 +843,7 @@ class Benchmark(object):
             logging.exception("Cannot import " + name)
             return impl_fnlist
 
-        print("0-0-0-0-0-0 ", mod, dir(mod))
+        print("0-0-0-0-0-0 3 ", mod, dir(mod))
 
         func_names = [self.bname, self.bname + "_" + impl_postfix]
         for func in func_names:

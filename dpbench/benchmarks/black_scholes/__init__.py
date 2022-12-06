@@ -18,7 +18,7 @@ all_benchmarks = [
     "numba_npr",
     "numpy",
     "python",
-    ("sycl", "black_scholes_sycl_native_ext"),
+    ("sycl", "black_scholes_sycl_native_ext.black_scholes_sycl"),
 ]
 
 __all__ = [

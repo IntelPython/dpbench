@@ -846,7 +846,7 @@ class Benchmark(object):
                 return impl_fnlist + [(name, getattr(mod, func))]
 
         logging.error(
-            "Unable find benchmark function for " + impl_postfix + " postfix"
+            "Unable to find benchmark function for " + impl_postfix + " postfix"
         )
         return impl_fnlist
 

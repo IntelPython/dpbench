@@ -753,9 +753,17 @@ class Benchmark(object):
         benchmark. If none is provided, the default config inside the
         package's bench_info directory is used.
         """
+
         self.bname = bmodule.__name__.split(".")[-1]
         self.bdata = dict()
         self.refdata = dict()
+
+        bench_mod = importlib.import_module("dpbench.benchmarks." + self.bname)
+        if hasattr(bench_mod, "all_benchmarks"):
+            self.bench_list = bench_mod.all_benchmarks
+        else:
+            self.bench_list = None
+
         try:
             self._load_benchmark_info(bconfig_path)
             self._set_data_initialization_fn(bmodule)
@@ -797,11 +805,11 @@ class Benchmark(object):
             return False
 
     def _get_impl_names(self):
-        mod = importlib.import_module("dpbench.benchmarks." + self.bname)
-        bench_list = mod.all_benchmarks
+        if self.bench_list is None:
+            return None
 
         result = {}
-        for bench in bench_list:
+        for bench in self.bench_list:
             if isinstance(bench, tuple):
                 postfix = bench[0]
                 name = bench[1]
@@ -814,7 +822,11 @@ class Benchmark(object):
         return result
 
     def _get_updated_fnlist(self, impl_postfix: str, impl_fnlist):
-        name = self._get_impl_names()[impl_postfix]
+        names = self._get_impl_names()
+        if names:
+            name = names[impl_postfix]
+        else:
+            name = name = self.bname + "_" + postfix
 
         for n, _ in impl_fnlist:
             if n == name:
@@ -956,10 +968,18 @@ class Benchmark(object):
             results.append(result)
 
         else:
-            bench_list = self._get_impl_names().keys()
+            impl_fnlist = self.get_impl_fnlist()
+
+            bench_list = self._get_impl_names()
+            if bench_list:
+                for postfix in bench_list.keys():
+                    impl_fnlist = self._get_updated_fnlist(postfix, impl_fnlist)
 
             # Run the benchmark for all available implementations
-            for impl_postfix in bench_list:
+            for impl in impl_fnlist:
+                impl_postfix = impl[0][
+                    (len(self.bname) - len(impl[0]) + 1) :  # noqa: E203
+                ]
                 runner = BenchmarkRunner(
                     bench=self,
                     impl_postfix=impl_postfix,

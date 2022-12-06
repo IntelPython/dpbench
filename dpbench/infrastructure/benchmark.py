@@ -840,7 +840,7 @@ class Benchmark(object):
             logging.exception("Cannot import " + name)
             return impl_fnlist
 
-        print('0-0-0-0-0-0 ', dir(mod))
+        print("0-0-0-0-0-0 ", mod, dir(mod))
 
         func_names = [self.bname, self.bname + "_" + impl_postfix]
         for func in func_names:

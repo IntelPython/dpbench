@@ -840,7 +840,12 @@ class Benchmark(object):
             logging.exception("Cannot import " + name)
             return impl_fnlist
 
-        return impl_fnlist + [(name, getattr(mod, self.bname))]
+        func_names = [self.bname, self.bname + "_" + impl_postfix]
+        for func in func_names:
+            if hasattr(mod, func):
+                return impl_fnlist + [(name, getattr(mod, func))]
+
+        return impl_fnlist
 
     def get_impl(self, impl_postfix: str):
         if not impl_postfix:

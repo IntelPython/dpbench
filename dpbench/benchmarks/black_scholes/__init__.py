@@ -6,7 +6,7 @@ from .black_scholes_initialize import initialize
 
 # List of all available benchmarks, each element must either a postfix string
 # (in this case specific benchmark module name will be deduced from postfix and
-# benchmark name) or 2-element tuple where first elemtn is potfix and second is
+# benchmark name) or 2-element tuple where first element is potfix and second is
 # module name.
 all_benchmarks = [
     "dpnp",

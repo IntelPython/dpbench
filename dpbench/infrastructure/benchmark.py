@@ -824,10 +824,11 @@ class Benchmark(object):
     def _get_updated_fnlist(self, impl_postfix: str, impl_fnlist):
         print("0-0-0-0-0-0 1 ", impl_postfix)
         names = self._get_impl_names()
+        canonical_name = self.bname + "_" + impl_postfix
         if names:
             name = names[impl_postfix]
         else:
-            name = name = self.bname + "_" + impl_postfix
+            name = canonical_name
 
         print("0-0-0-0-0-0 2 ", name)
 
@@ -848,7 +849,7 @@ class Benchmark(object):
         func_names = [self.bname, self.bname + "_" + impl_postfix]
         for func in func_names:
             if hasattr(mod, func):
-                return impl_fnlist + [(name, getattr(mod, func))]
+                return impl_fnlist + [(canonical_name, getattr(mod, func))]
 
         print("0-0-0-0-0-0 4 ", impl_postfix)
         logging.error(

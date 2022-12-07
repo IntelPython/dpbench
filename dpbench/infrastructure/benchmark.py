@@ -850,6 +850,7 @@ class Benchmark(object):
             if hasattr(mod, func):
                 return impl_fnlist + [(name, getattr(mod, func))]
 
+        print("0-0-0-0-0-0 4 ", impl_postfix)
         logging.error(
             "Unable to find benchmark function for " + impl_postfix + " postfix"
         )

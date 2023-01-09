@@ -497,10 +497,14 @@ class BenchmarkRunner:
                     self.results.error_state = ErrorCodes.EXECUTION_TIMEOUT
                     self.results.error_msg = "Execution timed out"
                 else:
-                    self.results.setup_time = results_dict["setup_time"]
-                    self.results.error_state = results_dict["error_state"]
-                    self.results.error_msg = results_dict["error_msg"]
+                    self.results.error_state = results_dict.get(
+                        "error_state", ErrorCodes.FAILED_EXECUTION
+                    )
+                    self.results.error_msg = results_dict.get(
+                        "error_msg", "Unexpected crash"
+                    )
                     if self.results.error_state == ErrorCodes.SUCCESS:
+                        self.results.setup_time = results_dict["setup_time"]
                         self.results.warmup_time = results_dict["warmup_time"]
                         self.results.exec_times = np.asarray(
                             results_dict["exec_times"]

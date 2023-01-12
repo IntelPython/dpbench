@@ -26,7 +26,6 @@ predictions: double
     vectors representing output predictions from test set
 """
 
-from .knn_dpnp import knn as knn_dpnp
 from .knn_initialize import initialize
 from .knn_numba_dpex_k import knn as knn_numba_dpex_k
 from .knn_numba_dpex_p import knn as knn_numba_dpex_p

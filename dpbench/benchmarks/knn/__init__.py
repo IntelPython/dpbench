@@ -2,7 +2,6 @@
 #
 # SPDX-License-Identifier: Apache 2.0
 
-from .knn_dpnp import knn as knn_dpnp
 from .knn_initialize import initialize
 from .knn_numba_dpex_k import knn as knn_numba_dpex_k
 from .knn_numba_dpex_p import knn as knn_numba_dpex_p
@@ -11,7 +10,6 @@ from .knn_python import knn as knn_python
 
 __all__ = [
     "initialize",
-    "knn_dpnp",
     "knn_numba_dpex_k",
     "knn_numba_dpex_p",
     "knn_numba_npr",

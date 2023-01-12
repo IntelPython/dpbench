@@ -16,6 +16,7 @@ from dpbench.infrastructure import timer
 from . import timeout_decorator as tout
 from .datamodel import store_results
 from .dpcpp_framework import DpcppFramework
+from .dpnp_framework import DpnpFramework
 from .framework import Framework
 from .numba_dpex_framework import NumbaDpexFramework
 from .numba_dpex_kernel_framework import NumbaDpexKernelFramework
@@ -587,7 +588,7 @@ class Benchmark(object):
                     )
             elif "_dpnp" in bimpl[0]:
                 try:
-                    fw = DpcppFramework("dpnp")
+                    fw = DpnpFramework("dpnp")
                     impl_to_fw_map.update({bimpl[0]: fw})
                 except Exception:
                     logging.exception(

@@ -5,4 +5,6 @@
 import dpnp
 
 def l2_norm(a, d):
-    dpnp.copyto(d, dpnp.linalg.norm(a, axis=1))
+    sq = dpnp.square(a)
+    sum = sq.sum(axis=1)
+    d[:] = dpnp.sqrt(sum)

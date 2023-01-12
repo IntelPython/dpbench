@@ -5,6 +5,8 @@
 import logging
 import sqlite3
 
+from .enums import ErrorCodes, ValidationStatusCodes
+
 _sql_create_results_table = """
 CREATE TABLE IF NOT EXISTS results (
     timestamp integer NOT NULL,
@@ -165,16 +167,20 @@ def store_results(conn, result, run_timestamp):
     data.append("TODO")
     data.append(result.framework_name + " " + result.framework_version)
 
-    if result.error_state == -1:
+    if result.error_state == ErrorCodes.UNIMPLEMENTED:
         error_state_str = "Unimplemented"
-    elif result.error_state == -2:
+    elif result.error_state == ErrorCodes.NO_FRAMEWORK:
         error_state_str = "Framework unavailable"
-    elif result.error_state == -3:
+    elif result.error_state == ErrorCodes.FAILED_EXECUTION:
         error_state_str = "Failed Execution"
-    elif result.error_state == -4:
+    elif result.error_state == ErrorCodes.FAILED_VALIDATION:
         error_state_str = "Failed Validation"
-    else:
+    elif result.error_state == ErrorCodes.EXECUTION_TIMEOUT:
+        error_state_str = "Execution Timeout"
+    elif result.error_state == ErrorCodes.SUCCESS:
         error_state_str = "Success"
+    else:
+        error_state_str = "N/A"
 
     data.append(error_state_str)
     data.append(result.preset)
@@ -188,7 +194,7 @@ def store_results(conn, result, run_timestamp):
     data.append(result.quartile75_exec_time)
     data.append(result.teardown_time)
 
-    if result.validation_state == 0:
+    if result.validation_state == ValidationStatusCodes.SUCCESS:
         validation_str = "Success"
     else:
         validation_str = "Fail"

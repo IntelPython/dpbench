@@ -1,0 +1,1 @@
+add_subdirectory(knn_sycl_native_ext)

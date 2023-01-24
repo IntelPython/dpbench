@@ -4,6 +4,7 @@
 
 import dpnp
 
+
 def l2_norm(a, d):
     sq = dpnp.square(a)
     sum = sq.sum(axis=1)

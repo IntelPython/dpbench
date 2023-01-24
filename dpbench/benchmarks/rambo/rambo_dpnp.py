@@ -4,6 +4,7 @@
 
 import dpnp
 
+
 def rambo(nevts, nout, C1, F1, Q1, output):
     for i in range(nevts):
         for j in range(nout):

@@ -43,7 +43,7 @@ void kmeans_impl(sycl::queue q,
                         FpTy sq_sum = 0.0;
                         for (size_t j = 0; j < ndims; j++) {
                             FpTy dist =
-                                arrayP[i0 * ndims + j] - arrayC[i0 * ndims + j];
+                                arrayP[i0 * ndims + j] - arrayC[i1 * ndims + j];
                             sq_sum += dist * dist;
                         }
                         FpTy total_distance = cl::sycl::sqrt(sq_sum);
@@ -60,10 +60,10 @@ void kmeans_impl(sycl::queue q,
         q.submit([&](sycl::handler &h) {
              h.parallel_for<class theKernel_1>(
                  sycl::range<1>{ncentroids}, [=](sycl::id<1> myID_k1) {
-                     size_t i = myID_k1[0];
+                     size_t i0 = myID_k1[0];
                      for (size_t j = 0; j < ndims; j++) {
-                         arrayCsum[i * ndims + j] = 0.0;
-                         arrayCnumpoint[i * ndims + j] = 0.0;
+                         arrayCsum[i0 * ndims + j] = 0.0;
+                         arrayCnumpoint[i0 * ndims + j] = 0.0;
                      }
                  });
          }).wait();
@@ -72,8 +72,8 @@ void kmeans_impl(sycl::queue q,
         q.submit([&](sycl::handler &h) {
              h.parallel_for<class theKernel_2>(
                  sycl::range<1>{npoints}, [=](sycl::id<1> myID) {
-                     size_t i = myID[0];
-                     size_t ci = arrayPclusters[i];
+                     size_t i0 = myID[0];
+                     size_t ci = arrayPclusters[i0];
 
                      for (size_t j = 0; j < ndims; j++) {
                          sycl::atomic_ref<
@@ -81,7 +81,7 @@ void kmeans_impl(sycl::queue q,
                              sycl::memory_scope::system,
                              sycl::access::address_space::global_space>
                              centroid_sum(arrayCsum[ci * ndims + j]);
-                         centroid_sum += arrayP[i * ndims + j];
+                         centroid_sum += arrayP[i0 * ndims + j];
                      }
 
                      sycl::atomic_ref<size_t, sycl::memory_order::relaxed,
@@ -96,11 +96,11 @@ void kmeans_impl(sycl::queue q,
         q.submit([&](sycl::handler &h) {
              h.parallel_for<class theKernel_uc>(
                  sycl::range<1>{ncentroids}, [=](sycl::id<1> myID) {
-                     size_t i = myID[0];
-                     if (arrayCnumpoint[i] > 0) {
+                     size_t i0 = myID[0];
+                     if (arrayCnumpoint[i0] > 0) {
                          for (size_t j = 0; j < ndims; j++) {
-                             arrayC[i * ndims + j] =
-                                 arrayCsum[i * ndims + j] / arrayCnumpoint[i];
+                             arrayC[i0 * ndims + j] =
+                                 arrayCsum[i0 * ndims + j] / arrayCnumpoint[i0];
                          }
                      }
                  });

@@ -124,9 +124,10 @@ def compute_clusters(n, min_pts, assignments, sizes, indices_list):
     return nclusters
 
 
-def dbscan(
-    n_samples, n_features, data, eps, min_pts, assignments, indices_list, sizes
-):
+def dbscan(n_samples, n_features, data, eps, min_pts, assignments):
+    indices_list = np.empty(n_samples * n_samples, dtype=np.int64)
+    sizes = np.zeros(n_samples, dtype=np.int64)
+
     get_neighborhood(
         n_samples, n_features, data, eps, indices_list, sizes, assignments
     )

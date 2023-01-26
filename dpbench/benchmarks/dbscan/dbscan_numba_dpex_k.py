@@ -3,6 +3,7 @@
 # SPDX-License-Identifier: Apache 2.0
 
 
+import dpctl.tensor as dpt
 import numba as nb
 import numba_dpex as nbd
 import numpy as np
@@ -49,13 +50,7 @@ def _queue_empty(head, tail):
     return head == tail
 
 
-@nbd.kernel(
-    access_types={
-        "read_only": ["data"],
-        "write_only": ["assignments", "ind_lst"],
-        "read_write": ["sz_lst"],
-    }
-)
+@nbd.kernel
 def get_neighborhood(
     n, dim, data, eps, ind_lst, sz_lst, assignments, block_size, nblocks
 ):
@@ -133,20 +128,43 @@ def compute_clusters(n, min_pts, assignments, sizes, indices_list):
     return nclusters
 
 
-def dbscan(
-    n_samples, n_features, data, eps, min_pts, assignments, indices_list, sizes
-):
+def dbscan(n_samples, n_features, data, eps, min_pts, assignments):
+    indices_list = np.empty(n_samples * n_samples, dtype=np.int64)
+    indices_list_usm = dpt.asarray(
+        obj=indices_list,
+        dtype=indices_list.dtype,
+        device=data.device,
+        copy=None,
+        usm_type=None,
+        sycl_queue=None,
+    )
+
+    sizes = np.zeros(n_samples, dtype=np.int64)
+    sizes_usm = dpt.asarray(
+        obj=sizes,
+        dtype=sizes.dtype,
+        device=data.device,
+        copy=None,
+        usm_type=None,
+        sycl_queue=None,
+    )
+
     get_neighborhood[n_samples, nbd.DEFAULT_LOCAL_SIZE](
         n_samples,
         n_features,
         data,
         eps,
-        indices_list,
-        sizes,
+        indices_list_usm,
+        sizes_usm,
         assignments,
         1,
         n_samples,
     )
+
+    assignments_np = dpt.asnumpy(assignments)
+    sizes = dpt.asnumpy(sizes_usm)
+    indices_list = dpt.asnumpy(indices_list_usm)
+
     return compute_clusters(
-        n_samples, min_pts, assignments, sizes, indices_list
+        n_samples, min_pts, assignments_np, sizes, indices_list
     )

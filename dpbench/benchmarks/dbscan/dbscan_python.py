@@ -6,9 +6,7 @@ import numpy as np
 from sklearn.cluster import DBSCAN
 
 
-def dbscan(
-    n_samples, n_features, data, eps, min_pts, assignments, indices_list, sizes
-):
+def dbscan(n_samples, n_features, data, eps, min_pts, assignments):
 
     data = np.reshape(data, (n_samples, n_features))
 

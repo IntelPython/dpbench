@@ -10,7 +10,7 @@ import pathlib
 import tempfile
 from datetime import datetime
 from inspect import getmembers
-from multiprocessing import Manager, Process
+from multiprocessing import Manager
 from typing import Any, Dict
 
 import numpy as np
@@ -455,60 +455,6 @@ class BenchmarkRunner:
             with Manager() as manager:
                 results_dict = manager.dict()
 
-                # if multiprocessing needed then
-
-                # p = Process(
-                #     target=_exec,
-                #     args=(
-                #         self.bench,
-                #         self.fmwrk,
-                #         impl_postfix,
-                #         preset,
-                #         timeout,
-                #         repeat,
-                #         self.copied_args,
-                #         results_dict,
-                #     ),
-                # )
-                # p.start()
-                # res = p.join(timeout * 1.2)
-
-                # if res is None and p.exitcode is None:
-                #     logging.error(
-                #         "Terminating process due to timeout in the execution "
-                #         f"phase of {self.bench.bname} "
-                #         f"for the {impl_postfix} implementation"
-                #     )
-                #     p.kill()
-                #     self.results.error_state = ErrorCodes.EXECUTION_TIMEOUT
-                #     self.results.error_msg = "Execution timed out"
-                # else:
-                #     self.results.error_state = results_dict["error_state"]
-                #     self.results.error_msg = results_dict["error_msg"]
-                #     if self.results.error_state == ErrorCodes.SUCCESS:
-                #         self.results.warmup_time = results_dict["warmup_time"]
-                #         self.results.exec_times = np.asarray(
-                #             results_dict["exec_times"]
-                #         )
-                #         self.results.teardown_time = results_dict[
-                #             "teardown_time"
-                #         ]
-
-                #         output_npz = results_dict["outputs"]
-                #         if output_npz:
-                #             npzfile = np.load(output_npz)
-                #             for outarr in npzfile.files:
-                #                 self.results.results.update(
-                #                     {outarr: npzfile[outarr]}
-                #                 )
-                #             os.remove(output_npz)
-                #         if results_dict["return-value"]:
-                #             self.results.results.update(
-                #                 {"return-value": results_dict["return-value"]}
-                #             )
-
-                # else no multiprocessing
-
                 _exec(
                     self.bench,
                     self.fmwrk,
@@ -541,8 +487,6 @@ class BenchmarkRunner:
                         self.results.results.update(
                             {"return-value": results_dict["return-value"]}
                         )
-
-    # endif
 
     def _setup(self):
         initialized_data = self.bench.get_data(preset=self.preset)

@@ -1,0 +1,1 @@
+add_subdirectory(kmeans_sycl_native_ext)

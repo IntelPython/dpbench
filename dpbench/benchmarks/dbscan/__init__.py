@@ -17,5 +17,5 @@ __all__ = [
     "dbscan_numba_n",
     "dbscan_numba_npr",
     "dbscan_python",
-    "dbscan_sycl"
+    "dbscan_sycl",
 ]

@@ -40,19 +40,21 @@ template <typename... Args> bool ensure_compatibility(const Args &...args)
 
 } // namespace
 
-size_t dbscan_sync(size_t n_samples, size_t n_features,
-		   dpctl::tensor::usm_ndarray data,
-		   double eps,
-		   size_t min_pts,
-		   dpctl::tensor::usm_ndarray assignments)
+size_t dbscan_sync(size_t n_samples,
+                   size_t n_features,
+                   dpctl::tensor::usm_ndarray data,
+                   double eps,
+                   size_t min_pts,
+                   dpctl::tensor::usm_ndarray assignments)
 {
-  auto queue = data.get_queue();
-  
-  if (!ensure_compatibility(data, assignments))
-    throw std::runtime_error("Input arrays are not acceptable.");
-  
-  return dbscan_impl<double>(queue, n_samples, n_features, data.get_data<double>(),
-		     eps, min_pts, assignments.get_data<size_t>());
+    auto queue = data.get_queue();
+
+    if (!ensure_compatibility(data, assignments))
+        throw std::runtime_error("Input arrays are not acceptable.");
+
+    return dbscan_impl<double>(queue, n_samples, n_features,
+                               data.get_data<double>(), eps, min_pts,
+                               assignments.get_data<size_t>());
 }
 
 PYBIND11_MODULE(_dbscan_sycl, m)
@@ -60,8 +62,7 @@ PYBIND11_MODULE(_dbscan_sycl, m)
     // Import the dpctl extensions
     import_dpctl();
 
-    m.def("dbscan", &dbscan_sync,
-          "DPC++ implementation of DBSCAN", py::arg("n_samples"),
-          py::arg("n_features"), py::arg("data"), py::arg("eps"), py::arg("min_pts"),
-          py::arg("assignments"));
+    m.def("dbscan", &dbscan_sync, "DPC++ implementation of DBSCAN",
+          py::arg("n_samples"), py::arg("n_features"), py::arg("data"),
+          py::arg("eps"), py::arg("min_pts"), py::arg("assignments"));
 }

@@ -1,0 +1,1 @@
+add_subdirectory(dbscan_sycl_native_ext)

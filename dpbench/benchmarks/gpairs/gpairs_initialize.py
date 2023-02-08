@@ -6,14 +6,12 @@ import numpy as np
 
 
 def _generate_rbins(dtype, nbins, rmax, rmin):
-
     rbins = np.logspace(np.log10(rmin), np.log10(rmax), nbins).astype(dtype)
 
     return (rbins**2).astype(dtype)
 
 
 def initialize(nopt, seed, nbins, rmax, rmin):
-
     import numpy.random as default_rng
 
     default_rng.seed(seed)

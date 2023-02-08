@@ -39,11 +39,11 @@ jobs:
       - name: Install dpbench dependencies
         shell: bash -l {0}
         run: |
-          conda install -c intel tbb=2021.6.0 dpcpp_linux-64
+          conda install -c intel tbb dpcpp_linux-64
           conda install numpy numba cython cmake ninja scikit-build pandas
-          conda install scipy spirv-tools scikit-learn pybind11
+          conda install scipy scikit-learn pybind11
           conda install -c pkgs/main libgcc-ng">=11.2.0" libstdcxx-ng">=11.2.0" libgomp">=11.2.0"
-          conda install -c dppy/label/dev -c intel dpctl=0.13.0 numba-dpex=0.18.1 dpnp=0.10.1
+          conda install -c intel dpctl numba-dpex dpnp
           conda list
 
       - name: Build dpbench

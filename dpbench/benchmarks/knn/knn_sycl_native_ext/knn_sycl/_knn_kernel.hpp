@@ -59,7 +59,8 @@ sycl::event knn_impl(sycl::queue q,
                     FpTy new_neighbor_label = queue_neighbors[j].label;
                     size_t index = j;
                     while (index > 0 &&
-                           new_distance < queue_neighbors[index - 1].dist) {
+                           new_distance < queue_neighbors[index - 1].dist)
+                    {
                         queue_neighbors[index] = queue_neighbors[index - 1];
                         index--;
 
@@ -88,7 +89,8 @@ sycl::event knn_impl(sycl::queue q,
                         size_t index = k - 1;
 
                         while (index > 0 &&
-                               new_distance < queue_neighbors[index - 1].dist) {
+                               new_distance < queue_neighbors[index - 1].dist)
+                        {
                             queue_neighbors[index] = queue_neighbors[index - 1];
                             index--;
 

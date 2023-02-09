@@ -65,7 +65,6 @@ def kmeans_kernel(
     num_points,
     num_centroids,
 ):
-
     copy_arrayC[num_centroids, nb.DEFAULT_LOCAL_SIZE](arrayC, arrayP)
 
     for i in range(niters):
@@ -99,7 +98,6 @@ def kmeans(
     ndims,
     ncentroids,
 ):
-
     for i in range(REPEAT):
         arrayC, arrayCsum, arrayCnumpoint = kmeans_kernel(
             arrayP,

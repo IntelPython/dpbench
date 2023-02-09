@@ -56,7 +56,6 @@ def _kmeans_impl(
     npoints,
     ncentroids,
 ):
-
     for i in range(niters):
         _groupByCluster(arrayP, arrayPcluster, arrayC, npoints, ncentroids)
 
@@ -86,7 +85,6 @@ def kmeans(
     ndims,
     ncentroids,
 ):
-
     for i1 in nb.prange(ncentroids):
         arrayC[i1, 0] = arrayP[i1, 0]
         arrayC[i1, 1] = arrayP[i1, 1]

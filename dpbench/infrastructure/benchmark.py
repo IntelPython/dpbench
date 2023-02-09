@@ -624,7 +624,6 @@ class Benchmark(object):
         impl_to_fw_map = dict()
 
         for bimpl in impl_fnlist:
-
             if "_numba" in bimpl[0] and "_dpex" not in bimpl[0]:
                 impl_to_fw_map.update({bimpl[0]: NumbaFramework("numba")})
             elif "_numpy" in bimpl[0]:
@@ -695,7 +694,6 @@ class Benchmark(object):
             return None
 
     def _validate_results(self, preset, frmwrk, frmwrk_out):
-
         ref_out = self._get_validation_data(preset)
         if not ref_out:
             return False
@@ -751,7 +749,6 @@ class Benchmark(object):
         return self.impl_fnlist
 
     def has_impl(self, impl_postfix: str):
-
         if not impl_postfix:
             return False
 
@@ -766,7 +763,6 @@ class Benchmark(object):
             return False
 
     def get_impl(self, impl_postfix: str):
-
         if not impl_postfix:
             return None
 

@@ -53,7 +53,6 @@ def list_available_benchmarks():
 
 
 def list_possible_implementations():
-
     parent_folder = pathlib.Path(__file__).parent.absolute()
     impl_postfix_json = parent_folder.joinpath("configs", "impl_postfix.json")
 
@@ -152,7 +151,6 @@ def run_benchmarks(
     impl_postfixes = list_possible_implementations()
 
     for b in list_available_benchmarks():
-
         for impl in impl_postfixes:
             run_benchmark(
                 bname=b,

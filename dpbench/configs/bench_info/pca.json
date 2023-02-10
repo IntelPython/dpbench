@@ -1,0 +1,46 @@
+{
+    "benchmark": {
+        "name": "Principle Component Analysis",
+        "short_name": "PCA",
+        "relative_path": "pca",
+        "module_name": "pca",
+        "func_name": "pca",
+        "kind": "benchmark",
+        "domain": "data analysis",
+        "parameters": {
+            "S": {
+                "npoints": 1024,
+		"dims": 128
+            },
+            "M": {
+                "npoints": 16384,
+		"dims": 128
+            },
+            "L": {
+                "npoints": 524288,
+		"dims": 128
+            }
+        },
+        "init": {
+            "func_name": "initialize",
+            "input_args": [
+                "npoints",
+		"dims"
+            ],
+            "output_args": [
+		"data"
+            ]
+        },
+        "input_args": [
+            "data"
+        ],
+        "array_args": [
+            "data"
+        ],
+        "output_args": [
+            "data",
+	    "evalues",
+	    "evectors"
+        ]
+    }
+}

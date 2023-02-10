@@ -3,27 +3,17 @@
 # SPDX-License-Identifier: Apache 2.0
 
 from .pca_initialize import initialize
-from .pca_numpy import (
-    pca as pca_numpy
-)
-from .pca_numba_n import (
-    pca as pca_numba_n
-)
-
-from .pca_numba_np import (
-    pca as pca_numba_np
-)
-
-from .pca_numba_dpex_n import (
-    pca as pca_numba_dpex_n
-)
+from .pca_numba_dpex_n import pca as pca_numba_dpex_n
+from .pca_numba_n import pca as pca_numba_n
+from .pca_numba_np import pca as pca_numba_np
+from .pca_numpy import pca as pca_numpy
 
 __all__ = [
     "initialize",
     "pca_numpy",
     "pca_numba_n",
     "pca_numba_np",
-    "pca_numba_dpex_n"
+    "pca_numba_dpex_n",
 ]
 
 """Principle Component Analysis

@@ -2,11 +2,12 @@
 #
 # SPDX-License-Identifier: Apache-2.0
 
-import numpy as np
 import numba as nb
-
+import numpy as np
 
 nb.njit(parallel=False, fastmath=True)
+
+
 def pca(data, dims_rescaled_data=2):
     # mean center the data
     data -= data.mean(axis=0)
@@ -19,7 +20,7 @@ def pca(data, dims_rescaled_data=2):
 
     # sort eigenvalues and eigenvectors in decreasing order
     idx = np.argsort(evalues)[::-1]
-    evectors = evectors[:,idx]
+    evectors = evectors[:, idx]
     evalues = evalues[idx]
 
     # select the first n eigenvectors (n is desired dimension

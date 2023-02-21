@@ -9,6 +9,7 @@ import os
 import pathlib
 import tempfile
 from datetime import datetime
+from functools import partial
 from inspect import getmembers
 from multiprocessing import Manager, Process
 from typing import Any, Dict
@@ -43,6 +44,14 @@ def _reset_output_args(bench, fmwrk, inputs, preset):
             inputs.update({arg: fmwrk.copy_to_func()(original_data)})
 
 
+def _setup_func(initialized_data, array_args, framework):
+    copied_args = {}
+    for arg in array_args:
+        npdata = initialized_data[arg]
+        copied_args.update({arg: framework.copy_to_func()(npdata)})
+    return copied_args
+
+
 def _exec(
     bench,
     fmwrk,
@@ -50,7 +59,7 @@ def _exec(
     preset,
     timeout,
     repeat,
-    args,
+    get_args,
     results_dict,
 ):
     """Executes a benchmark for a given implementation.
@@ -79,6 +88,12 @@ def _exec(
     array_args = bench.info["array_args"]
     impl_fn = bench.get_impl(impl_postfix)
     inputs = dict()
+
+    with timer.timer() as t:
+        args = get_args()
+
+    results_dict["setup_time"] = t.get_elapsed_time()
+
     for arg in input_args:
         if arg not in array_args:
             inputs.update({arg: bench.get_data(preset=preset)[arg]})
@@ -436,7 +451,6 @@ class BenchmarkRunner:
         self.preset = preset
         self.repeat = repeat
         self.timeout = timeout
-        self.copied_args = dict()
         self.impl_fn = self.bench.get_impl(impl_postfix)
         self.fmwrk = self.bench.get_framework(impl_postfix)
         self.results = BenchmarkResults(
@@ -450,8 +464,6 @@ class BenchmarkRunner:
             self.results.error_state = ErrorCodes.NO_FRAMEWORK
             self.results.error_msg = "No framework"
         else:
-            # Run setup step
-            self._setup()
             # Execute the benchmark
             with Manager() as manager:
                 results_dict = manager.dict()
@@ -464,7 +476,12 @@ class BenchmarkRunner:
                         preset,
                         timeout,
                         repeat,
-                        self.copied_args,
+                        partial(
+                            _setup_func,
+                            self.bench.get_data(preset=self.preset),
+                            self.bench.info["array_args"],
+                            self.fmwrk,
+                        ),
                         results_dict,
                     ),
                 )
@@ -480,9 +497,14 @@ class BenchmarkRunner:
                     self.results.error_state = ErrorCodes.EXECUTION_TIMEOUT
                     self.results.error_msg = "Execution timed out"
                 else:
-                    self.results.error_state = results_dict["error_state"]
-                    self.results.error_msg = results_dict["error_msg"]
+                    self.results.error_state = results_dict.get(
+                        "error_state", ErrorCodes.FAILED_EXECUTION
+                    )
+                    self.results.error_msg = results_dict.get(
+                        "error_msg", "Unexpected crash"
+                    )
                     if self.results.error_state == ErrorCodes.SUCCESS:
+                        self.results.setup_time = results_dict["setup_time"]
                         self.results.warmup_time = results_dict["warmup_time"]
                         self.results.exec_times = np.asarray(
                             results_dict["exec_times"]
@@ -503,19 +525,6 @@ class BenchmarkRunner:
                             self.results.results.update(
                                 {"return-value": results_dict["return-value"]}
                             )
-
-    def _setup(self):
-        initialized_data = self.bench.get_data(preset=self.preset)
-        array_args = self.bench.info["array_args"]
-
-        with timer.timer() as t:
-            for arg in array_args:
-                npdata = initialized_data[arg]
-                self.copied_args.update(
-                    {arg: self.fmwrk.copy_to_func()(npdata)}
-                )
-
-        self.results.setup_time = t.get_elapsed_time()
 
     def get_results(self):
         return self.results

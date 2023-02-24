@@ -4,8 +4,9 @@
 
 import numba as nb
 import numpy as np
-from numba import int64, jit, prange
+from numba import int64, jit
 from numba.experimental import jitclass
+from numba_dpex import dpjit, prange
 
 queue_spec = [
     ("capacity", int64),
@@ -57,11 +58,11 @@ UNDEFINED = -2
 DEFAULT_QUEUE_CAPACITY = 10
 
 
-@nb.jit(nopython=True, parallel=True, fastmath=True)
+@dpjit
 def get_neighborhood(n, dim, data, eps, ind_lst, sz_lst, assignments):
     block_size = 1
     nblocks = n // block_size + int(n % block_size > 0)
-    for i in nb.prange(nblocks):
+    for i in prange(nblocks):
         start = i * block_size
         stop = n if i + 1 == nblocks else start + block_size
         for j in range(start, stop):

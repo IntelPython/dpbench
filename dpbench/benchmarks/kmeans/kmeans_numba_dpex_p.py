@@ -2,19 +2,17 @@
 #
 # SPDX-License-Identifier: Apache-2.0
 
-import numba
-import numpy
+import dpnp as np
+from numba_dpex import dpjit, prange
 
 REPEAT = 1
 
-__njit = numba.jit(nopython=True, parallel=True, fastmath=True)
-
 
 # determine the euclidean distance from the cluster center to each point
-@__njit
+@dpjit
 def groupByCluster(arrayP, arrayPcluster, arrayC, num_points, num_centroids):
     # parallel for loop
-    for i0 in numba.prange(num_points):
+    for i0 in prange(num_points):
         minor_distance = -1
         for i1 in range(num_centroids):
             dx = arrayP[i0, 0] - arrayC[i1, 0]
@@ -27,12 +25,12 @@ def groupByCluster(arrayP, arrayPcluster, arrayC, num_points, num_centroids):
 
 
 # assign points to cluster
-@__njit
+@dpjit
 def calCentroidsSum(
     arrayP, arrayPcluster, arrayCsum, arrayCnumpoint, num_points, num_centroids
 ):
     # parallel for loop
-    for i in numba.prange(num_centroids):
+    for i in prange(num_centroids):
         arrayCsum[i, 0] = 0
         arrayCsum[i, 1] = 0
         arrayCnumpoint[i] = 0
@@ -47,16 +45,16 @@ def calCentroidsSum(
 
 
 # update the centriods array after computation
-@__njit
+@dpjit
 def updateCentroids(arrayC, arrayCsum, arrayCnumpoint, num_centroids):
-    for i in numba.prange(num_centroids):
+    for i in prange(num_centroids):
         arrayC[i, 0] = arrayCsum[i, 0] / arrayCnumpoint[i]
         arrayC[i, 1] = arrayCsum[i, 1] / arrayCnumpoint[i]
 
 
-@__njit
+@dpjit
 def copy_arrayC(arrayC, arrayP, num_centroids):
-    for i in numba.prange(num_centroids):
+    for i in prange(num_centroids):
         arrayC[i, 0] = arrayP[i, 0]
         arrayC[i, 1] = arrayP[i, 1]
 
@@ -98,7 +96,7 @@ def kmeans(
     nopt,
     ncentroids,
 ):
-    for i in numba.prange(REPEAT):
+    for i in range(REPEAT):
         copy_arrayC(arrayC, arrayP, ncentroids)
 
         arrayC, arrayCsum, arrayCnumpoint = kmeans_numba(

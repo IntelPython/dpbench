@@ -2,11 +2,11 @@
 #
 # SPDX-License-Identifier: Apache-2.0
 
-import numba as nb
-import numpy as np
+import dpnp as np
+from numba import dpjit, prange
 
 
-@nb.njit(parallel=True, fastmath=True)
+@dpjit
 def pairwise_distance(X1, X2, D):
     """Naïve pairwise distance impl - take an array representing M points in N
     dimensions, and return the M x M matrix of Euclidean distances
@@ -22,7 +22,7 @@ def pairwise_distance(X1, X2, D):
     O = X1.shape[1]
 
     # Outermost parallel loop over the matrix X1
-    for i in nb.prange(M):
+    for i in prange(M):
         # Loop over the matrix X2
         for j in range(N):
             d = 0.0

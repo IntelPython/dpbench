@@ -20,10 +20,6 @@ class DpnpFramework(Framework):
 
         super().__init__(fname, fconfig_path)
 
-    def version(self) -> str:
-        """Returns the framework version."""
-        return pkg_resources.get_distribution(self.fname).version
-
     def imports(self) -> Dict[str, Any]:
         """Returns a dictionary any modules and methods needed for running
         a benchmark."""

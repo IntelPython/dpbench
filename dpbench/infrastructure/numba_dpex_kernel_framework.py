@@ -2,7 +2,6 @@
 #
 # SPDX-License-Identifier: Apache 2.0
 
-import logging
 from typing import Any, Callable, Dict
 
 import pkg_resources
@@ -61,23 +60,3 @@ class NumbaDpexKernelFramework(NumbaDpexFramework):
         import dpctl.tensor as dpt
 
         return dpt.asnumpy
-
-    def execute(self, impl_fn: Callable, input_args: Dict):
-        """Numba_dpex kernels support directly passing in
-        dpctl.tensor.usm_ndarray and compute follows data. No need for a
-        device_context.
-
-
-        :param impl_fn: A benchmark implementation.
-        :param input_args: Parameters to be passed to the kernel
-        """
-        return impl_fn(**input_args)
-
-    def version(self) -> str:
-        """Returns the numba-dpex version."""
-
-        try:
-            return pkg_resources.get_distribution("numba_dpex").version
-        except pkg_resources.DistributionNotFound:
-            logging.exception("No version information exists for framework")
-            return "unknown"

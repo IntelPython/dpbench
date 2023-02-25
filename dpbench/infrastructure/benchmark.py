@@ -468,21 +468,22 @@ class BenchmarkRunner:
             with Manager() as manager:
                 results_dict = manager.dict()
 
-                _exec(self.bench,
-                      self.fmwrk,
-                      impl_postfix,
-                      preset,
-                      timeout,
-                      repeat,
-                      partial(
-                          _setup_func,
-                          self.bench.get_data(preset=self.preset),
-                          self.bench.info["array_args"],
-                          self.fmwrk
-                      ),
-                      results_dict
+                _exec(
+                    self.bench,
+                    self.fmwrk,
+                    impl_postfix,
+                    preset,
+                    timeout,
+                    repeat,
+                    partial(
+                        _setup_func,
+                        self.bench.get_data(preset=self.preset),
+                        self.bench.info["array_args"],
+                        self.fmwrk,
+                    ),
+                    results_dict,
                 )
-                
+
                 self.results.error_state = results_dict.get(
                     "error_state", ErrorCodes.FAILED_EXECUTION
                 )
@@ -495,9 +496,7 @@ class BenchmarkRunner:
                     self.results.exec_times = np.asarray(
                         results_dict["exec_times"]
                     )
-                    self.results.teardown_time = results_dict[
-                        "teardown_time"
-                    ]
+                    self.results.teardown_time = results_dict["teardown_time"]
 
                     output_npz = results_dict["outputs"]
                     if output_npz:

@@ -3,24 +3,24 @@
 # SPDX-License-Identifier: Apache-2.0
 
 import numba as nb
-import numpy
+import numpy as np
 
 
-@nb.jit(nopython=True, parallel=True, fastmath=True)
+@nb.njit(parallel=True, fastmath=True)
 def _groupByCluster(arrayP, arrayPcluster, arrayC, num_points, num_centroids):
     for i0 in nb.prange(num_points):
         minor_distance = -1
         for i1 in range(num_centroids):
             dx = arrayP[i0, 0] - arrayC[i1, 0]
             dy = arrayP[i0, 1] - arrayC[i1, 1]
-            my_distance = numpy.sqrt(dx * dx + dy * dy)
+            my_distance = np.sqrt(dx * dx + dy * dy)
             if minor_distance > my_distance or minor_distance == -1:
                 minor_distance = my_distance
                 arrayPcluster[i0] = i1
     return arrayPcluster
 
 
-@nb.jit(nopython=True, parallel=True, fastmath=True)
+@nb.njit(parallel=True, fastmath=True)
 def _calCentroidsSum(
     arrayP, arrayPcluster, arrayCsum, arrayCnumpoint, num_points, num_centroids
 ):
@@ -38,14 +38,14 @@ def _calCentroidsSum(
     return arrayCsum, arrayCnumpoint
 
 
-@nb.jit(nopython=True, parallel=True, fastmath=True)
+@nb.njit(parallel=True, fastmath=True)
 def _updateCentroids(arrayC, arrayCsum, arrayCnumpoint, num_centroids):
     for i in nb.prange(num_centroids):
         arrayC[i, 0] = arrayCsum[i, 0] / arrayCnumpoint[i]
         arrayC[i, 1] = arrayCsum[i, 1] / arrayCnumpoint[i]
 
 
-@nb.jit(nopython=True)
+@nb.njit()
 def _kmeans_impl(
     arrayP,
     arrayPcluster,
@@ -73,7 +73,7 @@ def _kmeans_impl(
     return arrayC, arrayCsum, arrayCnumpoint
 
 
-@nb.jit(nopython=True, parallel=True, fastmath=True)
+@nb.njit(parallel=True, fastmath=True)
 def kmeans(
     arrayP,
     arrayPclusters,

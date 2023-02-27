@@ -2,18 +2,13 @@
 #
 # SPDX-License-Identifier: Apache-2.0
 
-import math
+from math import sqrt
 
-import numba_dpex
+import numba_dpex as nbdx
 import numpy as np
 
 
-@numba_dpex.kernel(
-    access_types={
-        "read_only": ["train", "train_labels", "test", "votes_to_classes_lst"],
-        "write_only": ["predictions"],
-    }
-)
+@nbdx.kernel
 def _knn_kernel(
     train,
     train_labels,
@@ -25,9 +20,9 @@ def _knn_kernel(
     votes_to_classes_lst,
     data_dim,
 ):
-    i = numba_dpex.get_global_id(0)
+    i = nbdx.get_global_id(0)
     # here k has to be 5 in order to match with numpy
-    queue_neighbors = numba_dpex.private.array(shape=(5, 2), dtype=np.float64)
+    queue_neighbors = nbdx.private.array(shape=(5, 2), dtype=np.float64)
 
     for j in range(k):
         x1 = train[j]
@@ -37,7 +32,7 @@ def _knn_kernel(
         for jj in range(data_dim):
             diff = x1[jj] - x2[jj]
             distance += diff * diff
-        dist = math.sqrt(distance)
+        dist = sqrt(distance)
 
         queue_neighbors[j, 0] = dist
         queue_neighbors[j, 1] = train_labels[j]
@@ -64,7 +59,7 @@ def _knn_kernel(
         for jj in range(data_dim):
             diff = x1[jj] - x2[jj]
             distance += diff * diff
-        dist = math.sqrt(distance)
+        dist = sqrt(distance)
 
         if dist < queue_neighbors[k - 1][0]:
             queue_neighbors[k - 1][0] = dist
@@ -110,7 +105,7 @@ def knn(
     votes_to_classes,
     data_dim,
 ):
-    _knn_kernel[test_size, numba_dpex.DEFAULT_LOCAL_SIZE](
+    _knn_kernel[test_size,](
         x_train,
         y_train,
         x_test,

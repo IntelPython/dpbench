@@ -3,7 +3,6 @@
 # SPDX-License-Identifier: Apache-2.0
 
 import dpnp as np
-from scipy.special import erf
 
 invsqrt = lambda x: np.true_divide(1.0, np.sqrt(x))
 
@@ -26,8 +25,8 @@ def black_scholes(nopt, price, strike, t, rate, volatility, call, put):
     w1 = (a - b + c) * y
     w2 = (a - b - c) * y
 
-    d1 = 0.5 + 0.5 * erf(w1)
-    d2 = 0.5 + 0.5 * erf(w2)
+    d1 = 0.5 + 0.5 * np.erf(w1)
+    d2 = 0.5 + 0.5 * np.erf(w2)
 
     Se = np.exp(b) * S
 

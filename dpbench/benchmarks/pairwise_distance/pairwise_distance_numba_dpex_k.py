@@ -2,13 +2,13 @@
 #
 # SPDX-License-Identifier: Apache-2.0
 
-import numba_dpex
+import numba_dpex as nbdx
 import numpy as np
 
 
-@numba_dpex.kernel
+@nbdx.kernel
 def _pairwise_distance_kernel(X1, X2, D):
-    i = numba_dpex.get_global_id(0)
+    i = nbdx.get_global_id(0)
 
     N = X2.shape[0]
     O = X1.shape[1]
@@ -21,6 +21,4 @@ def _pairwise_distance_kernel(X1, X2, D):
 
 
 def pairwise_distance(X1, X2, D):
-    _pairwise_distance_kernel[X1.shape[0], numba_dpex.DEFAULT_LOCAL_SIZE](
-        X1, X2, D
-    )
+    _pairwise_distance_kernel[X1.shape[0],](X1, X2, D)

@@ -2,24 +2,20 @@
 #
 # SPDX-License-Identifier: Apache-2.0
 
-import numba
-import numpy
-
-REPEAT = 1
-
-__njit = numba.jit(nopython=True, parallel=True, fastmath=True)
+import numba as nb
+import numpy as np
 
 
 # determine the euclidean distance from the cluster center to each point
-@__njit
+@nb.njit(parallel=True, fastmath=True)
 def groupByCluster(arrayP, arrayPcluster, arrayC, num_points, num_centroids):
     # parallel for loop
-    for i0 in numba.prange(num_points):
+    for i0 in nb.prange(num_points):
         minor_distance = -1
         for i1 in range(num_centroids):
             dx = arrayP[i0, 0] - arrayC[i1, 0]
             dy = arrayP[i0, 1] - arrayC[i1, 1]
-            my_distance = numpy.sqrt(dx * dx + dy * dy)
+            my_distance = np.sqrt(dx * dx + dy * dy)
             if minor_distance > my_distance or minor_distance == -1:
                 minor_distance = my_distance
                 arrayPcluster[i0] = i1
@@ -27,12 +23,12 @@ def groupByCluster(arrayP, arrayPcluster, arrayC, num_points, num_centroids):
 
 
 # assign points to cluster
-@__njit
+@nb.njit(parallel=True, fastmath=True)
 def calCentroidsSum(
     arrayP, arrayPcluster, arrayCsum, arrayCnumpoint, num_points, num_centroids
 ):
     # parallel for loop
-    for i in numba.prange(num_centroids):
+    for i in nb.prange(num_centroids):
         arrayCsum[i, 0] = 0
         arrayCsum[i, 1] = 0
         arrayCnumpoint[i] = 0
@@ -47,16 +43,16 @@ def calCentroidsSum(
 
 
 # update the centriods array after computation
-@__njit
+@nb.njit(parallel=True, fastmath=True)
 def updateCentroids(arrayC, arrayCsum, arrayCnumpoint, num_centroids):
-    for i in numba.prange(num_centroids):
+    for i in nb.prange(num_centroids):
         arrayC[i, 0] = arrayCsum[i, 0] / arrayCnumpoint[i]
         arrayC[i, 1] = arrayCsum[i, 1] / arrayCnumpoint[i]
 
 
-@__njit
+@nb.njit(parallel=True, fastmath=True)
 def copy_arrayC(arrayC, arrayP, num_centroids):
-    for i in numba.prange(num_centroids):
+    for i in nb.prange(num_centroids):
         arrayC[i, 0] = arrayP[i, 0]
         arrayC[i, 1] = arrayP[i, 1]
 
@@ -99,16 +95,15 @@ def kmeans(
     ndims,
     ncentroids,
 ):
-    for i in numba.prange(REPEAT):
-        copy_arrayC(arrayC, arrayP, ncentroids)
+    copy_arrayC(arrayC, arrayP, ncentroids)
 
-        arrayC, arrayCsum, arrayCnumpoint = kmeans_numba(
-            arrayP,
-            arrayPclusters,
-            arrayC,
-            arrayCsum,
-            arrayCnumpoint,
-            niters,
-            npoints,
-            ncentroids,
-        )
+    arrayC, arrayCsum, arrayCnumpoint = kmeans_numba(
+        arrayP,
+        arrayPclusters,
+        arrayC,
+        arrayCsum,
+        arrayCnumpoint,
+        niters,
+        npoints,
+        ncentroids,
+    )

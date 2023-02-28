@@ -5,20 +5,15 @@
 
 from math import erf, exp, log, sqrt
 
-import numba_dpex as nb
+import numba_dpex as nbdx
 
 
-@nb.kernel(
-    access_types={
-        "read_only": ["price", "strike", "t"],
-        "write_only": ["call", "put"],
-    }
-)
+@nbdx.kernel
 def _black_scholes_kernel(nopt, price, strike, t, rate, volatility, call, put):
     mr = -rate
     sig_sig_two = volatility * volatility * 2
 
-    i = nb.get_global_id(0)
+    i = nbdx.get_global_id(0)
 
     P = price[i]
     S = strike[i]
@@ -45,6 +40,6 @@ def _black_scholes_kernel(nopt, price, strike, t, rate, volatility, call, put):
 
 
 def black_scholes(nopt, price, strike, t, rate, volatility, call, put):
-    _black_scholes_kernel[nopt, nb.DEFAULT_LOCAL_SIZE](
+    _black_scholes_kernel[nopt,](
         nopt, price, strike, t, rate, volatility, call, put
     )

@@ -2,10 +2,8 @@
 #
 # SPDX-License-Identifier: Apache-2.0
 
-import dpnp as np
+import numpy as np
 
 
 def l2_norm(a, d):
-    sq = np.square(a)
-    sum = sq.sum(axis=1)
-    d[:] = np.sqrt(sum)
+    d[:] = np.linalg.norm(a, axis=1)

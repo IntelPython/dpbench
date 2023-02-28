@@ -5,12 +5,23 @@
 import numba as nb
 import numpy as np
 
-nb.njit(parallel=False, fastmath=True)
+
+@nb.njit(parallel=False, fastmath=True)
+def mean_axis_0(data):
+    tdata = data.T
+    m = np.empty(tdata.shape[0])
+    for i in nb.prange(tdata.shape[0]):
+        sum = 0.0
+        for j in range(tdata.shape[1]):
+            sum += tdata[i, j]
+        m[i] = sum / tdata.shape[1]
+    return m
 
 
+@nb.njit(parallel=False, fastmath=True)
 def pca(data, dims_rescaled_data=2):
-    # mean center the data
-    data -= data.mean(axis=0)
+    # mean center the data (data -= data.mean(axis=0))
+    data -= mean_axis_0(data)
 
     # calculate the covariance matrix
     v = np.cov(data, rowvar=False)

@@ -38,7 +38,7 @@
             "data"
         ],
         "output_args": [
-            "data",
+            "tdata",
 	    "evalues",
 	    "evectors"
         ]

@@ -5,9 +5,8 @@
 import numba as nb
 import numpy as np
 
-nb.njit(parallel=True, fastmath=True)
 
-
+@nb.njit(parallel=True, fastmath=True)
 def pca(data, dims_rescaled_data=2):
     # mean center the data
     data -= data.mean(axis=0)

@@ -1,12 +1,6 @@
-//==- _knn_sycl.cpp - Python native extension of Black-Scholes   ===//
+// SPDX-FileCopyrightText: 2023 Intel Corporation
 //
-// Copyright 2022 Intel Corp.
-//
-// SPDX - License - Identifier : Apache 2.0
-///
-/// \file
-/// The files implements a SYCL-based Python native extension for the
-/// knn benchmark.
+// SPDX-License-Identifier: Apache-2.0
 
 #include "_knn_kernel.hpp"
 #include <dpctl4pybind11.hpp>

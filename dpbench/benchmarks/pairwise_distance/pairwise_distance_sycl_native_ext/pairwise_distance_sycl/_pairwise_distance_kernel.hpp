@@ -1,10 +1,6 @@
+// SPDX-FileCopyrightText: 2023 Intel Corporation
 //
-// Copyright 2022 Intel Corp.
-//
-// SPDX - License - Identifier : Apache 2.0
-///
-/// The files implements a SYCL-based Python native extension for the
-/// pairwise_distance benchmark.
+// SPDX-License-Identifier: Apache-2.0
 
 #include <CL/sycl.hpp>
 #include <mathimf.h>

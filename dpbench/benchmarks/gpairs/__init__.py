@@ -1,6 +1,7 @@
-# Copyright 2022 Intel Corporation
+# SPDX-FileCopyrightText: 2023 Intel Corporation
 #
-# SPDX-License-Identifier: Apache 2.0
+# SPDX-License-Identifier: Apache-2.0
+
 """
 The gpairs benchmark calculates a weighted histogram of the distances between
 points in a 3D vector space.

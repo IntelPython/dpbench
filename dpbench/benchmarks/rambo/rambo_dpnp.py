@@ -2,7 +2,7 @@
 #
 # SPDX-License-Identifier: Apache-2.0
 
-import numpy as np
+import dpnp as np
 
 
 def rambo(nevts, nout, C1, F1, Q1, output):

@@ -1,5 +1,4 @@
 # Copyright 2021 ETH Zurich and the NPBench authors. All rights reserved.
-# Copyright 2022 Intel Corp.
 #
 # SPDX-License-Identifier: BSD-3-Clause
 

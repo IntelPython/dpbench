@@ -2,11 +2,9 @@
 #
 # SPDX-License-Identifier: Apache-2.0
 
-import numba as nb
 import numpy as np
 
 
-@nb.njit(parallel=False, fastmath=True)
 def rambo(nevts, nout, C1, F1, Q1, output):
     for i in range(nevts):
         for j in range(nout):

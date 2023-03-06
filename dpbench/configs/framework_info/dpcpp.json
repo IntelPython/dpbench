@@ -5,7 +5,7 @@
         "prefix": "dp",
         "postfix": "dpcpp",
         "class": "DpcppFramework",
-        "arch": "cpu",
-        "sycl_device": "cpu"
+        "arch": "gpu",
+        "sycl_device": "gpu"
     }
 }

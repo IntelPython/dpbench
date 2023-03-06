@@ -2,11 +2,12 @@
 #
 # SPDX-License-Identifier: Apache-2.0
 
+import dpnp as np
 import numba as nb
-import numpy as np
+from numba_dpex import dpjit
 
 
-@nb.njit(parallel=True, fastmath=True)
+@dpjit
 def l2_norm(a, d):
     for i in nb.prange(a.shape[0]):
         for k in range(a.shape[1]):

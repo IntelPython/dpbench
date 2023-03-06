@@ -4,7 +4,7 @@
         "full_name": "numba_dpex_kernel",
         "prefix": "dpex-kernel",
         "class": "NumbaDpexKernelFramework",
-        "arch": "cpu",
-        "sycl_device": "cpu"
+        "arch": "gpu",
+        "sycl_device": "gpu"
     }
 }

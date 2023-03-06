@@ -19,16 +19,34 @@ class NumbaDpexFramework(Framework):
 
         super().__init__(fname, fconfig_path)
 
-    def imports(self) -> Dict[str, Any]:
-        """Returns a dictionary any modules and methods needed for running
-        a benchmark."""
+    def copy_to_func(self) -> Callable:
+        """Returns the copy-method that should be used
+        for copying the benchmark arguments."""
 
-        return {"dpctl": dpctl}
+        def _copy_to_func_impl(ref_array):
+            import dpnp
 
-    def execute(self, impl_fn: Callable, input_args: Dict):
-        """The njit implementations for numba_dpex require calling the
-        functions inside a dpctl.device_context contextmanager to trigger
-        offload.
-        """
-        with dpctl.device_context(self.sycl_device):
-            return impl_fn(**input_args)
+            if ref_array.flags["C_CONTIGUOUS"]:
+                order = "C"
+            elif ref_array.flags["F_CONTIGUOUS"]:
+                order = "F"
+            else:
+                order = "K"
+            return dpnp.asarray(
+                ref_array,
+                dtype=ref_array.dtype,
+                order=order,
+                like=None,
+                device=self.sycl_device,
+                usm_type=None,
+                sycl_queue=None,
+            )
+
+        return _copy_to_func_impl
+
+    def copy_from_func(self) -> Callable:
+        """Returns the copy-method that should be used
+        for copying the benchmark arguments."""
+        import dpnp
+
+        return dpnp.asnumpy

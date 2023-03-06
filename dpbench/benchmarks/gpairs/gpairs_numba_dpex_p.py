@@ -2,13 +2,14 @@
 #
 # SPDX-License-Identifier: Apache-2.0
 
+import dpnp as np
 import numba as nb
-import numpy as np
+from numba_dpex import dpjit
 
 # This implementation is numba dpex prange version without atomics.
 
 
-@nb.njit(parallel=True, fastmath=True)
+@dpjit
 def count_weighted_pairs_3d_diff_ker(
     n, nbins, x1, y1, z1, w1, x2, y2, z2, w2, rbins_squared, result
 ):
@@ -42,7 +43,7 @@ def count_weighted_pairs_3d_diff_ker(
                 result[i, k] += result[i, j]
 
 
-@nb.njit(parallel=True, fastmath=True)
+@dpjit
 def count_weighted_pairs_3d_diff_agg_ker(nbins, result, n):
     for col_id in nb.prange(nbins):
         for i in range(1, n):
@@ -62,4 +63,4 @@ def gpairs(nopt, nbins, x1, y1, z1, w1, x2, y2, z2, w2, rbins, results):
     count_weighted_pairs_3d_diff_agg_ker(nbins, results_disjoint, nopt)
 
     # copy to results vector
-    np.copyto(results, results_disjoint[0])
+    results[:] = results_disjoint[0]

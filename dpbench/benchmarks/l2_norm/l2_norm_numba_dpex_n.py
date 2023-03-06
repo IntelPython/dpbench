@@ -2,11 +2,11 @@
 #
 # SPDX-License-Identifier: Apache-2.0
 
-import numba as nb
-import numpy as np
+import dpnp as np
+from numba_dpex import dpjit
 
 
-@nb.njit(parallel=True, fastmath=True)
+@dpjit
 def l2_norm(a, d):
     sq = np.square(a)
     sum = sq.sum(axis=1)

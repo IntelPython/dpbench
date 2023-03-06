@@ -2,11 +2,11 @@
 #
 # SPDX-License-Identifier: Apache-2.0
 
-import numba as nb
-import numpy as np
+import dpnp as np
+from numba_dpex import dpjit
 
 
-@nb.njit(parallel=True, fastmath=True)
+@dpjit
 def pairwise_distance(X1, X2, D):
     x1 = np.sum(np.square(X1), axis=1)
     x2 = np.sum(np.square(X2), axis=1)

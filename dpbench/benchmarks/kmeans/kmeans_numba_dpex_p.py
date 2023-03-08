@@ -44,14 +44,6 @@ def calCentroidsSum2(arrayP, arrayPcluster, arrayCsum, arrayCnumpoint):
     nbdx.atomic.add(arrayCsum, (ci, 1), arrayP[i, 1])
     nbdx.atomic.add(arrayCnumpoint, ci, 1)
 
-    # for i in range(num_points):
-    #     ci = arrayPcluster[i]
-    #     arrayCsum[ci, 0] += arrayP[i, 0]
-    #     arrayCsum[ci, 1] += arrayP[i, 1]
-    #     arrayCnumpoint[ci] += 1
-
-    # return arrayCsum, arrayCnumpoint
-
 
 # update the centriods array after computation
 @dpjit

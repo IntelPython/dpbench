@@ -4,8 +4,6 @@
 
 from typing import Any, Callable, Dict
 
-import dpctl
-
 from .framework import Framework
 
 

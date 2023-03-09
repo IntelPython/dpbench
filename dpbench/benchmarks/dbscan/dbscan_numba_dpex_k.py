@@ -2,10 +2,10 @@
 #
 # SPDX-License-Identifier: Apache-2.0
 
-import dpctl.tensor as dpt
+import dpnp as np
 import numba as nb
 import numba_dpex as nbdx
-import numpy as np
+import numpy
 
 NOISE = -1
 UNDEFINED = -2
@@ -14,14 +14,14 @@ DEFAULT_QUEUE_CAPACITY = 10
 
 @nb.njit()
 def _queue_create(capacity):
-    return (np.empty(capacity, dtype=np.int64), 0, 0)
+    return (numpy.empty(capacity, dtype=numpy.int64), 0, 0)
 
 
 @nb.njit()
 def _queue_resize(qu, tail, new_capacity):
     tail = min(tail, new_capacity)
 
-    new_qu = np.empty(new_capacity, dtype=np.int64)
+    new_qu = numpy.empty(new_capacity, dtype=numpy.int64)
     new_qu[:tail] = qu[:tail]
     return new_qu, tail
 
@@ -129,41 +129,24 @@ def compute_clusters(n, min_pts, assignments, sizes, indices_list):
 
 def dbscan(n_samples, n_features, data, eps, min_pts, assignments):
     indices_list = np.empty(n_samples * n_samples, dtype=np.int64)
-    indices_list_usm = dpt.asarray(
-        obj=indices_list,
-        dtype=indices_list.dtype,
-        device=data.device,
-        copy=None,
-        usm_type=None,
-        sycl_queue=None,
-    )
-
     sizes = np.zeros(n_samples, dtype=np.int64)
-    sizes_usm = dpt.asarray(
-        obj=sizes,
-        dtype=sizes.dtype,
-        device=data.device,
-        copy=None,
-        usm_type=None,
-        sycl_queue=None,
-    )
 
     get_neighborhood[n_samples,](
         n_samples,
         n_features,
         data,
         eps,
-        indices_list_usm,
-        sizes_usm,
+        indices_list,
+        sizes,
         assignments,
         1,
         n_samples,
     )
 
-    assignments_np = dpt.asnumpy(assignments)
-    sizes = dpt.asnumpy(sizes_usm)
-    indices_list = dpt.asnumpy(indices_list_usm)
-
     return compute_clusters(
-        n_samples, min_pts, assignments_np, sizes, indices_list
+        n_samples,
+        min_pts,
+        np.asnumpy(assignments),
+        np.asnumpy(sizes),
+        np.asnumpy(indices_list),
     )

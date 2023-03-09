@@ -2,8 +2,10 @@
 #
 # SPDX-License-Identifier: Apache-2.0
 
-import subprocess
+import logging
 from typing import Callable
+
+import dpctl
 
 from .framework import Framework
 
@@ -17,6 +19,29 @@ class DpcppFramework(Framework):
         """
 
         super().__init__(fname, fconfig_path)
+
+        try:
+            self.sycl_device = self.info["sycl_device"]
+            dpctl.SyclDevice(self.sycl_device)
+        except KeyError:
+            pass
+        except dpctl.SyclDeviceCreationError as sdce:
+            logging.exception(
+                "Could not create a Sycl device using filter {} string".format(
+                    self.info["sycl_device"]
+                )
+            )
+            raise sdce
+
+    def device_filter_string(self) -> str:
+        """Returns the sycl device's filter string if the framework has an
+        associated sycl device."""
+
+        try:
+            return dpctl.SyclDevice(self.device).get_filter_string()
+        except Exception:
+            logging.exception("No device string exists for device")
+            return "unknown"
 
     def copy_to_func(self) -> Callable:
         """Returns the copy-method that should be used

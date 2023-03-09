@@ -6,7 +6,7 @@
 * __*_numba_*.py__ : This file contains Numba implementations of the benchmarks. There are three modes: nopython-mode, nopython-mode-parallel and nopython-mode-parallel-range.
 * __*_numba_dpex_*.py__ : This file contains Numba-Dpex implementations of the benchmarks. There are three modes: kernel-mode, numpy-mode and prange-mode.
 * __*_dpnp_*.py__ : This file contains dpnp implementations of the benchmarks.
-* __*_native_ext/__sycl/__kernel_*.hpp__ : This file contains native dpcpp implementations of the benchmarks.
+* __*_native_ext/_sycl/__kernel_*.hpp__ : This file contains native dpcpp implementations of the benchmarks.
 
 ## Examples of setting up and running the benchmarks
 1. Setting up conda environment and installing dependencies:

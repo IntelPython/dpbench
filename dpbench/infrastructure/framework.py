@@ -9,8 +9,6 @@ import logging
 import pathlib
 from typing import Callable, Dict
 
-import dpctl
-import numpy as np
 import pkg_resources
 
 from dpbench.infrastructure import utilities
@@ -48,28 +46,12 @@ class Framework(object):
             )
             raise e
 
-        try:
-            self.sycl_device = self.info["sycl_device"]
-            dpctl.SyclDevice(self.sycl_device)
-        except KeyError:
-            pass
-        except dpctl.SyclDeviceCreationError as sdce:
-            logging.exception(
-                "Could not create a Sycl device using filter {} string".format(
-                    self.info["sycl_device"]
-                )
-            )
-            raise sdce
-
     def device_filter_string(self) -> str:
         """Returns the sycl device's filter string if the framework has an
         associated sycl device."""
 
-        try:
-            return dpctl.SyclDevice(self.device).get_filter_string()
-        except Exception:
-            logging.exception("No device string exists for device")
-            return "unknown"
+        logging.exception("No device string exists for device")
+        return "unknown"
 
     def version(self) -> str:
         """Returns the framework version."""
@@ -87,13 +69,17 @@ class Framework(object):
         """Returns the copy-method that should be used
         for copying the benchmark arguments from host
         to device."""
-        return np.copy
+        import numpy
+
+        return numpy.copy
 
     def copy_from_func(self) -> Callable:
         """Returns the copy-method that should be used
         for copying the benchmark arguments from device
         to host."""
-        return np.copy
+        import numpy
+
+        return numpy.copy
 
     def validator(self) -> Callable:
         """Returns a function that compares two lists of arrays and validates if

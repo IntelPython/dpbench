@@ -4,8 +4,6 @@
 
 import dpnp as np
 
-invsqrt = lambda x: np.true_divide(1.0, np.sqrt(x))
-
 
 def black_scholes(nopt, price, strike, t, rate, volatility, call, put):
     mr = -rate
@@ -20,7 +18,7 @@ def black_scholes(nopt, price, strike, t, rate, volatility, call, put):
 
     z = T * sig_sig_two
     c = 0.25 * z
-    y = invsqrt(z)
+    y = np.true_divide(1.0, np.sqrt(z))
 
     w1 = (a - b + c) * y
     w2 = (a - b - c) * y

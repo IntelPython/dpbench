@@ -9,7 +9,7 @@
 * __*_native_ext/__sycl/__kernel_*.hpp__ : This file contains native dpcpp implementations of the benchmarks.
 
 ## Examples of setting up and running the benchmarks
-1. Setting up conda environment and installing dependencies:
+1. Setting up conda environment and installing dependencies (if you already have [OneAPI](https://www.intel.com/content/www/us/en/docs/oneapi/installation-guide-linux/2023-0/overview.html) installed, you don't need `dpcpp_linux-64`):
 
         $ conda create -n dpbench-dev
         $ conda activate dpbench-dev
@@ -24,7 +24,7 @@
 2. Build and run DPBench
     - To build:
         ```bash
-        $  CC=icx CXX=icpx python setup.py develop -- -Dpybind11_DIR=$(python -m pybind11 --cmakedir) -DDPCTL_MODULE_PATH=$(python -m dpctl --cmakedir)
+        $  python setup.py develop
         ```
     - To run, taking black_scholes for example:
         ```bash

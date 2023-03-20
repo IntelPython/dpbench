@@ -1,0 +1,4 @@
+
+[submodule "dpbench/benchmarks/npbench"]
+	path = dpbench/benchmarks/npbench
+	url = https://github.com/spcl/npbench.git

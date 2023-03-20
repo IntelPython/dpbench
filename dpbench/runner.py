@@ -5,6 +5,7 @@
 import importlib
 import json
 import logging
+import os
 import pathlib
 import pkgutil
 from datetime import datetime
@@ -38,14 +39,14 @@ def _print_results(result):
         print("error msg:", result.error_msg)
 
 
-def list_available_benchmarks():
-    """Return the list of available benchmarks that ae in the
+def list_available_benchmarks(benchmark_package=dp_bms):
+    """Return the list of available benchmarks that are in the
     dpbench.benchmarks module.
     """
 
     submods = [
         submod.name
-        for submod in pkgutil.iter_modules(dp_bms.__path__)
+        for submod in pkgutil.iter_modules(benchmark_package.__path__)
         if submod.ispkg
     ]
 
@@ -72,6 +73,8 @@ def list_possible_implementations():
 
 def run_benchmark(
     bname,
+    benchmark_package="dpbench.benchmarks",
+    infrastructure_package=dpbi,
     implementation_postfix=None,
     fconfig_path=None,
     bconfig_path=None,
@@ -88,8 +91,10 @@ def run_benchmark(
     print("")
     bench = None
     try:
-        benchmod = importlib.import_module("dpbench.benchmarks." + bname)
-        bench = dpbi.Benchmark(benchmod, bconfig_path=bconfig_path)
+        benchmod = importlib.import_module(benchmark_package + "." + bname)
+        bench = infrastructure_package.Benchmark(
+            benchmod, bconfig_path=bconfig_path
+        )
     except Exception:
         logging.exception(
             "Skipping the benchmark execution due to the following error: "
@@ -118,6 +123,8 @@ def run_benchmark(
 
 
 def run_benchmarks(
+    benchmark_package=dp_bms,
+    infrastrucure_package=dpbi,
     fconfig_path=None,
     bconfig_path=None,
     preset="S",
@@ -129,6 +136,7 @@ def run_benchmarks(
 ):
     """Run all benchmarks in the dpbench benchmark directory
     Args:
+        package
         bconfig_path (str, optional): Path to benchmark configurations.
         Defaults to None.
         preset (str, optional): Problem size. Defaults to "S".
@@ -145,12 +153,12 @@ def run_benchmarks(
     if not dbfile:
         dbfile = "results_" + datetime_str + ".db"
 
-    conn = dpbi.create_connection(db_file=dbfile)
-    dpbi.create_results_table(conn)
+    conn = infrastrucure_package.create_connection(db_file=dbfile)
+    infrastrucure_package.create_results_table(conn)
 
     impl_postfixes = list_possible_implementations()
 
-    for b in list_available_benchmarks():
+    for b in list_available_benchmarks(benchmark_package):
         for impl in impl_postfixes:
             run_benchmark(
                 bname=b,
@@ -174,7 +182,7 @@ def run_benchmarks(
     print("===============================================================")
     print("")
 
-    dpbi.print_implementation_summary(conn=conn)
+    infrastrucure_package.print_implementation_summary(conn=conn)
 
 
 def all_benchmarks_passed_validation(dbfile):

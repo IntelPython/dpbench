@@ -11,16 +11,19 @@ from datetime import datetime
 
 import dpbench.benchmarks as dp_bms
 import dpbench.infrastructure as dpbi
+from dpbench.infrastructure.enums import ErrorCodes
 
 
 def _print_results(result):
     print(
         "================ implementation "
         + result.benchmark_impl_postfix
-        + " ========================"
+        + " ========================\n"
+        + "implementation:",
+        result.benchmark_impl_postfix,
     )
-    if result.error_state == 0:
-        print("implementation:", result.benchmark_impl_postfix)
+
+    if result.error_state == ErrorCodes.SUCCESS:
         print("framework:", result.framework_name)
         print("framework version:", result.framework_version)
         print("setup time:", result.setup_time)
@@ -33,7 +36,6 @@ def _print_results(result):
         print("preset:", result.preset)
         print("validated:", result.validation_state)
     else:
-        print("implementation:", result.benchmark_impl_postfix)
         print("error states:", result.error_state)
         print("error msg:", result.error_msg)
 

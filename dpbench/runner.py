@@ -14,7 +14,7 @@ import dpbench.infrastructure as dpbi
 from dpbench.infrastructure.enums import ErrorCodes
 
 
-def _print_results(result):
+def _print_results(result: dpbi.BenchmarkResults):
     print(
         "================ implementation "
         + result.benchmark_impl_postfix
@@ -34,7 +34,7 @@ def _print_results(result):
         print("median execution times:", result.median_exec_time)
         print("repeats:", result.num_repeats)
         print("preset:", result.preset)
-        print("validated:", result.validation_state)
+        print("validated:", result.validation_state.name)
     else:
         print("error states:", result.error_state)
         print("error msg:", result.error_msg)

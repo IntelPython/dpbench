@@ -2,7 +2,11 @@
 #
 # SPDX-License-Identifier: Apache-2.0
 
-from .benchmark import Benchmark, get_supported_implementation_postfixes
+from .benchmark import (
+    Benchmark,
+    BenchmarkResults,
+    get_supported_implementation_postfixes,
+)
 from .datamodel import (
     create_connection,
     create_results_table,

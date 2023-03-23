@@ -1,14 +1,42 @@
-{
-    "impl_postfix": {
-        "dpnp": "Data-parallel Numeric Python implementation",
-        "numba_dpex_k": "Numba-dpex kernel implementation",
-        "numba_dpex_p": "Numba-dpex prange implementation",
-        "numba_dpex_n": "Numba-dpex NumPy array expression implementation",
-        "numba_n": "Numba nopython implementation",
-        "numba_np": "Numba nopython and Parallel=True implementation",
-        "numba_npr": "Numba nopython and Parallel=True and prange implementation",
-        "numpy": "NumPy implementation",
-        "python": "Python implementation",
-        "sycl": "DPCPP native implementation"
+[
+    {
+        "impl_postfix": "dpnp",
+        "description": "Data-parallel Numeric Python"
+    },
+    {
+        "impl_postfix": "numba_dpex_k",
+        "description": "Numba-dpex with kernel"
+    },
+    {
+        "impl_postfix": "numba_dpex_p",
+        "description": "Numba-dpex with prange"
+    },
+    {
+        "impl_postfix": "numba_dpex_n",
+        "description": "Numba-dpex with NumPy array expression"
+    },
+    {
+        "impl_postfix": "numba_n",
+        "description": "Numba with nopython"
+    },
+    {
+        "impl_postfix": "numba_np",
+        "description": "Numba with nopython, Parallel=True"
+    },
+    {
+        "impl_postfix": "numba_npr",
+        "description": "Numba with nopython, Parallel=True and prange"
+    },
+    {
+        "impl_postfix": "numpy",
+        "description": "Numpy"
+    },
+    {
+        "impl_postfix": "python",
+        "description": "Python"
+    },
+    {
+        "impl_postfix": "sycl",
+        "description": "DPC++ with dpctl bindings"
     }
-}
+]

@@ -179,7 +179,7 @@ def get_supported_implementation_postfixes():
 
     try:
         with open(impl_postfix_json) as json_file:
-            return json.load(json_file)["impl_postfix"]
+            return [entry["impl_postfix"] for entry in json.load(json_file)]
     except Exception as e:
         logging.exception("impl_postfix.json file not found")
         raise (e)
@@ -545,6 +545,9 @@ class Benchmark(object):
         Args:
             bmod : A benchmark module
             initialize_fname : Name of the initialization function
+        Returns:
+            A list of (name, value) pair that represents the name of an
+            implementation function and a corresponding function object.
         """
 
         return [
@@ -607,17 +610,23 @@ class Benchmark(object):
         the reference implementation is set to None.
 
         Args:
-            impl_fnlist : The list of implementation function for the
-            benchmark.
+            impl_fnlist : A list of (name, value) pair that represents the name
+            of an implementation function and a corresponding function object.
         """
         ref_impl_fn = None
 
-        for fn in impl_fnlist:
-            if "python" in fn[0]:
-                ref_impl_fn = fn
-            elif "numpy" in fn[0]:
-                ref_impl_fn = fn
-
+        python_impl_fn = [
+            impl_fn for impl_fn in impl_fnlist if "python" in impl_fn[0]
+        ]
+        numpy_impl_fn = [
+            impl_fn for impl_fn in impl_fnlist if "numpy" in impl_fn[0]
+        ]
+        # We give preference to the NumPy implementation over Python if both are
+        # present.
+        if numpy_impl_fn:
+            ref_impl_fn = numpy_impl_fn
+        elif python_impl_fn:
+            ref_impl_fn = python_impl_fn
         return ref_impl_fn
 
     def _set_impl_to_framework_map(self, impl_fnlist):

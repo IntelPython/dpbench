@@ -174,4 +174,6 @@ def run_benchmarks(
     print("===============================================================")
     print("")
 
+    dpbi.generate_impl_summary_report(dbfile)
+
     return dbfile

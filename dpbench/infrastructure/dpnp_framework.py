@@ -45,13 +45,13 @@ class DpnpFramework(Framework):
             else:
                 order = "K"
             return dpnp.asarray(
-                obj=ref_array,
+                ref_array,
                 dtype=ref_array.dtype,
+                order=order,
+                like=None,
                 device=self.sycl_device,
-                copy=None,
                 usm_type=None,
                 sycl_queue=None,
-                order=order,
             )
 
         return _copy_to_func_impl

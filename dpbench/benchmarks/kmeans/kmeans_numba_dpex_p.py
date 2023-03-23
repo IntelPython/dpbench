@@ -9,6 +9,7 @@ REPEAT = 1
 
 __njit = numba.jit(nopython=True, parallel=True, fastmath=True)
 
+
 # determine the euclidean distance from the cluster center to each point
 @__njit
 def groupByCluster(arrayP, arrayPcluster, arrayC, num_points, num_centroids):
@@ -70,7 +71,6 @@ def kmeans_numba(
     num_points,
     num_centroids,
 ):
-
     for i in range(niters):
         groupByCluster(arrayP, arrayPcluster, arrayC, num_points, num_centroids)
 
@@ -98,7 +98,6 @@ def kmeans(
     nopt,
     ncentroids,
 ):
-
     for i in numba.prange(REPEAT):
         copy_arrayC(arrayC, arrayP, ncentroids)
 

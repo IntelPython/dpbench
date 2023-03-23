@@ -9,6 +9,7 @@ import os
 import pathlib
 import tempfile
 from datetime import datetime
+from functools import partial
 from inspect import getmembers
 from multiprocessing import Manager, Process
 from typing import Any, Dict
@@ -20,6 +21,7 @@ from dpbench.infrastructure import timer
 from . import timeout_decorator as tout
 from .datamodel import store_results
 from .dpcpp_framework import DpcppFramework
+from .dpnp_framework import DpnpFramework
 from .enums import ErrorCodes, ValidationStatusCodes
 from .framework import Framework
 from .numba_dpex_framework import NumbaDpexFramework
@@ -42,6 +44,14 @@ def _reset_output_args(bench, fmwrk, inputs, preset):
             inputs.update({arg: fmwrk.copy_to_func()(original_data)})
 
 
+def _setup_func(initialized_data, array_args, framework):
+    copied_args = {}
+    for arg in array_args:
+        npdata = initialized_data[arg]
+        copied_args.update({arg: framework.copy_to_func()(npdata)})
+    return copied_args
+
+
 def _exec(
     bench,
     fmwrk,
@@ -49,7 +59,7 @@ def _exec(
     preset,
     timeout,
     repeat,
-    args,
+    get_args,
     results_dict,
 ):
     """Executes a benchmark for a given implementation.
@@ -78,6 +88,12 @@ def _exec(
     array_args = bench.info["array_args"]
     impl_fn = bench.get_impl(impl_postfix)
     inputs = dict()
+
+    with timer.timer() as t:
+        args = get_args()
+
+    results_dict["setup_time"] = t.get_elapsed_time()
+
     for arg in input_args:
         if arg not in array_args:
             inputs.update({arg: bench.get_data(preset=preset)[arg]})
@@ -405,7 +421,7 @@ class BenchmarkResults:
         self._results = results
 
     @property
-    def validation_state(self):
+    def validation_state(self) -> ValidationStatusCodes:
         return self._validation_state
 
     @validation_state.setter
@@ -435,7 +451,6 @@ class BenchmarkRunner:
         self.preset = preset
         self.repeat = repeat
         self.timeout = timeout
-        self.copied_args = dict()
         self.impl_fn = self.bench.get_impl(impl_postfix)
         self.fmwrk = self.bench.get_framework(impl_postfix)
         self.results = BenchmarkResults(
@@ -449,8 +464,6 @@ class BenchmarkRunner:
             self.results.error_state = ErrorCodes.NO_FRAMEWORK
             self.results.error_msg = "No framework"
         else:
-            # Run setup step
-            self._setup()
             # Execute the benchmark
             with Manager() as manager:
                 results_dict = manager.dict()
@@ -463,7 +476,12 @@ class BenchmarkRunner:
                         preset,
                         timeout,
                         repeat,
-                        self.copied_args,
+                        partial(
+                            _setup_func,
+                            self.bench.get_data(preset=self.preset),
+                            self.bench.info["array_args"],
+                            self.fmwrk,
+                        ),
                         results_dict,
                     ),
                 )
@@ -479,9 +497,14 @@ class BenchmarkRunner:
                     self.results.error_state = ErrorCodes.EXECUTION_TIMEOUT
                     self.results.error_msg = "Execution timed out"
                 else:
-                    self.results.error_state = results_dict["error_state"]
-                    self.results.error_msg = results_dict["error_msg"]
+                    self.results.error_state = results_dict.get(
+                        "error_state", ErrorCodes.FAILED_EXECUTION
+                    )
+                    self.results.error_msg = results_dict.get(
+                        "error_msg", "Unexpected crash"
+                    )
                     if self.results.error_state == ErrorCodes.SUCCESS:
+                        self.results.setup_time = results_dict["setup_time"]
                         self.results.warmup_time = results_dict["warmup_time"]
                         self.results.exec_times = np.asarray(
                             results_dict["exec_times"]
@@ -503,20 +526,7 @@ class BenchmarkRunner:
                                 {"return-value": results_dict["return-value"]}
                             )
 
-    def _setup(self):
-        initialized_data = self.bench.get_data(preset=self.preset)
-        array_args = self.bench.info["array_args"]
-
-        with timer.timer() as t:
-            for arg in array_args:
-                npdata = initialized_data[arg]
-                self.copied_args.update(
-                    {arg: self.fmwrk.copy_to_func()(npdata)}
-                )
-
-        self.results.setup_time = t.get_elapsed_time()
-
-    def get_results(self):
+    def get_results(self) -> BenchmarkResults:
         return self.results
 
 
@@ -647,7 +657,6 @@ class Benchmark(object):
         impl_to_fw_map = dict()
 
         for bimpl in impl_fnlist:
-
             if "_numba" in bimpl[0] and "_dpex" not in bimpl[0]:
                 impl_to_fw_map.update({bimpl[0]: NumbaFramework("numba")})
             elif "_numpy" in bimpl[0]:
@@ -683,7 +692,7 @@ class Benchmark(object):
                     )
             elif "_dpnp" in bimpl[0]:
                 try:
-                    fw = DpcppFramework("dpnp")
+                    fw = DpnpFramework("dpnp")
                     impl_to_fw_map.update({bimpl[0]: fw})
                 except Exception:
                     logging.exception(
@@ -718,7 +727,6 @@ class Benchmark(object):
             return None
 
     def _validate_results(self, preset, frmwrk, frmwrk_out):
-
         ref_out = self._get_validation_data(preset)
         if not ref_out:
             return False
@@ -774,7 +782,6 @@ class Benchmark(object):
         return self.impl_fnlist
 
     def has_impl(self, impl_postfix: str):
-
         if not impl_postfix:
             return False
 
@@ -789,7 +796,6 @@ class Benchmark(object):
             return False
 
     def get_impl(self, impl_postfix: str):
-
         if not impl_postfix:
             return None
 
@@ -879,7 +885,7 @@ class Benchmark(object):
         validate: bool = True,
         timeout: float = 200.0,
         run_datetime=None,
-    ):
+    ) -> list[BenchmarkResults]:
         results = []
         if not run_datetime:
             run_datetime = datetime.now().strftime("%m.%d.%Y_%H.%M.%S")

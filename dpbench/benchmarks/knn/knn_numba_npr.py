@@ -21,7 +21,6 @@ def knn(
     votes_to_classes,
     data_dim,
 ):
-
     for i in numba.prange(test_size):
         queue_neighbors = np.empty(shape=(k, 2))
 

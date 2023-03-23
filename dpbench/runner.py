@@ -11,16 +11,19 @@ from datetime import datetime
 
 import dpbench.benchmarks as dp_bms
 import dpbench.infrastructure as dpbi
+from dpbench.infrastructure.enums import ErrorCodes
 
 
-def _print_results(result):
+def _print_results(result: dpbi.BenchmarkResults):
     print(
         "================ implementation "
         + result.benchmark_impl_postfix
-        + " ========================"
+        + " ========================\n"
+        + "implementation:",
+        result.benchmark_impl_postfix,
     )
-    if result.error_state == 0:
-        print("implementation:", result.benchmark_impl_postfix)
+
+    if result.error_state == ErrorCodes.SUCCESS:
         print("framework:", result.framework_name)
         print("framework version:", result.framework_version)
         print("setup time:", result.setup_time)
@@ -31,9 +34,8 @@ def _print_results(result):
         print("median execution times:", result.median_exec_time)
         print("repeats:", result.num_repeats)
         print("preset:", result.preset)
-        print("validated:", result.validation_state)
+        print("validated:", result.validation_state.name)
     else:
-        print("implementation:", result.benchmark_impl_postfix)
         print("error states:", result.error_state)
         print("error msg:", result.error_msg)
 
@@ -53,7 +55,6 @@ def list_available_benchmarks():
 
 
 def list_possible_implementations():
-
     parent_folder = pathlib.Path(__file__).parent.absolute()
     impl_postfix_json = parent_folder.joinpath("configs", "impl_postfix.json")
 
@@ -150,7 +151,6 @@ def run_benchmarks(
     impl_postfixes = list_possible_implementations()
 
     for b in list_available_benchmarks():
-
         for impl in impl_postfixes:
             run_benchmark(
                 bname=b,

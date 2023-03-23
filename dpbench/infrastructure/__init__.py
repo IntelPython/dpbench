@@ -2,8 +2,17 @@
 #
 # SPDX-License-Identifier: Apache-2.0
 
-from .benchmark import Benchmark, get_supported_implementation_postfixes
-from .datamodel import create_connection, create_results_table, store_results
+from .benchmark import (
+    Benchmark,
+    BenchmarkResults,
+    get_supported_implementation_postfixes,
+)
+from .datamodel import (
+    create_connection,
+    create_results_table,
+    print_implementation_summary,
+    store_results,
+)
 from .dpcpp_framework import DpcppFramework
 from .dpnp_framework import DpnpFramework
 from .framework import Framework

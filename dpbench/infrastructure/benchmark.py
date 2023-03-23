@@ -421,7 +421,7 @@ class BenchmarkResults:
         self._results = results
 
     @property
-    def validation_state(self):
+    def validation_state(self) -> ValidationStatusCodes:
         return self._validation_state
 
     @validation_state.setter
@@ -526,7 +526,7 @@ class BenchmarkRunner:
                                 {"return-value": results_dict["return-value"]}
                             )
 
-    def get_results(self):
+    def get_results(self) -> BenchmarkResults:
         return self.results
 
 
@@ -876,7 +876,7 @@ class Benchmark(object):
         validate: bool = True,
         timeout: float = 200.0,
         run_datetime=None,
-    ):
+    ) -> list[BenchmarkResults]:
         results = []
         if not run_datetime:
             run_datetime = datetime.now().strftime("%m.%d.%Y_%H.%M.%S")

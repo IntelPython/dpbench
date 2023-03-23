@@ -28,7 +28,11 @@
         ```
     - To run, taking black_scholes for example:
         ```bash
-        $  python -c "import dpbench; dpbench.run_benchmark(\"black_scholes\")"
+        $  python -c "import dpbench; dpbench.run_benchmark(\"black_scholes\")" 2> /dev/null
+        ```
+    - Similarly, to run all the cases in DPBench:
+        ```bash
+        $  python -c "import dpbench; dpbench.run_benchmarks()" 2> /dev/null
         ```
 
 3. Device Customization

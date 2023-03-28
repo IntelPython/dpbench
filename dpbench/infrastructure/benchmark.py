@@ -7,6 +7,7 @@ import json
 import logging
 import os
 import pathlib
+import sqlite3
 import tempfile
 from datetime import datetime
 from functools import partial
@@ -878,20 +879,33 @@ class Benchmark(object):
 
     def run(
         self,
-        conn=None,
+        conn: sqlite3.Connection = None,
         implementation_postfix: str = None,
         preset: str = "S",
         repeat: int = 10,
         validate: bool = True,
         timeout: float = 200.0,
-        run_datetime=None,
+        run_datetime: str = None,
     ) -> list[BenchmarkResults]:
-        results = []
+        results: list[BenchmarkResults] = []
+
         if not run_datetime:
             run_datetime = datetime.now().strftime("%m.%d.%Y_%H.%M.%S")
 
+        implementation_postfixes = []
+
         if implementation_postfix:
-            # Run the benchmark for a specific implementation
+            implementation_postfixes.append(implementation_postfix)
+        else:
+            for impl in self.impl_fnlist:
+                impl_postfix = impl[0][
+                    (len(self.bname) - len(impl[0]) + 1) :  # noqa: E203
+                ]
+
+                implementation_postfixes.append(impl_postfix)
+
+        # TODO: do we call ref benchmark function twice?
+        for implementation_postfix in implementation_postfixes:
             runner = BenchmarkRunner(
                 bench=self,
                 impl_postfix=implementation_postfix,
@@ -913,30 +927,4 @@ class Benchmark(object):
                 store_results(conn, result, run_datetime)
             results.append(result)
 
-        else:
-            # Run the benchmark for all available implementations
-            for impl in self.get_impl_fnlist():
-                impl_postfix = impl[0][
-                    (len(self.bname) - len(impl[0]) + 1) :  # noqa: E203
-                ]
-                runner = BenchmarkRunner(
-                    bench=self,
-                    impl_postfix=impl_postfix,
-                    preset=preset,
-                    repeat=repeat,
-                    timeout=timeout,
-                )
-                result = runner.get_results()
-                if validate and result.error_state == ErrorCodes.SUCCESS:
-                    if self._validate_results(
-                        preset, result.framework, result.results
-                    ):
-                        result.validation_state = ValidationStatusCodes.SUCCESS
-                    else:
-                        result.validation_state = ValidationStatusCodes.FAILURE
-                        result.error_state = ErrorCodes.FAILED_VALIDATION
-                        result.error_msg = "Validation failed"
-                if conn:
-                    store_results(conn, result, run_datetime)
-                results.append(result)
         return results

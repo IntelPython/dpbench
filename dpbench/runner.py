@@ -60,7 +60,9 @@ def list_possible_implementations():
 
     try:
         with open(impl_postfix_json) as json_file:
-            return [entry["impl_postfix"] for entry in json.load(json_file)]
+            info = json.load(json_file)["impl_postfix"]
+            impl_postfix_list = info.keys()
+            return impl_postfix_list
     except Exception:
         logging.exception(
             "impl postfix JSON file {b} could not be opened.".format(
@@ -174,6 +176,62 @@ def run_benchmarks(
     print("===============================================================")
     print("")
 
-    dpbi.generate_impl_summary_report(dbfile)
+    dpbi.print_implementation_summary(conn=conn)
 
-    return dbfile
+
+def all_benchmarks_passed_validation(dbfile):
+    """Checks the results table of the output database to confirm if all
+    benchmarks passed validation in the last run.
+    Args:
+        dbfile (str): Name of database with dpbench results
+    """
+
+    summary = (
+        "SELECT "
+        + "MAX(id),"
+        + "benchmark,"
+        + "framework,"
+        + "version,"
+        + "details,"
+        + "IIF(validated == 1, 'PASS', 'FAIL' ) AS result "
+        + "FROM results "
+        + "GROUP BY benchmark, framework, version, details, result "
+        + "ORDER BY benchmark, framework;"
+    )
+
+    failed_benchmark_summary = (
+        "SELECT "
+        + "MAX(id),"
+        + "benchmark,"
+        + "framework,"
+        + "version,"
+        + "details,"
+        + "IIF(validated == 1, 'PASS', 'FAIL' ) AS result "
+        + "FROM results "
+        + "WHERE validated = 0 "
+        + "GROUP BY benchmark, framework, version, details, result;"
+    )
+
+    conn = dpbi.create_connection(dbfile)
+    cur = conn.cursor()
+
+    data = cur.execute(summary)
+    print("Summary")
+    print("==============================================")
+    for row in data:
+        print(row)
+    print("==============================================")
+
+    data = cur.execute(failed_benchmark_summary)
+    fails = [row for row in data]
+
+    if fails:
+        print("Number of failing validations: ", len(fails))
+        print("==============================================")
+        for fail in fails:
+            print(fail)
+        print("==============================================")
+        return False
+    else:
+        print("All benchmarks were validated successfully")
+        return True

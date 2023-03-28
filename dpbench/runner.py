@@ -54,7 +54,10 @@ def list_available_benchmarks():
     return submods
 
 
-def list_possible_implementations():
+def list_possible_implementations() -> list[str]:
+    """Returns list of implementation postfixes, which are keys in
+    configs/impl_postfix.json.
+    """
     parent_folder = pathlib.Path(__file__).parent.absolute()
     impl_postfix_json = parent_folder.joinpath("configs", "impl_postfix.json")
 
@@ -87,9 +90,16 @@ def run_benchmark(
     print("================ Benchmark " + bname + " ========================")
     print("")
     bench = None
+
+    allowed_impl_postfixes = list_possible_implementations()
+
     try:
         benchmod = importlib.import_module("dpbench.benchmarks." + bname)
-        bench = dpbi.Benchmark(benchmod, bconfig_path=bconfig_path)
+        bench = dpbi.Benchmark(
+            benchmod,
+            bconfig_path=bconfig_path,
+            allowed_implementation_postfixes=allowed_impl_postfixes,
+        )
     except Exception:
         logging.exception(
             "Skipping the benchmark execution due to the following error: "

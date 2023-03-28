@@ -638,9 +638,9 @@ class Benchmark(object):
         # We give preference to the NumPy implementation over Python if both are
         # present.
         if numpy_impl_fn:
-            ref_impl_fn = numpy_impl_fn
+            ref_impl_fn = numpy_impl_fn[0]
         elif python_impl_fn:
-            ref_impl_fn = python_impl_fn
+            ref_impl_fn = python_impl_fn[0]
         return ref_impl_fn
 
     def _set_impl_to_framework_map(self, impl_fnlist):

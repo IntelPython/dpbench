@@ -1,7 +1,6 @@
 # Copyright 2021 ETH Zurich and the NPBench authors. All rights reserved.
-# SPDX-FileCopyrightText: 2023 Intel Corporation
+# Copyright 2022 Intel Corp.
 #
-# SPDX-License-Identifier: Apache-2.0
 # SPDX-License-Identifier: BSD-3-Clause
 
 import importlib
@@ -14,7 +13,7 @@ import tempfile
 from datetime import datetime
 from functools import partial
 from inspect import getmembers
-from multiprocessing import Manager
+from multiprocessing import Manager, Process
 from typing import Any, Dict
 
 import numpy as np
@@ -473,50 +472,64 @@ class BenchmarkRunner:
             # Execute the benchmark
             with Manager() as manager:
                 results_dict = manager.dict()
-
-                _exec(
-                    self.bench,
-                    self.fmwrk,
-                    impl_postfix,
-                    preset,
-                    timeout,
-                    repeat,
-                    partial(
-                        _setup_func,
-                        self.bench.get_data(preset=self.preset),
-                        self.bench.info["array_args"],
+                p = Process(
+                    target=tout.exit_after(timeout)(_exec),
+                    args=(
+                        self.bench,
                         self.fmwrk,
+                        impl_postfix,
+                        preset,
+                        timeout,
+                        repeat,
+                        partial(
+                            _setup_func,
+                            self.bench.get_data(preset=self.preset),
+                            self.bench.info["array_args"],
+                            self.fmwrk,
+                        ),
+                        results_dict,
                     ),
-                    results_dict,
                 )
-
-                self.results.error_state = results_dict.get(
-                    "error_state", ErrorCodes.FAILED_EXECUTION
-                )
-                self.results.error_msg = results_dict.get(
-                    "error_msg", "Unexpected crash"
-                )
-                if self.results.error_state == ErrorCodes.SUCCESS:
-                    self.results.setup_time = results_dict["setup_time"]
-                    self.results.warmup_time = results_dict["warmup_time"]
-                    self.results.exec_times = np.asarray(
-                        results_dict["exec_times"]
+                p.start()
+                res = p.join(timeout * 1.2)
+                if res is None and p.exitcode is None:
+                    logging.error(
+                        "Terminating process due to timeout in the execution "
+                        f"phase of {self.bench.bname} "
+                        f"for the {impl_postfix} implementation"
                     )
-                    self.results.teardown_time = results_dict["teardown_time"]
-
-                    output_npz = results_dict["outputs"]
-                    if output_npz:
-                        npzfile = np.load(output_npz)
-                        for outarr in npzfile.files:
-                            self.results.results.update(
-                                {outarr: npzfile[outarr]}
-                            )
-                        os.remove(output_npz)
-
-                    if results_dict["return-value"]:
-                        self.results.results.update(
-                            {"return-value": results_dict["return-value"]}
+                    p.kill()
+                    self.results.error_state = ErrorCodes.EXECUTION_TIMEOUT
+                    self.results.error_msg = "Execution timed out"
+                else:
+                    self.results.error_state = results_dict.get(
+                        "error_state", ErrorCodes.FAILED_EXECUTION
+                    )
+                    self.results.error_msg = results_dict.get(
+                        "error_msg", "Unexpected crash"
+                    )
+                    if self.results.error_state == ErrorCodes.SUCCESS:
+                        self.results.setup_time = results_dict["setup_time"]
+                        self.results.warmup_time = results_dict["warmup_time"]
+                        self.results.exec_times = np.asarray(
+                            results_dict["exec_times"]
                         )
+                        self.results.teardown_time = results_dict[
+                            "teardown_time"
+                        ]
+
+                        output_npz = results_dict["outputs"]
+                        if output_npz:
+                            npzfile = np.load(output_npz)
+                            for outarr in npzfile.files:
+                                self.results.results.update(
+                                    {outarr: npzfile[outarr]}
+                                )
+                            os.remove(output_npz)
+                        if results_dict["return-value"]:
+                            self.results.results.update(
+                                {"return-value": results_dict["return-value"]}
+                            )
 
     def get_results(self) -> BenchmarkResults:
         return self.results

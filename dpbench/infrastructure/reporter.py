@@ -19,7 +19,14 @@ _sql_latest_implementation_summary = """
 SELECT
     MAX(timestamp) as As_of,
     benchmark,
-    problem_preset as problem_size,
+    problem_preset,
+    CASE
+        WHEN MAX(input_size) < 1024 THEN MAX(input_size) || 'B'
+        WHEN MAX(input_size) >=  1024 AND MAX(input_size) < (1024 * 1024) THEN (MAX(input_size) / 1024) || 'KB'
+        WHEN MAX(input_size) >= (1024 * 1024)  AND MAX(input_size) < (1024 * 1024 * 1024) THEN (MAX(input_size) / (1024 * 1024)) || 'MB'
+        WHEN MAX(input_size) >= (1024 * 1024 * 1024) AND MAX(input_size) < (1024 * 1024 * 1024 *1024) THEN (MAX(input_size) / (1024 * 1024 * 1024)) || 'GB'
+        WHEN MAX(input_size) >= (1024 * 1024 * 1024 * 1024) THEN (MAX(input_size) / (1024 * 1024 * 1024 * 1024)) || 'TB'
+    END AS input_size,
     MAX(
         CASE
             WHEN implementation == "numba_dpex_k" THEN error_state

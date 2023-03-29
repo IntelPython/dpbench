@@ -54,9 +54,16 @@ def _setup_func(initialized_data, array_args, framework):
     return copied_args
 
 
+def _array_size(array: Any) -> int:
+    try:
+        return array.nbytes
+    except AttributeError:
+        return array.size * array.itemsize
+
+
 # TODO: move definition of class on top, so we can properly linter it.
 def _exec(
-    bench: "BenchmarkResults",
+    bench: "Benchmark",
     fmwrk,
     impl_postfix,
     preset,
@@ -96,6 +103,12 @@ def _exec(
         args = get_args()
 
     results_dict["setup_time"] = t.get_elapsed_time()
+
+    input_size = 0
+    for arg in array_args:
+        input_size += _array_size(bench.bdata[preset][arg])
+
+    results_dict["input_size"] = input_size
 
     for arg in input_args:
         if arg not in array_args:
@@ -207,6 +220,7 @@ class BenchmarkResults:
         self._repeats = repeat
         self._impl_postfix = impl_postfix
         self._preset = preset
+        self._input_size = 0
 
         self.exec_times = np.zeros(repeat, np.float64)
 
@@ -339,6 +353,14 @@ class BenchmarkResults:
     @preset.setter
     def preset(self, preset):
         self._preset = preset
+
+    @property
+    def input_size(self):
+        return self._input_size
+
+    @input_size.setter
+    def input_size(self, problem_size):
+        self._input_size = problem_size
 
     @property
     def exec_times(self):
@@ -509,6 +531,7 @@ class BenchmarkRunner:
                     self.results.error_msg = results_dict.get(
                         "error_msg", "Unexpected crash"
                     )
+                    self.results.input_size = results_dict.get("input_size")
                     if self.results.error_state == ErrorCodes.SUCCESS:
                         self.results.setup_time = results_dict["setup_time"]
                         self.results.warmup_time = results_dict["warmup_time"]

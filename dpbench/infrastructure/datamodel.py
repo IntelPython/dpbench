@@ -16,6 +16,7 @@ CREATE TABLE IF NOT EXISTS results (
     framework_version text NOT NULL,
     error_state text NOT NULL,
     problem_preset text,
+    input_size integer,
     setup_time real,
     warmup_time real,
     repeats text,
@@ -39,6 +40,7 @@ INSERT INTO results(
     framework_version,
     error_state,
     problem_preset,
+    input_size,
     repeats,
     setup_time,
     warmup_time,
@@ -49,7 +51,7 @@ INSERT INTO results(
     quartile75_exec_time,
     teardown_time,
     validated
-) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
+) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
 """
 
 
@@ -87,6 +89,7 @@ def create_results_table(conn):
         )
 
 
+# TODO: refactor for proper typing. Current typing for 'result' produce import loop error
 def store_results(conn, result, run_timestamp):
     data = []
 
@@ -113,6 +116,7 @@ def store_results(conn, result, run_timestamp):
 
     data.append(error_state_str)
     data.append(result.preset)
+    data.append(result.input_size)
     data.append(str(result.num_repeats))
     data.append(result.setup_time)
     data.append(result.warmup_time)

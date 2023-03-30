@@ -3,10 +3,17 @@
 #
 # SPDX-License-Identifier: BSD-3-Clause
 
+import importlib
 import json
 import logging
+import os
 import pathlib
+import sqlite3
+import tempfile
+from datetime import datetime
+from functools import partial
 from inspect import getmembers
+from multiprocessing import Manager, Process
 from typing import Any, Dict
 
 import numpy as np
@@ -16,13 +23,164 @@ from dpbench.infrastructure import timer
 from . import timeout_decorator as tout
 from .datamodel import store_results
 from .dpcpp_framework import DpcppFramework
+from .dpnp_framework import DpnpFramework
+from .enums import ErrorCodes, ValidationStatusCodes
 from .framework import Framework
 from .numba_dpex_framework import NumbaDpexFramework
 from .numba_dpex_kernel_framework import NumbaDpexKernelFramework
 from .numba_framework import NumbaFramework
 
 
-def get_supported_implementation_postfixes():
+def _reset_output_args(bench, fmwrk, inputs, preset):
+    try:
+        output_args = bench.info["output_args"]
+    except KeyError:
+        logging.info(
+            "No output args to reset as benchmarks has no array output."
+        )
+        return
+    array_args = bench.info["array_args"]
+    for arg in inputs.keys():
+        if arg in output_args and arg in array_args:
+            original_data = bench.get_data(preset=preset)[arg]
+            inputs.update({arg: fmwrk.copy_to_func()(original_data)})
+
+
+def _setup_func(initialized_data, array_args, framework):
+    copied_args = {}
+    for arg in array_args:
+        npdata = initialized_data[arg]
+        copied_args.update({arg: framework.copy_to_func()(npdata)})
+    return copied_args
+
+
+def _array_size(array: Any) -> int:
+    try:
+        return array.nbytes
+    except AttributeError:
+        return array.size * array.itemsize
+
+
+# TODO: move definition of class on top, so we can properly linter it.
+def _exec(
+    bench: "Benchmark",
+    fmwrk,
+    impl_postfix,
+    preset,
+    timeout,
+    repeat,
+    get_args,
+    results_dict,
+):
+    """Executes a benchmark for a given implementation.
+
+    A helper function to execute a benchmark. The function is called in a
+    separate sub-process by a BenchmarkRunner instance. The ``_exec`` function
+    first runs the benchmark implementation function once as a warmup and then
+    performs the specified number of repetitions. The output results are reset
+    before each repetition and the final output is serialized into a npz
+    (compressed NumPy data file) file.
+
+    All timing results and the path to the serialized results are written to
+    the results_dict input argument that is managed by the calling process.
+
+    Args:
+        bench : A Benchmark object representing the benchmark to be executed.
+        fmwrk : A Framework for which the benchmark is to be executed.
+        impl_postfix : The identifier for the benchmark implementation.
+        preset : A problem size entry defined in the bench_info JSON.
+        timeout : Number of seconds after which the execution is killed.
+        repeat : Number of repetitions of the benchmark execution.
+        args : Input arguments to benchmark implementation function.
+        results_dict : A dictionary where timing and other results are stored.
+    """
+    input_args = bench.info["input_args"]
+    array_args = bench.info["array_args"]
+    impl_fn = bench.get_impl(impl_postfix)
+    inputs = dict()
+
+    with timer.timer() as t:
+        args = get_args()
+
+    results_dict["setup_time"] = t.get_elapsed_time()
+
+    input_size = 0
+    for arg in array_args:
+        input_size += _array_size(bench.bdata[preset][arg])
+
+    results_dict["input_size"] = input_size
+
+    for arg in input_args:
+        if arg not in array_args:
+            inputs.update({arg: bench.get_data(preset=preset)[arg]})
+        else:
+            inputs.update({arg: args[arg]})
+
+    # Warmup
+    def warmup(impl_fn, inputs):
+        fmwrk.execute(impl_fn, inputs)
+
+    with timer.timer() as t:
+        try:
+            warmup(impl_fn, inputs)
+        except Exception:
+            logging.exception("Benchmark execution failed at the warmup step.")
+            results_dict["error_state"] = ErrorCodes.FAILED_EXECUTION
+            results_dict["error_msg"] = "Execution failed"
+            return
+
+    results_dict["warmup_time"] = t.get_elapsed_time()
+    _reset_output_args(bench=bench, fmwrk=fmwrk, inputs=inputs, preset=preset)
+    exec_times = [0] * repeat
+
+    retval = None
+    for i in range(repeat):
+        with timer.timer() as t:
+            retval = fmwrk.execute(impl_fn, inputs)
+        exec_times[i] = t.get_elapsed_time()
+        # Do not reset the output from the last repeat
+        if i < repeat - 1:
+            _reset_output_args(
+                bench=bench, fmwrk=fmwrk, inputs=inputs, preset=preset
+            )
+
+    results_dict["exec_times"] = exec_times
+
+    # Get the output data
+    try:
+        out_args = bench.info["output_args"]
+    except KeyError:
+        out_args = []
+
+    array_args = bench.info["array_args"]
+    output_arrays = dict()
+    with timer.timer() as t:
+        for out_arg in out_args:
+            if out_arg in array_args:
+                output_arrays.update(
+                    {out_arg: fmwrk.copy_from_func()(inputs[out_arg])}
+                )
+    run_datetime = datetime.now().strftime("%m.%d.%Y_%H.%M.%S")
+    out_filename = (
+        bench.bname + "_" + impl_postfix + "_" + preset + "." + run_datetime
+    )
+    out_filename = tempfile.gettempdir() + "/" + out_filename
+    np.savez_compressed(out_filename, **output_arrays)
+    results_dict["outputs"] = out_filename + ".npz"
+    results_dict["teardown_time"] = t.get_elapsed_time()
+
+    # Special case: if the benchmark implementation returns anything, then
+    # add that to the results dict
+    if retval:
+        results_dict["return-value"] = retval
+    else:
+        results_dict["return-value"] = None
+
+    results_dict["error_state"] = ErrorCodes.SUCCESS
+    results_dict["error_msg"] = ""
+
+
+def get_supported_implementation_postfixes() -> list[str]:
     """Returns as a dictionary all the supported postfixes for filenames
     that implement a specific version of a benchmark.
 
@@ -37,7 +195,7 @@ def get_supported_implementation_postfixes():
 
     try:
         with open(impl_postfix_json) as json_file:
-            return json.load(json_file)["impl_postfix"]
+            return [entry["impl_postfix"] for entry in json.load(json_file)]
     except Exception as e:
         logging.exception("impl_postfix.json file not found")
         raise (e)
@@ -50,18 +208,19 @@ class BenchmarkResults:
 
     def __init__(self, bench, repeat, impl_postfix, preset):
         """Initialize defaults."""
-        self._fmwrk = None
-        self._setup_time = -1
-        self._warmup_time = -1
-        self._teardown_time = -1
-        self._validation_state = -4
-        self._error_state = -1
+        self._fmwrk = bench.get_framework(impl_postfix)
+        self._setup_time = 0.0
+        self._warmup_time = 0.0
+        self._teardown_time = 0.0
+        self._validation_state = ValidationStatusCodes.FAILURE
+        self._error_state = ErrorCodes.UNIMPLEMENTED
         self._error_msg = "Not implemented"
         self._results = dict()
         self._bench = bench
         self._repeats = repeat
         self._impl_postfix = impl_postfix
         self._preset = preset
+        self._input_size = 0
 
         self.exec_times = np.zeros(repeat, np.float64)
 
@@ -196,6 +355,14 @@ class BenchmarkResults:
         self._preset = preset
 
     @property
+    def input_size(self):
+        return self._input_size
+
+    @input_size.setter
+    def input_size(self, problem_size):
+        self._input_size = problem_size
+
+    @property
     def exec_times(self):
         """Returns an array of execution timings measured in nanoseconds
 
@@ -279,7 +446,7 @@ class BenchmarkResults:
         self._results = results
 
     @property
-    def validation_state(self):
+    def validation_state(self) -> ValidationStatusCodes:
         return self._validation_state
 
     @validation_state.setter
@@ -291,7 +458,7 @@ class BenchmarkResults:
         return self._error_state
 
     @error_state.setter
-    def error_state(self, error_state=-1):
+    def error_state(self, error_state=ErrorCodes.UNIMPLEMENTED):
         self._error_state = error_state
 
     @property
@@ -303,133 +470,92 @@ class BenchmarkResults:
         self._error_msg = error_msg
 
 
+# TODO: move Benchmark implementation above for proper linter.
 class BenchmarkRunner:
-    def __init__(self, bench, impl_postfix, preset, repeat, timeout):
+    def __init__(
+        self, bench: "Benchmark", impl_postfix, preset, repeat, timeout
+    ):
         self.bench = bench
         self.preset = preset
         self.repeat = repeat
         self.timeout = timeout
-        self.copied_args = dict()
-        self.results = BenchmarkResults(bench, repeat, impl_postfix, preset)
-
         self.impl_fn = self.bench.get_impl(impl_postfix)
         self.fmwrk = self.bench.get_framework(impl_postfix)
-        self.results.benchmark = self.bench
-        self.results.framework = self.fmwrk
+        self.results = BenchmarkResults(
+            self.bench, self.repeat, impl_postfix, self.preset
+        )
 
         if not self.impl_fn:
-            self.results.error_state = -1
+            self.results.error_state = ErrorCodes.UNIMPLEMENTED
             self.results.error_msg = "No implementation"
         elif not self.fmwrk:
-            self.results.error_state = -2
+            self.results.error_state = ErrorCodes.NO_FRAMEWORK
             self.results.error_msg = "No framework"
         else:
-            self.results.error_state = 0
-            self.results.error_msg = ""
-            # Run setup step
-            self._setup()
             # Execute the benchmark
-            self._exec()
-
-    def _setup(self):
-        initialized_data = self.bench.get_data(preset=self.preset)
-        array_args = self.bench.info["array_args"]
-
-        with timer.timer() as t:
-            for arg in array_args:
-                npdata = initialized_data[arg]
-                self.copied_args.update(
-                    {arg: self.fmwrk.copy_to_func()(npdata)}
+            with Manager() as manager:
+                results_dict = manager.dict()
+                p = Process(
+                    target=tout.exit_after(timeout)(_exec),
+                    args=(
+                        self.bench,
+                        self.fmwrk,
+                        impl_postfix,
+                        preset,
+                        timeout,
+                        repeat,
+                        partial(
+                            _setup_func,
+                            self.bench.get_data(preset=self.preset),
+                            self.bench.info["array_args"],
+                            self.fmwrk,
+                        ),
+                        results_dict,
+                    ),
                 )
-
-        self.results.setup_time = t.get_elapsed_time()
-
-    def _reset_output_args(self, inputs):
-        try:
-            output_args = self.bench.info["output_args"]
-        except KeyError:
-            logging.info(
-                "No output args to reset as benchmarks has no array output."
-            )
-            return
-        array_args = self.bench.info["array_args"]
-        for arg in inputs.keys():
-            if arg in output_args and arg in array_args:
-                original_data = self.bench.get_data(preset=self.preset)[arg]
-                inputs.update({arg: self.fmwrk.copy_to_func()(original_data)})
-
-    def _exec(self):
-        input_args = self.bench.info["input_args"]
-        array_args = self.bench.info["array_args"]
-        inputs = dict()
-        for arg in input_args:
-            if arg not in array_args:
-                inputs.update(
-                    {arg: self.bench.get_data(preset=self.preset)[arg]}
-                )
-            else:
-                inputs.update({arg: self.copied_args[arg]})
-
-        # Warmup
-        @tout.exit_after(self.timeout)
-        def warmup(impl_fn, inputs):
-            self.fmwrk.execute(impl_fn, inputs)
-
-        with timer.timer() as t:
-            try:
-                warmup(self.impl_fn, inputs)
-            except KeyboardInterrupt:
-                logging.exception(
-                    "Benchmark {0} execution failed due to a timeout".format(
-                        self.bench.bname
+                p.start()
+                res = p.join(timeout * 1.2)
+                if res is None and p.exitcode is None:
+                    logging.error(
+                        "Terminating process due to timeout in the execution "
+                        f"phase of {self.bench.bname} "
+                        f"for the {impl_postfix} implementation"
                     )
-                )
-                self.results.error_state = -3
-                self.results.error_msg = "Execution failed"
-                return
-            except Exception:
-                logging.exception("Benchmark execution failed.")
-                self.results.error_state = -3
-                self.results.error_msg = "Execution failed"
-                return
-
-        self.results.warmup_time = t.get_elapsed_time()
-        self._reset_output_args(inputs=inputs)
-        exec_times = np.empty(self.repeat, dtype=np.float64)
-
-        retval = None
-        for i in range(self.repeat):
-            with timer.timer() as t:
-                retval = self.fmwrk.execute(self.impl_fn, inputs)
-            exec_times[i] = t.get_elapsed_time()
-            # Do not reset the output from the last repeat
-            if i < self.repeat - 1:
-                self._reset_output_args(inputs=inputs)
-
-        self.results.exec_times = exec_times
-
-        # Get the output data
-        try:
-            out_args = self.bench.info["output_args"]
-        except KeyError:
-            out_args = []
-
-        array_args = self.bench.info["array_args"]
-        with timer.timer() as t:
-            for out_arg in out_args:
-                if out_arg in array_args:
-                    self.results.results.update(
-                        {out_arg: self.fmwrk.copy_from_func()(inputs[out_arg])}
+                    p.kill()
+                    self.results.error_state = ErrorCodes.EXECUTION_TIMEOUT
+                    self.results.error_msg = "Execution timed out"
+                else:
+                    self.results.error_state = results_dict.get(
+                        "error_state", ErrorCodes.FAILED_EXECUTION
                     )
-        self.results.teardown_time = t.get_elapsed_time()
+                    self.results.error_msg = results_dict.get(
+                        "error_msg", "Unexpected crash"
+                    )
+                    self.results.input_size = results_dict.get("input_size")
+                    if self.results.error_state == ErrorCodes.SUCCESS:
+                        self.results.setup_time = results_dict["setup_time"]
+                        self.results.warmup_time = results_dict["warmup_time"]
+                        self.results.exec_times = np.asarray(
+                            results_dict["exec_times"]
+                        )
+                        self.results.teardown_time = results_dict[
+                            "teardown_time"
+                        ]
 
-        # Special case: if the benchmark implementation returns anything, then
-        # add that to the results dict
+                        output_npz = results_dict["outputs"]
+                        if output_npz:
+                            npzfile = np.load(output_npz)
+                            for outarr in npzfile.files:
+                                self.results.results.update(
+                                    {outarr: npzfile[outarr]}
+                                )
+                            os.remove(output_npz)
+                        if results_dict["return-value"]:
+                            self.results.results.update(
+                                {"return-value": results_dict["return-value"]}
+                            )
 
-        if retval:
-            self.results.results.update({"return-value": retval})
-
-    def get_results(self):
+    def get_results(self) -> BenchmarkResults:
         return self.results
 
 
@@ -454,7 +580,11 @@ class Benchmark(object):
         else:
             return False
 
-    def _set_implementation_fn_list(self, bmod, initialize_fname):
+    def _set_implementation_fn_list(
+        self,
+        bmod: str,
+        allowed_implementation_postfixes: list[str],
+    ) -> list[tuple[str, object]]:
         """Selects all the callables from the __all__ list for the module
         excluding the initialize function that we know is not a benchmark
         implementation.
@@ -462,13 +592,30 @@ class Benchmark(object):
         Args:
             bmod : A benchmark module
             initialize_fname : Name of the initialization function
+        Returns:
+            A list of (name, value) pair that represents the name of an
+            implementation function and a corresponding function object.
         """
 
-        return [
-            fn
-            for fn in getmembers(bmod, callable)
-            if initialize_fname not in fn[0]
-        ]
+        result: list[tuple[str, object]] = []
+
+        for postfix, module_name in self._get_impl_names(
+            bmod, allowed_implementation_postfixes
+        ).items():
+            module_name = f"dpbench.benchmarks.{self.bname}.{module_name}"
+            mod = importlib.import_module(module_name)
+            canonical_name = f"{self.bname}_{postfix}"
+
+            func_name: str = None
+            for func in [self.bname, canonical_name]:
+                if hasattr(mod, func):
+                    func_name = func
+                    break
+
+            if func_name:
+                result.append((canonical_name, getattr(mod, func_name)))
+
+        return result
 
     def _load_benchmark_info(self, bconfig_path: str = None):
         """Reads the benchmark configuration and loads into a member dict.
@@ -489,7 +636,7 @@ class Benchmark(object):
 
         try:
             with open(bench_path) as json_file:
-                self.info = json.load(json_file)["benchmark"]
+                self.info: dict = json.load(json_file)["benchmark"]
         except Exception:
             logging.exception(
                 "Benchmark JSON file {b} could not be opened.".format(
@@ -498,7 +645,7 @@ class Benchmark(object):
             )
             raise
 
-    def _set_data_initialization_fn(self, bmodule):
+    def _set_data_initialization_fn(self):
         """Sets the initialize function object to be used by the benchmark.
 
         Raises:
@@ -506,34 +653,45 @@ class Benchmark(object):
             loaded.
         """
 
-        if "init" in self.info.keys() and self.info["init"]:
-            self.init_fn_name = self.info["init"]["func_name"]
-            self.initialize_fn = getattr(bmodule, self.init_fn_name)
-        else:
-            raise RuntimeError(
-                "Initialization function not specified in JSON configuration"
-                + " for "
-                + self.bname
-            )
+        self.init_mod_path: str = (
+            self.info.get("init", {}).get("package_path")
+            or f"dpbench.benchmarks.{self.bname}.{self.bname}_initialize"
+        )
+
+        self.init_fn_name: str = (
+            self.info.get("init", {}).get("func_name") or "initialize"
+        )
+
+        self.initialize_fn = getattr(
+            importlib.import_module(self.init_mod_path), self.init_fn_name
+        )
 
     def _set_reference_implementation(self, impl_fnlist):
         """Sets the reference implementation for the benchmark.
 
         The reference implementation is either a pure Python implementation
-        if available, or else a NumPy implementation. If neither is found, then
-        the reference implementation is set to None.
+        if available, or else a NumPy implementation. We give preference to
+        the NumPy implementation over Python if both are present.
+        If neither is found, then the reference implementation is set to None.
 
         Args:
-            impl_fnlist : The list of implementation function for the
-            benchmark.
+            impl_fnlist : A list of (name, value) pair that represents the name
+            of an implementation function and a corresponding function object.
         """
+
         ref_impl_fn = None
 
-        for fn in impl_fnlist:
-            if "python" in fn[0]:
-                ref_impl_fn = fn
-            elif "numpy" in fn[0]:
-                ref_impl_fn = fn
+        python_impl_fn = [
+            impl_fn for impl_fn in impl_fnlist if "python" in impl_fn[0]
+        ]
+        numpy_impl_fn = [
+            impl_fn for impl_fn in impl_fnlist if "numpy" in impl_fn[0]
+        ]
+
+        if numpy_impl_fn:
+            ref_impl_fn = numpy_impl_fn[0]
+        elif python_impl_fn:
+            ref_impl_fn = python_impl_fn[0]
 
         return ref_impl_fn
 
@@ -551,7 +709,6 @@ class Benchmark(object):
         impl_to_fw_map = dict()
 
         for bimpl in impl_fnlist:
-
             if "_numba" in bimpl[0] and "_dpex" not in bimpl[0]:
                 impl_to_fw_map.update({bimpl[0]: NumbaFramework("numba")})
             elif "_numpy" in bimpl[0]:
@@ -587,7 +744,7 @@ class Benchmark(object):
                     )
             elif "_dpnp" in bimpl[0]:
                 try:
-                    fw = DpcppFramework("dpnp")
+                    fw = DpnpFramework("dpnp")
                     impl_to_fw_map.update({bimpl[0]: fw})
                 except Exception:
                     logging.exception(
@@ -611,7 +768,7 @@ class Benchmark(object):
             validate=False,
         )[0]
 
-        if ref_results.error_state == 0:
+        if ref_results.error_state == ErrorCodes.SUCCESS:
             self.refdata.update({preset: ref_results.results})
             return ref_results.results
         else:
@@ -622,7 +779,6 @@ class Benchmark(object):
             return None
 
     def _validate_results(self, preset, frmwrk, frmwrk_out):
-
         ref_out = self._get_validation_data(preset)
         if not ref_out:
             return False
@@ -641,21 +797,88 @@ class Benchmark(object):
         except Exception:
             return False
 
-    def __init__(self, bmodule: object, bconfig_path: str = None):
+    def _get_impl_names(
+        self,
+        bmod,
+        allowed_implementation_postfixes: list[str],
+    ) -> dict[str, str]:
+        """Resolves bench_list into actual file paths.
+
+        Returns:
+            map[str, str]: map of benchmark postfix to module name for
+            every implementation of the benchmark.
+        """
+
+        result: dict[str, str] = {}
+
+        bench_list = self.info.get("bench_list")
+        if bench_list:
+            for bench in bench_list:
+                if isinstance(bench, tuple):
+                    postfix = bench[0]
+                    module_name = bench[1]
+                else:
+                    postfix = bench
+                    module_name = self.bname + "_" + postfix
+
+                result[postfix] = module_name
+
+            return result
+
+        modules: list[str] = [
+            m
+            for m in bmod.__loader__.get_resource_reader().contents()
+            if m.startswith(self.bname)
+        ]
+
+        for module in modules:
+            module_name = module
+            postfix = ""
+            module_name = ""
+
+            if module.endswith(".py"):
+                module_name = module[:-3]
+                postfix = module_name[len(self.bname) + 1 :]
+            elif module.endswith("sycl_native_ext"):
+                module_name = f"{module}.{self.bname}_sycl._{self.bname}_sycl"
+                postfix = "sycl"
+
+            if self.init_mod_path.endswith(module_name):
+                continue
+
+            if postfix not in allowed_implementation_postfixes:
+                raise RuntimeError(
+                    f"Could not recognize postfix {postfix} as known postfix for"
+                    + f" file {module} in {self.bname}"
+                )
+
+            result[postfix] = module_name
+
+        return result
+
+    def __init__(
+        self,
+        bmodule: object,
+        allowed_implementation_postfixes: list[str],
+        bconfig_path: str = None,
+    ):
         """Reads benchmark information.
         :param bname: The benchmark name.
         "param config_path: Optional location of the config JSON file for the
         benchmark. If none is provided, the default config inside the
         package's bench_info directory is used.
         """
+
         self.bname = bmodule.__name__.split(".")[-1]
         self.bdata = dict()
         self.refdata = dict()
+
         try:
             self._load_benchmark_info(bconfig_path)
-            self._set_data_initialization_fn(bmodule)
+            self._set_data_initialization_fn()
             self.impl_fnlist = self._set_implementation_fn_list(
-                bmodule, self.init_fn_name
+                bmodule,
+                allowed_implementation_postfixes,
             )
             self.ref_impl_fn = self._set_reference_implementation(
                 self.impl_fnlist
@@ -666,7 +889,7 @@ class Benchmark(object):
         except Exception:
             raise
 
-    def get_impl_fnlist(self):
+    def get_impl_fnlist(self) -> list[tuple[str, object]]:
         """Returns a list of function objects each for a single implementation
         of the benchmark.
 
@@ -678,7 +901,6 @@ class Benchmark(object):
         return self.impl_fnlist
 
     def has_impl(self, impl_postfix: str):
-
         if not impl_postfix:
             return False
 
@@ -693,7 +915,6 @@ class Benchmark(object):
             return False
 
     def get_impl(self, impl_postfix: str):
-
         if not impl_postfix:
             return None
 
@@ -776,22 +997,33 @@ class Benchmark(object):
 
     def run(
         self,
-        conn=None,
+        conn: sqlite3.Connection = None,
         implementation_postfix: str = None,
         preset: str = "S",
         repeat: int = 10,
         validate: bool = True,
         timeout: float = 200.0,
-        run_datetime=None,
-    ):
-        results = []
-        if not run_datetime:
-            from datetime import datetime
+        run_datetime: str = None,
+    ) -> list[BenchmarkResults]:
+        results: list[BenchmarkResults] = []
 
+        if not run_datetime:
             run_datetime = datetime.now().strftime("%m.%d.%Y_%H.%M.%S")
 
+        implementation_postfixes = []
+
         if implementation_postfix:
-            # Run the benchmark for a specific implementation
+            implementation_postfixes.append(implementation_postfix)
+        else:
+            for impl in self.impl_fnlist:
+                impl_postfix = impl[0][
+                    (len(self.bname) - len(impl[0]) + 1) :  # noqa: E203
+                ]
+
+                implementation_postfixes.append(impl_postfix)
+
+        # TODO: do we call ref benchmark function twice?
+        for implementation_postfix in implementation_postfixes:
             runner = BenchmarkRunner(
                 bench=self,
                 impl_postfix=implementation_postfix,
@@ -800,43 +1032,17 @@ class Benchmark(object):
                 timeout=timeout,
             )
             result = runner.get_results()
-            if validate and result.error_state == 0:
+            if validate and result.error_state == ErrorCodes.SUCCESS:
                 if self._validate_results(
                     preset, result.framework, result.results
                 ):
-                    result.validation_state = 0
+                    result.validation_state = ValidationStatusCodes.SUCCESS
                 else:
-                    result.validation_state = -1
-                    result.error_state = -4
+                    result.validation_state = ValidationStatusCodes.FAILURE
+                    result.error_state = ErrorCodes.FAILED_VALIDATION
                     result.error_msg = "Validation failed"
             if conn:
                 store_results(conn, result, run_datetime)
             results.append(result)
 
-        else:
-            # Run the benchmark for all available implementations
-            for impl in self.get_impl_fnlist():
-                impl_postfix = impl[0][
-                    (len(self.bname) - len(impl[0]) + 1) :  # noqa: E203
-                ]
-                runner = BenchmarkRunner(
-                    bench=self,
-                    impl_postfix=impl_postfix,
-                    preset=preset,
-                    repeat=repeat,
-                    timeout=timeout,
-                )
-                result = runner.get_results()
-                if validate and result.error_state == 0:
-                    if self._validate_results(
-                        preset, result.framework, result.results
-                    ):
-                        result.validation_state = 0
-                    else:
-                        result.validation_state = -1
-                        result.error_state = -4
-                        result.error_msg = "Validation failed"
-                if conn:
-                    store_results(conn, result, run_datetime)
-                results.append(result)
         return results

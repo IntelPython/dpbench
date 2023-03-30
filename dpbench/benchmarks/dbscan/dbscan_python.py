@@ -7,7 +7,6 @@ from sklearn.cluster import DBSCAN
 
 
 def dbscan(n_samples, n_features, data, eps, min_pts, assignments):
-
     data = np.reshape(data, (n_samples, n_features))
 
     labels = DBSCAN(eps=eps, min_samples=min_pts).fit_predict(data)

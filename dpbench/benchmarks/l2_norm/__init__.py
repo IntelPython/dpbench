@@ -2,24 +2,6 @@
 #
 # SPDX-License-Identifier: Apache 2.0
 
-from .l2_norm_initialize import initialize
-from .l2_norm_numba_dpex_k import l2_norm as l2_norm_numba_dpex_k
-from .l2_norm_numba_dpex_n import l2_norm as l2_norm_numba_dpex_n
-from .l2_norm_numba_n import l2_norm as l2_norm_numba_n
-from .l2_norm_numba_np import l2_norm as l2_norm_numba_np
-from .l2_norm_numpy import l2_norm as l2_norm_numpy
-from .l2_norm_sycl_native_ext import l2_norm_sycl
-
-__all__ = [
-    "initialize",
-    "l2_norm_numba_dpex_k",
-    "l2_norm_numba_dpex_n",
-    "l2_norm_numba_n",
-    "l2_norm_numba_np",
-    "l2_norm_numpy",
-    "l2_norm_sycl",
-]
-
 """l2-norm calculation of n vectors
 
 Input

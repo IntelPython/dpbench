@@ -143,3 +143,5 @@ dmypy.json
 
 # VSCode local files
 .vscode
+
+dpbench/configs/framework_info/dpcpp_version.json

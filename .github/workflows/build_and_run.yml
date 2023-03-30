@@ -12,7 +12,7 @@ jobs:
 
     strategy:
       matrix:
-        python: ["3.8", "3.9"]
+        python: ["3.9", "3.10"]
 
     steps:
       - name: Cancel Previous Runs
@@ -39,11 +39,11 @@ jobs:
       - name: Install dpbench dependencies
         shell: bash -l {0}
         run: |
-          conda install -c intel tbb=2021.6.0 dpcpp_linux-64
+          conda install -c intel tbb dpcpp_linux-64
           conda install numpy numba cython cmake ninja scikit-build pandas
-          conda install scipy spirv-tools scikit-learn pybind11
+          conda install scipy scikit-learn pybind11
           conda install -c pkgs/main libgcc-ng">=11.2.0" libstdcxx-ng">=11.2.0" libgomp">=11.2.0"
-          conda install -c dppy/label/dev -c intel dpctl=0.13.0 numba-dpex=0.18.1 dpnp=0.10.1
+          conda install -c dppy/label/dev -c intel -c main dpctl numba-dpex dpnp
           conda list
 
       - name: Build dpbench
@@ -55,6 +55,14 @@ jobs:
         shell: bash -l {0}
         run: |
           export OCL_ICD_FILENAMES=libintelocl.so
+
+          # Turn off numba-dpex autofall back
+          export NUMBA_DPEX_FALLBACK_ON_CPU=0
+          # Make sure numba-dpex is using native atomics in github CI
+          export NUMBA_DPEX_ACTIVATE_ATOMICS_FP_NATIVE=1
+          ls $(dirname $(dirname `which icx`))/bin-llvm || exit 1
+          export NUMBA_DPEX_LLVM_SPIRV_ROOT=$(dirname $(dirname `which icx`))/bin-llvm
+
           LD_PRELOAD="${CONDA_PREFIX}/lib/libmkl_intel_ilp64.so ${CONDA_PREFIX}/lib/libmkl_tbb_thread.so ${CONDA_PREFIX}/lib/libmkl_core.so" python -c "import dpbench; dpbench.run_benchmarks()" || exit 1
           # LD_PRELOAD="${CONDA_PREFIX}/lib/libmkl_intel_ilp64.so ${CONDA_PREFIX}/lib/libmkl_tbb_thread.so ${CONDA_PREFIX}/lib/libmkl_core.so" python -c "import dpbench; dpbench.all_benchmarks_passed_validation(\"dpbench.db\");"
           # res=`                                                                    \

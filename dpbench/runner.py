@@ -11,16 +11,19 @@ from datetime import datetime
 
 import dpbench.benchmarks as dp_bms
 import dpbench.infrastructure as dpbi
+from dpbench.infrastructure.enums import ErrorCodes
 
 
-def _print_results(result):
+def _print_results(result: dpbi.BenchmarkResults):
     print(
         "================ implementation "
         + result.benchmark_impl_postfix
-        + " ========================"
+        + " ========================\n"
+        + "implementation:",
+        result.benchmark_impl_postfix,
     )
-    if result.error_state == 0:
-        print("implementation:", result.benchmark_impl_postfix)
+
+    if result.error_state == ErrorCodes.SUCCESS:
         print("framework:", result.framework_name)
         print("framework version:", result.framework_version)
         print("setup time:", result.setup_time)
@@ -31,9 +34,8 @@ def _print_results(result):
         print("median execution times:", result.median_exec_time)
         print("repeats:", result.num_repeats)
         print("preset:", result.preset)
-        print("validated:", result.validation_state)
+        print("validated:", result.validation_state.name)
     else:
-        print("implementation:", result.benchmark_impl_postfix)
         print("error states:", result.error_state)
         print("error msg:", result.error_msg)
 
@@ -52,16 +54,16 @@ def list_available_benchmarks():
     return submods
 
 
-def list_possible_implementations():
-
+def list_possible_implementations() -> list[str]:
+    """Returns list of implementation postfixes, which are keys in
+    configs/impl_postfix.json.
+    """
     parent_folder = pathlib.Path(__file__).parent.absolute()
     impl_postfix_json = parent_folder.joinpath("configs", "impl_postfix.json")
 
     try:
         with open(impl_postfix_json) as json_file:
-            info = json.load(json_file)["impl_postfix"]
-            impl_postfix_list = info.keys()
-            return impl_postfix_list
+            return [entry["impl_postfix"] for entry in json.load(json_file)]
     except Exception:
         logging.exception(
             "impl postfix JSON file {b} could not be opened.".format(
@@ -88,9 +90,16 @@ def run_benchmark(
     print("================ Benchmark " + bname + " ========================")
     print("")
     bench = None
+
+    allowed_impl_postfixes = list_possible_implementations()
+
     try:
         benchmod = importlib.import_module("dpbench.benchmarks." + bname)
-        bench = dpbi.Benchmark(benchmod, bconfig_path=bconfig_path)
+        bench = dpbi.Benchmark(
+            benchmod,
+            bconfig_path=bconfig_path,
+            allowed_implementation_postfixes=allowed_impl_postfixes,
+        )
     except Exception:
         logging.exception(
             "Skipping the benchmark execution due to the following error: "
@@ -152,7 +161,6 @@ def run_benchmarks(
     impl_postfixes = list_possible_implementations()
 
     for b in list_available_benchmarks():
-
         for impl in impl_postfixes:
             run_benchmark(
                 bname=b,
@@ -176,62 +184,6 @@ def run_benchmarks(
     print("===============================================================")
     print("")
 
-    dpbi.print_implementation_summary(conn=conn)
+    dpbi.generate_impl_summary_report(dbfile)
 
-
-def all_benchmarks_passed_validation(dbfile):
-    """Checks the results table of the output database to confirm if all
-    benchmarks passed validation in the last run.
-    Args:
-        dbfile (str): Name of database with dpbench results
-    """
-
-    summary = (
-        "SELECT "
-        + "MAX(id),"
-        + "benchmark,"
-        + "framework,"
-        + "version,"
-        + "details,"
-        + "IIF(validated == 1, 'PASS', 'FAIL' ) AS result "
-        + "FROM results "
-        + "GROUP BY benchmark, framework, version, details, result "
-        + "ORDER BY benchmark, framework;"
-    )
-
-    failed_benchmark_summary = (
-        "SELECT "
-        + "MAX(id),"
-        + "benchmark,"
-        + "framework,"
-        + "version,"
-        + "details,"
-        + "IIF(validated == 1, 'PASS', 'FAIL' ) AS result "
-        + "FROM results "
-        + "WHERE validated = 0 "
-        + "GROUP BY benchmark, framework, version, details, result;"
-    )
-
-    conn = dpbi.create_connection(dbfile)
-    cur = conn.cursor()
-
-    data = cur.execute(summary)
-    print("Summary")
-    print("==============================================")
-    for row in data:
-        print(row)
-    print("==============================================")
-
-    data = cur.execute(failed_benchmark_summary)
-    fails = [row for row in data]
-
-    if fails:
-        print("Number of failing validations: ", len(fails))
-        print("==============================================")
-        for fail in fails:
-            print(fail)
-        print("==============================================")
-        return False
-    else:
-        print("All benchmarks were validated successfully")
-        return True
+    return dbfile

@@ -16,6 +16,7 @@ CREATE TABLE IF NOT EXISTS results (
     framework_version text NOT NULL,
     error_state text NOT NULL,
     problem_preset text,
+    input_size integer,
     setup_time real,
     warmup_time real,
     repeats text,
@@ -39,6 +40,7 @@ INSERT INTO results(
     framework_version,
     error_state,
     problem_preset,
+    input_size,
     repeats,
     setup_time,
     warmup_time,
@@ -49,78 +51,7 @@ INSERT INTO results(
     quartile75_exec_time,
     teardown_time,
     validated
-) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
-"""
-
-# Note the space before N/A is deliberate so that the MAX operator always
-# picks the error_state rather than N/A.
-_sql_latest_implementation_summary = """
-SELECT
-    MAX(timestamp) as As_of,
-    benchmark,
-    problem_preset as problem_size,
-    MAX(
-        CASE
-            WHEN implementation == "numba_dpex_k" THEN error_state
-            ELSE " N/A"
-        END
-    ) as numba_dpex_k,
-    MAX(
-        CASE
-            WHEN implementation == "numba_dpex_p" THEN error_state
-            ELSE " N/A"
-        END
-    ) as numba_dpex_p,
-    MAX(
-        CASE
-            WHEN implementation == "numba_dpex_n" THEN error_state
-            ELSE " N/A"
-        END
-    ) as numba_dpex_n,
-    MAX(
-        CASE
-            WHEN implementation == "dpnp" THEN error_state
-            ELSE " N/A"
-        END
-    ) as dpnp,
-    MAX(
-        CASE
-            WHEN implementation == "numpy" THEN error_state
-            ELSE " N/A"
-        END
-    ) as numpy,
-    MAX(
-        CASE
-            WHEN implementation == "python" THEN error_state
-            ELSE " N/A"
-        END
-    ) as python,
-    MAX(
-        CASE
-            WHEN implementation == "numba_n" THEN error_state
-            ELSE " N/A"
-        END
-    ) as numba_n,
-    MAX(
-        CASE
-            WHEN implementation == "numba_np" THEN error_state
-            ELSE " N/A"
-        END
-    ) as numba_np,
-    MAX(
-        CASE
-            WHEN implementation == "numba_npr" THEN error_state
-            ELSE " N/A"
-        END
-    ) as numba_npr,
-    MAX(
-        CASE
-            WHEN implementation == "sycl" THEN error_state
-            ELSE " N/A"
-        END
-    ) as dpcpp
-    FROM results
-    GROUP BY benchmark, problem_preset;
+) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
 """
 
 
@@ -158,6 +89,7 @@ def create_results_table(conn):
         )
 
 
+# TODO: refactor for proper typing. Current typing for 'result' produce import loop error
 def store_results(conn, result, run_timestamp):
     data = []
 
@@ -184,6 +116,7 @@ def store_results(conn, result, run_timestamp):
 
     data.append(error_state_str)
     data.append(result.preset)
+    data.append(result.input_size)
     data.append(str(result.num_repeats))
     data.append(result.setup_time)
     data.append(result.warmup_time)
@@ -203,10 +136,3 @@ def store_results(conn, result, run_timestamp):
     cur = conn.cursor()
     cur.execute(_sql_insert_into_results_table, data)
     conn.commit()
-
-
-def print_implementation_summary(conn):
-    import pandas as pd
-
-    df = pd.read_sql_query(_sql_latest_implementation_summary, conn)
-    print(df.to_string())

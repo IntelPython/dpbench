@@ -4,7 +4,6 @@
 
 
 def initialize(n_samples, n_features, centers, seed):
-
     from typing import NamedTuple
 
     import numpy as np

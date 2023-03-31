@@ -27,7 +27,6 @@ def count_weighted_pairs_3d_intel_no_slm_ker(
     rbins_squared,
     result,
 ):
-
     lid0 = numba_dpex.get_local_id(0)
     gr0 = numba_dpex.get_group_id(0)
 

@@ -48,7 +48,8 @@ void kmeans_impl(sycl::queue q,
                         }
                         FpTy total_distance = cl::sycl::sqrt(sq_sum);
                         if (minor_distance > total_distance ||
-                            minor_distance == -1.0) {
+                            minor_distance == -1.0)
+                        {
                             minor_distance = total_distance;
                             arrayPclusters[i0] = i1;
                         }

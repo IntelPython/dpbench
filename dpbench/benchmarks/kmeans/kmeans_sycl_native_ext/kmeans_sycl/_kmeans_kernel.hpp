@@ -1,10 +1,6 @@
+// SPDX-FileCopyrightText: 2023 Intel Corporation
 //
-// Copyright 2022 Intel Corp.
-//
-// SPDX - License - Identifier : Apache 2.0
-///
-/// The files implements a SYCL-based Python native extension for the
-/// kmeans benchmark.
+// SPDX-License-Identifier: Apache-2.0
 
 #include <CL/sycl.hpp>
 
@@ -64,8 +60,8 @@ void kmeans_impl(sycl::queue q,
                      size_t i0 = myID_k1[0];
                      for (size_t j = 0; j < ndims; j++) {
                          arrayCsum[i0 * ndims + j] = 0.0;
-                         arrayCnumpoint[i0 * ndims + j] = 0.0;
                      }
+                     arrayCnumpoint[i0] = 0.0;
                  });
          }).wait();
 

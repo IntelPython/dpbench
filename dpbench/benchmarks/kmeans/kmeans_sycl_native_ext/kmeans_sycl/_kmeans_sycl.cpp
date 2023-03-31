@@ -47,7 +47,7 @@ void kmeans_sync(dpctl::tensor::usm_ndarray arrayP,
         arrayPclusters.get_typenum() != UAR_ULONG ||
         arrayCnumpoint.get_typenum() != UAR_ULONG)
     {
-        throw std::runtime_error("Expected a double precision FP array.");
+        throw std::runtime_error("Expected a double precision array.");
     }
 
     kmeans_impl(arrayP.get_queue(), arrayP.get_data<double>(),

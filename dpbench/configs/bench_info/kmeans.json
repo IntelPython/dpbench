@@ -9,21 +9,21 @@
         "domain": "Machine Learning",
         "parameters": {
             "S": {
-                "nopt": 4000,
+                "npoints": 4000,
                 "niters": 10,
                 "seed": 123456789,
                 "ndims": 2,
                 "ncentroids": 10
             },
             "M": {
-                "nopt": 40000,
+                "npoints": 40000,
                 "niters": 10,
                 "seed": 123456789,
                 "ndims": 2,
                 "ncentroids": 10
             },
             "L": {
-                "nopt": 400000,
+                "npoints": 400000,
                 "niters": 10,
                 "seed": 123456789,
                 "ndims": 2,
@@ -33,7 +33,7 @@
         "init": {
             "func_name": "initialize",
             "input_args": [
-                "nopt",
+                "npoints",
                 "niters",
                 "seed",
                 "ndims",
@@ -44,10 +44,7 @@
                 "arrayPclusters",
                 "arrayC",
                 "arrayCsum",
-                "arrayCnumpoint",
-                "niters",
-                "nopt",
-                "ncentroids"
+                "arrayCnumpoint"
             ]
         },
         "input_args": [
@@ -57,7 +54,8 @@
             "arrayCsum",
             "arrayCnumpoint",
             "niters",
-            "nopt",
+            "npoints",
+	    "ndims",
             "ncentroids"
         ],
         "array_args": [

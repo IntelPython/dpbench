@@ -53,18 +53,18 @@ def _kmeans_impl(
     arrayCsum,
     arrayCnumpoint,
     niters,
-    nopt,
+    npoints,
     ncentroids,
 ):
     for i in range(niters):
-        _groupByCluster(arrayP, arrayPcluster, arrayC, nopt, ncentroids)
+        _groupByCluster(arrayP, arrayPcluster, arrayC, npoints, ncentroids)
 
         _calCentroidsSum(
             arrayP,
             arrayPcluster,
             arrayCsum,
             arrayCnumpoint,
-            nopt,
+            npoints,
             ncentroids,
         )
 
@@ -81,7 +81,8 @@ def kmeans(
     arrayCsum,
     arrayCnumpoint,
     niters,
-    nopt,
+    npoints,
+    ndims,
     ncentroids,
 ):
     for i1 in nb.prange(ncentroids):
@@ -95,6 +96,6 @@ def kmeans(
         arrayCsum,
         arrayCnumpoint,
         niters,
-        nopt,
+        npoints,
         ncentroids,
     )

@@ -95,7 +95,8 @@ def kmeans(
     arrayCsum,
     arrayCnumpoint,
     niters,
-    nopt,
+    npoints,
+    ndims,
     ncentroids,
 ):
     for i in numba.prange(REPEAT):
@@ -108,6 +109,6 @@ def kmeans(
             arrayCsum,
             arrayCnumpoint,
             niters,
-            nopt,
+            npoints,
             ncentroids,
         )

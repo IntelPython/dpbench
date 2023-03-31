@@ -17,9 +17,6 @@ template <typename... Args> bool ensure_compatibility(const Args &...args)
     std::vector<dpctl::tensor::usm_ndarray> arrays = {args...};
 
     auto arr = arrays.at(0);
-    auto q = arr.get_queue();
-    auto type_flag = arr.get_typenum();
-    auto arr_size = arr.get_size();
 
     for (auto &arr : arrays) {
         if (!(arr.get_flags() & (USM_ARRAY_C_CONTIGUOUS))) {
@@ -44,7 +41,12 @@ void kmeans_sync(dpctl::tensor::usm_ndarray arrayP,
                               arrayCnumpoint))
         throw std::runtime_error("Input arrays are not acceptable.");
 
-    if (arrayP.get_typenum() != UAR_DOUBLE) {
+    if (arrayP.get_typenum() != UAR_DOUBLE ||
+        arrayC.get_typenum() != UAR_DOUBLE ||
+        arrayCsum.get_typenum() != UAR_DOUBLE ||
+        arrayPclusters.get_typenum() != UAR_ULONG ||
+        arrayCnumpoint.get_typenum() != UAR_ULONG)
+    {
         throw std::runtime_error("Expected a double precision FP array.");
     }
 

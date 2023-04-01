@@ -10,9 +10,9 @@ import os
 import pathlib
 import sqlite3
 import tempfile
+from collections import namedtuple
 from datetime import datetime
 from functools import partial
-from inspect import getmembers
 from multiprocessing import Manager, Process
 from typing import Any, Dict
 
@@ -29,6 +29,10 @@ from .framework import Framework
 from .numba_dpex_framework import NumbaDpexFramework
 from .numba_dpex_kernel_framework import NumbaDpexKernelFramework
 from .numba_framework import NumbaFramework
+
+# A global namedtuple to store a function implementing a benchmark along with
+# the name of the implementation.
+BenchmarkImplFn = namedtuple("BenchmarkImplFn", "name fn")
 
 
 def _reset_output_args(bench, fmwrk, inputs, preset):
@@ -584,7 +588,7 @@ class Benchmark(object):
         self,
         bmod: str,
         allowed_implementation_postfixes: list[str],
-    ) -> list[tuple[str, object]]:
+    ) -> list[BenchmarkImplFn]:
         """Selects all the callables from the __all__ list for the module
         excluding the initialize function that we know is not a benchmark
         implementation.
@@ -597,7 +601,7 @@ class Benchmark(object):
             implementation function and a corresponding function object.
         """
 
-        result: list[tuple[str, object]] = []
+        result: list[BenchmarkImplFn] = []
 
         for postfix, module_name in self._get_impl_names(
             bmod, allowed_implementation_postfixes
@@ -613,7 +617,10 @@ class Benchmark(object):
                     break
 
             if func_name:
-                result.append((canonical_name, getattr(mod, func_name)))
+                implfn = BenchmarkImplFn(
+                    name=canonical_name, fn=getattr(mod, func_name)
+                )
+                result.append(implfn)
 
         return result
 
@@ -666,7 +673,9 @@ class Benchmark(object):
             importlib.import_module(self.init_mod_path), self.init_fn_name
         )
 
-    def _set_reference_implementation(self, impl_fnlist):
+    def _set_reference_implementation(
+        self, impl_fnlist: list[BenchmarkImplFn]
+    ) -> BenchmarkImplFn:
         """Sets the reference implementation for the benchmark.
 
         The reference implementation is either a pure Python implementation
@@ -677,23 +686,24 @@ class Benchmark(object):
         Args:
             impl_fnlist : A list of (name, value) pair that represents the name
             of an implementation function and a corresponding function object.
+        Returns:
+            BenchmarkImplFn: The reference benchmark implementation.
+
         """
 
-        ref_impl_fn = None
+        ref_impl = None
 
-        python_impl_fn = [
-            impl_fn for impl_fn in impl_fnlist if "python" in impl_fn[0]
-        ]
-        numpy_impl_fn = [
-            impl_fn for impl_fn in impl_fnlist if "numpy" in impl_fn[0]
-        ]
+        python_impl = [impl for impl in impl_fnlist if "python" in impl.name]
+        numpy_impl = [impl for impl in impl_fnlist if "numpy" in impl.name]
 
-        if numpy_impl_fn:
-            ref_impl_fn = numpy_impl_fn[0]
-        elif python_impl_fn:
-            ref_impl_fn = python_impl_fn[0]
+        if numpy_impl:
+            ref_impl = numpy_impl[0]
+        elif python_impl:
+            ref_impl = python_impl[0]
+        else:
+            raise RuntimeError("No reference implementation")
 
-        return ref_impl_fn
+        return ref_impl
 
     def _set_impl_to_framework_map(self, impl_fnlist):
         """Create a dictionary mapping each implementation function name to a
@@ -709,17 +719,17 @@ class Benchmark(object):
         impl_to_fw_map = dict()
 
         for bimpl in impl_fnlist:
-            if "_numba" in bimpl[0] and "_dpex" not in bimpl[0]:
-                impl_to_fw_map.update({bimpl[0]: NumbaFramework("numba")})
-            elif "_numpy" in bimpl[0]:
-                impl_to_fw_map.update({bimpl[0]: Framework("numpy")})
-            elif "_python" in bimpl[0]:
-                impl_to_fw_map.update({bimpl[0]: Framework("python")})
-            elif "_dpex" in bimpl[0]:
-                if "dpex_k" in bimpl[0]:
+            if "_numba" in bimpl.name and "_dpex" not in bimpl.name:
+                impl_to_fw_map.update({bimpl.name: NumbaFramework("numba")})
+            elif "_numpy" in bimpl.name:
+                impl_to_fw_map.update({bimpl.name: Framework("numpy")})
+            elif "_python" in bimpl.name:
+                impl_to_fw_map.update({bimpl.name: Framework("python")})
+            elif "_dpex" in bimpl.name:
+                if "dpex_k" in bimpl.name:
                     try:
                         fw = NumbaDpexKernelFramework("numba_dpex_kernel")
-                        impl_to_fw_map.update({bimpl[0]: fw})
+                        impl_to_fw_map.update({bimpl.name: fw})
                     except Exception:
                         logging.exception(
                             "Framework could not be "
@@ -728,24 +738,24 @@ class Benchmark(object):
                 else:
                     try:
                         fw = NumbaDpexFramework("numba_dpex")
-                        impl_to_fw_map.update({bimpl[0]: fw})
+                        impl_to_fw_map.update({bimpl.name: fw})
                     except Exception:
                         logging.exception(
                             "Framework could not be "
                             + "created for numba_dpex due to:"
                         )
-            elif "_sycl" in bimpl[0]:
+            elif "_sycl" in bimpl.name:
                 try:
                     fw = DpcppFramework("dpcpp")
-                    impl_to_fw_map.update({bimpl[0]: fw})
+                    impl_to_fw_map.update({bimpl.name: fw})
                 except Exception:
                     logging.exception(
                         "Framework could not be created for dpcpp due to:"
                     )
-            elif "_dpnp" in bimpl[0]:
+            elif "_dpnp" in bimpl.name:
                 try:
                     fw = DpnpFramework("dpnp")
-                    impl_to_fw_map.update({bimpl[0]: fw})
+                    impl_to_fw_map.update({bimpl.name: fw})
                 except Exception:
                     logging.exception(
                         "Framework could not be created for dpcpp due to:"
@@ -757,8 +767,8 @@ class Benchmark(object):
         if preset in self.refdata.keys():
             return self.refdata[preset]
 
-        ref_impl_postfix = self.ref_impl_fn[0][
-            (len(self.bname) - len(self.ref_impl_fn[0]) + 1) :  # noqa: E203
+        ref_impl_postfix = self.ref_impl_fn.name[
+            (len(self.bname) - len(self.ref_impl_fn.name) + 1) :  # noqa: E203
         ]
 
         ref_results = self.run(
@@ -889,12 +899,12 @@ class Benchmark(object):
         except Exception:
             raise
 
-    def get_impl_fnlist(self) -> list[tuple[str, object]]:
+    def get_impl_fnlist(self) -> list[BenchmarkImplFn]:
         """Returns a list of function objects each for a single implementation
         of the benchmark.
 
         Returns:
-            list[tuple(str, object)]: A list of 2-tuple. The first element of
+            list[BenchmarkImplFn]: A list of 2-tuple. The first element of
             the tuple is the string function name and the second element is
             the actual function object.
         """
@@ -907,7 +917,7 @@ class Benchmark(object):
         impls = [
             impl
             for impl in self.impl_fnlist
-            if self.bname + "_" + impl_postfix == impl[0]
+            if self.bname + "_" + impl_postfix == impl.name
         ]
         if len(impls) == 1:
             return True
@@ -919,9 +929,9 @@ class Benchmark(object):
             return None
 
         fn = [
-            impl[1]
+            impl.fn
             for impl in self.impl_fnlist
-            if self.bname + "_" + impl_postfix == impl[0]
+            if self.bname + "_" + impl_postfix == impl.name
         ]
         if len(fn) > 1:
             logging.error(
@@ -1016,8 +1026,8 @@ class Benchmark(object):
             implementation_postfixes.append(implementation_postfix)
         else:
             for impl in self.impl_fnlist:
-                impl_postfix = impl[0][
-                    (len(self.bname) - len(impl[0]) + 1) :  # noqa: E203
+                impl_postfix = impl.name[
+                    (len(self.bname) - len(impl.name) + 1) :  # noqa: E203
                 ]
 
                 implementation_postfixes.append(impl_postfix)

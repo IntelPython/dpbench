@@ -86,7 +86,7 @@ SELECT
             WHEN implementation == "sycl" THEN error_state
             ELSE " N/A"
         END
-    ) as dpcpp
+    ) as sycl
     FROM results
     GROUP BY benchmark, problem_preset;
 """

@@ -2,7 +2,8 @@
 #
 # SPDX-License-Identifier: Apache 2.0
 
-"""l2-norm calculation of n vectors
+"""
+l2-norm calculation of n vectors
 
 Input
 ---------

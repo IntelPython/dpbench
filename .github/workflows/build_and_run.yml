@@ -63,7 +63,7 @@ jobs:
           ls $(dirname $(dirname `which icx`))/bin-llvm || exit 1
           export NUMBA_DPEX_LLVM_SPIRV_ROOT=$(dirname $(dirname `which icx`))/bin-llvm
 
-          LD_PRELOAD="${CONDA_PREFIX}/lib/libmkl_intel_ilp64.so ${CONDA_PREFIX}/lib/libmkl_tbb_thread.so ${CONDA_PREFIX}/lib/libmkl_core.so" python -c "import dpbench; dpbench.run_benchmarks()" || exit 1
+          python -c "import dpbench; dpbench.run_benchmarks()" || exit 1
           # LD_PRELOAD="${CONDA_PREFIX}/lib/libmkl_intel_ilp64.so ${CONDA_PREFIX}/lib/libmkl_tbb_thread.so ${CONDA_PREFIX}/lib/libmkl_core.so" python -c "import dpbench; dpbench.all_benchmarks_passed_validation(\"dpbench.db\");"
           # res=`                                                                    \
           #   printf "%s"                                                            \

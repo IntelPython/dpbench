@@ -67,7 +67,6 @@ def initialize(n_samples, n_features, centers, seed):
 
     return (
         X.flatten().astype(dtype),
-        np.empty(n_samples, dtype=np.int64),
         params.eps,
         params.minpts,
     )

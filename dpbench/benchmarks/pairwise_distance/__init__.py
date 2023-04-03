@@ -2,7 +2,8 @@
 #
 # SPDX-License-Identifier: Apache 2.0
 
-"""Pairwise distance computation of 2 n-dim arrays
+"""
+Pairwise distance computation of 2 n-dim arrays
 
 Input
 ---------

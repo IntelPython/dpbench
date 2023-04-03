@@ -2,16 +2,16 @@
 #
 # SPDX-License-Identifier: Apache-2.0
 
-import numba
+import numba as nb
 import numpy as np
 
 
-@numba.njit(parallel=True, fastmath=True)
+@nb.njit(parallel=True, fastmath=True)
 def pairwise_distance(X1, X2, D):
     M = X1.shape[0]
     N = X2.shape[0]
     O = X1.shape[1]
-    for i in numba.prange(M):
+    for i in nb.prange(M):
         for j in range(N):
             d = 0.0
             for k in range(O):

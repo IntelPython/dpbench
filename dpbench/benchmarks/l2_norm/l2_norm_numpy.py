@@ -6,4 +6,6 @@ import numpy as np
 
 
 def l2_norm(a, d):
-    d[:] = np.linalg.norm(a, axis=1)
+    sq = np.square(a)
+    sum = sq.sum(axis=1)
+    d[:] = np.sqrt(sum)

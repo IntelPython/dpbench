@@ -1,12 +1,6 @@
-//==- _l2_norm_sycl.cpp - Python native extension of l2-norm   ===//
+// SPDX-FileCopyrightText: 2022 - 2023 Intel Corporation
 //
-// Copyright 2022 Intel Corp.
-//
-// SPDX - License - Identifier : Apache 2.0
-///
-/// \file
-/// The files implements a SYCL-based Python native extension for the
-/// l2-norm benchmark.
+// SPDX-License-Identifier: Apache-2.0
 
 #include "_l2_norm_kernel.hpp"
 #include <CL/sycl.hpp>

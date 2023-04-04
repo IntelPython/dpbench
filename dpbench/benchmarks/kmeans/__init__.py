@@ -1,6 +1,6 @@
-# Copyright 2022 Intel Corporation
+# SPDX-FileCopyrightText: 2022 - 2023 Intel Corporation
 #
-# SPDX-License-Identifier: Apache 2.0
+# SPDX-License-Identifier: Apache-2.0
 
 """
 K-means is a clustering algorithm that partitions observations
@@ -35,4 +35,5 @@ Output
 -------
 clusters: int
     number of clusters
+
 """

@@ -1,12 +1,6 @@
-//==- _kmeans_sycl.cpp - Python native extension of Kmeans   ===//
+// SPDX-FileCopyrightText: 2022 - 2023 Intel Corporation
 //
-// Copyright 2022 Intel Corp.
-//
-// SPDX - License - Identifier : Apache 2.0
-///
-/// \file
-/// The files implements a SYCL-based Python native extension for the
-/// kmeans benchmark.
+// SPDX-License-Identifier: Apache-2.0
 
 #include "_kmeans_kernel.hpp"
 #include <CL/sycl.hpp>

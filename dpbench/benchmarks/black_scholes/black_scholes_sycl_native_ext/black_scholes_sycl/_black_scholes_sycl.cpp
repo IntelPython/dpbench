@@ -1,12 +1,6 @@
-//==- _black_scholes_sycl.cpp - Python native extension of Black-Scholes   ===//
+// SPDX-FileCopyrightText: 2022 - 2023 Intel Corporation
 //
-// Copyright 2022 Intel Corp.
-//
-// SPDX - License - Identifier : Apache 2.0
-///
-/// \file
-/// The files implements a SYCL-based Python native extension for the
-/// black-scholes benchmark.
+// SPDX-License-Identifier: Apache-2.0
 
 #include "_black_scholes_kernel.hpp"
 #include <CL/sycl.hpp>

@@ -1,6 +1,8 @@
 # Copyright 2022 Intel Corp.
+# SPDX-FileCopyrightText: 2022 Intel Corporation
 #
 # SPDX-License-Identifier: Apache 2.0
+# SPDX-License-Identifier: Apache-2.0
 
 """The module generates reports for implementation summary and timing summary
 from a specific benchmark run.

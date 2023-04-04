@@ -1,8 +1,8 @@
 # Copyright 2021 ETH Zurich and the NPBench authors. All rights reserved.
-# Copyright 2022 Intel Corp.
+# SPDX-FileCopyrightText: 2022 - 2023 Intel Corporation
 #
+# SPDX-License-Identifier: Apache-2.0
 # SPDX-License-Identifier: BSD-3-Clause
-
 
 from .framework import Framework
 

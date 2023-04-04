@@ -4,12 +4,12 @@
 
 from math import cos, log, pi, sin, sqrt
 
-import numba_dpex as nbdx
+import numba_dpex as dpex
 
 
-@nbdx.kernel
+@dpex.kernel
 def _rambo(C1, F1, Q1, nout, output):
-    i = nbdx.get_global_id(0)
+    i = dpex.get_global_id(0)
     for j in range(nout):
         C = 2.0 * C1[i, j] - 1.0
         S = sqrt(1 - C * C)

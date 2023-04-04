@@ -5,15 +5,15 @@
 
 from math import erf, exp, log, sqrt
 
-import numba_dpex as nbdx
+import numba_dpex as dpex
 
 
-@nbdx.kernel
+@dpex.kernel
 def _black_scholes_kernel(nopt, price, strike, t, rate, volatility, call, put):
     mr = -rate
     sig_sig_two = volatility * volatility * 2
 
-    i = nbdx.get_global_id(0)
+    i = dpex.get_global_id(0)
 
     P = price[i]
     S = strike[i]

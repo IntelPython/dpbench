@@ -5,7 +5,7 @@
 
 import dpctl.tensor as dpt
 import numba as nb
-import numba_dpex as nbdx
+import numba_dpex as dpex
 import numpy as np
 
 NOISE = -1
@@ -50,9 +50,9 @@ def _queue_empty(head, tail):
     return head == tail
 
 
-@nbdx.kernel
+@dpex.kernel
 def get_neighborhood(n, dim, data, eps, ind_lst, sz_lst, block_size, nblocks):
-    i = nbdx.get_global_id(0)
+    i = dpex.get_global_id(0)
 
     start = i * block_size
     stop = n if i + 1 == nblocks else start + block_size

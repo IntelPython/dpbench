@@ -2,18 +2,13 @@
 #
 # SPDX-License-Identifier: Apache-2.0
 
-import math
-
-import numba_dpex
+import numba_dpex as dpex
 import numpy as np
-from numba_dpex import DEFAULT_LOCAL_SIZE, kernel
-
-atomic_add = numba_dpex.atomic.add
 
 
-@kernel(access_types={"read_only": ["a"], "write_only": ["d"]})
+@dpex.kernel
 def l2_norm_kernel(a, d):
-    i = numba_dpex.get_global_id(0)
+    i = dpex.get_global_id(0)
     O = a.shape[1]
     d[i] = 0.0
     for k in range(O):
@@ -22,4 +17,4 @@ def l2_norm_kernel(a, d):
 
 
 def l2_norm(a, d):
-    l2_norm_kernel[a.shape[0], DEFAULT_LOCAL_SIZE](a, d)
+    l2_norm_kernel[a.shape[0],](a, d)

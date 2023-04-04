@@ -5,7 +5,7 @@
 
 import dpctl.tensor as dpt
 import numba as nb
-import numba_dpex as nbd
+import numba_dpex as dpex
 import numpy as np
 
 NOISE = -1
@@ -50,9 +50,9 @@ def _queue_empty(head, tail):
     return head == tail
 
 
-@nbd.kernel
+@dpex.kernel
 def get_neighborhood(n, dim, data, eps, ind_lst, sz_lst, block_size, nblocks):
-    i = nbd.get_global_id(0)
+    i = dpex.get_global_id(0)
 
     start = i * block_size
     stop = n if i + 1 == nblocks else start + block_size
@@ -144,7 +144,7 @@ def dbscan(n_samples, n_features, data, eps, min_pts):
         sycl_queue=None,
     )
 
-    get_neighborhood[n_samples, nbd.DEFAULT_LOCAL_SIZE](
+    get_neighborhood[n_samples,](
         n_samples,
         n_features,
         data,

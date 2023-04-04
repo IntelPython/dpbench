@@ -2,13 +2,11 @@
 #
 # SPDX-License-Identifier: Apache-2.0
 
-import math
-
-import numba
+import numba as nb
 import numpy as np
 
 
-@numba.njit(parallel=True, fastmath=True)
+@nb.njit(parallel=True, fastmath=True)
 def knn(
     x_train,
     y_train,
@@ -21,7 +19,7 @@ def knn(
     votes_to_classes,
     data_dim,
 ):
-    for i in numba.prange(test_size):
+    for i in nb.prange(test_size):
         queue_neighbors = np.empty(shape=(k, 2))
 
         for j in range(k):
@@ -32,7 +30,7 @@ def knn(
             for jj in range(data_dim):
                 diff = x1[jj] - x2[jj]
                 distance += diff * diff
-            dist = math.sqrt(distance)
+            dist = np.sqrt(distance)
 
             queue_neighbors[j, 0] = dist
             queue_neighbors[j, 1] = y_train[j]
@@ -59,7 +57,7 @@ def knn(
             for jj in range(data_dim):
                 diff = x1[jj] - x2[jj]
                 distance += diff * diff
-            dist = math.sqrt(distance)
+            dist = np.sqrt(distance)
 
             if dist < queue_neighbors[k - 1][0]:
                 queue_neighbors[k - 1][0] = dist

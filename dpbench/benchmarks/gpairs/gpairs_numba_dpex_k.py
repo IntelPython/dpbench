@@ -4,13 +4,13 @@
 
 import math
 
-import numba_dpex
+import numba_dpex as dpex
 import numpy as np
 
 # This implementation is numba dpex kernel version with atomics.
 
 
-@numba_dpex.kernel
+@dpex.kernel
 def count_weighted_pairs_3d_intel_no_slm_ker(
     n,
     nbins,
@@ -27,20 +27,20 @@ def count_weighted_pairs_3d_intel_no_slm_ker(
     rbins_squared,
     result,
 ):
-    lid0 = numba_dpex.get_local_id(0)
-    gr0 = numba_dpex.get_group_id(0)
+    lid0 = dpex.get_local_id(0)
+    gr0 = dpex.get_group_id(0)
 
-    lid1 = numba_dpex.get_local_id(1)
-    gr1 = numba_dpex.get_group_id(1)
+    lid1 = dpex.get_local_id(1)
+    gr1 = dpex.get_group_id(1)
 
-    lws0 = numba_dpex.get_local_size(0)
-    lws1 = numba_dpex.get_local_size(1)
+    lws0 = dpex.get_local_size(0)
+    lws1 = dpex.get_local_size(1)
 
     n_wi = 20
 
-    dsq_mat = numba_dpex.private.array(shape=(20 * 20), dtype=np.float32)
-    w0_vec = numba_dpex.private.array(shape=(20), dtype=np.float32)
-    w1_vec = numba_dpex.private.array(shape=(20), dtype=np.float32)
+    dsq_mat = dpex.private.array(shape=(20 * 20), dtype=np.float32)
+    w0_vec = dpex.private.array(shape=(20), dtype=np.float32)
+    w1_vec = dpex.private.array(shape=(20), dtype=np.float32)
 
     offset0 = gr0 * n_wi * lws0 + lid0
     offset1 = gr1 * n_wi * lws1 + lid1
@@ -80,7 +80,7 @@ def count_weighted_pairs_3d_intel_no_slm_ker(
 
     # update slm_hist. Use work-item private buffer of 16 tfloat elements
     for k in range(0, slm_hist_size, private_hist_size):
-        private_hist = numba_dpex.private.array(shape=(16), dtype=np.float32)
+        private_hist = dpex.private.array(shape=(16), dtype=np.float32)
         for p in range(private_hist_size):
             private_hist[p] = 0.0
 
@@ -109,7 +109,7 @@ def count_weighted_pairs_3d_intel_no_slm_ker(
 
         pk = k
         for p in range(private_hist_size):
-            numba_dpex.atomic.add(result, pk, private_hist[p])
+            dpex.atomic.add(result, pk, private_hist[p])
             pk += 1
 
 

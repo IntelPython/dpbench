@@ -2,7 +2,7 @@
 #
 # SPDX-License-Identifier: Apache-2.0
 
-import math
+from math import sqrt
 
 import numpy as np
 
@@ -31,7 +31,7 @@ def knn(
             for jj in range(data_dim):
                 diff = x1[jj] - x2[jj]
                 distance += diff * diff
-            dist = math.sqrt(distance)
+            dist = sqrt(distance)
 
             queue_neighbors[j, 0] = dist
             queue_neighbors[j, 1] = y_train[j]
@@ -61,7 +61,7 @@ def knn(
             for jj in range(data_dim):
                 diff = x1[jj] - x2[jj]
                 distance += diff * diff
-            dist = math.sqrt(distance)
+            dist = sqrt(distance)
 
             if dist < queue_neighbors[k - 1][0]:
                 # queue_neighbors[k - 1] = new_neighbor

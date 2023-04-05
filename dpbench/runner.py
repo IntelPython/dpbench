@@ -133,7 +133,7 @@ def run_benchmarks(
     preset="S",
     repeat=10,
     validate=True,
-    timeout=200.0,
+    timeout=1000.0,
     dbfile=None,
     print_results=True,
 ):

@@ -3,6 +3,7 @@
 # SPDX-License-Identifier: Apache-2.0
 
 import dpnp as np
+import numba as nb
 from numba_dpex import dpjit
 
 

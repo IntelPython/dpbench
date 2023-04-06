@@ -10,6 +10,7 @@ def update_copyrights(root_dir, year):
                 ".h",
                 ".c",
                 ".cpp",
+                ".hpp",
             ]:
                 filePath = os.path.abspath(os.path.join(folder, filename))
                 args = [

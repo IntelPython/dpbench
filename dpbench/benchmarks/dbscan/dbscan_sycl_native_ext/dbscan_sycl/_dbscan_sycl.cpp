@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: 2023 Intel Corporation
+// SPDX-FileCopyrightText: 2022 - 2023 Intel Corporation
 //
 // SPDX-License-Identifier: Apache-2.0
 
@@ -19,9 +19,6 @@ template <typename... Args> bool ensure_compatibility(const Args &...args)
     std::vector<dpctl::tensor::usm_ndarray> arrays = {args...};
 
     auto arr = arrays.at(0);
-    auto q = arr.get_queue();
-    auto type_flag = arr.get_typenum();
-    auto arr_size = arr.get_size();
 
     for (auto &arr : arrays) {
         if (!(arr.get_flags() & (USM_ARRAY_C_CONTIGUOUS))) {
@@ -38,17 +35,19 @@ size_t dbscan_sync(size_t n_samples,
                    size_t n_features,
                    dpctl::tensor::usm_ndarray data,
                    double eps,
-                   size_t min_pts,
-                   dpctl::tensor::usm_ndarray assignments)
+                   size_t min_pts)
 {
     auto queue = data.get_queue();
 
-    if (!ensure_compatibility(data, assignments))
+    if (!ensure_compatibility(data))
         throw std::runtime_error("Input arrays are not acceptable.");
 
+    if (data.get_typenum() != UAR_DOUBLE) {
+        throw std::runtime_error("Expected a double precision FP array.");
+    }
+
     return dbscan_impl<double>(queue, n_samples, n_features,
-                               data.get_data<double>(), eps, min_pts,
-                               assignments.get_data<size_t>());
+                               data.get_data<double>(), eps, min_pts);
 }
 
 PYBIND11_MODULE(_dbscan_sycl, m)
@@ -58,5 +57,5 @@ PYBIND11_MODULE(_dbscan_sycl, m)
 
     m.def("dbscan", &dbscan_sync, "DPC++ implementation of DBSCAN",
           py::arg("n_samples"), py::arg("n_features"), py::arg("data"),
-          py::arg("eps"), py::arg("min_pts"), py::arg("assignments"));
+          py::arg("eps"), py::arg("min_pts"));
 }

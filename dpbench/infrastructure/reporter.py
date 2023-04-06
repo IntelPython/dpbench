@@ -1,6 +1,8 @@
 # Copyright 2022 Intel Corp.
+# SPDX-FileCopyrightText: 2022 Intel Corporation
 #
 # SPDX-License-Identifier: Apache 2.0
+# SPDX-License-Identifier: Apache-2.0
 
 """The module generates reports for implementation summary and timing summary
 from a specific benchmark run.
@@ -86,7 +88,7 @@ SELECT
             WHEN implementation == "sycl" THEN error_state
             ELSE " N/A"
         END
-    ) as dpcpp
+    ) as sycl
     FROM results
     GROUP BY benchmark, problem_preset;
 """

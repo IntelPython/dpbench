@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: 2023 Intel Corporation
+// SPDX-FileCopyrightText: 2022 - 2023 Intel Corporation
 //
 // SPDX-License-Identifier: Apache-2.0
 
@@ -60,8 +60,8 @@ void kmeans_impl(sycl::queue q,
                      size_t i0 = myID_k1[0];
                      for (size_t j = 0; j < ndims; j++) {
                          arrayCsum[i0 * ndims + j] = 0.0;
-                         arrayCnumpoint[i0 * ndims + j] = 0.0;
                      }
+                     arrayCnumpoint[i0] = 0.0;
                  });
          }).wait();
 

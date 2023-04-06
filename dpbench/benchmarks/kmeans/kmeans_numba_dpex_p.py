@@ -1,15 +1,14 @@
-# SPDX-FileCopyrightText: 2023 Intel Corporation
+# SPDX-FileCopyrightText: 2022 - 2023 Intel Corporation
 #
 # SPDX-License-Identifier: Apache-2.0
 
 import dpnp as np
 import numba as nb
-import numba_dpex as nbdx
-from numba_dpex import dpjit, kernel
+import numba_dpex as dpex
 
 
 # determine the euclidean distance from the cluster center to each point
-@dpjit
+@dpex.dpjit
 def groupByCluster(arrayP, arrayPcluster, arrayC, num_points, num_centroids):
     # parallel for loop
     for i0 in nb.prange(num_points):
@@ -25,7 +24,7 @@ def groupByCluster(arrayP, arrayPcluster, arrayC, num_points, num_centroids):
 
 
 # assign points to cluster
-@dpjit
+@dpex.dpjit
 def calCentroidsSum(
     arrayP, arrayPcluster, arrayCsum, arrayCnumpoint, num_points, num_centroids
 ):
@@ -36,24 +35,24 @@ def calCentroidsSum(
         arrayCnumpoint[i] = 0
 
 
-@kernel
+@dpex.kernel
 def calCentroidsSum2(arrayP, arrayPcluster, arrayCsum, arrayCnumpoint):
-    i = nbdx.get_global_id(0)
+    i = dpex.get_global_id(0)
     ci = arrayPcluster[i]
-    nbdx.atomic.add(arrayCsum, (ci, 0), arrayP[i, 0])
-    nbdx.atomic.add(arrayCsum, (ci, 1), arrayP[i, 1])
-    nbdx.atomic.add(arrayCnumpoint, ci, 1)
+    dpex.atomic.add(arrayCsum, (ci, 0), arrayP[i, 0])
+    dpex.atomic.add(arrayCsum, (ci, 1), arrayP[i, 1])
+    dpex.atomic.add(arrayCnumpoint, ci, 1)
 
 
 # update the centriods array after computation
-@dpjit
+@dpex.dpjit
 def updateCentroids(arrayC, arrayCsum, arrayCnumpoint, num_centroids):
     for i in nb.prange(num_centroids):
         arrayC[i, 0] = arrayCsum[i, 0] / arrayCnumpoint[i]
         arrayC[i, 1] = arrayCsum[i, 1] / arrayCnumpoint[i]
 
 
-@dpjit
+@dpex.dpjit
 def copy_arrayC(arrayC, arrayP, num_centroids):
     for i in nb.prange(num_centroids):
         arrayC[i, 0] = arrayP[i, 0]

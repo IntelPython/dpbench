@@ -1,14 +1,14 @@
-# SPDX-FileCopyrightText: 2023 Intel Corporation
+# SPDX-FileCopyrightText: 2022 - 2023 Intel Corporation
 #
 # SPDX-License-Identifier: Apache-2.0
 
 from math import sqrt
 
-import numba_dpex as nbdx
+import numba_dpex as dpex
 import numpy as np
 
 
-@nbdx.kernel
+@dpex.kernel
 def _knn_kernel(
     train,
     train_labels,
@@ -20,9 +20,9 @@ def _knn_kernel(
     votes_to_classes_lst,
     data_dim,
 ):
-    i = nbdx.get_global_id(0)
+    i = dpex.get_global_id(0)
     # here k has to be 5 in order to match with numpy
-    queue_neighbors = nbdx.private.array(shape=(5, 2), dtype=np.float64)
+    queue_neighbors = dpex.private.array(shape=(5, 2), dtype=np.float64)
 
     for j in range(k):
         x1 = train[j]

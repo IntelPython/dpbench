@@ -1,4 +1,4 @@
-# SPDX-FileCopyrightText: 2023 Intel Corporation
+# SPDX-FileCopyrightText: 2022 - 2023 Intel Corporation
 #
 # SPDX-License-Identifier: Apache-2.0
 
@@ -10,7 +10,7 @@ import numpy as np
 def mean_axis_0(data):
     tdata = data.T
     m = np.empty(tdata.shape[0])
-    for i in nb.prange(tdata.shape[0]):
+    for i in range(tdata.shape[0]):
         sum = 0.0
         for j in range(tdata.shape[1]):
             sum += tdata[i, j]

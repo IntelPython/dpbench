@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: 2023 Intel Corporation
+// SPDX-FileCopyrightText: 2022 - 2023 Intel Corporation
 //
 // SPDX-License-Identifier: Apache-2.0
 
@@ -10,7 +10,7 @@
 
 using namespace sycl;
 
-struct Queue
+struct cluster_queue
 {
     static const size_t defaultSize = 10;
 
@@ -20,14 +20,14 @@ struct Queue
     size_t head;
     size_t tail;
 
-    Queue(size_t cap = defaultSize)
+    cluster_queue(size_t cap = defaultSize)
     {
         capacity = cap;
         head = tail = 0;
         values = new size_t[capacity];
     }
 
-    ~Queue() { delete[] values; }
+    ~cluster_queue() { delete[] values; }
 
     void resize(size_t newCapacity)
     {
@@ -112,8 +112,7 @@ size_t dbscan_impl(queue q,
                    size_t n_features,
                    FpTy *data,
                    FpTy eps,
-                   size_t min_pts,
-                   size_t *assignments)
+                   size_t min_pts)
 {
     size_t *sizes = new size_t[n_samples];
     memset(sizes, 0, n_samples * sizeof(size_t));
@@ -131,9 +130,6 @@ size_t dbscan_impl(queue q,
             range<1>{n_samples}, [=](id<1> myID) {
                 size_t i1 = myID[0];
                 size_t i2 = (i1 + 1 == n_samples ? n_samples : i1 + 1);
-                for (size_t i = i1; i < i2; i++) {
-                    assignments[i] = UNDEFINED;
-                }
                 getNeighborhood<double>(n_samples, n_features, data, i2 - i1,
                                         data + i1 * n_features, eps,
                                         d_indices + i1 * n_samples,
@@ -146,34 +142,37 @@ size_t dbscan_impl(queue q,
     // copy result back to host
     size_t *indices = new size_t[n_samples * n_samples];
     q.memcpy(indices, d_indices, n_samples * n_samples * sizeof(size_t));
-    size_t *h_assignments = new size_t[n_samples];
-    q.memcpy(h_assignments, assignments, n_samples * sizeof(size_t));
     q.memcpy(sizes, d_sizes, n_samples * sizeof(size_t));
 
     q.wait();
 
+    size_t *assignments = new size_t[n_samples];
+    for (size_t i = 0; i < n_samples; i++) {
+        assignments[i] = UNDEFINED;
+    }
+
     size_t nClusters = 0;
     size_t nNoise = 0;
     for (size_t i = 0; i < n_samples; i++) {
-        if (h_assignments[i] != UNDEFINED)
+        if (assignments[i] != UNDEFINED)
             continue;
         size_t size = sizes[i];
         if (size < min_pts) {
             nNoise++;
-            h_assignments[i] = NOISE;
+            assignments[i] = NOISE;
             continue;
         }
         nClusters++;
-        h_assignments[i] = nClusters - 1;
-        Queue qu;
+        assignments[i] = nClusters - 1;
+        cluster_queue qu;
         for (size_t j = 0; j < size; j++) {
             size_t nextPoint = indices[i * n_samples + j];
-            if (h_assignments[nextPoint] == NOISE) {
+            if (assignments[nextPoint] == NOISE) {
                 nNoise--;
-                h_assignments[nextPoint] = nClusters - 1;
+                assignments[nextPoint] = nClusters - 1;
             }
-            else if (h_assignments[nextPoint] == UNDEFINED) {
-                h_assignments[nextPoint] = nClusters - 1;
+            else if (assignments[nextPoint] == UNDEFINED) {
+                assignments[nextPoint] = nClusters - 1;
                 qu.push(nextPoint);
             }
         }
@@ -181,18 +180,18 @@ size_t dbscan_impl(queue q,
             size_t curPoint = qu.pop();
 
             size_t size = sizes[curPoint];
-            h_assignments[curPoint] = nClusters - 1;
+            assignments[curPoint] = nClusters - 1;
             if (size < min_pts)
                 continue;
 
             for (size_t j = 0; j < size; j++) {
                 size_t nextPoint = indices[curPoint * n_samples + j];
-                if (h_assignments[nextPoint] == NOISE) {
+                if (assignments[nextPoint] == NOISE) {
                     nNoise--;
-                    h_assignments[nextPoint] = nClusters - 1;
+                    assignments[nextPoint] = nClusters - 1;
                 }
-                else if (h_assignments[nextPoint] == UNDEFINED) {
-                    h_assignments[nextPoint] = nClusters - 1;
+                else if (assignments[nextPoint] == UNDEFINED) {
+                    assignments[nextPoint] = nClusters - 1;
                     qu.push(nextPoint);
                 }
             }

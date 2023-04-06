@@ -1,14 +1,14 @@
-# SPDX-FileCopyrightText: 2023 Intel Corporation
+# SPDX-FileCopyrightText: 2022 - 2023 Intel Corporation
 #
 # SPDX-License-Identifier: Apache-2.0
 
-import numba_dpex as nbdx
-import numpy as np
+import dpnp as np
+import numba_dpex as dpex
 
 
-@nbdx.kernel
+@dpex.kernel
 def _pairwise_distance_kernel(X1, X2, D):
-    i = nbdx.get_global_id(0)
+    i = dpex.get_global_id(0)
 
     N = X2.shape[0]
     O = X1.shape[1]

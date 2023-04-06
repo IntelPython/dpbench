@@ -1,15 +1,15 @@
-# SPDX-FileCopyrightText: 2023 Intel Corporation
+# SPDX-FileCopyrightText: 2022 - 2023 Intel Corporation
 #
 # SPDX-License-Identifier: Apache-2.0
 
 from math import sqrt
 
-import numba_dpex as nbdx
+import numba_dpex as dpex
 
 
-@nbdx.kernel
+@dpex.kernel
 def groupByCluster(arrayP, arrayPcluster, arrayC, num_points, num_centroids):
-    idx = nbdx.get_global_id(0)
+    idx = dpex.get_global_id(0)
     # if idx < num_points: # why it was removed??
     minor_distance = -1
     for i in range(num_centroids):
@@ -21,33 +21,33 @@ def groupByCluster(arrayP, arrayPcluster, arrayC, num_points, num_centroids):
             arrayPcluster[idx] = i
 
 
-@nbdx.kernel
+@dpex.kernel
 def calCentroidsSum1(arrayCsum, arrayCnumpoint):
-    i = nbdx.get_global_id(0)
+    i = dpex.get_global_id(0)
     arrayCsum[i, 0] = 0
     arrayCsum[i, 1] = 0
     arrayCnumpoint[i] = 0
 
 
-@nbdx.kernel
+@dpex.kernel
 def calCentroidsSum2(arrayP, arrayPcluster, arrayCsum, arrayCnumpoint):
-    i = nbdx.get_global_id(0)
+    i = dpex.get_global_id(0)
     ci = arrayPcluster[i]
-    nbdx.atomic.add(arrayCsum, (ci, 0), arrayP[i, 0])
-    nbdx.atomic.add(arrayCsum, (ci, 1), arrayP[i, 1])
-    nbdx.atomic.add(arrayCnumpoint, ci, 1)
+    dpex.atomic.add(arrayCsum, (ci, 0), arrayP[i, 0])
+    dpex.atomic.add(arrayCsum, (ci, 1), arrayP[i, 1])
+    dpex.atomic.add(arrayCnumpoint, ci, 1)
 
 
-@nbdx.kernel
+@dpex.kernel
 def updateCentroids(arrayC, arrayCsum, arrayCnumpoint, num_centroids):
-    i = nbdx.get_global_id(0)
+    i = dpex.get_global_id(0)
     arrayC[i, 0] = arrayCsum[i, 0] / arrayCnumpoint[i]
     arrayC[i, 1] = arrayCsum[i, 1] / arrayCnumpoint[i]
 
 
-@nbdx.kernel
+@dpex.kernel
 def copy_arrayC(arrayC, arrayP):
-    i = nbdx.get_global_id(0)
+    i = dpex.get_global_id(0)
     arrayC[i, 0] = arrayP[i, 0]
     arrayC[i, 1] = arrayP[i, 1]
 

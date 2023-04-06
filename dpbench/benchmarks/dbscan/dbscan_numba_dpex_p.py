@@ -1,4 +1,4 @@
-# SPDX-FileCopyrightText: 2023 Intel Corporation
+# SPDX-FileCopyrightText: 2022 - 2023 Intel Corporation
 #
 # SPDX-License-Identifier: Apache-2.0
 
@@ -50,15 +50,12 @@ def _queue_empty(head, tail):
 
 
 @dpjit
-def get_neighborhood(n, dim, data, eps, ind_lst, sz_lst, assignments):
+def get_neighborhood(n, dim, data, eps, ind_lst, sz_lst):
     block_size = 1
     nblocks = n // block_size + int(n % block_size > 0)
     for i in nb.prange(nblocks):
         start = i * block_size
         stop = n if i + 1 == nblocks else start + block_size
-        for j in range(start, stop):
-            assignments[j] = UNDEFINED
-
         eps2 = eps * eps
         block_size1 = 256
         nblocks1 = n // block_size1 + int(n % block_size1 > 0)
@@ -126,18 +123,20 @@ def compute_clusters(n, min_pts, assignments, sizes, indices_list):
     return nclusters
 
 
-def dbscan(n_samples, n_features, data, eps, min_pts, assignments):
+def dbscan(n_samples, n_features, data, eps, min_pts):
     indices_list = np.empty(n_samples * n_samples, dtype=np.int64)
     sizes = np.zeros(n_samples, dtype=np.int64)
 
-    get_neighborhood(
-        n_samples, n_features, data, eps, indices_list, sizes, assignments
-    )
+    get_neighborhood(n_samples, n_features, data, eps, indices_list, sizes)
+
+    assignments = numpy.empty(n_samples, dtype=np.int64)
+    for i in range(n_samples):
+        assignments[i] = UNDEFINED
 
     return compute_clusters(
         n_samples,
         min_pts,
-        np.asnumpy(assignments),
+        assignments,
         np.asnumpy(sizes),
         np.asnumpy(indices_list),
     )

@@ -1,10 +1,10 @@
-# SPDX-FileCopyrightText: 2023 Intel Corporation
+# SPDX-FileCopyrightText: 2022 - 2023 Intel Corporation
 #
 # SPDX-License-Identifier: Apache-2.0
 
 import dpnp as np
 import numba as nb
-import numba_dpex as nbdx
+import numba_dpex as dpex
 import numpy
 
 NOISE = -1
@@ -49,17 +49,12 @@ def _queue_empty(head, tail):
     return head == tail
 
 
-@nbdx.kernel
-def get_neighborhood(
-    n, dim, data, eps, ind_lst, sz_lst, assignments, block_size, nblocks
-):
-    i = nbdx.get_global_id(0)
+@dpex.kernel
+def get_neighborhood(n, dim, data, eps, ind_lst, sz_lst, block_size, nblocks):
+    i = dpex.get_global_id(0)
 
     start = i * block_size
     stop = n if i + 1 == nblocks else start + block_size
-    for j in range(start, stop):
-        assignments[j] = UNDEFINED
-
     eps2 = eps * eps
     block_size1 = 256
     nblocks1 = n // block_size1 + int(n % block_size1 > 0)
@@ -127,7 +122,7 @@ def compute_clusters(n, min_pts, assignments, sizes, indices_list):
     return nclusters
 
 
-def dbscan(n_samples, n_features, data, eps, min_pts, assignments):
+def dbscan(n_samples, n_features, data, eps, min_pts):
     indices_list = np.empty(n_samples * n_samples, dtype=np.int64)
     sizes = np.zeros(n_samples, dtype=np.int64)
 
@@ -138,15 +133,18 @@ def dbscan(n_samples, n_features, data, eps, min_pts, assignments):
         eps,
         indices_list,
         sizes,
-        assignments,
         1,
         n_samples,
     )
 
+    assignments = np.empty(n_samples, dtype=np.int64)
+    for i in range(n_samples):
+        assignments[i] = UNDEFINED
+
     return compute_clusters(
         n_samples,
         min_pts,
-        np.asnumpy(assignments),
+        assignments,
         np.asnumpy(sizes),
         np.asnumpy(indices_list),
     )

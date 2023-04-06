@@ -1,4 +1,4 @@
-# SPDX-FileCopyrightText: 2023 Intel Corporation
+# SPDX-FileCopyrightText: 2022 - 2023 Intel Corporation
 #
 # SPDX-License-Identifier: Apache-2.0
 
@@ -67,7 +67,6 @@ def initialize(n_samples, n_features, centers, seed):
 
     return (
         X.flatten().astype(dtype),
-        np.empty(n_samples, dtype=np.int64),
         params.eps,
         params.minpts,
     )

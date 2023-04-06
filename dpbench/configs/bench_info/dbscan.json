@@ -37,7 +37,6 @@
             ],
             "output_args": [
                 "data",
-                "assignments",
                 "eps",
                 "min_pts"
             ]
@@ -47,12 +46,10 @@
             "n_features",
             "data",
             "eps",
-            "min_pts",
-            "assignments"
+            "min_pts"
         ],
         "array_args": [
-            "data",
-            "assignments"
+            "data"
         ]
     }
 }

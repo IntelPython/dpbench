@@ -2,9 +2,11 @@
 #
 # SPDX-License-Identifier: Apache-2.0
 
+import numba as nb
 import numpy as np
 
 
+@nb.njit(parallel=True, fastmath=True)
 def rambo(nevts, nout, C1, F1, Q1, output):
     C = 2.0 * C1 - 1.0
     S = np.sqrt(1 - np.square(C))

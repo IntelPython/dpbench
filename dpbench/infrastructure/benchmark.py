@@ -28,7 +28,6 @@ from .dpnp_framework import DpnpFramework
 from .enums import ErrorCodes, ValidationStatusCodes
 from .framework import Framework
 from .numba_dpex_framework import NumbaDpexFramework
-from .numba_dpex_kernel_framework import NumbaDpexKernelFramework
 from .numba_framework import NumbaFramework
 
 # A global namedtuple to store a function implementing a benchmark along with
@@ -727,24 +726,14 @@ class Benchmark(object):
             elif "_python" in bimpl.name:
                 impl_to_fw_map.update({bimpl.name: Framework("python")})
             elif "_dpex" in bimpl.name:
-                if "dpex_k" in bimpl.name:
-                    try:
-                        fw = NumbaDpexKernelFramework("numba_dpex_kernel")
-                        impl_to_fw_map.update({bimpl.name: fw})
-                    except Exception:
-                        logging.exception(
-                            "Framework could not be "
-                            + "created for numba_dpex kernel due to:"
-                        )
-                else:
-                    try:
-                        fw = NumbaDpexFramework("numba_dpex")
-                        impl_to_fw_map.update({bimpl.name: fw})
-                    except Exception:
-                        logging.exception(
-                            "Framework could not be "
-                            + "created for numba_dpex due to:"
-                        )
+                try:
+                    fw = NumbaDpexFramework("numba_dpex")
+                    impl_to_fw_map.update({bimpl.name: fw})
+                except Exception:
+                    logging.exception(
+                        "Framework could not be "
+                        + "created for numba_dpex due to:"
+                    )
             elif "_sycl" in bimpl.name:
                 try:
                     fw = DpcppFramework("dpcpp")

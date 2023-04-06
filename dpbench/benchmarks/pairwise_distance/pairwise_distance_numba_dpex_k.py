@@ -2,8 +2,8 @@
 #
 # SPDX-License-Identifier: Apache-2.0
 
+import dpnp as np
 import numba_dpex as dpex
-import numpy as np
 
 
 @dpex.kernel

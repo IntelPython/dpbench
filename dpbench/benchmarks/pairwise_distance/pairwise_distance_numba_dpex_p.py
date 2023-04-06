@@ -2,11 +2,12 @@
 #
 # SPDX-License-Identifier: Apache-2.0
 
+import dpnp as np
 import numba as nb
-import numpy as np
+from numba_dpex import dpjit
 
 
-@nb.njit(parallel=True, fastmath=True)
+@dpjit
 def pairwise_distance(X1, X2, D):
     """Naïve pairwise distance impl - take an array representing M points in N
     dimensions, and return the M x M matrix of Euclidean distances

@@ -2,12 +2,13 @@
 #
 # SPDX-License-Identifier: Apache-2.0
 
+import dpnp as np
 import numba as nb
-import numpy as np
+import numba_dpex as dpex
 
 
 # determine the euclidean distance from the cluster center to each point
-@nb.njit(parallel=True, fastmath=True)
+@dpex.dpjit
 def groupByCluster(arrayP, arrayPcluster, arrayC, num_points, num_centroids):
     # parallel for loop
     for i0 in nb.prange(num_points):
@@ -23,7 +24,7 @@ def groupByCluster(arrayP, arrayPcluster, arrayC, num_points, num_centroids):
 
 
 # assign points to cluster
-@nb.njit(parallel=True, fastmath=True)
+@dpex.dpjit
 def calCentroidsSum(
     arrayP, arrayPcluster, arrayCsum, arrayCnumpoint, num_points, num_centroids
 ):
@@ -33,24 +34,25 @@ def calCentroidsSum(
         arrayCsum[i, 1] = 0
         arrayCnumpoint[i] = 0
 
-    for i in range(num_points):
-        ci = arrayPcluster[i]
-        arrayCsum[ci, 0] += arrayP[i, 0]
-        arrayCsum[ci, 1] += arrayP[i, 1]
-        arrayCnumpoint[ci] += 1
 
-    return arrayCsum, arrayCnumpoint
+@dpex.kernel
+def calCentroidsSum2(arrayP, arrayPcluster, arrayCsum, arrayCnumpoint):
+    i = dpex.get_global_id(0)
+    ci = arrayPcluster[i]
+    dpex.atomic.add(arrayCsum, (ci, 0), arrayP[i, 0])
+    dpex.atomic.add(arrayCsum, (ci, 1), arrayP[i, 1])
+    dpex.atomic.add(arrayCnumpoint, ci, 1)
 
 
 # update the centriods array after computation
-@nb.njit(parallel=True, fastmath=True)
+@dpex.dpjit
 def updateCentroids(arrayC, arrayCsum, arrayCnumpoint, num_centroids):
     for i in nb.prange(num_centroids):
         arrayC[i, 0] = arrayCsum[i, 0] / arrayCnumpoint[i]
         arrayC[i, 1] = arrayCsum[i, 1] / arrayCnumpoint[i]
 
 
-@nb.njit(parallel=True, fastmath=True)
+@dpex.dpjit
 def copy_arrayC(arrayC, arrayP, num_centroids):
     for i in nb.prange(num_centroids):
         arrayC[i, 0] = arrayP[i, 0]
@@ -77,6 +79,10 @@ def kmeans_numba(
             arrayCnumpoint,
             num_points,
             num_centroids,
+        )
+
+        calCentroidsSum2[num_points,](
+            arrayP, arrayPcluster, arrayCsum, arrayCnumpoint
         )
 
         updateCentroids(arrayC, arrayCsum, arrayCnumpoint, num_centroids)

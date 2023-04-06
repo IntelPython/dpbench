@@ -92,8 +92,6 @@ def count_weighted_pairs_3d_intel_no_slm_ker(
             while (i1 < n_wi) and (j1 < n):
                 dsq = dsq_mat[i0 * n_wi + i1]
                 pw = w0_vec[i0] * w1_vec[i1]
-                # i1 += 1
-                # j1 += lws1
                 pk = k
                 for p in range(private_hist_size):
                     private_hist[p] += (

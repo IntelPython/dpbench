@@ -4,16 +4,16 @@
 
 from math import erf, exp, log, sqrt
 
-import numba
+from numba import prange
+from numba_dpex import dpjit
 
 
-# blackscholes implemented as a parallel loop using numba.prange
-@numba.njit(parallel=True, fastmath=True)
-def _black_scholes(nopt, price, strike, t, rate, volatility, call, put):
+@dpjit
+def black_scholes(nopt, price, strike, t, rate, volatility, call, put):
     mr = -rate
     sig_sig_two = volatility * volatility * 2
 
-    for i in numba.prange(nopt):
+    for i in prange(nopt):
         P = price[i]
         S = strike[i]
         T = t[i]
@@ -36,7 +36,3 @@ def _black_scholes(nopt, price, strike, t, rate, volatility, call, put):
         r = P * d1 - Se * d2
         call[i] = r
         put[i] = r - P + Se
-
-
-def black_scholes(nopt, price, strike, t, rate, volatility, call, put):
-    _black_scholes(nopt, price, strike, t, rate, volatility, call, put)

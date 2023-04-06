@@ -2,11 +2,12 @@
 #
 # SPDX-License-Identifier: Apache-2.0
 
+import dpnp as np
 import numba as nb
-import numpy as np
+from numba_dpex import dpjit
 
 
-@nb.njit(parallel=True, fastmath=True)
+@dpjit
 def mean_axis_0(data):
     tdata = data.T
     m = np.empty(tdata.shape[0])
@@ -18,7 +19,7 @@ def mean_axis_0(data):
     return m
 
 
-@nb.njit(parallel=True, fastmath=True)
+@dpjit
 def pca(data, dims_rescaled_data=2):
     # mean center the data (data -= data.mean(axis=0))
     data = data - mean_axis_0(data)

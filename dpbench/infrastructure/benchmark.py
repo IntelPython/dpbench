@@ -22,7 +22,7 @@ import numpy as np
 from dpbench.infrastructure import timer
 
 from . import timeout_decorator as tout
-from .datamodel import store_results
+from .datamodel import Result, store_results
 from .dpcpp_framework import DpcppFramework
 from .dpnp_framework import DpnpFramework
 from .enums import ErrorCodes, ValidationStatusCodes
@@ -472,6 +472,48 @@ class BenchmarkResults:
     @error_msg.setter
     def error_msg(self, error_msg="Not implemented"):
         self._error_msg = error_msg
+
+    def Result(self, run_id: int) -> Result:
+        if self.error_state == ErrorCodes.UNIMPLEMENTED:
+            error_state_str = "Unimplemented"
+        elif self.error_state == ErrorCodes.NO_FRAMEWORK:
+            error_state_str = "Framework unavailable"
+        elif self.error_state == ErrorCodes.FAILED_EXECUTION:
+            error_state_str = "Failed Execution"
+        elif self.error_state == ErrorCodes.FAILED_VALIDATION:
+            error_state_str = "Failed Validation"
+        elif self.error_state == ErrorCodes.EXECUTION_TIMEOUT:
+            error_state_str = "Execution Timeout"
+        elif self.error_state == ErrorCodes.SUCCESS:
+            error_state_str = "Success"
+        else:
+            error_state_str = "N/A"
+
+        return Result(
+            run_id=run_id,
+            benchmark=self.benchmark_name,
+            implementation=self.benchmark_impl_postfix,
+            platform="TODO",
+            framework_version=self.framework_name
+            + " "
+            + self.framework_version,
+            error_state=error_state_str,
+            problem_preset=self.preset,
+            input_size=self.input_size,
+            # todo: platform
+            setup_time=self.setup_time,
+            warmup_time=self.warmup_time,
+            repeats=str(self.num_repeats),
+            min_exec_time=self.min_exec_time,
+            max_exec_time=self.max_exec_time,
+            median_exec_time=self.median_exec_time,
+            quartile25_exec_time=self.quartile25_exec_time,
+            quartile75_exec_time=self.quartile75_exec_time,
+            teardown_time=self.teardown_time,
+            validated="Success"
+            if self.validation_state == ValidationStatusCodes.SUCCESS
+            else "Fail",
+        )
 
 
 # TODO: move Benchmark implementation above for proper linter.
@@ -1003,12 +1045,9 @@ class Benchmark(object):
         repeat: int = 10,
         validate: bool = True,
         timeout: float = 200.0,
-        run_datetime: str = None,
+        run_id: int = None,
     ) -> list[BenchmarkResults]:
         results: list[BenchmarkResults] = []
-
-        if not run_datetime:
-            run_datetime = datetime.now().strftime("%m.%d.%Y_%H.%M.%S")
 
         implementation_postfixes = []
 
@@ -1042,7 +1081,7 @@ class Benchmark(object):
                     result.error_state = ErrorCodes.FAILED_VALIDATION
                     result.error_msg = "Validation failed"
             if conn:
-                store_results(conn, result, run_datetime)
+                store_results(conn, result.Result(run_id=run_id))
             results.append(result)
 
         return results

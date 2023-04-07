@@ -9,23 +9,23 @@
         "domain": "Machine Learning",
         "parameters": {
             "S": {
-                "npoints": 4000,
+                "npoints": 4096,
                 "niters": 10,
-                "seed": 123456789,
+                "seed": 7777777,
                 "ndims": 2,
                 "ncentroids": 10
             },
             "M": {
-                "npoints": 40000,
-                "niters": 10,
-                "seed": 123456789,
+                "npoints": 1048576,
+                "niters": 30,
+                "seed": 7777777,
                 "ndims": 2,
                 "ncentroids": 10
             },
             "L": {
-                "npoints": 400000,
-                "niters": 10,
-                "seed": 123456789,
+                "npoints": 2097152,
+                "niters": 30,
+                "seed": 7777777,
                 "ndims": 2,
                 "ncentroids": 10
             }

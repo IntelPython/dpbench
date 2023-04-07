@@ -71,7 +71,6 @@ def _exec(
     fmwrk,
     impl_postfix,
     preset,
-    timeout,
     repeat,
     get_args,
     results_dict,
@@ -542,13 +541,12 @@ class BenchmarkRunner:
             with Manager() as manager:
                 results_dict = manager.dict()
                 p = Process(
-                    target=tout.exit_after(timeout)(_exec),
+                    target=_exec,
                     args=(
                         self.bench,
                         self.fmwrk,
                         impl_postfix,
                         preset,
-                        timeout,
                         repeat,
                         partial(
                             _setup_func,
@@ -560,7 +558,7 @@ class BenchmarkRunner:
                     ),
                 )
                 p.start()
-                res = p.join(timeout * 1.2)
+                res = p.join(timeout)
                 if res is None and p.exitcode is None:
                     logging.error(
                         "Terminating process due to timeout in the execution "
@@ -590,11 +588,11 @@ class BenchmarkRunner:
 
                         output_npz = results_dict["outputs"]
                         if output_npz:
-                            npzfile = np.load(output_npz)
-                            for outarr in npzfile.files:
-                                self.results.results.update(
-                                    {outarr: npzfile[outarr]}
-                                )
+                            with np.load(output_npz) as npzfile:
+                                for outarr in npzfile.files:
+                                    self.results.results.update(
+                                        {outarr: npzfile[outarr]}
+                                    )
                             os.remove(output_npz)
                         if results_dict["return-value"]:
                             self.results.results.update(

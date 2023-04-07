@@ -2,7 +2,11 @@
 //
 // SPDX-License-Identifier: Apache-2.0
 
+// For M_PI
+#define _USE_MATH_DEFINES
+
 #include <CL/sycl.hpp>
+#include <math.h>
 #include <stdlib.h>
 #include <type_traits>
 

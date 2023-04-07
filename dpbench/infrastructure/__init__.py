@@ -21,7 +21,7 @@ from .dpnp_framework import DpnpFramework
 from .framework import Framework
 from .numba_dpex_framework import NumbaDpexFramework
 from .numba_framework import NumbaFramework
-from .reporter import generate_impl_summary_report
+from .reporter import generate_impl_summary_report, generate_performance_report
 from .utilities import validate
 
 __all__ = [
@@ -40,6 +40,7 @@ __all__ = [
     "create_run",
     "store_results",
     "generate_impl_summary_report",
+    "generate_performance_report",
     "validate",
     "get_supported_implementation_postfixes",
 ]

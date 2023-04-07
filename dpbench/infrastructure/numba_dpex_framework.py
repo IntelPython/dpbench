@@ -2,7 +2,8 @@
 #
 # SPDX-License-Identifier: Apache-2.0
 
-from typing import Any, Callable, Dict
+import logging
+from typing import Callable
 
 import dpctl
 
@@ -19,16 +20,57 @@ class NumbaDpexFramework(Framework):
 
         super().__init__(fname, fconfig_path)
 
-    def imports(self) -> Dict[str, Any]:
-        """Returns a dictionary any modules and methods needed for running
-        a benchmark."""
+        try:
+            self.sycl_device = self.info["sycl_device"]
+            dpctl.SyclDevice(self.sycl_device)
+        except KeyError:
+            pass
+        except dpctl.SyclDeviceCreationError as sdce:
+            logging.exception(
+                "Could not create a Sycl device using filter {} string".format(
+                    self.info["sycl_device"]
+                )
+            )
+            raise sdce
 
-        return {"dpctl": dpctl}
+    def device_filter_string(self) -> str:
+        """Returns the sycl device's filter string if the framework has an
+        associated sycl device."""
 
-    def execute(self, impl_fn: Callable, input_args: Dict):
-        """The njit implementations for numba_dpex require calling the
-        functions inside a dpctl.device_context contextmanager to trigger
-        offload.
-        """
-        with dpctl.device_context(self.sycl_device):
-            return impl_fn(**input_args)
+        try:
+            return dpctl.SyclDevice(self.device).get_filter_string()
+        except Exception:
+            logging.exception("No device string exists for device")
+            return "unknown"
+
+    def copy_to_func(self) -> Callable:
+        """Returns the copy-method that should be used
+        for copying the benchmark arguments."""
+
+        def _copy_to_func_impl(ref_array):
+            import dpnp
+
+            if ref_array.flags["C_CONTIGUOUS"]:
+                order = "C"
+            elif ref_array.flags["F_CONTIGUOUS"]:
+                order = "F"
+            else:
+                order = "K"
+            return dpnp.asarray(
+                ref_array,
+                dtype=ref_array.dtype,
+                order=order,
+                like=None,
+                device=self.sycl_device,
+                usm_type=None,
+                sycl_queue=None,
+            )
+
+        return _copy_to_func_impl
+
+    def copy_from_func(self) -> Callable:
+        """Returns the copy-method that should be used
+        for copying the benchmark arguments."""
+        import dpnp
+
+        return dpnp.asnumpy

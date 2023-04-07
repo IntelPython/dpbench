@@ -2,8 +2,10 @@
 #
 # SPDX-License-Identifier: Apache-2.0
 
+import dpnp as np
 import numba as nb
-import numpy as np
+import numpy
+from numba_dpex import dpjit
 
 NOISE = -1
 UNDEFINED = -2
@@ -12,14 +14,14 @@ DEFAULT_QUEUE_CAPACITY = 10
 
 @nb.njit()
 def _queue_create(capacity):
-    return (np.empty(capacity, dtype=np.int64), 0, 0)
+    return (numpy.empty(capacity, dtype=numpy.int64), 0, 0)
 
 
 @nb.njit()
 def _queue_resize(qu, tail, new_capacity):
     tail = min(tail, new_capacity)
 
-    new_qu = np.empty(new_capacity, dtype=np.int64)
+    new_qu = numpy.empty(new_capacity, dtype=numpy.int64)
     new_qu[:tail] = qu[:tail]
     return new_qu, tail
 
@@ -47,7 +49,7 @@ def _queue_empty(head, tail):
     return head == tail
 
 
-@nb.njit(parallel=True, fastmath=True)
+@dpjit
 def get_neighborhood(n, dim, data, eps, ind_lst, sz_lst):
     block_size = 1
     nblocks = n // block_size + int(n % block_size > 0)
@@ -127,10 +129,14 @@ def dbscan(n_samples, n_features, data, eps, min_pts):
 
     get_neighborhood(n_samples, n_features, data, eps, indices_list, sizes)
 
-    assignments = np.empty(n_samples, dtype=np.int64)
+    assignments = numpy.empty(n_samples, dtype=np.int64)
     for i in range(n_samples):
         assignments[i] = UNDEFINED
 
     return compute_clusters(
-        n_samples, min_pts, assignments, sizes, indices_list
+        n_samples,
+        min_pts,
+        assignments,
+        np.asnumpy(sizes),
+        np.asnumpy(indices_list),
     )

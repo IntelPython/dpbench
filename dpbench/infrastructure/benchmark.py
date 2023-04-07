@@ -588,11 +588,11 @@ class BenchmarkRunner:
 
                         output_npz = results_dict["outputs"]
                         if output_npz:
-                            npzfile = np.load(output_npz)
-                            for outarr in npzfile.files:
-                                self.results.results.update(
-                                    {outarr: npzfile[outarr]}
-                                )
+                            with np.load(output_npz) as npzfile:
+                                for outarr in npzfile.files:
+                                    self.results.results.update(
+                                        {outarr: npzfile[outarr]}
+                                    )
                             os.remove(output_npz)
                         if results_dict["return-value"]:
                             self.results.results.update(

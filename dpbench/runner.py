@@ -83,8 +83,8 @@ def run_benchmark(
     validate=True,
     timeout=200.0,
     conn=None,
-    run_datetime=None,
     print_results=True,
+    run_id: int = None,
 ):
     print("")
     print("================ Benchmark " + bname + " ========================")
@@ -114,7 +114,7 @@ def run_benchmark(
             validate=validate,
             timeout=timeout,
             conn=conn,
-            run_datetime=run_datetime,
+            run_id=run_id,
         )
         if print_results:
             for result in results:
@@ -136,6 +136,7 @@ def run_benchmarks(
     timeout=200.0,
     dbfile=None,
     print_results=True,
+    run_id=None,
 ):
     """Run all benchmarks in the dpbench benchmark directory
     Args:
@@ -151,12 +152,14 @@ def run_benchmarks(
     print("===============================================================")
     print("")
     print("***Start Running DPBench***")
-    datetime_str = datetime.now().strftime("%m.%d.%Y_%H.%M.%S")
     if not dbfile:
-        dbfile = "results_" + datetime_str + ".db"
+        dbfile = "results.db"
 
+    # dpbi.create_results_table(conn)
+    dpbi.create_results_table()
     conn = dpbi.create_connection(db_file=dbfile)
-    dpbi.create_results_table(conn)
+    if run_id is None:
+        run_id = dpbi.create_run(conn)
 
     impl_postfixes = list_possible_implementations()
 
@@ -172,8 +175,8 @@ def run_benchmarks(
                 validate=validate,
                 timeout=timeout,
                 conn=conn,
-                run_datetime=datetime_str,
                 print_results=print_results,
+                run_id=run_id,
             )
 
     print("")
@@ -184,6 +187,6 @@ def run_benchmarks(
     print("===============================================================")
     print("")
 
-    dpbi.generate_impl_summary_report(dbfile)
+    dpbi.generate_impl_summary_report(conn, run_id=run_id)
 
     return dbfile

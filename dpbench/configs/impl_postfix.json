@@ -1,9 +1,5 @@
 [
     {
-        "impl_postfix": "dpnp",
-        "description": "Data-parallel Numeric Python"
-    },
-    {
         "impl_postfix": "numba_dpex_k",
         "description": "Numba-dpex with kernel"
     },
@@ -16,6 +12,18 @@
         "description": "Numba-dpex with NumPy array expression"
     },
     {
+        "impl_postfix": "dpnp",
+        "description": "Data-parallel Numeric Python"
+    },
+    {
+        "impl_postfix": "numpy",
+        "description": "Numpy"
+    },
+    {
+        "impl_postfix": "python",
+        "description": "Python"
+    },
+    {
         "impl_postfix": "numba_n",
         "description": "Numba with nopython"
     },
@@ -26,14 +34,6 @@
     {
         "impl_postfix": "numba_npr",
         "description": "Numba with nopython, Parallel=True and prange"
-    },
-    {
-        "impl_postfix": "numpy",
-        "description": "Numpy"
-    },
-    {
-        "impl_postfix": "python",
-        "description": "Python"
     },
     {
         "impl_postfix": "sycl",

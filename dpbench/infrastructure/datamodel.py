@@ -3,59 +3,117 @@
 # SPDX-License-Identifier: Apache-2.0
 
 import logging
+import os
 import sqlite3
 
-from .enums import ErrorCodes, ValidationStatusCodes
+from sqlalchemy import (
+    Column,
+    Computed,
+    Engine,
+    ForeignKey,
+    UniqueConstraint,
+    and_,
+    case,
+    create_engine,
+    func,
+    text,
+)
+from sqlalchemy.orm import (
+    DeclarativeBase,
+    Mapped,
+    Session,
+    mapped_column,
+    relationship,
+)
 
-_sql_create_results_table = """
-CREATE TABLE IF NOT EXISTS results (
-    timestamp integer NOT NULL,
-    benchmark text NOT NULL,
-    implementation text NOT NULL,
-    platform text NOT NULL,
-    framework_version text NOT NULL,
-    error_state text NOT NULL,
-    problem_preset text,
-    input_size integer,
-    setup_time real,
-    warmup_time real,
-    repeats text,
-    min_exec_time real,
-    max_exec_time real,
-    median_exec_time real,
-    quartile25_exec_time real,
-    quartile75_exec_time real,
-    teardown_time real,
-    validated text,
-    PRIMARY KEY (timestamp, benchmark, implementation)
-);
-"""
-
-_sql_insert_into_results_table = """
-INSERT INTO results(
-    timestamp,
-    benchmark,
-    implementation,
-    platform,
-    framework_version,
-    error_state,
-    problem_preset,
-    input_size,
-    repeats,
-    setup_time,
-    warmup_time,
-    min_exec_time,
-    max_exec_time,
-    median_exec_time,
-    quartile25_exec_time,
-    quartile75_exec_time,
-    teardown_time,
-    validated
-) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
-"""
+from alembic import command
+from alembic.config import Config
 
 
-def create_connection(db_file) -> sqlite3.Connection:
+class Base(DeclarativeBase):
+    id: Mapped[int] = mapped_column(primary_key=True)
+    created_at: Mapped[int] = mapped_column(
+        server_default=text("strftime('%s','now')")
+    )
+    pass
+
+
+class Run(Base):
+    __tablename__ = "runs"
+
+    # results: Mapped[list["Result"]] = relationship(back_populates="run")
+
+
+class Result(Base):
+    __tablename__ = "results"
+
+    run_id: Mapped[int] = mapped_column(ForeignKey("runs.id"))
+    # run: Mapped["Run"] = relationship()
+    # run: Mapped["Run"] = relationship(back_populates="results")
+    benchmark: Mapped[str]  # = mapped_column(primary_key=True)
+    implementation: Mapped[str]  # = mapped_column(primary_key=True)
+    platform: Mapped[str]
+    framework_version: Mapped[str]
+    error_state: Mapped[str]
+    problem_preset: Mapped[str]
+    input_size: Mapped[int]
+    input_size_human: Mapped[int] = mapped_column(
+        Computed(
+            case(
+                (
+                    and_(
+                        Column("input_size") >= 1024,
+                        Column("input_size") < 1024 * 1024,
+                    ),
+                    Column("input_size").op("/")(1024).op("||")("KB"),
+                ),
+                (
+                    and_(
+                        Column("input_size") >= 1024 * 1024,
+                        Column("input_size") < 1024 * 1024 * 1024,
+                    ),
+                    Column("input_size").op("/")(1024 * 1024).op("||")("MB"),
+                ),
+                (
+                    and_(
+                        Column("input_size") >= 1024 * 1024 * 1024,
+                        Column("input_size") < 1024 * 1024 * 1024 * 1024,
+                    ),
+                    Column("input_size")
+                    .op("/")(1024 * 1024 * 1024)
+                    .op("||")("GB"),
+                ),
+                (
+                    and_(
+                        Column("input_size") >= 1024 * 1024 * 1024 * 1024,
+                        Column("input_size") < 1024 * 1024 * 1024 * 1024 * 1024,
+                    ),
+                    Column("input_size")
+                    .op("/")(1024 * 1024 * 1024 * 1024)
+                    .op("||")("TB"),
+                ),
+                else_=Column("input_size").op("||")("B"),
+            ),
+            persisted=False,
+        )
+    )
+    setup_time: Mapped[float]
+    warmup_time: Mapped[float]
+    repeats: Mapped[str]
+    min_exec_time: Mapped[float]
+    max_exec_time: Mapped[float]
+    median_exec_time: Mapped[float]
+    quartile25_exec_time: Mapped[float]
+    quartile75_exec_time: Mapped[float]
+    teardown_time: Mapped[float]
+    validated: Mapped[str]
+
+    __table_args__ = (
+        UniqueConstraint("run_id", "benchmark", "implementation"),
+    )
+
+
+def create_connection(db_file) -> Engine:
     """create a database connection to the SQLite database
         specified by db_file
     :param db_file: database file
@@ -63,8 +121,9 @@ def create_connection(db_file) -> sqlite3.Connection:
     """
     conn = None
     try:
-        conn = sqlite3.connect(db_file)
-        return conn
+        engine = create_engine(f"sqlite:///{db_file}")
+
+        return engine
     except sqlite3.Error:
         logging.exception(
             "Failed to create a connection to database specified as " + db_file
@@ -73,66 +132,40 @@ def create_connection(db_file) -> sqlite3.Connection:
     return conn
 
 
-def create_results_table(conn):
-    """create a table from the create_table_sql statement
-    :param conn: Connection object
-    :param create_table_sql: a CREATE TABLE statement
+def create_run(conn: Engine) -> int:
+    """creates run record of the benchmarks and returns it's id
+    :param conn: sqlalchemy engine
+    :return: id of the run
+    """
+    run = Run()
+
+    with Session(conn) as session:
+        session.add(run)
+        session.commit()
+
+        return run.id
+
+
+def create_results_table():
+    """create sqlite database file and runs migrations to create all necessery tables.
+    If file exists - it just updates it to the head version.
     :return:
     """
-    try:
-        c = conn.cursor()
-        c.execute(_sql_create_results_table)
-    except sqlite3.Error:
-        logging.exception(
-            "Failed to create the results table using "
-            + _sql_create_results_table
-        )
+
+    absolute_path = os.path.dirname(__file__)
+    relative_path = "../../alembic.ini"
+    full_path = os.path.join(absolute_path, relative_path)
+
+    alembic_cfg = Config(full_path)
+    command.upgrade(alembic_cfg, "head")
 
 
-# TODO: refactor for proper typing. Current typing for 'result' produce import loop error
-def store_results(conn, result, run_timestamp):
-    data = []
-
-    data.append(run_timestamp)
-    data.append(result.benchmark_name)
-    data.append(result.benchmark_impl_postfix)
-    data.append("TODO")
-    data.append(result.framework_name + " " + result.framework_version)
-
-    if result.error_state == ErrorCodes.UNIMPLEMENTED:
-        error_state_str = "Unimplemented"
-    elif result.error_state == ErrorCodes.NO_FRAMEWORK:
-        error_state_str = "Framework unavailable"
-    elif result.error_state == ErrorCodes.FAILED_EXECUTION:
-        error_state_str = "Failed Execution"
-    elif result.error_state == ErrorCodes.FAILED_VALIDATION:
-        error_state_str = "Failed Validation"
-    elif result.error_state == ErrorCodes.EXECUTION_TIMEOUT:
-        error_state_str = "Execution Timeout"
-    elif result.error_state == ErrorCodes.SUCCESS:
-        error_state_str = "Success"
-    else:
-        error_state_str = "N/A"
-
-    data.append(error_state_str)
-    data.append(result.preset)
-    data.append(result.input_size)
-    data.append(str(result.num_repeats))
-    data.append(result.setup_time)
-    data.append(result.warmup_time)
-    data.append(result.min_exec_time)
-    data.append(result.max_exec_time)
-    data.append(result.median_exec_time)
-    data.append(result.quartile25_exec_time)
-    data.append(result.quartile75_exec_time)
-    data.append(result.teardown_time)
-
-    if result.validation_state == ValidationStatusCodes.SUCCESS:
-        validation_str = "Success"
-    else:
-        validation_str = "Fail"
-    data.append(validation_str)
-
-    cur = conn.cursor()
-    cur.execute(_sql_insert_into_results_table, data)
-    conn.commit()
+def store_results(conn: Engine, result: Result):
+    """creates result record in database.
+    :param conn: sqlalchemy engine
+    :param result: result resord to be inserted into db
+    :return:
+    """
+    with Session(conn) as session:
+        session.add(result)
+        session.commit()

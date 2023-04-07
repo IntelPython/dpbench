@@ -8,6 +8,14 @@
 from a specific benchmark run.
 """
 
+import pathlib
+from typing import Union
+
+import pandas as pd
+import sqlalchemy
+from sqlalchemy import case, func
+from sqlalchemy.orm import Session
+
 from . import datamodel as dm
 
 __all__ = [
@@ -15,98 +23,80 @@ __all__ = [
 ]
 
 
-# Note the space before N/A is deliberate so that the MAX operator always
-# picks the error_state rather than N/A.
-_sql_latest_implementation_summary = """
-SELECT
-    MAX(timestamp) as As_of,
-    benchmark,
-    problem_preset,
-    CASE
-        WHEN MAX(input_size) < 1024 THEN MAX(input_size) || 'B'
-        WHEN MAX(input_size) >=  1024 AND MAX(input_size) < (1024 * 1024) THEN (MAX(input_size) / 1024) || 'KB'
-        WHEN MAX(input_size) >= (1024 * 1024)  AND MAX(input_size) < (1024 * 1024 * 1024) THEN (MAX(input_size) / (1024 * 1024)) || 'MB'
-        WHEN MAX(input_size) >= (1024 * 1024 * 1024) AND MAX(input_size) < (1024 * 1024 * 1024 *1024) THEN (MAX(input_size) / (1024 * 1024 * 1024)) || 'GB'
-        WHEN MAX(input_size) >= (1024 * 1024 * 1024 * 1024) THEN (MAX(input_size) / (1024 * 1024 * 1024 * 1024)) || 'TB'
-    END AS input_size,
-    MAX(
-        CASE
-            WHEN implementation == "numba_dpex_k" THEN error_state
-            ELSE " N/A"
-        END
-    ) as numba_dpex_k,
-    MAX(
-        CASE
-            WHEN implementation == "numba_dpex_p" THEN error_state
-            ELSE " N/A"
-        END
-    ) as numba_dpex_p,
-    MAX(
-        CASE
-            WHEN implementation == "numba_dpex_n" THEN error_state
-            ELSE " N/A"
-        END
-    ) as numba_dpex_n,
-    MAX(
-        CASE
-            WHEN implementation == "dpnp" THEN error_state
-            ELSE " N/A"
-        END
-    ) as dpnp,
-    MAX(
-        CASE
-            WHEN implementation == "numpy" THEN error_state
-            ELSE " N/A"
-        END
-    ) as numpy,
-    MAX(
-        CASE
-            WHEN implementation == "python" THEN error_state
-            ELSE " N/A"
-        END
-    ) as python,
-    MAX(
-        CASE
-            WHEN implementation == "numba_n" THEN error_state
-            ELSE " N/A"
-        END
-    ) as numba_n,
-    MAX(
-        CASE
-            WHEN implementation == "numba_np" THEN error_state
-            ELSE " N/A"
-        END
-    ) as numba_np,
-    MAX(
-        CASE
-            WHEN implementation == "numba_npr" THEN error_state
-            ELSE " N/A"
-        END
-    ) as numba_npr,
-    MAX(
-        CASE
-            WHEN implementation == "sycl" THEN error_state
-            ELSE " N/A"
-        END
-    ) as sycl
-    FROM results
-    GROUP BY benchmark, problem_preset;
-"""
-
-
-def generate_impl_summary_report(results_db):
-    import pathlib
-
-    import pandas as pd
-
-    conn = dm.create_connection(db_file=results_db)
+def generate_impl_summary_report(
+    results_db: Union[str, sqlalchemy.Engine] = "results.db",
+    run_id: int = None,
+):
+    conn = results_db
+    if not isinstance(conn, sqlalchemy.Engine):
+        conn = dm.create_connection(db_file=results_db)
 
     parent_folder = pathlib.Path(__file__).parent.absolute()
     impl_postfix_path = parent_folder.joinpath(
         "..", "configs", "impl_postfix.json"
     )
     legends = pd.read_json(impl_postfix_path)
-    df = pd.read_sql_query(_sql_latest_implementation_summary, conn)
+
+    columns = [
+        dm.Result.input_size_human.label("input_size"),
+        dm.Result.benchmark,
+        dm.Result.problem_preset,
+    ]
+
+    for _, row in legends.iterrows():
+        impl = row["impl_postfix"]
+        columns.append(
+            func.ifnull(
+                func.max(
+                    case(
+                        (
+                            dm.Result.implementation == impl,
+                            dm.Result.error_state,
+                        ),
+                    )
+                ),
+                "N/A",
+            ).label(impl),
+        )
+
+    sql = sqlalchemy.select(*columns).group_by(
+        dm.Result.benchmark,
+        dm.Result.problem_preset,
+    )
+    if not run_id:
+        with Session(conn) as session:
+            run_id = (
+                session.query(
+                    dm.Run.id,
+                )
+                .order_by(dm.Run.created_at.desc())
+                .limit(1)
+                .scalar()
+            )
+
+            print(
+                f"WARNING: run_id was not provided, using the latest one {run_id}"
+            )
+
+    with Session(conn) as session:
+        created_at = (
+            session.query(
+                func.datetime(dm.Run.created_at, "unixepoch", "localtime"),
+            )
+            .where(dm.Run.id == run_id)
+            .limit(1)
+            .scalar()
+        )
+
+        print(f"Report for {created_at} run")
+        print("==================================")
+
+    sql = sql.where(dm.Result.run_id == run_id)
+
+    df = pd.read_sql_query(
+        sql=sql,
+        con=conn.connect(),
+    )
 
     print("Legend")
     print("======")

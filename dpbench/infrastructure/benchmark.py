@@ -647,7 +647,14 @@ class Benchmark(object):
             bmod, allowed_implementation_postfixes
         ).items():
             module_name = f"dpbench.benchmarks.{self.bname}.{module_name}"
-            mod = importlib.import_module(module_name)
+            try:
+                mod = importlib.import_module(module_name)
+            except Exception:
+                logging.exception(
+                    f"Failed to import benchmark module: {module_name}"
+                )
+                continue
+
             canonical_name = f"{self.bname}_{postfix}"
 
             func_name: str = None

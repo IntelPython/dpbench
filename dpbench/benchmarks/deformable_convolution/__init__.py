@@ -3,8 +3,12 @@
 # SPDX-License-Identifier: Apache 2.0
 
 from .deformable_convolution_initialize import initialize
-from .deformable_convolution_numba_npr import deformable_convolution as deformable_convolution_numba_npr
-from .deformable_convolution_numpy import deformable_convolution as deformable_convolution_numpy
+from .deformable_convolution_numba_npr import (
+    deformable_convolution as deformable_convolution_numba_npr,
+)
+from .deformable_convolution_numpy import (
+    deformable_convolution as deformable_convolution_numpy,
+)
 from .deformable_convolution_sycl_native_ext import deformable_convolution_sycl
 
 __all__ = [

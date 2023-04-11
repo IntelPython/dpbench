@@ -51,7 +51,7 @@ def count_weighted_pairs_3d_diff_agg_ker(nbins, result, n):
 
 def gpairs(nopt, nbins, x1, y1, z1, w1, x2, y2, z2, w2, rbins, results):
     # allocate per-work item private result vector in device global memory
-    results_disjoint = np.zeros((nopt, rbins.shape[0]), dtype=np.float32)
+    results_disjoint = np.zeros_like(results, shape=(nopt, rbins.shape[0]))
 
     # call gpairs compute kernel
     count_weighted_pairs_3d_diff_ker(

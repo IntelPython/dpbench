@@ -137,7 +137,7 @@ def dbscan(n_samples, n_features, data, eps, min_pts):
         n_samples,
     )
 
-    assignments = np.empty(n_samples, dtype=np.int64)
+    assignments = numpy.empty(n_samples, dtype=numpy.int64)
     for i in range(n_samples):
         assignments[i] = UNDEFINED
 

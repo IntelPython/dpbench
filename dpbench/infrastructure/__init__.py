@@ -21,6 +21,7 @@ from .frameworks import (
     NumbaMlirFramework,
 )
 from .reporter import (
+    generate_comparison_report,
     generate_impl_summary_report,
     generate_performance_report,
     get_unexpected_failures,
@@ -45,6 +46,7 @@ __all__ = [
     "store_results",
     "generate_impl_summary_report",
     "generate_performance_report",
+    "generate_comparison_report",
     "get_unexpected_failures",
     "validate",
 ]

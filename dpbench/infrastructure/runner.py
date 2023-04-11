@@ -213,6 +213,7 @@ def print_report(
     conn: sqlalchemy.Engine,
     run_id: int,
     implementations: set[str],
+    comparison_pairs: list[tuple[str, str]] = [],
 ):
     if not implementations:
         implementations = {impl.postfix for impl in cfg.GLOBAL.implementations}
@@ -228,6 +229,14 @@ def print_report(
         conn,
         run_id=run_id,
         implementations=implementations,
+        headless=True,
+    )
+
+    dpbi.generate_comparison_report(
+        conn,
+        run_id=run_id,
+        implementations=implementations,
+        comparison_pairs=comparison_pairs,
         headless=True,
     )
 

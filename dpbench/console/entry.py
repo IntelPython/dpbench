@@ -7,20 +7,9 @@
 import argparse
 from importlib.metadata import version
 
-from ._namespace import Namespace
+from ._namespace import CommaSeparateStringAction, Namespace
 from .report import add_report_arguments, execute_report
 from .run import add_run_arguments, execute_run
-
-
-class CommaSeparateStringAction(argparse.Action):
-    """Action that reads comma separated string into set of strings.
-
-    This action supposed to be used in argparse argument.
-    """
-
-    def __call__(self, _, namespace, values, __):
-        """Split values into set of strings."""
-        setattr(namespace, self.dest, set(values.split(",")))
 
 
 def parse_args() -> Namespace:

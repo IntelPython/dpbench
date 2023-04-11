@@ -28,3 +28,26 @@ class Namespace(argparse.Namespace):
     timeout: float
     precision: Union[str, None]
     program: str
+    comparisons: list[str]
+
+
+class CommaSeparateStringAction(argparse.Action):
+    """Action that reads comma separated string into set of strings.
+
+    This action supposed to be used in argparse argument.
+    """
+
+    def __call__(self, _, namespace, values, __):
+        """Split values into set of strings."""
+        setattr(namespace, self.dest, set(values.split(",")))
+
+
+class CommaSeparateStringListAction(argparse.Action):
+    """Action that reads comma separated string into set of strings.
+
+    This action supposed to be used in argparse argument.
+    """
+
+    def __call__(self, _, namespace, values, __):
+        """Split values into list of strings."""
+        setattr(namespace, self.dest, values.split(","))

@@ -34,7 +34,7 @@ def _print_results(result: dpbi.BenchmarkResults):
         print("median execution times:", result.median_exec_time)
         print("repeats:", result.num_repeats)
         print("preset:", result.preset)
-        print("validated:", result.validation_state.name)
+        print("validated:", result.validation_state)
     else:
         print("error states:", result.error_state)
         print("error msg:", result.error_msg)

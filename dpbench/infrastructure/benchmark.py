@@ -74,6 +74,7 @@ def _exec(
     repeat,
     get_args,
     results_dict,
+    copy_output,
 ):
     """Executes a benchmark for a given implementation.
 
@@ -96,6 +97,7 @@ def _exec(
         repeat : Number of repetitions of the benchmark execution.
         args : Input arguments to benchmark implementation function.
         results_dict : A dictionary where timing and other results are stored.
+        copy_output : A flag that controls copying output.
     """
     input_args = bench.info["input_args"]
     array_args = bench.info["array_args"]
@@ -150,34 +152,33 @@ def _exec(
     results_dict["exec_times"] = exec_times
 
     # Get the output data
-    try:
-        out_args = bench.info["output_args"]
-    except KeyError:
-        out_args = []
+    if copy_output:
+        try:
+            out_args = bench.info["output_args"]
+        except KeyError:
+            out_args = []
 
-    array_args = bench.info["array_args"]
-    output_arrays = dict()
-    with timer.timer() as t:
-        for out_arg in out_args:
-            if out_arg in array_args:
-                output_arrays.update(
-                    {out_arg: fmwrk.copy_from_func()(inputs[out_arg])}
-                )
-    run_datetime = datetime.now().strftime("%m.%d.%Y_%H.%M.%S")
-    out_filename = (
-        bench.bname + "_" + impl_postfix + "_" + preset + "." + run_datetime
-    )
-    out_filename = tempfile.gettempdir() + "/" + out_filename
-    np.savez_compressed(out_filename, **output_arrays)
-    results_dict["outputs"] = out_filename + ".npz"
-    results_dict["teardown_time"] = t.get_elapsed_time()
+        array_args = bench.info["array_args"]
+        output_arrays = dict()
+        with timer.timer() as t:
+            for out_arg in out_args:
+                if out_arg in array_args:
+                    output_arrays.update(
+                        {out_arg: fmwrk.copy_from_func()(inputs[out_arg])}
+                    )
+        run_datetime = datetime.now().strftime("%m.%d.%Y_%H.%M.%S")
+        out_filename = (
+            bench.bname + "_" + impl_postfix + "_" + preset + "." + run_datetime
+        )
+        out_filename = tempfile.gettempdir() + "/" + out_filename
+        np.savez_compressed(out_filename, **output_arrays)
+        results_dict["outputs"] = out_filename + ".npz"
+        results_dict["teardown_time"] = t.get_elapsed_time()
 
-    # Special case: if the benchmark implementation returns anything, then
-    # add that to the results dict
-    if retval:
-        results_dict["return-value"] = retval
-    else:
-        results_dict["return-value"] = None
+        # Special case: if the benchmark implementation returns anything, then
+        # add that to the results dict
+        if retval:
+            results_dict["return-value"] = retval
 
     results_dict["error_state"] = ErrorCodes.SUCCESS
     results_dict["error_msg"] = ""
@@ -518,7 +519,13 @@ class BenchmarkResults:
 # TODO: move Benchmark implementation above for proper linter.
 class BenchmarkRunner:
     def __init__(
-        self, bench: "Benchmark", impl_postfix, preset, repeat, timeout
+        self,
+        bench: "Benchmark",
+        impl_postfix,
+        preset,
+        repeat=10,
+        timeout=200.0,
+        copy_output=True,
     ):
         self.bench = bench
         self.preset = preset
@@ -555,6 +562,7 @@ class BenchmarkRunner:
                             self.fmwrk,
                         ),
                         results_dict,
+                        copy_output,
                     ),
                 )
                 p.start()
@@ -582,19 +590,21 @@ class BenchmarkRunner:
                         self.results.exec_times = np.asarray(
                             results_dict["exec_times"]
                         )
-                        self.results.teardown_time = results_dict[
-                            "teardown_time"
-                        ]
 
-                        output_npz = results_dict["outputs"]
-                        if output_npz:
-                            with np.load(output_npz) as npzfile:
-                                for outarr in npzfile.files:
-                                    self.results.results.update(
-                                        {outarr: npzfile[outarr]}
-                                    )
-                            os.remove(output_npz)
-                        if results_dict["return-value"]:
+                        if "outputs" in results_dict:
+                            output_npz = results_dict["outputs"]
+                            if output_npz:
+                                with np.load(output_npz) as npzfile:
+                                    for outarr in npzfile.files:
+                                        self.results.results.update(
+                                            {outarr: npzfile[outarr]}
+                                        )
+                                os.remove(output_npz)
+                            self.results.teardown_time = results_dict[
+                                "teardown_time"
+                            ]
+
+                        if "return-value" in results_dict:
                             self.results.results.update(
                                 {"return-value": results_dict["return-value"]}
                             )
@@ -808,12 +818,13 @@ class Benchmark(object):
             (len(self.bname) - len(self.ref_impl_fn.name) + 1) :  # noqa: E203
         ]
 
-        ref_results = self.run(
-            implementation_postfix=ref_impl_postfix,
+        ref_results = BenchmarkRunner(
+            bench=self,
+            impl_postfix=ref_impl_postfix,
             preset=preset,
             repeat=1,
-            validate=False,
-        )[0]
+            copy_output=True,
+        ).get_results()
 
         if ref_results.error_state == ErrorCodes.SUCCESS:
             self.refdata.update({preset: ref_results.results})
@@ -1068,12 +1079,14 @@ class Benchmark(object):
 
         # TODO: do we call ref benchmark function twice?
         for implementation_postfix in implementation_postfixes:
+            # copy_output is true only if validation is needed.
             runner = BenchmarkRunner(
                 bench=self,
                 impl_postfix=implementation_postfix,
                 preset=preset,
                 repeat=repeat,
                 timeout=timeout,
+                copy_output=validate,
             )
             result = runner.get_results()
             if validate and result.error_state == ErrorCodes.SUCCESS:

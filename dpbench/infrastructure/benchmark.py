@@ -215,7 +215,7 @@ class BenchmarkResults:
         self._setup_time = 0.0
         self._warmup_time = 0.0
         self._teardown_time = 0.0
-        self._validation_state = ValidationStatusCodes.FAILURE
+        self._validation_state = ValidationStatusCodes.NA
         self._error_state = ErrorCodes.UNIMPLEMENTED
         self._error_msg = "Not implemented"
         self._results = dict()

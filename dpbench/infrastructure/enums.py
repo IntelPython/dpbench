@@ -21,5 +21,9 @@ class ValidationStatusCodes(Enum):
     benchmark validation step
     """
 
-    SUCCESS = 0
-    FAILURE = -1
+    SUCCESS = "Success"
+    FAILURE = "Failure"
+    NA = "Not Validated"
+
+    def __str__(self):
+        return self.value

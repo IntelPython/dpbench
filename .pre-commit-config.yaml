@@ -1,3 +1,7 @@
+# SPDX-FileCopyrightText: 2022 - 2023 Intel Corporation
+#
+# SPDX-License-Identifier: Apache-2.0
+
 # See https://pre-commit.com for more information
 # See https://pre-commit.com/hooks.html for more hooks
 repos:
@@ -28,3 +32,10 @@ repos:
     -   id: clang-format
         args: ["-i"]
         types_or: [c++, c]
+-   repo: https://github.com/fsfe/reuse-tool
+    rev: v1.1.2
+    hooks:
+      - id: reuse
+        name: add SPDX headers
+        args: [annotate, --skip-existing, --skip-unrecognised, --year=2022 - 2023, --copyright=Intel Corporation, --license=Apache-2.0]
+        pass_filenames: true

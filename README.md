@@ -1,3 +1,9 @@
+<!--
+SPDX-FileCopyrightText: 2022 - 2023 Intel Corporation
+
+SPDX-License-Identifier: Apache-2.0
+-->
+
 [![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
 [![pre-commit](https://github.com/IntelPython/dpbench/actions/workflows/pre-commit.yml/badge.svg)](https://github.com/IntelPython/dpbench/actions/workflows/pre-commit.yml)
 

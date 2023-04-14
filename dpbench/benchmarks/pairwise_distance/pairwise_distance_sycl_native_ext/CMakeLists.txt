@@ -1,3 +1,6 @@
+# SPDX-FileCopyrightText: 2022 - 2023 Intel Corporation
+#
+# SPDX-License-Identifier: Apache-2.0
 
 set(py_module_name _pairwise_distance_sycl)
 pybind11_add_module(${py_module_name}

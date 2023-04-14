@@ -1,3 +1,7 @@
+# SPDX-FileCopyrightText: 2022 - 2023 Intel Corporation
+#
+# SPDX-License-Identifier: Apache-2.0
+
 from logging.config import fileConfig
 
 from sqlalchemy import engine_from_config, pool

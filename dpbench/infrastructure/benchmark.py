@@ -105,7 +105,9 @@ def _exec(
     inputs = dict()
 
     with timer.timer() as t:
-        args = get_args()
+        args = get_args(
+            bench.get_data(preset=preset), bench.info["array_args"], fmwrk
+        )
 
     results_dict["setup_time"] = t.get_elapsed_time()
 
@@ -555,12 +557,7 @@ class BenchmarkRunner:
                         impl_postfix,
                         preset,
                         repeat,
-                        partial(
-                            _setup_func,
-                            self.bench.get_data(preset=self.preset),
-                            self.bench.info["array_args"],
-                            self.fmwrk,
-                        ),
+                        _setup_func,
                         results_dict,
                         copy_output,
                     ),

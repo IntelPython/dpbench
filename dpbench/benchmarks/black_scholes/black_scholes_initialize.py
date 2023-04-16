@@ -23,7 +23,7 @@ def initialize(nopt, seed):
     t = default_rng.uniform(TL, TH, nopt).astype(dtype)
     rate = RISK_FREE
     volatility = VOLATILITY
-    call = np.zeros(nopt, dtype=np.float64)
-    put = -np.ones(nopt, dtype=np.float64)
+    call = np.zeros(nopt, dtype=dtype)
+    put = -np.ones(nopt, dtype=dtype)
 
     return (nopt, price, strike, t, rate, volatility, call, put)

@@ -32,7 +32,7 @@ def time_to_ms(raw: float) -> int:
 def relative_error(
     ref: Union[Number, np.ndarray], val: Union[Number, np.ndarray]
 ) -> float:
-    if np.np.linalg.norm(ref) == 0.0:
+    if np.linalg.norm(ref) == 0.0:
         return 0.0
     return np.linalg.norm(ref - val) / np.linalg.norm(ref)
 

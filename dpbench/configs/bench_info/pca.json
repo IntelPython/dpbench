@@ -13,11 +13,11 @@
 		"dims": 128
             },
             "M": {
-                "npoints": 16384,
+                "npoints": 1048576,
 		"dims": 128
             },
             "L": {
-                "npoints": 524288,
+                "npoints": 4194304,
 		"dims": 128
             }
         },

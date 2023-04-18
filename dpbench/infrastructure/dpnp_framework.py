@@ -7,28 +7,30 @@ from typing import Callable
 
 import dpctl
 
+import dpbench.config as cfg
+
 from .framework import Framework
 
 
 class DpnpFramework(Framework):
     """A class for reading and processing framework information."""
 
-    def __init__(self, fname: str, fconfig_path: str = None):
+    def __init__(self, fname: str = None, config: cfg.Framework = None):
         """Reads framework information.
         :param fname: The framework name.
         """
 
-        super().__init__(fname, fconfig_path)
+        super().__init__(fname, config)
 
         try:
-            self.sycl_device = self.info["sycl_device"]
+            self.sycl_device = self.info.sycl_device
             dpctl.SyclDevice(self.sycl_device)
         except KeyError:
             pass
         except dpctl.SyclDeviceCreationError as sdce:
             logging.exception(
                 "Could not create a Sycl device using filter {} string".format(
-                    self.info["sycl_device"]
+                    self.info.sycl_device
                 )
             )
             raise sdce

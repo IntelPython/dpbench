@@ -12,7 +12,7 @@ from typing import Any
 class Implementation:
     """Configuration with implementation information."""
 
-    impl_postfix: str
+    postfix: str
     description: str
 
     @staticmethod

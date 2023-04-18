@@ -37,5 +37,24 @@ repos:
     hooks:
       - id: reuse
         name: add SPDX headers
-        args: [annotate, --skip-existing, --skip-unrecognised, --year=2022 - 2023, --copyright=Intel Corporation, --license=Apache-2.0]
+        args: [
+            annotate,
+            --skip-existing,
+            --skip-unrecognised,
+            --year=2022 - 2023,
+            --copyright=Intel Corporation,
+            --license=Apache-2.0]
         pass_filenames: true
+-   repo: https://github.com/pycqa/pydocstyle
+    rev: 6.3.0
+    hooks:
+    -   id: pydocstyle
+        # TODO: add packages one by one to enforce pydocstyle eventually
+        files: ^dpbench/config/
+        args: ["--convention=google"]
+        # D417 does not work properly:
+        # https://github.com/PyCQA/pydocstyle/issues/459
+-   repo: https://github.com/pycqa/flake8
+    rev: 6.0.0
+    hooks:
+    -   id: flake8

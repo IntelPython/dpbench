@@ -1,0 +1,16 @@
+[flake8]
+max-line-length = 80
+# TODO: keep just E203
+extend-ignore = E203, E266, F401, E501
+# TODO: fix excludes
+exclude =
+    ./.git
+    __pycache__
+    ./dist
+    ./setup.py
+    ./dpbench/benchmarks/l2_norm/l2_norm_numba_dpex_k.py
+    ./dpbench/benchmarks/pairwise_distance/pairwise_distance_numba_dpex_k.py
+    ./dpbench/benchmarks/pairwise_distance/pairwise_distance_numba_dpex_p.py
+    ./dpbench/benchmarks/pairwise_distance/pairwise_distance_numba_npr.py
+# TODO: simplify to 10
+max-complexity = 14

@@ -5,11 +5,13 @@
 import importlib
 import json
 import logging
+import os
 import pathlib
 import pkgutil
 from datetime import datetime
 
 import dpbench.benchmarks as dp_bms
+import dpbench.config as config
 import dpbench.infrastructure as dpbi
 from dpbench.infrastructure.enums import ErrorCodes
 
@@ -40,44 +42,24 @@ def _print_results(result: dpbi.BenchmarkResults):
         print("error msg:", result.error_msg)
 
 
-def list_available_benchmarks():
-    """Return the list of available benchmarks that ae in the
-    dpbench.benchmarks module.
-    """
+def get_benchmark(
+    benchmark: config.Benchmark = None,
+    benchmark_name: str = "",
+) -> config.Benchmark:
+    """Returns benchmark config if it is not none, otherwise returns benchmark
+    config by name."""
+    if benchmark is not None:
+        return benchmark
 
-    submods = [
-        submod.name
-        for submod in pkgutil.iter_modules(dp_bms.__path__)
-        if submod.ispkg
-    ]
-
-    return submods
-
-
-def list_possible_implementations() -> list[str]:
-    """Returns list of implementation postfixes, which are keys in
-    configs/impl_postfix.json.
-    """
-    parent_folder = pathlib.Path(__file__).parent.absolute()
-    impl_postfix_json = parent_folder.joinpath("configs", "impl_postfix.json")
-
-    try:
-        with open(impl_postfix_json) as json_file:
-            return [entry["impl_postfix"] for entry in json.load(json_file)]
-    except Exception:
-        logging.exception(
-            "impl postfix JSON file {b} could not be opened.".format(
-                b="impl_post_fix.json"
-            )
-        )
-        raise
+    return next(
+        b for b in config.GLOBAL.benchmarks if b.module_name == benchmark_name
+    )
 
 
 def run_benchmark(
-    bname,
+    bname: str = "",
+    benchmark: config.Benchmark = None,
     implementation_postfix=None,
-    fconfig_path=None,
-    bconfig_path=None,
     preset="S",
     repeat=10,
     validate=True,
@@ -86,20 +68,15 @@ def run_benchmark(
     print_results=True,
     run_id: int = None,
 ):
+    bench_cfg = get_benchmark(benchmark=benchmark, benchmark_name=bname)
+    bname = bench_cfg.name
     print("")
     print("================ Benchmark " + bname + " ========================")
     print("")
     bench = None
 
-    allowed_impl_postfixes = list_possible_implementations()
-
     try:
-        benchmod = importlib.import_module("dpbench.benchmarks." + bname)
-        bench = dpbi.Benchmark(
-            benchmod,
-            bconfig_path=bconfig_path,
-            allowed_implementation_postfixes=allowed_impl_postfixes,
-        )
+        bench = dpbi.Benchmark(bench_cfg)
     except Exception:
         logging.exception(
             "Skipping the benchmark execution due to the following error: "
@@ -128,8 +105,6 @@ def run_benchmark(
 
 
 def run_benchmarks(
-    fconfig_path=None,
-    bconfig_path=None,
     preset="S",
     repeat=10,
     validate=True,
@@ -155,21 +130,16 @@ def run_benchmarks(
     if not dbfile:
         dbfile = "results.db"
 
-    # dpbi.create_results_table(conn)
     dpbi.create_results_table()
     conn = dpbi.create_connection(db_file=dbfile)
     if run_id is None:
         run_id = dpbi.create_run(conn)
 
-    impl_postfixes = list_possible_implementations()
-
-    for b in list_available_benchmarks():
-        for impl in impl_postfixes:
+    for b in config.GLOBAL.benchmarks:
+        for impl in config.GLOBAL.implementations:
             run_benchmark(
-                bname=b,
-                implementation_postfix=impl,
-                fconfig_path=fconfig_path,
-                bconfig_path=bconfig_path,
+                benchmark=b,
+                implementation_postfix=impl.postfix,
                 preset=preset,
                 repeat=repeat,
                 validate=validate,

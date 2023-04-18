@@ -8,7 +8,7 @@ from dataclasses import dataclass
 
 from .benchmark import Benchmark
 from .framework import Framework
-from .implementaion_postfix import Implementation
+from .implementation_postfix import Implementation
 
 
 @dataclass

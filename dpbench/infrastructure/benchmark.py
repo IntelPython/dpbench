@@ -19,6 +19,7 @@ from typing import Any, Dict
 
 import numpy as np
 
+import dpbench.config as config
 from dpbench.infrastructure import timer
 
 from . import timeout_decorator as tout
@@ -36,14 +37,8 @@ BenchmarkImplFn = namedtuple("BenchmarkImplFn", "name fn")
 
 
 def _reset_output_args(bench, fmwrk, inputs, preset):
-    try:
-        output_args = bench.info["output_args"]
-    except KeyError:
-        logging.info(
-            "No output args to reset as benchmarks has no array output."
-        )
-        return
-    array_args = bench.info["array_args"]
+    output_args = bench.info.output_args
+    array_args = bench.info.array_args
     for arg in inputs.keys():
         if arg in output_args and arg in array_args:
             original_data = bench.get_data(preset=preset)[arg]
@@ -99,15 +94,13 @@ def _exec(
         results_dict : A dictionary where timing and other results are stored.
         copy_output : A flag that controls copying output.
     """
-    input_args = bench.info["input_args"]
-    array_args = bench.info["array_args"]
+    input_args = bench.info.input_args
+    array_args = bench.info.array_args
     impl_fn = bench.get_impl(impl_postfix)
     inputs = dict()
 
     with timer.timer() as t:
-        args = get_args(
-            bench.get_data(preset=preset), bench.info["array_args"], fmwrk
-        )
+        args = get_args(bench.get_data(preset=preset), array_args, fmwrk)
 
     results_dict["setup_time"] = t.get_elapsed_time()
 
@@ -155,12 +148,8 @@ def _exec(
 
     # Get the output data
     if copy_output:
-        try:
-            out_args = bench.info["output_args"]
-        except KeyError:
-            out_args = []
-
-        array_args = bench.info["array_args"]
+        out_args = bench.info.output_args
+        array_args = bench.info.array_args
         output_arrays = dict()
         with timer.timer() as t:
             for out_arg in out_args:
@@ -633,16 +622,9 @@ class Benchmark(object):
 
     def _set_implementation_fn_list(
         self,
-        bmod: str,
-        allowed_implementation_postfixes: list[str],
     ) -> list[BenchmarkImplFn]:
-        """Selects all the callables from the __all__ list for the module
-        excluding the initialize function that we know is not a benchmark
-        implementation.
+        """Loads all implementation functions into list.
 
-        Args:
-            bmod : A benchmark module
-            initialize_fname : Name of the initialization function
         Returns:
             A list of (name, value) pair that represents the name of an
             implementation function and a corresponding function object.
@@ -650,86 +632,23 @@ class Benchmark(object):
 
         result: list[BenchmarkImplFn] = []
 
-        for postfix, module_name in self._get_impl_names(
-            bmod, allowed_implementation_postfixes
-        ).items():
-            module_name = f"dpbench.benchmarks.{self.bname}.{module_name}"
+        for impl in self.info.implementations:
             try:
-                mod = importlib.import_module(module_name)
+                mod = importlib.import_module(impl.package_path)
+                canonical_name = f"{self.info.module_name}_{impl.postfix}"
+                implfn = BenchmarkImplFn(
+                    name=canonical_name, fn=getattr(mod, impl.func_name)
+                )
+                result.append(implfn)
             except Exception:
                 logging.exception(
-                    f"Failed to import benchmark module: {module_name}"
+                    f"Failed to import benchmark module: {impl.module_name}"
                 )
                 continue
 
-            canonical_name = f"{self.bname}_{postfix}"
-
-            func_name: str = None
-            for func in [self.bname, canonical_name]:
-                if hasattr(mod, func):
-                    func_name = func
-                    break
-
-            if func_name:
-                implfn = BenchmarkImplFn(
-                    name=canonical_name, fn=getattr(mod, func_name)
-                )
-                result.append(implfn)
-
         return result
 
-    def _load_benchmark_info(self, bconfig_path: str = None):
-        """Reads the benchmark configuration and loads into a member dict.
-
-        Args:
-            bconfig_path (str, optional): _description_. Defaults to None.
-        """
-        bench_filename = "{b}.json".format(b=self.bname)
-        bench_path = None
-
-        if bconfig_path:
-            bench_path = bconfig_path.joinpath(bench_filename)
-        else:
-            parent_folder = pathlib.Path(__file__).parent.absolute()
-            bench_path = parent_folder.joinpath(
-                "..", "configs", "bench_info", bench_filename
-            )
-
-        try:
-            with open(bench_path) as json_file:
-                self.info: dict = json.load(json_file)["benchmark"]
-        except Exception:
-            logging.exception(
-                "Benchmark JSON file {b} could not be opened.".format(
-                    b=bench_filename
-                )
-            )
-            raise
-
-    def _set_data_initialization_fn(self):
-        """Sets the initialize function object to be used by the benchmark.
-
-        Raises:
-            RuntimeError: If the module's initialize function could not be
-            loaded.
-        """
-
-        self.init_mod_path: str = (
-            self.info.get("init", {}).get("package_path")
-            or f"dpbench.benchmarks.{self.bname}.{self.bname}_initialize"
-        )
-
-        self.init_fn_name: str = (
-            self.info.get("init", {}).get("func_name") or "initialize"
-        )
-
-        self.initialize_fn = getattr(
-            importlib.import_module(self.init_mod_path), self.init_fn_name
-        )
-
-    def _set_reference_implementation(
-        self, impl_fnlist: list[BenchmarkImplFn]
-    ) -> BenchmarkImplFn:
+    def _set_reference_implementation(self) -> BenchmarkImplFn:
         """Sets the reference implementation for the benchmark.
 
         The reference implementation is either a pure Python implementation
@@ -737,9 +656,6 @@ class Benchmark(object):
         the NumPy implementation over Python if both are present.
         If neither is found, then the reference implementation is set to None.
 
-        Args:
-            impl_fnlist : A list of (name, value) pair that represents the name
-            of an implementation function and a corresponding function object.
         Returns:
             BenchmarkImplFn: The reference benchmark implementation.
 
@@ -747,8 +663,10 @@ class Benchmark(object):
 
         ref_impl = None
 
-        python_impl = [impl for impl in impl_fnlist if "python" in impl.name]
-        numpy_impl = [impl for impl in impl_fnlist if "numpy" in impl.name]
+        python_impl = [
+            impl for impl in self.impl_fnlist if "python" in impl.name
+        ]
+        numpy_impl = [impl for impl in self.impl_fnlist if "numpy" in impl.name]
 
         if numpy_impl:
             ref_impl = numpy_impl[0]
@@ -759,7 +677,7 @@ class Benchmark(object):
 
         return ref_impl
 
-    def _set_impl_to_framework_map(self, impl_fnlist):
+    def _set_impl_to_framework_map(self, impl_fnlist) -> dict[str, Framework]:
         """Create a dictionary mapping each implementation function name to a
         corresponding Framework object.
 
@@ -852,70 +770,9 @@ class Benchmark(object):
         except Exception:
             return False
 
-    def _get_impl_names(
-        self,
-        bmod,
-        allowed_implementation_postfixes: list[str],
-    ) -> dict[str, str]:
-        """Resolves bench_list into actual file paths.
-
-        Returns:
-            map[str, str]: map of benchmark postfix to module name for
-            every implementation of the benchmark.
-        """
-
-        result: dict[str, str] = {}
-
-        bench_list = self.info.get("bench_list")
-        if bench_list:
-            for bench in bench_list:
-                if isinstance(bench, tuple):
-                    postfix = bench[0]
-                    module_name = bench[1]
-                else:
-                    postfix = bench
-                    module_name = self.bname + "_" + postfix
-
-                result[postfix] = module_name
-
-            return result
-
-        modules: list[str] = [
-            m
-            for m in bmod.__loader__.get_resource_reader().contents()
-            if m.startswith(self.bname)
-        ]
-
-        for module in modules:
-            module_name = module
-            postfix = ""
-            module_name = ""
-
-            if module.endswith(".py"):
-                module_name = module[:-3]
-                postfix = module_name[len(self.bname) + 1 :]
-            elif module.endswith("sycl_native_ext"):
-                module_name = f"{module}.{self.bname}_sycl._{self.bname}_sycl"
-                postfix = "sycl"
-
-            if self.init_mod_path.endswith(module_name):
-                continue
-
-            if postfix not in allowed_implementation_postfixes:
-                raise RuntimeError(
-                    f"Could not recognize postfix {postfix} as known postfix for"
-                    + f" file {module} in {self.bname}"
-                )
-
-            result[postfix] = module_name
-
-        return result
-
     def __init__(
         self,
-        bmodule: object,
-        allowed_implementation_postfixes: list[str],
-        bconfig_path: str = None,
+        config: config.Benchmark,
     ):
         """Reads benchmark information.
         :param bname: The benchmark name.
@@ -924,25 +781,21 @@ class Benchmark(object):
         package's bench_info directory is used.
         """
 
-        self.bname = bmodule.__name__.split(".")[-1]
         self.bdata = dict()
         self.refdata = dict()
 
-        try:
-            self._load_benchmark_info(bconfig_path)
-            self._set_data_initialization_fn()
-            self.impl_fnlist = self._set_implementation_fn_list(
-                bmodule,
-                allowed_implementation_postfixes,
-            )
-            self.ref_impl_fn = self._set_reference_implementation(
-                self.impl_fnlist
-            )
-            self.impl_to_fw_map = self._set_impl_to_framework_map(
-                self.impl_fnlist
-            )
-        except Exception:
-            raise
+        self.info: config.Benchmark = config
+        self.bname = self.info.module_name
+        self.init_mod_path = self.info.init.package_path
+        self.init_fn_name: str = self.info.init.func_name
+
+        self.initialize_fn = getattr(
+            importlib.import_module(self.init_mod_path), self.init_fn_name
+        )
+
+        self.impl_fnlist = self._set_implementation_fn_list()
+        self.ref_impl_fn = self._set_reference_implementation()
+        self.impl_to_fw_map = self._set_impl_to_framework_map(self.impl_fnlist)
 
     def get_impl_fnlist(self) -> list[BenchmarkImplFn]:
         """Returns a list of function objects each for a single implementation
@@ -1010,6 +863,7 @@ class Benchmark(object):
         :param preset: The data-size preset (S, M, L, paper).
         """
 
+        # 0. Skip if preset is already loaded
         if preset in self.bdata.keys():
             return self.bdata[preset]
 
@@ -1018,20 +872,20 @@ class Benchmark(object):
 
         # 2. Check if the provided preset configuration is available in the
         #    config file.
-        if preset not in self.info["parameters"].keys():
+        if preset not in self.info.parameters.keys():
             raise NotImplementedError(
                 "{b} doesn't have a {p} preset.".format(b=self.bname, p=preset)
             )
 
         # 3. Store the input preset args in the "data" dict.
-        parameters = self.info["parameters"][preset]
+        parameters = self.info.parameters[preset]
         for k, v in parameters.items():
             data[k] = v
 
         # 4. Call the initialize_fn with the input args and store the results
         #    in the "data" dict.
 
-        init_input_args_list = self.info["init"]["input_args"]
+        init_input_args_list = self.info.init.input_args
         init_input_args_val_list = []
         for arg in init_input_args_list:
             init_input_args_val_list.append(data[arg])
@@ -1042,7 +896,7 @@ class Benchmark(object):
         # 5. Store the initialized output in the "data" dict. Note that the
         #    implementation depends on Python dicts being ordered. Thus, the
         #    code will not work with Python older than 3.7.
-        for idx, out in enumerate(self.info["init"]["output_args"]):
+        for idx, out in enumerate(self.info.init.output_args):
             data.update({out: initialized_output[idx]})
 
         # 6. Update the benchmark data (self.bdata) with the generated data

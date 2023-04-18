@@ -4,6 +4,8 @@
 # SPDX-License-Identifier: Apache-2.0
 # SPDX-License-Identifier: BSD-3-Clause
 
+import dpbench.config as cfg
+
 from .framework import Framework
 
 _impl = {
@@ -19,9 +21,9 @@ _impl = {
 class NumbaFramework(Framework):
     """A class for reading and processing framework information."""
 
-    def __init__(self, fname: str, fconfig_path: str = None):
+    def __init__(self, fname: str = None, config: cfg.Framework = None):
         """Reads framework information.
         :param fname: The framework name.
         """
 
-        super().__init__(fname, fconfig_path)
+        super().__init__(fname, config)

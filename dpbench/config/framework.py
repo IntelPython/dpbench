@@ -17,13 +17,17 @@ class Framework:
     prefix: str
     class_: str
     arch: str
+    sycl_device: str
 
     @staticmethod
     def from_dict(obj: Any) -> "Framework":
         """Convert object into Framework dataclass."""
-        _simple_name = str(obj.get("simple_name"))
-        _full_name = str(obj.get("full_name"))
-        _prefix = str(obj.get("prefix"))
-        _class = str(obj.get("class"))
-        _arch = str(obj.get("arch"))
-        return Framework(_simple_name, _full_name, _prefix, _class, _arch)
+        _simple_name = str(obj.get("simple_name") or "")
+        _full_name = str(obj.get("full_name") or "")
+        _prefix = str(obj.get("prefix") or "")
+        _class = str(obj.get("class") or "")
+        _arch = str(obj.get("arch") or "")
+        _sycl_device = str(obj.get("sycl_device") or "")
+        return Framework(
+            _simple_name, _full_name, _prefix, _class, _arch, _sycl_device
+        )

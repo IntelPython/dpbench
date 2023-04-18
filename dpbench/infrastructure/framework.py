@@ -4,47 +4,43 @@
 # SPDX-License-Identifier: Apache-2.0
 # SPDX-License-Identifier: BSD-3-Clause
 
-import json
 import logging
-import pathlib
 from typing import Callable, Dict
 
 import pkg_resources
 
+import dpbench.config as cfg
 from dpbench.infrastructure import utilities
 
 
 class Framework(object):
     """A class for reading and processing framework information."""
 
-    def __init__(self, fname: str, fconfig_path: str = None):
+    def __init__(
+        self,
+        fname: str = None,
+        config: cfg.Framework = None,
+    ):
         """Reads framework information.
-        :param fname: The framework name.
+        :param fname: The framework name. It must be provided if no config was
+        provided.
+        :param config: The framework configuration. It must be provided if no
+        fname was provided.
         """
 
-        self.fname = fname
+        if fname is None and config is None:
+            raise ValueError("At least one of fname or config must be provided")
 
-        frmwrk_filename = "{f}.json".format(f=fname)
-        frmwrk_path = None
+        if config is None:
+            config = [
+                f for f in cfg.GLOBAL.frameworks if fname in f.simple_name
+            ]
+            if len(config) < 1:
+                raise ValueError(f"Configuration with name {fname} not found")
+            config = config[0]
 
-        if fconfig_path:
-            frmwrk_path = pathlib.Path(fconfig_path).joinpath(frmwrk_filename)
-        else:
-            parent_folder = pathlib.Path(__file__).parent.absolute()
-            frmwrk_path = parent_folder.joinpath(
-                "..", "configs", "framework_info", frmwrk_filename
-            )
-
-        try:
-            with open(frmwrk_path) as json_file:
-                self.info = json.load(json_file)["framework"]
-        except Exception as e:
-            logging.exception(
-                "Framework JSON file {f} could not be opened.".format(
-                    f=frmwrk_filename
-                )
-            )
-            raise e
+        self.info = config
+        self.fname = self.info.simple_name
 
     def device_filter_string(self) -> str:
         """Returns the sycl device's filter string if the framework has an

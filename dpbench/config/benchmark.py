@@ -73,7 +73,7 @@ class Benchmark:
     kind: str = ""
     domain: str = ""
     parameters: Presets = field(default_factory=Presets)
-    init: Init = field(default_factory=Init)
+    init: Init = None
     input_args: List[str] = field(default_factory=list)
     array_args: List[str] = field(default_factory=list)
     output_args: List[str] = field(default_factory=list)
@@ -81,17 +81,18 @@ class Benchmark:
 
     @staticmethod
     def from_dict(obj: Any) -> "Benchmark":
-        """Convert object into Benchamrk dataclass."""
+        """Convert object into Benchmark dataclass."""
         _name = str(obj.get("name") or "")
         _short_name = str(obj.get("short_name") or "")
         _relative_path = str(obj.get("relative_path") or "")
         _module_name = str(obj.get("module_name") or "")
-        _packge_path = str(obj.get("package_path") or "")
+        _package_path = str(obj.get("package_path") or "")
         _func_name = str(obj.get("func_name") or "")
         _kind = str(obj.get("kind") or "")
         _domain = str(obj.get("domain") or "")
         _parameters = Presets(obj.get("parameters"))
-        _init = Init.from_dict(obj.get("init"))
+        _init = obj.get("init")
+        _init = Init.from_dict(_init) if _init else None
         _input_args = obj.get("input_args") or []
         _array_args = obj.get("array_args") or []
         _output_args = obj.get("output_args") or []
@@ -101,7 +102,7 @@ class Benchmark:
             _short_name,
             _relative_path,
             _module_name,
-            _packge_path,
+            _package_path,
             _func_name,
             _kind,
             _domain,
@@ -112,16 +113,3 @@ class Benchmark:
             _output_args,
             _implementations,
         )
-
-    def __post_init__(self):
-        """Post initialization hook for dataclass. Not for direct use."""
-        if self.package_path == "":
-            self.package_path = f"dpbench.benchmarks.{self.module_name}"
-
-        if self.init.module_name == "":
-            self.init.module_name = f"{self.module_name}_initialize"
-
-        if self.init.package_path == "":
-            self.init.package_path = (
-                f"{self.package_path}.{self.init.module_name}"
-            )

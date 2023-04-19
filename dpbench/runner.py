@@ -11,7 +11,7 @@ import pkgutil
 from datetime import datetime
 
 import dpbench.benchmarks as dp_bms
-import dpbench.config as config
+import dpbench.config as cfg
 import dpbench.infrastructure as dpbi
 from dpbench.infrastructure.enums import ErrorCodes
 
@@ -43,22 +43,22 @@ def _print_results(result: dpbi.BenchmarkResults):
 
 
 def get_benchmark(
-    benchmark: config.Benchmark = None,
+    benchmark: cfg.Benchmark = None,
     benchmark_name: str = "",
-) -> config.Benchmark:
+) -> cfg.Benchmark:
     """Returns benchmark config if it is not none, otherwise returns benchmark
     config by name."""
     if benchmark is not None:
         return benchmark
 
     return next(
-        b for b in config.GLOBAL.benchmarks if b.module_name == benchmark_name
+        b for b in cfg.GLOBAL.benchmarks if b.module_name == benchmark_name
     )
 
 
 def run_benchmark(
     bname: str = "",
-    benchmark: config.Benchmark = None,
+    benchmark: cfg.Benchmark = None,
     implementation_postfix=None,
     preset="S",
     repeat=10,
@@ -135,8 +135,8 @@ def run_benchmarks(
     if run_id is None:
         run_id = dpbi.create_run(conn)
 
-    for b in config.GLOBAL.benchmarks:
-        for impl in config.GLOBAL.implementations:
+    for b in cfg.GLOBAL.benchmarks:
+        for impl in cfg.GLOBAL.implementations:
             run_benchmark(
                 benchmark=b,
                 implementation_postfix=impl.postfix,

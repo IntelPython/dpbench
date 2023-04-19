@@ -19,7 +19,7 @@ from typing import Any, Dict
 
 import numpy as np
 
-import dpbench.config as config
+import dpbench.config as cfg
 from dpbench.infrastructure import timer
 
 from . import timeout_decorator as tout
@@ -168,7 +168,7 @@ def _exec(
 
         # Special case: if the benchmark implementation returns anything, then
         # add that to the results dict
-        if retval:
+        if retval is not None:
             results_dict["return-value"] = retval
 
     results_dict["error_state"] = ErrorCodes.SUCCESS
@@ -772,7 +772,7 @@ class Benchmark(object):
 
     def __init__(
         self,
-        config: config.Benchmark,
+        config: cfg.Benchmark,
     ):
         """Reads benchmark information.
         :param bname: The benchmark name.
@@ -784,13 +784,21 @@ class Benchmark(object):
         self.bdata = dict()
         self.refdata = dict()
 
-        self.info: config.Benchmark = config
+        self.info: cfg.Benchmark = config
         self.bname = self.info.module_name
-        self.init_mod_path = self.info.init.package_path
-        self.init_fn_name: str = self.info.init.func_name
+        self.init_mod_path = (
+            self.info.init.package_path if self.info.init else None
+        )
+        self.init_fn_name: str = (
+            self.info.init.func_name if self.info.init else None
+        )
 
-        self.initialize_fn = getattr(
-            importlib.import_module(self.init_mod_path), self.init_fn_name
+        self.initialize_fn = (
+            getattr(
+                importlib.import_module(self.init_mod_path), self.init_fn_name
+            )
+            if self.info.init
+            else None
         )
 
         self.impl_fnlist = self._set_implementation_fn_list()
@@ -882,22 +890,30 @@ class Benchmark(object):
         for k, v in parameters.items():
             data[k] = v
 
-        # 4. Call the initialize_fn with the input args and store the results
-        #    in the "data" dict.
+        if self.info.init:
+            # 4. Call the initialize_fn with the input args and store the results
+            #    in the "data" dict.
 
-        init_input_args_list = self.info.init.input_args
-        init_input_args_val_list = []
-        for arg in init_input_args_list:
-            init_input_args_val_list.append(data[arg])
+            init_input_args_list = self.info.init.input_args
+            init_input_args_val_list = []
+            for arg in init_input_args_list:
+                init_input_args_val_list.append(data[arg])
 
-        init_kws = dict(zip(init_input_args_list, init_input_args_val_list))
-        initialized_output = self.initialize_fn(**init_kws)
+            init_kws = dict(zip(init_input_args_list, init_input_args_val_list))
+            initialized_output = self.initialize_fn(**init_kws)
 
-        # 5. Store the initialized output in the "data" dict. Note that the
-        #    implementation depends on Python dicts being ordered. Thus, the
-        #    code will not work with Python older than 3.7.
-        for idx, out in enumerate(self.info.init.output_args):
-            data.update({out: initialized_output[idx]})
+            # 5. Store the initialized output in the "data" dict. Note that the
+            #    implementation depends on Python dicts being ordered. Thus, the
+            #    code will not work with Python older than 3.7.
+            if len(self.info.init.output_args) > 1:
+                for idx, out in enumerate(self.info.init.output_args):
+                    # TODO: add support for single return
+                    data.update({out: initialized_output[idx]})
+            elif len(self.info.init.output_args) == 1 and not isinstance(
+                initialized_output, tuple
+            ):
+                out = self.info.init.output_args[0]
+                data.update({out: initialized_output})
 
         # 6. Update the benchmark data (self.bdata) with the generated data
         #    for the provided preset.

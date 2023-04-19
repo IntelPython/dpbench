@@ -7,7 +7,7 @@ from typing import Callable
 
 import dpctl
 
-import dpbench.config as config
+import dpbench.config as cfg
 
 from .framework import Framework
 
@@ -15,7 +15,7 @@ from .framework import Framework
 class DpcppFramework(Framework):
     """A class for reading and processing framework information."""
 
-    def __init__(self, fname: str = None, config: config.Framework = None):
+    def __init__(self, fname: str = None, config: cfg.Framework = None):
         """Reads framework information.
         :param fname: The framework name.
         """

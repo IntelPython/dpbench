@@ -43,6 +43,8 @@ def update_run_id(conn: sqlalchemy.Engine, run_id: Union[int, None]) -> int:
             f"WARNING: run_id was not provided, using the latest one {run_id}"
         )
 
+        return run_id
+
 
 def update_connection(
     results_db: Union[str, sqlalchemy.Engine] = "results.db",
@@ -102,6 +104,7 @@ def generate_summary(data: pd.DataFrame):
 def generate_impl_summary_report(
     results_db: Union[str, sqlalchemy.Engine] = "results.db",
     run_id: int = None,
+    postfixes: list[str] = None,
 ):
     """generate implementation summary report with status of each benchmark"""
     conn = update_connection(results_db=results_db)
@@ -117,8 +120,10 @@ def generate_impl_summary_report(
         dm.Result.problem_preset,
     ]
 
-    for _, row in legends.iterrows():
-        impl = row["impl_postfix"]
+    if postfixes is None:
+        postfixes = [row["impl_postfix"] for _, row in legends.iterrows()]
+
+    for impl in postfixes:
         columns.append(
             func.ifnull(
                 func.max(

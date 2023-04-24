@@ -1,0 +1,56 @@
+# SPDX-FileCopyrightText: 2022 - 2023 Intel Corporation
+#
+# SPDX-License-Identifier: Apache-2.0
+
+[benchmark]
+name = "Rambo"
+short_name = "Rambo"
+relative_path = "rambo"
+module_name = "rambo"
+func_name = "rambo"
+kind = "microbenchmark"
+domain = "Particles Physics"
+input_args = [
+    "nevts",
+    "nout",
+    "C1",
+    "F1",
+    "Q1",
+    "output",
+]
+array_args = [
+    "C1",
+    "F1",
+    "Q1",
+    "output",
+]
+output_args = [
+    "output",
+]
+
+[benchmark.parameters.S]
+nevts = 32768
+nout = 4
+
+[benchmark.parameters.M]
+nevts = 8388608
+nout = 4
+
+[benchmark.parameters.L]
+nevts = 16777216
+nout = 4
+
+[benchmark.init]
+func_name = "initialize"
+input_args = [
+    "nevts",
+    "nout",
+]
+output_args = [
+    "nevts",
+    "nout",
+    "C1",
+    "F1",
+    "Q1",
+    "output",
+]

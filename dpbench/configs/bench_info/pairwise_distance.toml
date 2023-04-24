@@ -1,0 +1,53 @@
+# SPDX-FileCopyrightText: 2022 - 2023 Intel Corporation
+#
+# SPDX-License-Identifier: Apache-2.0
+
+[benchmark]
+name = "Pairwise Distance Computation"
+short_name = "pairwise-distance"
+relative_path = "pairwise_distance"
+module_name = "pairwise_distance"
+func_name = "pairwise_distance"
+kind = "microbenchmark"
+domain = "Distance Compute"
+input_args = [
+    "X1",
+    "X2",
+    "D",
+]
+array_args = [
+    "X1",
+    "X2",
+    "D",
+]
+output_args = [
+    "D",
+]
+
+[benchmark.parameters.S]
+npoints = 1024
+dims = 3
+seed = 7777777
+
+[benchmark.parameters.M]
+npoints = 32768
+dims = 3
+seed = 7777777
+
+[benchmark.parameters.L]
+npoints = 65536
+dims = 3
+seed = 7777777
+
+[benchmark.init]
+func_name = "initialize"
+input_args = [
+    "npoints",
+    "dims",
+    "seed",
+]
+output_args = [
+    "X1",
+    "X2",
+    "D",
+]

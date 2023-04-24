@@ -2,11 +2,7 @@
 #
 # SPDX-License-Identifier: Apache-2.0
 
-from .benchmark import (
-    Benchmark,
-    BenchmarkResults,
-    get_supported_implementation_postfixes,
-)
+from .benchmark import Benchmark, BenchmarkResults
 from .datamodel import (
     Base,
     Result,
@@ -42,5 +38,4 @@ __all__ = [
     "generate_impl_summary_report",
     "generate_performance_report",
     "validate",
-    "get_supported_implementation_postfixes",
 ]

@@ -1,0 +1,45 @@
+# SPDX-FileCopyrightText: 2022 - 2023 Intel Corporation
+#
+# SPDX-License-Identifier: Apache-2.0
+
+[benchmark]
+name = "Principle Component Analysis"
+short_name = "PCA"
+relative_path = "pca"
+module_name = "pca"
+func_name = "pca"
+kind = "benchmark"
+domain = "data analysis"
+input_args = [
+    "data",
+]
+array_args = [
+    "data",
+]
+output_args = [
+    "tdata",
+    "evalues",
+    "evectors",
+]
+
+[benchmark.parameters.S]
+npoints = 1024
+dims = 128
+
+[benchmark.parameters.M]
+npoints = 1048576
+dims = 128
+
+[benchmark.parameters.L]
+npoints = 4194304
+dims = 128
+
+[benchmark.init]
+func_name = "initialize"
+input_args = [
+    "npoints",
+    "dims",
+]
+output_args = [
+    "data",
+]

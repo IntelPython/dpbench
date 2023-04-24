@@ -1,0 +1,11 @@
+# SPDX-FileCopyrightText: 2022 - 2023 Intel Corporation
+#
+# SPDX-License-Identifier: Apache-2.0
+
+[framework]
+simple_name = "numpy"
+full_name = "NumPy"
+prefix = "np"
+postfix = "numpy"
+class = "Framework"
+arch = "cpu"

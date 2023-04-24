@@ -8,6 +8,7 @@
 from a specific benchmark run.
 """
 
+import dataclasses
 import pathlib
 from typing import Final, Union
 
@@ -15,6 +16,8 @@ import pandas as pd
 import sqlalchemy
 from sqlalchemy import case, func
 from sqlalchemy.orm import Session
+
+import dpbench.config as cfg
 
 from . import datamodel as dm
 
@@ -58,11 +61,9 @@ def update_connection(
 
 def read_legends() -> pd.DataFrame:
     """reads implementation postfixes"""
-    parent_folder = pathlib.Path(__file__).parent.absolute()
-    impl_postfix_path = parent_folder.joinpath(
-        "..", "configs", "impl_postfix.json"
+    return pd.DataFrame.from_records(
+        [dataclasses.asdict(impl) for impl in cfg.GLOBAL.implementations]
     )
-    return pd.read_json(impl_postfix_path)
 
 
 def generate_header(conn: sqlalchemy.Engine, run_id: int):
@@ -121,7 +122,7 @@ def generate_impl_summary_report(
     ]
 
     if postfixes is None:
-        postfixes = [row["impl_postfix"] for _, row in legends.iterrows()]
+        postfixes = [impl.postfix for impl in cfg.GLOBAL.implementations]
 
     for impl in postfixes:
         columns.append(

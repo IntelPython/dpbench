@@ -868,15 +868,14 @@ class Benchmark(object):
             # 5. Store the initialized output in the "data" dict. Note that the
             #    implementation depends on Python dicts being ordered. Thus, the
             #    code will not work with Python older than 3.7.
-            if len(self.info.init.output_args) > 1:
+            if isinstance(initialized_output, tuple):
                 for idx, out in enumerate(self.info.init.output_args):
-                    # TODO: add support for single return
                     data.update({out: initialized_output[idx]})
-            elif len(self.info.init.output_args) == 1 and not isinstance(
-                initialized_output, tuple
-            ):
+            elif len(self.info.init.output_args) == 1:
                 out = self.info.init.output_args[0]
                 data.update({out: initialized_output})
+            else:
+                raise ValueError("Unsupported initialize output")
 
         # 6. Update the benchmark data (self.bdata) with the generated data
         #    for the provided preset.

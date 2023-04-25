@@ -50,7 +50,7 @@ def mandelbrot(xmin, xmax, ymin, ymax, xn, yn, itermax, horizon=2.0):
         Zim += Y
 
         # Failed convergence
-        I = np.sqrt(Zre**2 + Zim**2) > horizon
+        I = np.sqrt(Zre**2 + Zim**2) > horizon  # noqa: E741 math variable
         for j in range(len(I)):
             if I[j]:
                 N_[Xi[j], Yi[j]] = i + 1

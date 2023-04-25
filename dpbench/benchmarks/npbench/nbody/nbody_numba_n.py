@@ -40,7 +40,7 @@ def getAcc(pos, mass, G, softening):
     # matrix that stores 1/r^3 for all particle pairwise particle separations
     inv_r3 = dx**2 + dy**2 + dz**2 + softening**2
     # inv_r3[inv_r3>0] = inv_r3[inv_r3>0]**(-1.5)
-    I = inv_r3 > 0
+    I = inv_r3 > 0  # noqa: E741 math variable
     for i in range(I.shape[0]):
         for j in range(I.shape[1]):
             if I[i, j]:
@@ -86,7 +86,7 @@ def getEnergy(pos, vel, mass, G):
     # matrix that stores 1/r for all particle pairwise particle separations
     inv_r = np.sqrt(dx**2 + dy**2 + dz**2)
     # inv_r[inv_r>0] = 1.0/inv_r[inv_r>0]
-    I = inv_r > 0
+    I = inv_r > 0  # noqa: E741 math variable
     for i in range(I.shape[0]):
         for j in range(I.shape[1]):
             if I[i, j]:

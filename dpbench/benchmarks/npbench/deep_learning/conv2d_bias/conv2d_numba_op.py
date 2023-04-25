@@ -33,23 +33,3 @@ def conv2d(input, weights):
 @nb.jit(nopython=False, forceobj=True, parallel=True, fastmath=True)
 def conv2d_bias(input, weights, bias):
     return conv2d(input, weights) + bias
-
-
-@nb.jit(nopython=False, forceobj=True, parallel=True, fastmath=True)
-def object_mode_prange(input, weights, bias):
-    return conv2d_object_prange(input, weights) + bias
-
-
-@nb.jit(nopython=True, parallel=False, fastmath=True)
-def nopython_mode(input, weights, bias):
-    return conv2d_nopython(input, weights) + bias
-
-
-@nb.jit(nopython=True, parallel=True, fastmath=True)
-def nopython_mode_parallel(input, weights, bias):
-    return conv2d_nopython_parallel(input, weights) + bias
-
-
-@nb.jit(nopython=True, parallel=True, fastmath=True)
-def nopython_mode_prange(input, weights, bias):
-    return conv2d_nopython_prange(input, weights) + bias

@@ -4,6 +4,9 @@
 #
 # SPDX-License-Identifier: BSD-3-Clause
 
+# flake8: noqa
+# TODO: fix the file
+
 import argparse
 import pathlib
 

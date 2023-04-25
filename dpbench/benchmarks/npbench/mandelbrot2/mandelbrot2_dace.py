@@ -23,7 +23,7 @@ def mgrid(X: dc.int64[M, N], Y: dc.int64[M, N]):
 @dc.program
 def linspace(start: dc.float64, stop: dc.float64, X: dc.float64[N]):
     dist = (stop - start) / (N - 1)
-    for i in dace.map[0:N]:
+    for i in dc.map[0:N]:
         X[i] = start + i * dist
 
 
@@ -59,7 +59,7 @@ def mandelbrot(
     Cv = np.reshape(C, (XN * YN,))
 
     Z = np.zeros(Cv.shape, np.complex128)
-    I = np.ndarray((XN * YN,), dtype=np.bool_)
+    I = np.ndarray((XN * YN,), dtype=np.bool_)  # noqa: E741 math variable
     length = XN * YN
     k = 0
     while length > 0 and k < maxiter:

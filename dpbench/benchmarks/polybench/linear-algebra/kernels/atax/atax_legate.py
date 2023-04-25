@@ -14,7 +14,7 @@ def kernel(A, x):
 
 
 def init_data(M, N, datatype):
-    fn = datatype(N)
+    # fn = datatype(N)
     A = np.empty((M, N), dtype=datatype)
     x = np.empty((N,), dtype=datatype)
     y = np.empty((N,), dtype=datatype)

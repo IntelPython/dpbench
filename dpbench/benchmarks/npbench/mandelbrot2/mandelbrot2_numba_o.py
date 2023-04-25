@@ -32,7 +32,7 @@ def mandelbrot(xmin, xmax, ymin, ymax, xn, yn, itermax, horizon=2.0):
         np.add(Z, C, Z)
 
         # Failed convergence
-        I = abs(Z) > horizon
+        I = abs(Z) > horizon  # noqa: E741 math variable
         N_[Xi[I], Yi[I]] = i + 1
         Z_[Xi[I], Yi[I]] = Z[I]
 

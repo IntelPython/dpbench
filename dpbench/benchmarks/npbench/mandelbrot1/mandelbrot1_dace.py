@@ -41,7 +41,7 @@ def mandelbrot(
     N = np.zeros(C.shape, dtype=np.int64)
     Z = np.zeros(C.shape, dtype=np.complex128)
     for n in range(maxiter):
-        I = np.less(np.absolute(Z), horizon)
+        I = np.less(np.absolute(Z), horizon)  # noqa: E741 math variable
         N[I] = n
         # np.positive(n, out=N, where=I)
         # for j, k in dace.map[0:YN, 0:XN]:

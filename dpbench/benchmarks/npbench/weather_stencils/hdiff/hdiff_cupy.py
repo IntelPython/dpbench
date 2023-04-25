@@ -10,7 +10,11 @@ import cupy as np
 
 # Adapted from https://github.com/GridTools/gt4py/blob/1caca893034a18d5df1522ed251486659f846589/tests/test_integration/stencil_definitions.py#L194
 def hdiff(in_field, out_field, coeff):
-    I, J, K = out_field.shape[0], out_field.shape[1], out_field.shape[2]
+    I, J, K = (  # noqa: E741,F841 math variable, TODO: K is not used
+        out_field.shape[0],
+        out_field.shape[1],
+        out_field.shape[2],
+    )
     lap_field = 4.0 * in_field[1 : I + 3, 1 : J + 3, :] - (
         in_field[2 : I + 4, 1 : J + 3, :]
         + in_field[0 : I + 2, 1 : J + 3, :]

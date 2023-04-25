@@ -66,7 +66,7 @@ def maxpool2d(x):
             #                               2 * j:2 * j + 2, :],
             #                             axis=(1, 2))
             for k in range(x.shape[0]):
-                for l in range(x.shape[3]):
+                for l in range(x.shape[3]):  # noqa: E741 math variable
                     output[k, i, j, l] = np.max(
                         x[k, 2 * i : 2 * i + 2, 2 * j : 2 * j + 2, l]
                     )

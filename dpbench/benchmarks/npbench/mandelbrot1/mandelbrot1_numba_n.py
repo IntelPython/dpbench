@@ -33,7 +33,7 @@ def mandelbrot(xmin, xmax, ymin, ymax, xn, yn, maxiter, horizon=2.0):
     Z = np.zeros(C.shape, dtype=np.complex128)
     for n in range(maxiter):
         # I = np.less(abs(Z), horizon)
-        I = np.less(np.absolute(Z), horizon)
+        I = np.less(np.absolute(Z), horizon)  # noqa: E741 math variable
         # N[I] = n
         for j in range(C.shape[0]):
             for k in range(C.shape[1]):

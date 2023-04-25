@@ -34,7 +34,9 @@ def mandelbrot(xmin, xmax, ymin, ymax, xn, yn, maxiter, horizon=2.0):
     # I = np.not_equal(N, maxiter - 1)
     # N[:] = np.int64(I) * N
     for n in range(maxiter):
-        I = np.less(np.sqrt(Zre**2 + Zim**2), horizon)
+        I = np.less(  # noqa: E741 math variable
+            np.sqrt(Zre**2 + Zim**2), horizon
+        )
         N[I] = n
         # Z[I] = Z[I]**2 + C[I]
         tmp = Zre[I] ** 2 - Zim[I] ** 2 + X[I, None]

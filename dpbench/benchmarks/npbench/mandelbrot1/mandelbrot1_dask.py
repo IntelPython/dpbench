@@ -23,7 +23,7 @@ def mandelbrot(xmin, xmax, ymin, ymax, xn, yn, maxiter, horizon=2.0):
     # dZ = da.from_array(Z, chunks='auto')
     for n in range(maxiter):
         # I = da.less(abs(Z), horizon)
-        I = abs(Z) < horizon
+        I = abs(Z) < horizon  # noqa: E741 math variable
         N[I] = n
         # Z[I] = Z[I]**2 + C[I]
         # Z[I] **=2

@@ -19,7 +19,7 @@ def mandelbrot(xmin, xmax, ymin, ymax, xn, yn, maxiter, horizon=2.0):
     N = np.zeros(C.shape, dtype=np.int64)
     Z = np.zeros(C.shape, dtype=np.complex128)
     for n in range(maxiter):
-        I = np.less(abs(Z), horizon)
+        I = np.less(abs(Z), horizon)  # noqa: E741 math variable
         N[I] = n
         Z[I] = Z[I] ** 2 + C[I]
     N[N == maxiter - 1] = 0

@@ -8,7 +8,7 @@
 import numpy as np
 
 
-def initialize(I, J, K):
+def initialize(I, J, K):  # noqa: E741 math variable
     from numpy.random import default_rng
 
     rng = default_rng(42)

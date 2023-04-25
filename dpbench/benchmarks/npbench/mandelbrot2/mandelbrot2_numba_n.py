@@ -60,7 +60,7 @@ def mandelbrot(xmin, xmax, ymin, ymax, xn, yn, itermax, horizon=2.0):
 
         # Failed convergence
         # I = abs(Z) > horizon
-        I = np.absolute(Z) > horizon
+        I = np.absolute(Z) > horizon  # noqa: E741 math variable
         # N_[Xi[I], Yi[I]] = i+1
         for j in range(I.shape[0]):
             if I[j]:

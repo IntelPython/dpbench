@@ -1,0 +1,12 @@
+# SPDX-FileCopyrightText: 2022 - 2023 Intel Corporation
+#
+# SPDX-License-Identifier: Apache-2.0
+
+[framework]
+simple_name = "dpcpp"
+full_name = "dpcpp"
+prefix = "dp"
+postfix = "dpcpp"
+class = "DpcppFramework"
+arch = "cpu"
+sycl_device = "cpu"

@@ -175,27 +175,6 @@ def _exec(
     results_dict["error_msg"] = ""
 
 
-def get_supported_implementation_postfixes() -> list[str]:
-    """Returns as a dictionary all the supported postfixes for filenames
-    that implement a specific version of a benchmark.
-
-    Returns:
-        Dict: Key is the string providing the supported postfix and value is a
-        string describing when to use the postfix.
-    """
-    parent_folder = pathlib.Path(__file__).parent.absolute()
-    impl_postfix_json = parent_folder.joinpath(
-        "..", "configs", "impl_postfix.json"
-    )
-
-    try:
-        with open(impl_postfix_json) as json_file:
-            return [entry["impl_postfix"] for entry in json.load(json_file)]
-    except Exception as e:
-        logging.exception("impl_postfix.json file not found")
-        raise (e)
-
-
 class BenchmarkResults:
     """A helper class to store the results and timing from running a
     benchmark.
@@ -604,22 +583,6 @@ class Benchmark(object):
     benchmark data.
     """
 
-    def _check_if_valid_impl_postfix(self, impl_postfix: str) -> bool:
-        """Checks if an implementation postfix is found in the
-        impl_postfix.json.
-
-        Args:
-            impl_postfix (str): An implementation postfix
-
-        Returns:
-            bool: True if the postfix is found in the JSON file else False
-        """
-        impl_postfixes = get_supported_implementation_postfixes()
-        if impl_postfix in impl_postfixes:
-            return True
-        else:
-            return False
-
     def _set_implementation_fn_list(
         self,
     ) -> list[BenchmarkImplFn]:
@@ -905,15 +868,14 @@ class Benchmark(object):
             # 5. Store the initialized output in the "data" dict. Note that the
             #    implementation depends on Python dicts being ordered. Thus, the
             #    code will not work with Python older than 3.7.
-            if len(self.info.init.output_args) > 1:
+            if isinstance(initialized_output, tuple):
                 for idx, out in enumerate(self.info.init.output_args):
-                    # TODO: add support for single return
                     data.update({out: initialized_output[idx]})
-            elif len(self.info.init.output_args) == 1 and not isinstance(
-                initialized_output, tuple
-            ):
+            elif len(self.info.init.output_args) == 1:
                 out = self.info.init.output_args[0]
                 data.update({out: initialized_output})
+            else:
+                raise ValueError("Unsupported initialize output")
 
         # 6. Update the benchmark data (self.bdata) with the generated data
         #    for the provided preset.

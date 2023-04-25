@@ -5,13 +5,14 @@
 """Set of functions to read configuration files."""
 
 import importlib
-import json
 import logging
 import os
 import pkgutil
 import re
 import sys
 from typing import Callable
+
+import tomli
 
 from .benchmark import Benchmark, BenchmarkImplementation, Presets
 from .config import Config
@@ -47,7 +48,7 @@ def read_configs(
                 dirname, "../configs/framework_info"
             ),
             impl_postfix_path=os.path.join(
-                dirname, "../configs/impl_postfix.json"
+                dirname, "../configs/impl_postfix.toml"
             ),
         ),
     ]
@@ -114,7 +115,7 @@ def read_benchmarks(
     Returns: nothing.
     """
     for bench_info_file in os.listdir(bench_info_dir):
-        if not bench_info_file.endswith(".json"):
+        if not bench_info_file.endswith(".toml"):
             continue
 
         if benchmarks and not bench_info_file[:-5] in benchmarks:
@@ -125,7 +126,7 @@ def read_benchmarks(
         with open(bench_info_file) as file:
             file_contents = file.read()
 
-        bench_info = json.loads(file_contents)
+        bench_info = tomli.loads(file_contents)
         benchmark = Benchmark.from_dict(bench_info.get("benchmark"))
         if benchmark.package_path == "":
             rel_path = benchmark.relative_path.replace("/", ".")
@@ -147,7 +148,7 @@ def read_frameworks(config: Config, framework_info_dir: str) -> None:
     Returns: nothing.
     """
     for framework_info_file in os.listdir(framework_info_dir):
-        if not framework_info_file.endswith(".json"):
+        if not framework_info_file.endswith(".toml"):
             continue
 
         framework_info_file = os.path.join(
@@ -157,7 +158,7 @@ def read_frameworks(config: Config, framework_info_dir: str) -> None:
         with open(framework_info_file) as file:
             file_contents = file.read()
 
-        framework_info = json.loads(file_contents)
+        framework_info = tomli.loads(file_contents)
         framework_dict = framework_info.get("framework")
         if framework_dict:
             framework = Framework.from_dict(framework_dict)
@@ -178,8 +179,8 @@ def read_implementation_postfixes(
     with open(impl_postfix_file) as file:
         file_contents = file.read()
 
-    implementation_postfixes = json.loads(file_contents)
-    for impl in implementation_postfixes:
+    implementation_postfixes = tomli.loads(file_contents)
+    for impl in implementation_postfixes["implementations"]:
         implementation = Implementation.from_dict(impl)
         config.implementations.append(implementation)
 

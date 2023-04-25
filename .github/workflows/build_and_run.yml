@@ -45,7 +45,7 @@ jobs:
         run: |
           conda install -c intel tbb dpcpp_linux-64
           conda install numpy numba cython cmake ninja scikit-build pandas
-          conda install scipy scikit-learn pybind11
+          conda install scipy scikit-learn pybind11 tomli
           conda install -c pkgs/main libgcc-ng">=11.2.0" libstdcxx-ng">=11.2.0" libgomp">=11.2.0"
           conda install -c dppy/label/dev -c intel -c main dpctl numba-dpex dpnp
           pip install alembic
@@ -68,7 +68,7 @@ jobs:
           ls $(dirname $(dirname `which icx`))/bin-llvm || exit 1
           export NUMBA_DPEX_LLVM_SPIRV_ROOT=$(dirname $(dirname `which icx`))/bin-llvm
 
-          python -c "import dpbench; dpbench.run_benchmarks()" || exit 1
+          python -c "import dpbench; dpbench.run_benchmarks(repeat=2)" || exit 1
           # LD_PRELOAD="${CONDA_PREFIX}/lib/libmkl_intel_ilp64.so ${CONDA_PREFIX}/lib/libmkl_tbb_thread.so ${CONDA_PREFIX}/lib/libmkl_core.so" python -c "import dpbench; dpbench.all_benchmarks_passed_validation(\"dpbench.db\");"
           # res=`                                                                    \
           #   printf "%s"                                                            \

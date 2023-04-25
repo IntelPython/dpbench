@@ -1,0 +1,50 @@
+# SPDX-FileCopyrightText: 2022 - 2023 Intel Corporation
+#
+# SPDX-License-Identifier: Apache-2.0
+
+[benchmark]
+name = "L2 Computation"
+short_name = "l2-norm"
+relative_path = "l2_norm"
+module_name = "l2_norm"
+func_name = "l2_norm"
+kind = "microbenchmark"
+domain = "Distance Compute"
+input_args = [
+    "a",
+    "d",
+]
+array_args = [
+    "a",
+    "d",
+]
+output_args = [
+    "d",
+]
+
+[benchmark.parameters.S]
+npoints = 32768
+dims = 3
+seed = 777777
+
+[benchmark.parameters.M]
+npoints = 268435456
+dims = 3
+seed = 777777
+
+[benchmark.parameters.L]
+npoints = 536870912
+dims = 3
+seed = 777777
+
+[benchmark.init]
+func_name = "initialize"
+input_args = [
+    "npoints",
+    "dims",
+    "seed",
+]
+output_args = [
+    "a",
+    "d",
+]

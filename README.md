@@ -22,7 +22,7 @@ SPDX-License-Identifier: Apache-2.0
         $ conda install python
         $ conda install -c intel tbb dpcpp_linux-64
         $ conda install numpy numba cython cmake ninja scikit-build pandas
-        $ conda install scipy scikit-learn pybind11
+        $ conda install scipy scikit-learn pybind11 tomli
         # do not miss the quotes!
         $ conda install -c pkgs/main libgcc-ng">=11.2.0" libstdcxx-ng">=11.2.0" libgomp">=11.2.0"
         $ conda install -c dppy/label/dev -c intel -c main dpctl numba-dpex dpnp

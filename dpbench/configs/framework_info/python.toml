@@ -1,0 +1,11 @@
+# SPDX-FileCopyrightText: 2022 - 2023 Intel Corporation
+#
+# SPDX-License-Identifier: Apache-2.0
+
+[framework]
+simple_name = "python"
+full_name = "Python"
+prefix = "python"
+postfix = "python"
+class = "Framework"
+arch = "cpu"

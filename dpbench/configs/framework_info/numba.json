@@ -1,9 +1,0 @@
-{
-    "framework": {
-        "simple_name": "numba",
-        "full_name": "Numba",
-        "prefix": "nb",
-        "class": "NumbaFramework",
-        "arch": "cpu"
-    }
-}

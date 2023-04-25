@@ -1,0 +1,75 @@
+# SPDX-FileCopyrightText: 2010-2016 Ohio State University
+# SPDX-FileCopyrightText: 2021 ETH Zurich and the NPBench authors
+# SPDX-FileCopyrightText: 2022 - 2023 Intel Corporation
+#
+# SPDX-License-Identifier: BSD-3-Clause
+
+[benchmark]
+name = "Vector Multiplication and Matrix Addition"
+short_name = "gemver"
+relative_path = "gemver"
+module_name = "gemver"
+func_name = "kernel"
+kind = "microbench"
+domain = "LinAlg"
+dwarf = "dense_linear_algebra"
+input_args = [
+    "alpha",
+    "beta",
+    "A",
+    "u1",
+    "v1",
+    "u2",
+    "v2",
+    "w",
+    "x",
+    "y",
+    "z",
+]
+array_args = [
+    "A",
+    "u1",
+    "v1",
+    "u2",
+    "v2",
+    "w",
+    "x",
+    "y",
+    "z",
+]
+output_args = [
+    "A",
+    "w",
+    "x",
+]
+
+[benchmark.parameters.S]
+N = 1000
+
+[benchmark.parameters.M]
+N = 3000
+
+[benchmark.parameters.L]
+N = 10000
+
+[benchmark.parameters.paper]
+N = 8000
+
+[benchmark.init]
+func_name = "initialize"
+input_args = [
+    "N",
+]
+output_args = [
+    "alpha",
+    "beta",
+    "A",
+    "u1",
+    "v1",
+    "u2",
+    "v2",
+    "w",
+    "x",
+    "y",
+    "z",
+]

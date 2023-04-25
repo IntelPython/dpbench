@@ -1,0 +1,44 @@
+# SPDX-FileCopyrightText: 2010-2016 Ohio State University
+# SPDX-FileCopyrightText: 2021 ETH Zurich and the NPBench authors
+# SPDX-FileCopyrightText: 2022 - 2023 Intel Corporation
+#
+# SPDX-License-Identifier: BSD-3-Clause
+
+[benchmark]
+name = "Nussinov"
+short_name = "nussinov"
+relative_path = "nussinov"
+module_name = "nussinov"
+func_name = "kernel"
+kind = "microapp"
+domain = "Chemistry"
+dwarf = "dynamic_programming"
+input_args = [
+    "N",
+    "seq",
+]
+array_args = [
+    "seq",
+]
+output_args = []
+
+[benchmark.parameters.S]
+N = 40
+
+[benchmark.parameters.M]
+N = 90
+
+[benchmark.parameters.L]
+N = 200
+
+[benchmark.parameters.paper]
+N = 500
+
+[benchmark.init]
+func_name = "initialize"
+input_args = [
+    "N",
+]
+output_args = [
+    "seq",
+]

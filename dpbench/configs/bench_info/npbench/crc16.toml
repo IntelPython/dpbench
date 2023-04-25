@@ -1,0 +1,43 @@
+# SPDX-FileCopyrightText: 2018 Øystein Sture
+# SPDX-FileCopyrightText: 2021 ETH Zurich and the NPBench authors
+# SPDX-FileCopyrightText: 2022 - 2023 Intel Corporation
+#
+# SPDX-License-Identifier: BSD-3-Clause
+
+[benchmark]
+name = "CRC-16"
+short_name = "crc16"
+relative_path = "crc16"
+module_name = "crc16"
+func_name = "crc16"
+kind = "microbench"
+domain = "Other"
+dwarf = "combinatorial"
+input_args = [
+    "data",
+]
+array_args = [
+    "data",
+]
+output_args = []
+
+[benchmark.parameters.S]
+N = 1600
+
+[benchmark.parameters.M]
+N = 16000
+
+[benchmark.parameters.L]
+N = 160000
+
+[benchmark.parameters.paper]
+N = 1000000
+
+[benchmark.init]
+func_name = "initialize"
+input_args = [
+    "N",
+]
+output_args = [
+    "data",
+]

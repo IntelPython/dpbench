@@ -1,0 +1,61 @@
+# SPDX-FileCopyrightText: 2021 ETH Zurich and the NPBench authors
+# SPDX-FileCopyrightText: 2022 - 2023 Intel Corporation
+#
+# SPDX-License-Identifier: BSD-3-Clause
+
+[benchmark]
+name = "Sparse Matrix-Vector Multiplication"
+short_name = "spmv"
+relative_path = "spmv"
+module_name = "spmv"
+func_name = "spmv"
+kind = "microapp"
+domain = "Other"
+dwarf = "sparse_linear_algebra"
+input_args = [
+    "A_row",
+    "A_col",
+    "A_val",
+    "x",
+]
+array_args = [
+    "A_row",
+    "A_col",
+    "A_val",
+    "x",
+]
+output_args = []
+
+[benchmark.parameters.S]
+M = 4096
+N = 4096
+nnz = 8192
+
+[benchmark.parameters.M]
+M = 32768
+N = 32768
+nnz = 65536
+
+[benchmark.parameters.L]
+M = 262144
+N = 262144
+nnz = 262144
+
+[benchmark.parameters.paper]
+M = 131072
+N = 131072
+nnz = 262144
+
+[benchmark.init]
+func_name = "initialize"
+input_args = [
+    "M",
+    "N",
+    "nnz",
+]
+output_args = [
+    "A_row",
+    "A_col",
+    "A_val",
+    "x",
+]

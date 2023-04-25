@@ -1,0 +1,85 @@
+# SPDX-FileCopyrightText: 2021 ETH Zurich and the NPBench authors
+# SPDX-FileCopyrightText: 2022 - 2023 Intel Corporation
+#
+# SPDX-License-Identifier: BSD-3-Clause
+
+[benchmark]
+name = "Lenet-5"
+short_name = "lenet"
+relative_path = "deep_learning/lenet"
+module_name = "lenet"
+func_name = "lenet5"
+kind = "microapp"
+domain = "Learning"
+dwarf = "dense_linear_algebra"
+input_args = [
+    "input",
+    "conv1",
+    "conv1bias",
+    "conv2",
+    "conv2bias",
+    "fc1w",
+    "fc1b",
+    "fc2w",
+    "fc2b",
+    "fc3w",
+    "fc3b",
+    "N",
+    "C_before_fc1",
+]
+array_args = [
+    "input",
+    "conv1",
+    "conv1bias",
+    "conv2",
+    "conv2bias",
+    "fc1w",
+    "fc1b",
+    "fc2w",
+    "fc2b",
+    "fc3w",
+    "fc3b",
+]
+output_args = []
+
+[benchmark.parameters.S]
+N = 4
+H = 28
+W = 28
+
+[benchmark.parameters.M]
+N = 8
+H = 56
+W = 56
+
+[benchmark.parameters.L]
+N = 8
+H = 176
+W = 176
+
+[benchmark.parameters.paper]
+N = 16
+H = 256
+W = 256
+
+[benchmark.init]
+func_name = "initialize"
+input_args = [
+    "N",
+    "H",
+    "W",
+]
+output_args = [
+    "input",
+    "conv1",
+    "conv1bias",
+    "conv2",
+    "conv2bias",
+    "fc1w",
+    "fc1b",
+    "fc2w",
+    "fc2b",
+    "fc3w",
+    "fc3b",
+    "C_before_fc1",
+]

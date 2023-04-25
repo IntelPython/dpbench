@@ -1,0 +1,52 @@
+# SPDX-FileCopyrightText: 2019 Serge Guelton
+# SPDX-FileCopyrightText: 2021 ETH Zurich and the NPBench authors
+# SPDX-FileCopyrightText: 2022 - 2023 Intel Corporation
+#
+# SPDX-License-Identifier: BSD-3-Clause
+
+[benchmark]
+name = "Arc Distance"
+short_name = "adist"
+relative_path = "pythran/arc_distance"
+module_name = "arc_distance"
+func_name = "arc_distance"
+kind = "microbench"
+domain = "kernels"
+dwarf = "dense_linear_algebra"
+input_args = [
+    "theta_1",
+    "phi_1",
+    "theta_2",
+    "phi_2",
+]
+array_args = [
+    "theta_1",
+    "phi_1",
+    "theta_2",
+    "phi_2",
+]
+output_args = []
+
+[benchmark.parameters.S]
+N = 100000
+
+[benchmark.parameters.M]
+N = 1000000
+
+[benchmark.parameters.L]
+N = 10000000
+
+[benchmark.parameters.paper]
+N = 10000000
+
+[benchmark.init]
+func_name = "initialize"
+input_args = [
+    "N",
+]
+output_args = [
+    "theta_1",
+    "phi_1",
+    "theta_2",
+    "phi_2",
+]

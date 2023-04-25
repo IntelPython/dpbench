@@ -1,0 +1,51 @@
+# SPDX-FileCopyrightText: 2010-2016 Ohio State University
+# SPDX-FileCopyrightText: 2021 ETH Zurich and the NPBench authors
+# SPDX-FileCopyrightText: 2022 - 2023 Intel Corporation
+#
+# SPDX-License-Identifier: BSD-3-Clause
+
+[benchmark]
+name = "A transpose times A times x"
+short_name = "atax"
+relative_path = "atax"
+module_name = "atax"
+func_name = "kernel"
+kind = "microbench"
+domain = "LinAlg"
+dwarf = "dense_linear_algebra"
+input_args = [
+    "A",
+    "x",
+]
+array_args = [
+    "A",
+    "x",
+]
+output_args = []
+
+[benchmark.parameters.S]
+M = 4000
+N = 5000
+
+[benchmark.parameters.M]
+M = 10000
+N = 12500
+
+[benchmark.parameters.L]
+M = 20000
+N = 25000
+
+[benchmark.parameters.paper]
+M = 18000
+N = 22000
+
+[benchmark.init]
+func_name = "initialize"
+input_args = [
+    "M",
+    "N",
+]
+output_args = [
+    "x",
+    "A",
+]

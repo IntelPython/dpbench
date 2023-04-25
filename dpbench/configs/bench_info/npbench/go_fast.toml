@@ -1,0 +1,43 @@
+# SPDX-FileCopyrightText: 2012-2020 Anaconda, Inc. and others
+# SPDX-FileCopyrightText: 2021 ETH Zurich and the NPBench authors
+# SPDX-FileCopyrightText: 2022 - 2023 Intel Corporation
+#
+# SPDX-License-Identifier: BSD-3-Clause
+
+[benchmark]
+name = "GoFast"
+short_name = "npgofast"
+relative_path = "go_fast"
+module_name = "go_fast"
+func_name = "go_fast"
+kind = "microbench"
+domain = "Others"
+dwarf = "dense_linear_algebra"
+input_args = [
+    "a",
+]
+array_args = [
+    "a",
+]
+output_args = []
+
+[benchmark.parameters.S]
+N = 2000
+
+[benchmark.parameters.M]
+N = 6000
+
+[benchmark.parameters.L]
+N = 20000
+
+[benchmark.parameters.paper]
+N = 12500
+
+[benchmark.init]
+func_name = "initialize"
+input_args = [
+    "N",
+]
+output_args = [
+    "a",
+]

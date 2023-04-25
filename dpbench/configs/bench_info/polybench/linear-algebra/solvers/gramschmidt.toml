@@ -1,0 +1,50 @@
+# SPDX-FileCopyrightText: 2010-2016 Ohio State University
+# SPDX-FileCopyrightText: 2021 ETH Zurich and the NPBench authors
+# SPDX-FileCopyrightText: 2022 - 2023 Intel Corporation
+#
+# SPDX-License-Identifier: BSD-3-Clause
+
+[benchmark]
+name = "Gram-Schmidt decomposition"
+short_name = "gramschm"
+relative_path = "gramschmidt"
+module_name = "gramschmidt"
+func_name = "kernel"
+kind = "microbench"
+domain = "Solver"
+dwarf = "dense_linear_algebra"
+input_args = [
+    "A",
+]
+array_args = [
+    "A",
+]
+output_args = [
+    "A",
+]
+
+[benchmark.parameters.S]
+M = 70
+N = 60
+
+[benchmark.parameters.M]
+M = 220
+N = 180
+
+[benchmark.parameters.L]
+M = 600
+N = 500
+
+[benchmark.parameters.paper]
+M = 240
+N = 200
+
+[benchmark.init]
+func_name = "initialize"
+input_args = [
+    "M",
+    "N",
+]
+output_args = [
+    "A",
+]

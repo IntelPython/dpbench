@@ -38,6 +38,7 @@ def read_configs(
 
     dirname: str = os.path.dirname(__file__)
 
+    # TODO: move into config
     modules: list[Module] = [
         Module(
             benchmark_configs_path=os.path.join(
@@ -57,13 +58,28 @@ def read_configs(
     if no_dpbench:
         modules[0].benchmark_configs_path = ""
 
-    npbench_root = os.getenv("NPBENCH_ROOT")
-    if npbench_root:
+    with_npbench = os.getenv("WITH_NPBENCH")
+    if with_npbench:
         modules.append(
             Module(
-                benchmark_configs_path=os.path.join(npbench_root, "bench_info"),
-                benchmarks_module="npbench.benchmarks",
-                path=npbench_root,
+                benchmark_configs_path=os.path.join(
+                    dirname, "../configs/bench_info/npbench"
+                ),
+                benchmarks_module="dpbench.benchmarks.npbench",
+                path=os.path.join(dirname, "../benchmarks/npbench"),
+            )
+        )
+
+    with_polybench = os.getenv("WITH_POLYBENCH")
+    if with_polybench:
+        modules.append(
+            Module(
+                benchmark_configs_path=os.path.join(
+                    dirname, "../configs/bench_info/polybench"
+                ),
+                benchmark_configs_recursive=True,
+                benchmarks_module="dpbench.benchmarks.polybench",
+                path=os.path.join(dirname, "../benchmarks/polybench"),
             )
         )
 
@@ -72,6 +88,7 @@ def read_configs(
             read_benchmarks(
                 config,
                 mod.benchmark_configs_path,
+                recursive=mod.benchmark_configs_recursive,
                 parent_package=mod.benchmarks_module,
                 benchmarks=benchmarks,
             )
@@ -92,7 +109,7 @@ def read_configs(
             postfixes=postfixes_tmp,
         )
 
-    if npbench_root:
+    if with_npbench:
         fix_npbench_configs(config.benchmarks)
 
     return config
@@ -101,6 +118,7 @@ def read_configs(
 def read_benchmarks(
     config: Config,
     bench_info_dir: str,
+    recursive: bool = False,
     parent_package: str = "dpbench.benchmarks",
     benchmarks: list[str] = None,
 ):
@@ -109,21 +127,34 @@ def read_benchmarks(
     Args:
         config: Configuration object where settings should be populated.
         bench_info_dir: Path to the directory with configuration files.
+        recursive: Either to load configs recursively.
         parent_package: Package that contains benchmark packages.
         benchmarks: list of benchmarks to load. None means all.
 
     Returns: nothing.
     """
     for bench_info_file in os.listdir(bench_info_dir):
+        bench_info_file_path = os.path.join(bench_info_dir, bench_info_file)
+
+        if not os.path.isfile(bench_info_file_path):
+            if recursive:
+                read_benchmarks(
+                    config=config,
+                    bench_info_dir=bench_info_file_path,
+                    recursive=recursive,
+                    parent_package=parent_package + "." + bench_info_file,
+                    benchmarks=benchmarks,
+                )
+
+            continue
+
         if not bench_info_file.endswith(".toml"):
             continue
 
         if benchmarks and not bench_info_file[:-5] in benchmarks:
             continue
 
-        bench_info_file = os.path.join(bench_info_dir, bench_info_file)
-
-        with open(bench_info_file) as file:
+        with open(bench_info_file_path) as file:
             file_contents = file.read()
 
         bench_info = tomli.loads(file_contents)

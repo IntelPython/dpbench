@@ -47,8 +47,6 @@ input_args = [
     "nout",
 ]
 output_args = [
-    "nevts",
-    "nout",
     "C1",
     "F1",
     "Q1",

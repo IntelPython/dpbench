@@ -51,7 +51,6 @@ input_args = [
     "seed",
 ]
 output_args = [
-    "nopt",
     "price",
     "strike",
     "t",

@@ -17,11 +17,4 @@ def initialize(nevts, nout):
             F1[i, j] = np.random.rand()
             Q1[i, j] = np.random.rand() * np.random.rand()
 
-    return (
-        nevts,
-        nout,
-        C1,
-        F1,
-        Q1,
-        np.empty((nevts, nout, 4)),
-    )
+    return (C1, F1, Q1, np.empty((nevts, nout, 4)))

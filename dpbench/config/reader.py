@@ -109,9 +109,6 @@ def read_configs(
             postfixes=postfixes_tmp,
         )
 
-    if with_npbench:
-        fix_npbench_configs(config.benchmarks)
-
     return config
 
 
@@ -232,6 +229,8 @@ def setup_init(config: Benchmark, modules: list[str]) -> None:
     init_module = None
     if config.module_name in modules:
         init_module = config.module_name
+    elif config.short_name in modules:
+        init_module = config.short_name
     elif config.module_name + "_initialize" in modules:
         init_module = config.module_name + "_initialize"
 
@@ -249,6 +248,34 @@ def setup_init(config: Benchmark, modules: list[str]) -> None:
             print(
                 f"WARNING: could not find init function for {config.module_name}"
             )
+
+
+def discover_module_name_and_postfix(module: str, config: Config):
+    """Discover real module name and postfix for the implementation.
+
+    Args:
+        module: Name of the root python module (either python file or top level
+            folder for sycl).
+        config: Module config.
+
+    Returns: (module_name, postfix).
+    """
+    postfix = ""
+    module_name = ""
+
+    if module.endswith("sycl_native_ext"):
+        module_name = (
+            f"{module}.{config.module_name}_sycl._{config.module_name}_sycl"
+        )
+        postfix = "sycl"
+    else:
+        module_name = module
+        if module.startswith(config.module_name):
+            postfix = module[len(config.module_name) + 1 :]
+        elif module.startswith(config.short_name):
+            postfix = module[len(config.short_name) + 1 :]
+
+    return module_name, postfix
 
 
 def read_benchmark_implementations(
@@ -289,17 +316,7 @@ def read_benchmark_implementations(
     setup_init(config, modules)
 
     for module in modules:
-        postfix = ""
-        module_name = ""
-
-        if module.endswith("sycl_native_ext"):
-            module_name = (
-                f"{module}.{config.module_name}_sycl._{config.module_name}_sycl"
-            )
-            postfix = "sycl"
-        else:
-            module_name = module
-            postfix = module[len(config.module_name) + 1 :]
+        module_name, postfix = discover_module_name_and_postfix(module, config)
 
         if postfixes and postfix not in postfixes:
             continue
@@ -318,6 +335,8 @@ def read_benchmark_implementations(
             impl_mod = importlib.import_module(package_path)
 
             for func in [
+                module,
+                f"{module}_{postfix}",
                 config.module_name,
                 f"{config.module_name}_{postfix}",
                 "kernel",
@@ -349,72 +368,3 @@ def get_benchmark_index(configs: list[Benchmark], module_name: str) -> int:
         ),
         None,
     )
-
-
-def fix_npbench_configs(configs: list[Benchmark]):
-    """Applies configuration fixes for some npbench benchmarks.
-
-    Fixes required due to the difference in framework implementations.
-    """
-    index = get_benchmark_index(configs, "mandelbrot1")
-    if index is not None:
-        configs[index] = modify_args(
-            configs[index], modifier=lambda s: s.lower()
-        )
-
-    index = get_benchmark_index(configs, "mandelbrot2")
-    if index is not None:
-        configs[index] = modify_args(
-            configs[index],
-            modifier=lambda s: "itermax" if s == "maxiter" else s.lower(),
-        )
-
-    index = get_benchmark_index(configs, "conv2d")
-    if index is not None:
-        config = configs[index]
-
-        config.module_name = "conv2d_bias"
-        configs[index] = config
-
-        for impl in config.implementations:
-            impl.func_name = "conv2d_bias"
-
-    index = get_benchmark_index(configs, "nbody")
-    if index is not None:
-        configs[index].output_args.append("pos")
-        configs[index].output_args.append("vel")
-
-    index = get_benchmark_index(configs, "scattering_self_energies")
-    if index is not None:
-        configs[index].output_args.append("Sigma")
-
-    index = get_benchmark_index(configs, "correlation")
-    if index is not None:
-        configs[index].output_args.append("data")
-
-    index = get_benchmark_index(configs, "doitgen")
-    if index is not None:
-        configs[index].output_args.append("A")
-
-
-def modify_args(config: Benchmark, modifier: Callable[[str], str]) -> Benchmark:
-    """Applies modifier to function argument names.
-
-    Current implementation applies modifier to
-      - all presets keys, not preset names;
-      - all input_args;
-      - all array_args;
-      - all output_args.
-    """
-    config.parameters = Presets(
-        {
-            preset: {modifier(k): v for k, v in parameters.items()}
-            for preset, parameters in config.parameters.items()
-        }
-    )
-
-    config.input_args = [modifier(arg) for arg in config.input_args]
-    config.array_args = [modifier(arg) for arg in config.array_args]
-    config.output_args = [modifier(arg) for arg in config.output_args]
-
-    return config

@@ -18,8 +18,8 @@ input_args = [
     "xmax",
     "ymin",
     "ymax",
-    "XN",
-    "YN",
+    "xn",
+    "yn",
     "maxiter",
     "horizon",
 ]
@@ -30,39 +30,39 @@ norm_error = 0.001
 [benchmark.parameters.S]
 xmin = -1.75
 xmax = 0.25
-XN = 125
+xn = 125
 ymin = -1.0
 ymax = 1.0
-YN = 125
+yn = 125
 maxiter = 60
 horizon = 2.0
 
 [benchmark.parameters.M]
 xmin = -1.75
 xmax = 0.25
-XN = 250
+xn = 250
 ymin = -1.0
 ymax = 1.0
-YN = 250
+yn = 250
 maxiter = 150
 horizon = 2.0
 
 [benchmark.parameters.L]
 xmin = -2.0
 xmax = 0.5
-XN = 833
+xn = 833
 ymin = -1.25
 ymax = 1.25
-YN = 833
+yn = 833
 maxiter = 200
 horizon = 2.0
 
 [benchmark.parameters.paper]
 xmin = -2.25
 xmax = 0.75
-XN = 1000
+xn = 1000
 ymin = -1.25
 ymax = 1.25
-YN = 1000
+yn = 1000
 maxiter = 200
 horizon = 2.0

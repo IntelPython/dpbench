@@ -26,7 +26,9 @@ array_args = [
     "D",
     "Sigma",
 ]
-output_args = []
+output_args = [
+    "Sigma",
+]
 
 [benchmark.parameters.S]
 Nkz = 2

@@ -28,7 +28,10 @@ array_args = [
     "pos",
     "vel",
 ]
-output_args = []
+output_args = [
+    "pos",
+    "vel",
+]
 norm_error = 0.1
 
 [benchmark.parameters.S]

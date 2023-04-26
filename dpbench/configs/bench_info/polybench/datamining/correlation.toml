@@ -21,7 +21,9 @@ input_args = [
 array_args = [
     "data",
 ]
-output_args = []
+output_args = [
+    "data",
+]
 
 [benchmark.parameters.S]
 M = 500

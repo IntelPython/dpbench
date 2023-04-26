@@ -7,7 +7,7 @@
 name = "Conv2D with Bias"
 short_name = "conv2d"
 relative_path = "deep_learning/conv2d_bias"
-module_name = "conv2d"
+module_name = "conv2d_bias"
 func_name = "conv2d_bias"
 kind = "microbench"
 domain = "Learning"

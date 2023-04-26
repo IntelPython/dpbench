@@ -24,7 +24,9 @@ array_args = [
     "A",
     "C4",
 ]
-output_args = []
+output_args = [
+    "A",
+]
 
 [benchmark.parameters.S]
 NR = 60

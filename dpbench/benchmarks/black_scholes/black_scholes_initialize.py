@@ -26,4 +26,4 @@ def initialize(nopt, seed):
     call = np.zeros(nopt, dtype=dtype)
     put = -np.ones(nopt, dtype=dtype)
 
-    return (nopt, price, strike, t, rate, volatility, call, put)
+    return (price, strike, t, rate, volatility, call, put)

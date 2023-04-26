@@ -1,0 +1,66 @@
+# SPDX-FileCopyrightText: 2021 ETH Zurich and the NPBench authors
+# SPDX-FileCopyrightText: 2022 - 2023 Intel Corporation
+#
+# SPDX-License-Identifier: BSD-3-Clause
+
+[benchmark]
+name = "Contour Integral"
+short_name = "coninteg"
+relative_path = "contour_integral"
+module_name = "contour_integral"
+func_name = "contour_integral"
+kind = "microapp"
+domain = "Physics"
+dwarf = "dense_linear_algebra"
+input_args = [
+    "NR",
+    "NM",
+    "slab_per_bc",
+    "Ham",
+    "int_pts",
+    "Y",
+]
+array_args = [
+    "Ham",
+    "int_pts",
+    "Y",
+]
+output_args = []
+
+[benchmark.parameters.S]
+NR = 50
+NM = 150
+slab_per_bc = 2
+num_int_pts = 32
+
+[benchmark.parameters.M]
+NR = 200
+NM = 400
+slab_per_bc = 2
+num_int_pts = 32
+
+[benchmark.parameters.L]
+NR = 600
+NM = 1000
+slab_per_bc = 2
+num_int_pts = 32
+
+[benchmark.parameters.paper]
+NR = 500
+NM = 1000
+slab_per_bc = 2
+num_int_pts = 32
+
+[benchmark.init]
+func_name = "initialize"
+input_args = [
+    "NR",
+    "NM",
+    "slab_per_bc",
+    "num_int_pts",
+]
+output_args = [
+    "Ham",
+    "int_pts",
+    "Y",
+]

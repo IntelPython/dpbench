@@ -1,0 +1,51 @@
+# SPDX-FileCopyrightText: 2010-2016 Ohio State University
+# SPDX-FileCopyrightText: 2021 ETH Zurich and the NPBench authors
+# SPDX-FileCopyrightText: 2022 - 2023 Intel Corporation
+#
+# SPDX-License-Identifier: BSD-3-Clause
+
+[benchmark]
+name = "Alternating Direction Implicit Method"
+short_name = "adi"
+relative_path = "adi"
+module_name = "adi"
+func_name = "kernel"
+kind = "microbench"
+domain = "Solver"
+dwarf = "structured_grids"
+input_args = [
+    "TSTEPS",
+    "N",
+    "u",
+]
+array_args = [
+    "u",
+]
+output_args = [
+    "u",
+]
+
+[benchmark.parameters.S]
+TSTEPS = 5
+N = 100
+
+[benchmark.parameters.M]
+TSTEPS = 20
+N = 200
+
+[benchmark.parameters.L]
+TSTEPS = 50
+N = 500
+
+[benchmark.parameters.paper]
+TSTEPS = 100
+N = 200
+
+[benchmark.init]
+func_name = "initialize"
+input_args = [
+    "N",
+]
+output_args = [
+    "u",
+]

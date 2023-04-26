@@ -1,0 +1,53 @@
+# SPDX-FileCopyrightText: 2010-2016 Ohio State University
+# SPDX-FileCopyrightText: 2021 ETH Zurich and the NPBench authors
+# SPDX-FileCopyrightText: 2022 - 2023 Intel Corporation
+#
+# SPDX-License-Identifier: BSD-3-Clause
+
+[benchmark]
+name = "Scalar, Vector and Matrix Multiplication"
+short_name = "gesummv"
+relative_path = "gesummv"
+module_name = "gesummv"
+func_name = "kernel"
+kind = "microbench"
+domain = "LinAlg"
+dwarf = "dense_linear_algebra"
+input_args = [
+    "alpha",
+    "beta",
+    "A",
+    "B",
+    "x",
+]
+array_args = [
+    "A",
+    "B",
+    "x",
+]
+output_args = []
+
+[benchmark.parameters.S]
+N = 2000
+
+[benchmark.parameters.M]
+N = 4000
+
+[benchmark.parameters.L]
+N = 14000
+
+[benchmark.parameters.paper]
+N = 11200
+
+[benchmark.init]
+func_name = "initialize"
+input_args = [
+    "N",
+]
+output_args = [
+    "alpha",
+    "beta",
+    "A",
+    "B",
+    "x",
+]

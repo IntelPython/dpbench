@@ -1,0 +1,45 @@
+# SPDX-FileCopyrightText: 2010-2016 Ohio State University
+# SPDX-FileCopyrightText: 2021 ETH Zurich and the NPBench authors
+# SPDX-FileCopyrightText: 2022 - 2023 Intel Corporation
+#
+# SPDX-License-Identifier: BSD-3-Clause
+
+[benchmark]
+name = "Toeplitz system solver"
+short_name = "durbin"
+relative_path = "durbin"
+module_name = "durbin"
+func_name = "kernel"
+kind = "microbench"
+domain = "Solver"
+dwarf = "dense_linear_algebra"
+input_args = [
+    "r",
+]
+array_args = [
+    "r",
+]
+output_args = []
+rtol = 0.001
+atol = 0.001
+
+[benchmark.parameters.S]
+N = 1000
+
+[benchmark.parameters.M]
+N = 6000
+
+[benchmark.parameters.L]
+N = 20000
+
+[benchmark.parameters.paper]
+N = 16000
+
+[benchmark.init]
+func_name = "initialize"
+input_args = [
+    "N",
+]
+output_args = [
+    "r",
+]

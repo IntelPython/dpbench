@@ -1,0 +1,45 @@
+# SPDX-FileCopyrightText: 2010-2016 Ohio State University
+# SPDX-FileCopyrightText: 2021 ETH Zurich and the NPBench authors
+# SPDX-FileCopyrightText: 2022 - 2023 Intel Corporation
+#
+# SPDX-License-Identifier: BSD-3-Clause
+
+[benchmark]
+name = "Floyd-Warshall"
+short_name = "floydwar"
+relative_path = "floyd_warshall"
+module_name = "floyd_warshall"
+func_name = "kernel"
+kind = "microapp"
+domain = "Graphs"
+dwarf = "dynamic_programming"
+input_args = [
+    "path",
+]
+array_args = [
+    "path",
+]
+output_args = [
+    "path",
+]
+
+[benchmark.parameters.S]
+N = 200
+
+[benchmark.parameters.M]
+N = 400
+
+[benchmark.parameters.L]
+N = 850
+
+[benchmark.parameters.paper]
+N = 2800
+
+[benchmark.init]
+func_name = "initialize"
+input_args = [
+    "N",
+]
+output_args = [
+    "path",
+]

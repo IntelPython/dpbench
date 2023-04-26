@@ -1,0 +1,86 @@
+# SPDX-FileCopyrightText: 2017 Lorena A. Barba, Gilbert F. Forsyth.
+# SPDX-FileCopyrightText: 2018 Barba, Lorena A., and Forsyth, Gilbert F.
+# SPDX-FileCopyrightText: 2021 ETH Zurich and the NPBench authors
+# SPDX-FileCopyrightText: 2022 - 2023 Intel Corporation
+#
+# SPDX-License-Identifier: BSD-3-Clause
+
+
+[benchmark]
+name = "Channel Flow"
+short_name = "chanflow"
+relative_path = "channel_flow"
+module_name = "channel_flow"
+func_name = "channel_flow"
+kind = "microapp"
+domain = "Physics"
+dwarf = "structured_grids"
+input_args = [
+    "nit",
+    "u",
+    "v",
+    "dt",
+    "dx",
+    "dy",
+    "p",
+    "rho",
+    "nu",
+    "F",
+]
+array_args = [
+    "u",
+    "v",
+    "p",
+]
+output_args = [
+    "u",
+    "v",
+    "p",
+]
+
+[benchmark.parameters.S]
+ny = 61
+nx = 61
+nit = 5
+rho = 1.0
+nu = 0.1
+F = 1.0
+
+[benchmark.parameters.M]
+ny = 121
+nx = 121
+nit = 10
+rho = 1.0
+nu = 0.1
+F = 1.0
+
+[benchmark.parameters.L]
+ny = 201
+nx = 201
+nit = 20
+rho = 1.0
+nu = 0.1
+F = 1.0
+
+[benchmark.parameters.paper]
+ny = 101
+nx = 101
+nit = 50
+rho = 1.0
+nu = 0.1
+F = 1.0
+
+[benchmark.init]
+func_name = "initialize"
+input_args = [
+    "ny",
+    "nx",
+]
+output_args = [
+    "u",
+    "v",
+    "p",
+    "dx",
+    "dy",
+    "dt",
+]

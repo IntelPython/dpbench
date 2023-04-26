@@ -1,0 +1,58 @@
+# SPDX-FileCopyrightText: 2010-2016 Ohio State University
+# SPDX-FileCopyrightText: 2021 ETH Zurich and the NPBench authors
+# SPDX-FileCopyrightText: 2022 - 2023 Intel Corporation
+#
+# SPDX-License-Identifier: BSD-3-Clause
+
+[benchmark]
+name = "Matrix Vector Product and Transpose"
+short_name = "mvt"
+relative_path = "mvt"
+module_name = "mvt"
+func_name = "kernel"
+kind = "microbench"
+domain = "LinAlg"
+dwarf = "dense_linear_algebra"
+input_args = [
+    "x1",
+    "x2",
+    "y_1",
+    "y_2",
+    "A",
+]
+array_args = [
+    "x1",
+    "x2",
+    "y_1",
+    "y_2",
+    "A",
+]
+output_args = [
+    "x1",
+    "x2",
+]
+
+[benchmark.parameters.S]
+N = 5500
+
+[benchmark.parameters.M]
+N = 11000
+
+[benchmark.parameters.L]
+N = 22000
+
+[benchmark.parameters.paper]
+N = 16000
+
+[benchmark.init]
+func_name = "initialize"
+input_args = [
+    "N",
+]
+output_args = [
+    "x1",
+    "x2",
+    "y_1",
+    "y_2",
+    "A",
+]

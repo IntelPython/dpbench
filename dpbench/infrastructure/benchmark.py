@@ -169,10 +169,23 @@ def _exec(
         # Special case: if the benchmark implementation returns anything, then
         # add that to the results dict
         if retval is not None:
-            results_dict["return-value"] = retval
+            results_dict["return-value"] = convert_to_numpy(retval, fmwrk)
 
     results_dict["error_state"] = ErrorCodes.SUCCESS
     results_dict["error_msg"] = ""
+
+
+def convert_to_numpy(value: any, fmwrk: Framework) -> any:
+    """Calls copy_from_func on all array values."""
+    if isinstance(value, tuple):
+        retval_list = list(value)
+        for i, _ in enumerate(retval_list):
+            retval_list[i] = fmwrk.copy_from_func()(retval_list[i])
+        value = tuple(retval_list)
+    else:
+        value = fmwrk.copy_from_func()(value)
+
+    return value
 
 
 class BenchmarkResults:

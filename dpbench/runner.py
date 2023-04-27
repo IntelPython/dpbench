@@ -16,6 +16,16 @@ import dpbench.infrastructure as dpbi
 from dpbench.infrastructure.enums import ErrorCodes
 
 
+def _format_ns(time_in_ns):
+    time = int(time_in_ns)
+    assert time >= 0
+    suff = [("s", 1000_000_000), ("ms", 1000_000), ("\u03BCs", 1000), ("ns", 0)]
+    for s, scale in suff:
+        if time >= scale:
+            scaled_time = float(time) / scale if scale > 0 else time
+            return f"{scaled_time}{s} ({time} ns)"
+
+
 def _print_results(result: dpbi.BenchmarkResults):
     print(
         "================ implementation "
@@ -28,12 +38,12 @@ def _print_results(result: dpbi.BenchmarkResults):
     if result.error_state == ErrorCodes.SUCCESS:
         print("framework:", result.framework_name)
         print("framework version:", result.framework_version)
-        print("setup time:", result.setup_time)
-        print("warmup time:", result.warmup_time)
-        print("teardown time:", result.teardown_time)
-        print("max execution times:", result.max_exec_time)
-        print("min execution times:", result.min_exec_time)
-        print("median execution times:", result.median_exec_time)
+        print("setup time:", _format_ns(result.setup_time))
+        print("warmup time:", _format_ns(result.warmup_time))
+        print("teardown time:", _format_ns(result.teardown_time))
+        print("max execution times:", _format_ns(result.max_exec_time))
+        print("min execution times:", _format_ns(result.min_exec_time))
+        print("median execution times:", _format_ns(result.median_exec_time))
         print("repeats:", result.num_repeats)
         print("preset:", result.preset)
         print("validated:", result.validation_state)

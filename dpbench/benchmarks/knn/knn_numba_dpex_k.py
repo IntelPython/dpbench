@@ -9,7 +9,7 @@ import numpy as np
 
 
 @dpex.kernel
-def _knn_kernel(
+def _knn_kernel(  # noqa: C901: TODO: can we simplify logic?
     train,
     train_labels,
     test,

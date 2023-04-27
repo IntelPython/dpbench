@@ -20,7 +20,9 @@ def linspace(start, stop, num, dtype):
 
 
 @nb.jit(nopython=True, parallel=False, fastmath=True)
-def mandelbrot(xmin, xmax, ymin, ymax, xn, yn, maxiter, horizon=2.0):
+def mandelbrot(  # noqa: C901: TODO: can we simplify logic?
+    xmin, xmax, ymin, ymax, xn, yn, maxiter, horizon=2.0
+):
     # Adapted from https://www.ibm.com/developerworks/community/blogs/jfp/...
     #              .../entry/How_To_Compute_Mandelbrodt_Set_Quickly?lang=en
     # X = np.linspace(xmin, xmax, xn, dtype=np.float64)

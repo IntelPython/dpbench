@@ -21,9 +21,9 @@ from .implementation_postfix import Implementation
 from .module import Module
 
 
-def read_configs(
+def read_configs(  # noqa: C901: TODO: move modules into config
     benchmarks: list[str] = None,
-    postfixes: list[str] = None,
+    implementations: list[str] = None,
 ) -> Config:
     """Read all configuration files and populate those settings into Config.
 
@@ -104,14 +104,13 @@ def read_configs(
         if mod.path != "":
             sys.path.append(mod.path)
 
+    if implementations is None:
+        implementations = [impl.postfix for impl in config.implementations]
+
     for benchmark in config.benchmarks:
-        postfixes_tmp = postfixes
-        if postfixes_tmp is None:
-            postfixes_tmp = [impl.postfix for impl in config.implementations]
         read_benchmark_implementations(
             benchmark,
-            config.implementations,
-            postfixes=postfixes_tmp,
+            implementations,
         )
 
     return config
@@ -136,22 +135,20 @@ def read_benchmarks(
     for bench_info_file in os.listdir(bench_info_dir):
         bench_info_file_path = os.path.join(bench_info_dir, bench_info_file)
 
-        if not os.path.isfile(bench_info_file_path):
-            if recursive:
-                read_benchmarks(
-                    config=config,
-                    bench_info_dir=bench_info_file_path,
-                    recursive=recursive,
-                    parent_package=parent_package + "." + bench_info_file,
-                    benchmarks=benchmarks,
-                )
+        if os.path.isdir(bench_info_file_path) and recursive:
+            read_benchmarks(
+                config=config,
+                bench_info_dir=bench_info_file_path,
+                recursive=recursive,
+                parent_package=parent_package + "." + bench_info_file,
+                benchmarks=benchmarks,
+            )
 
-            continue
-
-        if not bench_info_file.endswith(".toml"):
-            continue
-
-        if benchmarks and not bench_info_file[:-5] in benchmarks:
+        if (
+            not os.path.isfile(bench_info_file_path)
+            or not bench_info_file.endswith(".toml")
+            or (benchmarks and not bench_info_file[:-5] in benchmarks)
+        ):
             continue
 
         with open(bench_info_file_path) as file:
@@ -290,17 +287,15 @@ def discover_module_name_and_postfix(module: str, config: Config):
 
 def read_benchmark_implementations(
     config: Benchmark,
-    known_implementations: list[Implementation],
-    postfixes: list[str] = None,
+    implementations: list[str] = None,
 ) -> None:
     """Read and discover implementation modules and functions.
 
     Args:
         config: Benchmark configuration object where settings should be
             populated.
-        postfixes: List of postfixes to import. Set it to None to import all
-            available implementations. It does not affect initialization import.
-        implementations: Prepopulated list of implementations.
+        implementations: List of postfixes to import. It does not affect
+            initialization import.
 
     Raises:
         RuntimeError: Implementation file does not match any known postfix.
@@ -326,14 +321,9 @@ def read_benchmark_implementations(
     for module in modules:
         module_name, postfix = discover_module_name_and_postfix(module, config)
 
-        if postfixes and postfix not in postfixes:
-            continue
-
-        if config.init and config.init.module_name.endswith(module_name):
-            continue
-
-        if postfix not in [impl.postfix for impl in known_implementations]:
-            logging.warning(f"Skipping postfix: {module}")
+        if (postfix not in implementations) or (
+            config.init and config.init.module_name.endswith(module_name)
+        ):
             continue
 
         func_name: str = None

@@ -75,7 +75,9 @@ def get_neighborhood(n, dim, data, eps, ind_lst, sz_lst):
 
 
 @nb.njit(parallel=False, fastmath=True)
-def compute_clusters(n, min_pts, assignments, sizes, indices_list):
+def compute_clusters(  # noqa: C901: TODO: can we simplify logic?
+    n, min_pts, assignments, sizes, indices_list
+):
     nclusters = 0
     nnoise = 0
     for i in range(n):

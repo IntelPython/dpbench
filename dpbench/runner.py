@@ -78,6 +78,28 @@ def run_benchmark(
     print_results=True,
     run_id: int = None,
 ):
+    """Run specific benchmark.
+
+    Args:
+        bname (str, semi-optional): Name of the benchmark. Either name, either
+            configuration must be provided.
+        benchmark (Benchmark, semi-optional): Benchmark configuration. Either
+            name, either configuration must be provided.
+        implementation_postfix: (str, optional): Implementation postfixes
+            to be executed. If not provided, all possible implementations will
+            be executed.
+        preset (str, optional): Problem size. Defaults to "S".
+        repeat (int, optional): Number of repetitions. Defaults to 1.
+        validate (bool, optional): Whether to validate against NumPy.
+            Defaults to True.
+        timeout (float, optional): Timeout setting. Defaults to 10.0.
+        conn: connection to database. If not provided results won't be stored.
+        print_results (bool, optional): Either print results. Defaults to True.
+        run_id (int, optional): Either store result to specific run_id.
+            If not provided, new run_id will be created.
+
+    Returns: nothing.
+    """
     bench_cfg = get_benchmark(benchmark=benchmark, benchmark_name=bname)
     bname = bench_cfg.name
     print("")
@@ -119,37 +141,45 @@ def run_benchmarks(
     repeat=10,
     validate=True,
     timeout=200.0,
-    dbfile=None,
     print_results=True,
     run_id=None,
+    implementations: list[str] = None,
 ):
     """Run all benchmarks in the dpbench benchmark directory
+
     Args:
-        bconfig_path (str, optional): Path to benchmark configurations.
-        Defaults to None.
         preset (str, optional): Problem size. Defaults to "S".
         repeat (int, optional): Number of repetitions. Defaults to 1.
         validate (bool, optional): Whether to validate against NumPy.
-        Defaults to True.
+            Defaults to True.
         timeout (float, optional): Timeout setting. Defaults to 10.0.
+        print_results (bool, optional): Either print results. Defaults to True.
+        run_id (int, optional): Either store result to specific run_id.
+            If not provided, new run_id will be created.
+        implementations: (list[str], optional): List of implementation postfixes
+            to be executed. If not provided, all possible implementations will
+            be executed.
+
+    Returns: nothing.
     """
 
     print("===============================================================")
     print("")
     print("***Start Running DPBench***")
-    if not dbfile:
-        dbfile = "results.db"
 
     dpbi.create_results_table()
-    conn = dpbi.create_connection(db_file=dbfile)
+    conn = dpbi.create_connection(db_file="results.db")
     if run_id is None:
         run_id = dpbi.create_run(conn)
 
+    if implementations is None:
+        implementations = [impl.postfix for impl in cfg.GLOBAL.implementations]
+
     for b in cfg.GLOBAL.benchmarks:
-        for impl in cfg.GLOBAL.implementations:
+        for impl in implementations:
             run_benchmark(
                 benchmark=b,
-                implementation_postfix=impl.postfix,
+                implementation_postfix=impl,
                 preset=preset,
                 repeat=repeat,
                 validate=validate,
@@ -167,6 +197,14 @@ def run_benchmarks(
     print("===============================================================")
     print("")
 
-    dpbi.generate_impl_summary_report(conn, run_id=run_id)
+    if print_results:
+        dpbi.generate_impl_summary_report(
+            conn, run_id=run_id, implementations=implementations
+        )
 
-    return dbfile
+        dpbi.generate_performance_report(
+            conn,
+            run_id=run_id,
+            implementations=implementations,
+            headless=True,
+        )

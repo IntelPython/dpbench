@@ -105,7 +105,7 @@ def generate_summary(data: pd.DataFrame):
 def generate_impl_summary_report(
     results_db: Union[str, sqlalchemy.Engine] = "results.db",
     run_id: int = None,
-    postfixes: list[str] = None,
+    implementations: list[str] = None,
 ):
     """generate implementation summary report with status of each benchmark"""
     conn = update_connection(results_db=results_db)
@@ -121,10 +121,10 @@ def generate_impl_summary_report(
         dm.Result.problem_preset,
     ]
 
-    if postfixes is None:
-        postfixes = [impl.postfix for impl in cfg.GLOBAL.implementations]
+    if implementations is None:
+        implementations = [impl.postfix for impl in cfg.GLOBAL.implementations]
 
-    for impl in postfixes:
+    for impl in implementations:
         columns.append(
             func.ifnull(
                 func.max(
@@ -161,14 +161,17 @@ def generate_impl_summary_report(
 def generate_performance_report(
     results_db: Union[str, sqlalchemy.Engine] = "results.db",
     run_id: int = None,
+    implementations: list[str] = None,
+    headless=False,
 ):
     """generate performance report with median times for each benchmark"""
     conn = update_connection(results_db=results_db)
     run_id = update_run_id(conn, run_id)
     legends = read_legends()
 
-    generate_header(conn, run_id)
-    generate_legend(legends)
+    if not headless:
+        generate_header(conn, run_id)
+        generate_legend(legends)
 
     columns = [
         dm.Result.input_size_human.label("input_size"),
@@ -176,8 +179,10 @@ def generate_performance_report(
         dm.Result.problem_preset,
     ]
 
-    for _, row in legends.iterrows():
-        impl = row["impl_postfix"]
+    if implementations is None:
+        implementations = [impl.postfix for impl in cfg.GLOBAL.implementations]
+
+    for impl in implementations:
         columns.append(
             func.ifnull(
                 func.max(
@@ -207,9 +212,7 @@ def generate_performance_report(
     )
 
     for index, row in df.iterrows():
-        for _, legend_row in legends.iterrows():
-            impl = legend_row["impl_postfix"]
-
+        for impl in implementations:
             time = row[impl]
             if time:
                 NANOSECONDS_IN_MILISECONDS: Final[float] = 1000 * 1000.0

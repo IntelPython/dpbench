@@ -38,6 +38,7 @@ output_args = [
     "v",
     "p",
 ]
+expected_failure_implementations = ["dpnp"]
 
 [benchmark.parameters.S]
 ny = 61

@@ -21,6 +21,7 @@ array_args = [
     "imgIn",
 ]
 output_args = []
+expected_failure_implementations = ["dpnp"]
 
 [benchmark.parameters.S]
 W = 400

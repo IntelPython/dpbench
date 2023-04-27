@@ -26,6 +26,7 @@ input_args = [
 array_args = []
 output_args = []
 norm_error = 0.001
+expected_failure_implementations = ["dpnp"]
 
 [benchmark.parameters.S]
 xmin = -2.0

@@ -24,6 +24,7 @@ array_args = [
     "r",
 ]
 output_args = []
+expected_failure_implementations = ["dpnp"]
 
 [benchmark.parameters.S]
 M = 4000

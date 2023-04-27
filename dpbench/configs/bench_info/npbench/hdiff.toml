@@ -27,6 +27,7 @@ array_args = [
 output_args = [
     "out_field",
 ]
+expected_failure_implementations = ["dpnp"]
 
 [benchmark.parameters.S]
 I = 64

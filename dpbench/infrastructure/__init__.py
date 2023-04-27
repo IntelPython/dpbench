@@ -17,7 +17,11 @@ from .dpnp_framework import DpnpFramework
 from .framework import Framework
 from .numba_dpex_framework import NumbaDpexFramework
 from .numba_framework import NumbaFramework
-from .reporter import generate_impl_summary_report, generate_performance_report
+from .reporter import (
+    generate_impl_summary_report,
+    generate_performance_report,
+    get_unexpected_failures,
+)
 from .utilities import validate
 
 __all__ = [
@@ -37,5 +41,6 @@ __all__ = [
     "store_results",
     "generate_impl_summary_report",
     "generate_performance_report",
+    "get_unexpected_failures",
     "validate",
 ]

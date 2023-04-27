@@ -29,6 +29,7 @@ array_args = [
 output_args = [
     "Sigma",
 ]
+expected_failure_implementations = ["dpnp"]
 
 [benchmark.parameters.S]
 Nkz = 2

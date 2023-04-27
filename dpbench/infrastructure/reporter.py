@@ -225,3 +225,40 @@ def generate_performance_report(
             df.at[index, impl] = time
 
     generate_summary(df)
+
+
+def get_failures_from_results(
+    results_db: Union[str, sqlalchemy.Engine] = "results.db",
+    run_id: int = None,
+) -> list[tuple[str, str]]:
+    conn = update_connection(results_db=results_db)
+    run_id = update_run_id(conn, run_id)
+
+    sql = sqlalchemy.select(
+        dm.Result.benchmark,
+        dm.Result.implementation,
+    ).where(
+        sqlalchemy.or_(
+            dm.Result.error_state == "Failed Execution",
+            dm.Result.error_state == "Execution Timeout",
+        ),
+        dm.Result.run_id == run_id,
+    )
+
+    with conn.connect() as connection:
+        return connection.execute(sql).all()
+
+
+def get_unexpected_failures(
+    results_db: Union[str, sqlalchemy.Engine] = "results.db",
+    run_id: int = None,
+):
+    expected_failures = {
+        (b.module_name, impl)
+        for b in cfg.GLOBAL.benchmarks
+        for impl in b.expected_failure_implementations
+    }
+
+    failures = {f for f in get_failures_from_results(results_db, run_id)}
+
+    return failures.difference(expected_failures)

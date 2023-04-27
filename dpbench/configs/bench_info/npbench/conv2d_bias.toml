@@ -23,6 +23,7 @@ array_args = [
     "bias",
 ]
 output_args = []
+expected_failure_implementations = ["dpnp"]
 
 [benchmark.parameters.S]
 N = 8

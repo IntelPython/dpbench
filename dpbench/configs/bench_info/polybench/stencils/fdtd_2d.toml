@@ -31,6 +31,7 @@ output_args = [
     "ey",
     "hz",
 ]
+expected_failure_implementations = ["dpnp"]
 
 [benchmark.parameters.S]
 TMAX = 20

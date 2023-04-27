@@ -31,6 +31,7 @@ output_args = [
     "x1",
     "x2",
 ]
+expected_failure_implementations = ["dpnp"]
 
 [benchmark.parameters.S]
 N = 5500

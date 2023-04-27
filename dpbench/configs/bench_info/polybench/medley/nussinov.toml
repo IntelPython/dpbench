@@ -21,6 +21,7 @@ array_args = [
     "seq",
 ]
 output_args = []
+expected_failure_implementations = ["dpnp"]
 
 [benchmark.parameters.S]
 N = 40

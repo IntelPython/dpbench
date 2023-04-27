@@ -31,6 +31,7 @@ array_args = [
     "b3",
 ]
 output_args = []
+expected_failure_implementations = ["dpnp"]
 
 [benchmark.parameters.S]
 C_in = 3

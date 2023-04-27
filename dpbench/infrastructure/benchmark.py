@@ -36,12 +36,12 @@ from .numba_framework import NumbaFramework
 BenchmarkImplFn = namedtuple("BenchmarkImplFn", "name fn")
 
 
-def _reset_output_args(bench, fmwrk, inputs, preset):
-    output_args = bench.info.output_args
-    array_args = bench.info.array_args
+def _reset_output_args(bench_info, orig_data, fmwrk, inputs):
+    output_args = bench_info.output_args
+    array_args = bench_info.array_args
     for arg in inputs.keys():
         if arg in output_args and arg in array_args:
-            original_data = bench.get_data(preset=preset)[arg]
+            original_data = orig_data[arg]
             inputs.update({arg: fmwrk.copy_to_func()(original_data)})
 
 
@@ -62,10 +62,11 @@ def _array_size(array: Any) -> int:
 
 # TODO: move definition of class on top, so we can properly linter it.
 def _exec(
-    bench: "Benchmark",
+    bench_info,
+    orig_data,
+    impl_fn,
+    out_filename,
     fmwrk,
-    impl_postfix,
-    preset,
     repeat,
     get_args,
     results_dict,
@@ -82,37 +83,25 @@ def _exec(
 
     All timing results and the path to the serialized results are written to
     the results_dict input argument that is managed by the calling process.
-
-    Args:
-        bench : A Benchmark object representing the benchmark to be executed.
-        fmwrk : A Framework for which the benchmark is to be executed.
-        impl_postfix : The identifier for the benchmark implementation.
-        preset : A problem size entry defined in the bench_info JSON.
-        timeout : Number of seconds after which the execution is killed.
-        repeat : Number of repetitions of the benchmark execution.
-        args : Input arguments to benchmark implementation function.
-        results_dict : A dictionary where timing and other results are stored.
-        copy_output : A flag that controls copying output.
     """
-    input_args = bench.info.input_args
-    array_args = bench.info.array_args
-    impl_fn = bench.get_impl(impl_postfix)
+    input_args = bench_info.input_args
+    array_args = bench_info.array_args
     inputs = dict()
 
     with timer.timer() as t:
-        args = get_args(bench.get_data(preset=preset), array_args, fmwrk)
+        args = get_args(orig_data, array_args, fmwrk)
 
     results_dict["setup_time"] = t.get_elapsed_time()
 
     input_size = 0
     for arg in array_args:
-        input_size += _array_size(bench.bdata[preset][arg])
+        input_size += _array_size(orig_data[arg])
 
     results_dict["input_size"] = input_size
 
     for arg in input_args:
         if arg not in array_args:
-            inputs.update({arg: bench.get_data(preset=preset)[arg]})
+            inputs.update({arg: orig_data[arg]})
         else:
             inputs.update({arg: args[arg]})
 
@@ -130,7 +119,9 @@ def _exec(
             return
 
     results_dict["warmup_time"] = t.get_elapsed_time()
-    _reset_output_args(bench=bench, fmwrk=fmwrk, inputs=inputs, preset=preset)
+    _reset_output_args(
+        bench_info=bench_info, orig_data=orig_data, fmwrk=fmwrk, inputs=inputs
+    )
     exec_times = [0] * repeat
 
     retval = None
@@ -141,15 +132,18 @@ def _exec(
         # Do not reset the output from the last repeat
         if i < repeat - 1:
             _reset_output_args(
-                bench=bench, fmwrk=fmwrk, inputs=inputs, preset=preset
+                bench_info=bench_info,
+                orig_data=orig_data,
+                fmwrk=fmwrk,
+                inputs=inputs,
             )
 
     results_dict["exec_times"] = exec_times
 
     # Get the output data
     if copy_output:
-        out_args = bench.info.output_args
-        array_args = bench.info.array_args
+        out_args = bench_info.output_args
+        array_args = bench_info.array_args
         output_arrays = dict()
         with timer.timer() as t:
             for out_arg in out_args:
@@ -157,10 +151,7 @@ def _exec(
                     output_arrays.update(
                         {out_arg: fmwrk.copy_from_func()(inputs[out_arg])}
                     )
-        run_datetime = datetime.now().strftime("%m.%d.%Y_%H.%M.%S")
-        out_filename = (
-            bench.bname + "_" + impl_postfix + "_" + preset + "." + run_datetime
-        )
+
         out_filename = tempfile.gettempdir() + "/" + out_filename
         np.savez_compressed(out_filename, **output_arrays)
         results_dict["outputs"] = out_filename + ".npz"
@@ -530,13 +521,26 @@ class BenchmarkRunner:
             # Execute the benchmark
             with Manager() as manager:
                 results_dict = manager.dict()
+                orig_data = self.bench.get_data(preset=preset)
+                impl_fn = self.bench.get_impl(impl_postfix)
+                run_datetime = datetime.now().strftime("%m.%d.%Y_%H.%M.%S")
+                out_filename = (
+                    self.bench.bname
+                    + "_"
+                    + impl_postfix
+                    + "_"
+                    + preset
+                    + "."
+                    + run_datetime
+                )
                 p = Process(
                     target=_exec,
                     args=(
-                        self.bench,
+                        self.bench.info,
+                        orig_data,
+                        impl_fn,
+                        out_filename,
                         self.fmwrk,
-                        impl_postfix,
-                        preset,
                         repeat,
                         _setup_func,
                         results_dict,

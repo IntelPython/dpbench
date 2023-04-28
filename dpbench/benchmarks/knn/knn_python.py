@@ -7,7 +7,7 @@ from math import sqrt
 import numpy as np
 
 
-def knn(
+def knn(  # noqa: C901: TODO: can we simplify logic?
     x_train,
     y_train,
     x_test,

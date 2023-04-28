@@ -8,7 +8,7 @@ from numba_dpex import dpjit
 
 
 @dpjit
-def knn(
+def knn(  # noqa: C901: TODO: can we simplify logic?
     x_train,
     y_train,
     x_test,

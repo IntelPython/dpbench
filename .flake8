@@ -12,5 +12,4 @@ exclude =
     ./dpbench/benchmarks/pairwise_distance/pairwise_distance_numba_dpex_k.py
     ./dpbench/benchmarks/pairwise_distance/pairwise_distance_numba_dpex_p.py
     ./dpbench/benchmarks/pairwise_distance/pairwise_distance_numba_npr.py
-# TODO: simplify to 10
-max-complexity = 14
+max-complexity = 10

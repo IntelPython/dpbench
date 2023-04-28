@@ -176,31 +176,45 @@ def _exec(
 
     # Get the output data
     if copy_output:
-        out_args = bench.info.output_args
-        array_args = bench.info.array_args
-        output_arrays = dict()
-        with timer.timer() as t:
-            for out_arg in out_args:
-                if out_arg in array_args:
-                    output_arrays.update(
-                        {out_arg: fmwrk.copy_from_func()(inputs[out_arg])}
-                    )
-        run_datetime = datetime.now().strftime("%m.%d.%Y_%H.%M.%S")
-        out_filename = (
-            bench.bname + "_" + impl_postfix + "_" + preset + "." + run_datetime
+        _exec_copy_output(
+            bench, fmwrk, impl_postfix, preset, retval, inputs, results_dict
         )
-        out_filename = tempfile.gettempdir() + "/" + out_filename
-        np.savez_compressed(out_filename, **output_arrays)
-        results_dict["outputs"] = out_filename + ".npz"
-        results_dict["teardown_time"] = t.get_elapsed_time()
-
-        # Special case: if the benchmark implementation returns anything, then
-        # add that to the results dict
-        if retval is not None:
-            results_dict["return-value"] = convert_to_numpy(retval, fmwrk)
 
     results_dict["error_state"] = ErrorCodes.SUCCESS
     results_dict["error_msg"] = ""
+
+
+def _exec_copy_output(
+    bench: "Benchmark",
+    fmwrk,
+    impl_postfix,
+    preset,
+    retval,
+    inputs: dict,
+    results_dict,
+):
+    out_args = bench.info.output_args
+    array_args = bench.info.array_args
+    output_arrays = dict()
+    with timer.timer() as t:
+        for out_arg in out_args:
+            if out_arg in array_args:
+                output_arrays.update(
+                    {out_arg: fmwrk.copy_from_func()(inputs[out_arg])}
+                )
+    run_datetime = datetime.now().strftime("%m.%d.%Y_%H.%M.%S")
+    out_filename = (
+        bench.bname + "_" + impl_postfix + "_" + preset + "." + run_datetime
+    )
+    out_filename = tempfile.gettempdir() + "/" + out_filename
+    np.savez_compressed(out_filename, **output_arrays)
+    results_dict["outputs"] = out_filename + ".npz"
+    results_dict["teardown_time"] = t.get_elapsed_time()
+
+    # Special case: if the benchmark implementation returns anything, then
+    # add that to the results dict
+    if retval is not None:
+        results_dict["return-value"] = convert_to_numpy(retval, fmwrk)
 
 
 def convert_to_numpy(value: any, fmwrk: Framework) -> any:
@@ -683,7 +697,10 @@ class Benchmark(object):
 
         return ref_impl
 
-    def _set_impl_to_framework_map(self, impl_fnlist) -> dict[str, Framework]:
+    def _set_impl_to_framework_map(  # noqa: C901: refactor framework load
+        self,
+        impl_fnlist,
+    ) -> dict[str, Framework]:
         """Create a dictionary mapping each implementation function name to a
         corresponding Framework object.
 
@@ -955,7 +972,7 @@ class Benchmark(object):
         Args:
            preset: The data-size preset (S, M, L).
            framework: A Framework for which the data is initialized.
-           global_precision: The precsion to use for benchmark data.
+           global_precision: The precision to use for benchmark data.
 
         Returns: Dictionary with benchmark inputs as key
                  and initialized data as value.
@@ -987,52 +1004,71 @@ class Benchmark(object):
             )
 
         if self.info.init:
-            # 5. Call the initialize_fn with the input args and store the results
-            #    in the "data" dict.
-
-            init_input_args_list = self.info.init.input_args
-            init_input_args_val_list = []
-            for arg in init_input_args_list:
-                init_input_args_val_list.append(data[arg])
-
-            init_kws = dict(zip(init_input_args_list, init_input_args_val_list))
-            initialized_output = self.initialize_fn(**init_kws)
-
-            # 6. Store the initialized output in the "data" dict. Note that the
-            #    implementation depends on Python dicts being ordered. Thus, the
-            #    code will not work with Python older than 3.7.
-            if isinstance(initialized_output, tuple):
-                for idx, out in enumerate(self.info.init.output_args):
-                    data.update({out: initialized_output[idx]})
-            elif len(self.info.init.output_args) == 1:
-                out = self.info.init.output_args[0]
-                data.update({out: initialized_output})
-            else:
-                raise ValueError("Unsupported initialize output")
-
-            # 7. If global precision or precision through config is set
-            #   enforce precision on all initialized arguments.
-            if self.info.init.types_dict_name == "" and (
-                global_precision is not None or self.info.init.precision != ""
-            ):
-                enforce_pres = (
-                    global_precision
-                    if global_precision is not None
-                    else self.info.init.precision
-                )
-                for out in self.info.init.output_args:
-                    data.update(
-                        {
-                            out: self._enforce_precision(
-                                out, data[out], enforce_pres, framework
-                            )
-                        }
-                    )
+            self.get_data_init(framework, global_precision, data)
 
         # 8. Update the benchmark data (self.bdata) with the generated data
         #    for the provided preset.
         self.bdata[preset] = data
         return self.bdata[preset]
+
+    def get_data_init(
+        self,
+        framework: Framework,
+        global_precision: str,
+        data: str,
+    ):
+        """Population benchmark data with outputs from initialization function.
+
+        Args:
+           preset: The data-size preset (S, M, L).
+           framework: A Framework for which the data is initialized.
+           global_precision: The precision to use for benchmark data.
+           data: Dictionary to put data into.
+
+        Returns: Dictionary with benchmark inputs as key
+                 and initialized data as value.
+        """
+        # 5. Call the initialize_fn with the input args and store the results
+        #    in the "data" dict.
+
+        init_input_args_list = self.info.init.input_args
+        init_input_args_val_list = []
+        for arg in init_input_args_list:
+            init_input_args_val_list.append(data[arg])
+
+        init_kws = dict(zip(init_input_args_list, init_input_args_val_list))
+        initialized_output = self.initialize_fn(**init_kws)
+
+        # 6. Store the initialized output in the "data" dict. Note that the
+        #    implementation depends on Python dicts being ordered. Thus, the
+        #    code will not work with Python older than 3.7.
+        if isinstance(initialized_output, tuple):
+            for idx, out in enumerate(self.info.init.output_args):
+                data.update({out: initialized_output[idx]})
+        elif len(self.info.init.output_args) == 1:
+            out = self.info.init.output_args[0]
+            data.update({out: initialized_output})
+        else:
+            raise ValueError("Unsupported initialize output")
+
+        # 7. If global precision or precision through config is set
+        #   enforce precision on all initialized arguments.
+        if self.info.init.types_dict_name == "" and (
+            global_precision is not None or self.info.init.precision != ""
+        ):
+            enforce_pres = (
+                global_precision
+                if global_precision is not None
+                else self.info.init.precision
+            )
+            for out in self.info.init.output_args:
+                data.update(
+                    {
+                        out: self._enforce_precision(
+                            out, data[out], enforce_pres, framework
+                        )
+                    }
+                )
 
     def run(
         self,

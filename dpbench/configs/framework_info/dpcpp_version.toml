@@ -1,5 +1,0 @@
-# SPDX-FileCopyrightText: 2022 - 2023 Intel Corporation
-#
-# SPDX-License-Identifier: Apache-2.0
-
-dpcpp_version = "IntelLLVM 2023.1.0"

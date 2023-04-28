@@ -8,3 +8,15 @@ full_name = "Numba"
 prefix = "nb"
 class = "NumbaFramework"
 arch = "cpu"
+
+[[framework.postfixes]]
+impl_postfix = "numba_n"
+description = "Numba nopython"
+
+[[framework.postfixes]]
+impl_postfix = "numba_np"
+description = "Numba nopython, Parallel=True"
+
+[[framework.postfixes]]
+impl_postfix = "numba_npr"
+description = "Numba nopython, Parallel=True, prange"

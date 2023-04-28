@@ -24,12 +24,8 @@ from dpbench.infrastructure import timer
 
 from . import timeout_decorator as tout
 from .datamodel import Result, store_results
-from .dpcpp_framework import DpcppFramework
-from .dpnp_framework import DpnpFramework
 from .enums import ErrorCodes, ValidationStatusCodes
-from .framework import Framework
-from .numba_dpex_framework import NumbaDpexFramework
-from .numba_framework import NumbaFramework
+from .frameworks import Framework, build_framework_map
 
 # A global namedtuple to store a function implementing a benchmark along with
 # the name of the implementation.
@@ -697,56 +693,22 @@ class Benchmark(object):
 
         return ref_impl
 
-    def _set_impl_to_framework_map(  # noqa: C901: refactor framework load
-        self,
-        impl_fnlist,
-    ) -> dict[str, Framework]:
+    def _set_impl_to_framework_map(self) -> dict[str, Framework]:
         """Create a dictionary mapping each implementation function name to a
         corresponding Framework object.
-
-        Args:
-            impl_fnlist : list of implementation functions
 
         Returns:
             Dict: Dictionary mapping implementation function to a Framework
         """
 
-        impl_to_fw_map = dict()
+        framework_map = build_framework_map()
 
-        for bimpl in impl_fnlist:
-            if "_numba" in bimpl.name and "_dpex" not in bimpl.name:
-                impl_to_fw_map.update({bimpl.name: NumbaFramework("numba")})
-            elif "_numpy" in bimpl.name:
-                impl_to_fw_map.update({bimpl.name: Framework("numpy")})
-            elif "_python" in bimpl.name:
-                impl_to_fw_map.update({bimpl.name: Framework("python")})
-            elif "_dpex" in bimpl.name:
-                try:
-                    fw = NumbaDpexFramework("numba_dpex")
-                    impl_to_fw_map.update({bimpl.name: fw})
-                except Exception:
-                    logging.exception(
-                        "Framework could not be "
-                        + "created for numba_dpex due to:"
-                    )
-            elif "_sycl" in bimpl.name:
-                try:
-                    fw = DpcppFramework("dpcpp")
-                    impl_to_fw_map.update({bimpl.name: fw})
-                except Exception:
-                    logging.exception(
-                        "Framework could not be created for dpcpp due to:"
-                    )
-            elif "_dpnp" in bimpl.name:
-                try:
-                    fw = DpnpFramework("dpnp")
-                    impl_to_fw_map.update({bimpl.name: fw})
-                except Exception:
-                    logging.exception(
-                        "Framework could not be created for dpcpp due to:"
-                    )
-
-        return impl_to_fw_map
+        return {
+            f"{self.info.module_name}_{impl.postfix}": framework_map[
+                impl.postfix
+            ]
+            for impl in self.info.implementations
+        }
 
     def _get_validation_data(self, preset, precision):
         if preset in self.refdata.keys():
@@ -827,7 +789,7 @@ class Benchmark(object):
 
         self.impl_fnlist = self._set_implementation_fn_list()
         self.ref_impl_fn = self._set_reference_implementation()
-        self.impl_to_fw_map = self._set_impl_to_framework_map(self.impl_fnlist)
+        self.impl_to_fw_map = self._set_impl_to_framework_map()
 
     def get_impl_fnlist(self) -> list[BenchmarkImplFn]:
         """Returns a list of function objects each for a single implementation

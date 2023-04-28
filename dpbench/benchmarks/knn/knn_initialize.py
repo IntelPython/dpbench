@@ -4,12 +4,18 @@
 
 
 def initialize(
-    test_size, train_size, data_dim, classes_num, seed_test, seed_train
+    test_size,
+    train_size,
+    data_dim,
+    classes_num,
+    seed_test,
+    seed_train,
+    types_dict,
 ):
     import numpy as np
     import numpy.random as default_rng
 
-    dtype = np.float64
+    dtype = types_dict["float"]
 
     def _gen_data_x(ip_size, data_dim, seed, dtype):
         default_rng.seed(seed)
@@ -34,7 +40,7 @@ def initialize(
         train_size, data_dim, classes_num, seed_train, dtype
     )
     x_test = _gen_test_data(test_size, data_dim, seed_test, dtype)
-    predictions = np.empty(test_size, np.int64)
+    predictions = np.empty(test_size, types_dict["int"])
     votes_to_classes = np.zeros((test_size, classes_num))
 
     return (x_train, y_train, x_test, predictions, votes_to_classes)

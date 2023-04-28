@@ -5,7 +5,7 @@
 # SPDX-License-Identifier: BSD-3-Clause
 
 import logging
-from typing import Callable, Dict
+from typing import Any, Callable, Dict, final
 
 import pkg_resources
 
@@ -76,6 +76,31 @@ class Framework(object):
         import numpy
 
         return numpy.copy
+
+    @final
+    def dtype_obj(self) -> Callable:
+        """Returns method to convert literal to dtype
+        object"""
+
+        import numpy
+
+        return numpy.dtype
+
+    @final
+    def is_array_type(self, obj: Any):
+        import numpy
+
+        return isinstance(obj, numpy.ndarray)
+
+    @final
+    def is_type_fn(self) -> Callable:
+        import numpy
+
+        return numpy.issubsctype
+
+    @final
+    def change_precision_fn(self, obj: Any) -> Callable:
+        return obj.astype
 
     def validator(self) -> Callable:
         """Returns a function that compares two lists of arrays and validates if

@@ -3,12 +3,14 @@
 # SPDX-License-Identifier: Apache-2.0
 
 
-def initialize(nevts, nout):
+def initialize(nevts, nout, types_dict):
     import numpy as np
 
-    C1 = np.empty((nevts, nout))
-    F1 = np.empty((nevts, nout))
-    Q1 = np.empty((nevts, nout))
+    dtype = types_dict["float"]
+
+    C1 = np.empty((nevts, nout), dtype=dtype)
+    F1 = np.empty((nevts, nout), dtype=dtype)
+    Q1 = np.empty((nevts, nout), dtype=dtype)
 
     np.random.seed(777)
     for i in range(nevts):

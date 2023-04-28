@@ -1,0 +1,11 @@
+# SPDX-FileCopyrightText: 2022 - 2023 Intel Corporation
+#
+# SPDX-License-Identifier: Apache-2.0
+
+[int]
+single = "i4"
+double = "i8"
+
+[float]
+single = "f4"
+double = "f8"

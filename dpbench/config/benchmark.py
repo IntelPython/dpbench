@@ -19,6 +19,8 @@ class Init:
     func_name: str = ""
     package_path: str = ""
     module_name: str = ""
+    types_dict_name: str = ""
+    precision: str = ""
     input_args: List[str] = field(default_factory=list)
     output_args: List[str] = field(default_factory=list)
 
@@ -28,10 +30,18 @@ class Init:
         _func_name = str(obj.get("func_name") or "")
         _package_path = str(obj.get("package_path") or "")
         _module_name = str(obj.get("module_name") or "")
+        _types_dict_name = str(obj.get("types_dict_name") or "")
+        _precision = str(obj.get("precision") or "")
         _input_args = obj.get("input_args")
         _output_args = obj.get("output_args")
         return Init(
-            _func_name, _package_path, _module_name, _input_args, _output_args
+            _func_name,
+            _package_path,
+            _module_name,
+            _types_dict_name,
+            _precision,
+            _input_args,
+            _output_args,
         )
 
     def __post_init__(self):

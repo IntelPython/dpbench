@@ -3,7 +3,7 @@
 # SPDX-License-Identifier: Apache-2.0
 
 
-def initialize(n_samples, n_features, centers, seed):
+def initialize(n_samples, n_features, centers, seed, types_dict):
     from typing import NamedTuple
 
     import numpy as np
@@ -12,7 +12,6 @@ def initialize(n_samples, n_features, centers, seed):
 
     DEFAULT_EPS = 0.6
     DEFAULT_MINPTS = 20
-    dtype = np.float64
 
     class DataSize(NamedTuple):
         n_samples: int
@@ -66,7 +65,7 @@ def initialize(n_samples, n_features, centers, seed):
     )
 
     return (
-        X.flatten().astype(dtype),
+        X.flatten().astype(types_dict["float"]),
         params.eps,
         params.minpts,
     )

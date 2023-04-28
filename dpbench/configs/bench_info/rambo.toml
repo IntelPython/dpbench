@@ -42,9 +42,12 @@ nout = 4
 
 [benchmark.init]
 func_name = "initialize"
+types_dict_name="types_dict"
+precision="double"
 input_args = [
     "nevts",
     "nout",
+    "types_dict",
 ]
 output_args = [
     "C1",

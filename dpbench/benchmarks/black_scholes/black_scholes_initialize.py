@@ -3,11 +3,11 @@
 # SPDX-License-Identifier: Apache-2.0
 
 
-def initialize(nopt, seed):
+def initialize(nopt, seed, types_dict):
     import numpy as np
     import numpy.random as default_rng
 
-    dtype = np.float64
+    dtype = types_dict["float"]
     S0L = 10.0
     S0H = 50.0
     XL = 10.0

@@ -74,6 +74,7 @@ def run_benchmark(
     repeat=10,
     validate=True,
     timeout=200.0,
+    precision=None,
     conn=None,
     print_results=True,
     run_id: int = None,
@@ -93,6 +94,8 @@ def run_benchmark(
         validate (bool, optional): Whether to validate against NumPy.
             Defaults to True.
         timeout (float, optional): Timeout setting. Defaults to 10.0.
+        precision (str, optional): Precision to set for input types. If not provided,
+            precision used in benchmark initialization is retained.
         conn: connection to database. If not provided results won't be stored.
         print_results (bool, optional): Either print results. Defaults to True.
         run_id (int, optional): Either store result to specific run_id.
@@ -122,6 +125,7 @@ def run_benchmark(
             repeat=repeat,
             validate=validate,
             timeout=timeout,
+            precision=precision,
             conn=conn,
             run_id=run_id,
         )
@@ -141,6 +145,7 @@ def run_benchmarks(
     repeat=10,
     validate=True,
     timeout=200.0,
+    precision=None,
     print_results=True,
     run_id=None,
     implementations: list[str] = None,
@@ -153,6 +158,8 @@ def run_benchmarks(
         validate (bool, optional): Whether to validate against NumPy.
             Defaults to True.
         timeout (float, optional): Timeout setting. Defaults to 10.0.
+        precision (str, optional): Precision to set for input types. If not provided,
+            precision used in benchmark initialization is retained.
         print_results (bool, optional): Either print results. Defaults to True.
         run_id (int, optional): Either store result to specific run_id.
             If not provided, new run_id will be created.
@@ -184,6 +191,7 @@ def run_benchmarks(
                 repeat=repeat,
                 validate=validate,
                 timeout=timeout,
+                precision=precision,
                 conn=conn,
                 print_results=print_results,
                 run_id=run_id,

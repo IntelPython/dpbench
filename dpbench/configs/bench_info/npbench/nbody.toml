@@ -33,6 +33,7 @@ output_args = [
     "vel",
 ]
 norm_error = 0.1
+expected_failure_implementations = ["dpnp"]
 
 [benchmark.parameters.S]
 N = 25

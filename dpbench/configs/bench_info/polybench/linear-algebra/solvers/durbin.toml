@@ -22,6 +22,7 @@ array_args = [
 output_args = []
 rtol = 0.001
 atol = 0.001
+expected_failure_implementations = ["dpnp"]
 
 [benchmark.parameters.S]
 N = 1000

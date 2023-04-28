@@ -32,6 +32,7 @@ array_args = [
 output_args = [
     "predictions",
 ]
+expected_failure_implementations = ["numba_dpex_p"]
 
 [benchmark.parameters.S]
 test_size = 1024

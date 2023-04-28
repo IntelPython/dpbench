@@ -88,6 +88,7 @@ class Benchmark:
     array_args: List[str] = field(default_factory=list)
     output_args: List[str] = field(default_factory=list)
     implementations: List[BenchmarkImplementation] = field(default_factory=list)
+    expected_failure_implementations: List[str] = field(default_factory=list)
 
     @staticmethod
     def from_dict(obj: Any) -> "Benchmark":
@@ -107,6 +108,9 @@ class Benchmark:
         _array_args = obj.get("array_args") or []
         _output_args = obj.get("output_args") or []
         _implementations = obj.get("implementations") or []
+        _expected_failure_implementations = (
+            obj.get("expected_failure_implementations") or []
+        )
         return Benchmark(
             _name,
             _short_name,
@@ -122,4 +126,5 @@ class Benchmark:
             _array_args,
             _output_args,
             _implementations,
+            _expected_failure_implementations,
         )

@@ -22,6 +22,7 @@ array_args = [
 output_args = [
     "path",
 ]
+expected_failure_implementations = ["dpnp"]
 
 [benchmark.parameters.S]
 N = 200

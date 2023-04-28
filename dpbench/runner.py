@@ -216,3 +216,10 @@ def run_benchmarks(
             implementations=implementations,
             headless=True,
         )
+
+        unexpected_failures = dpbi.get_unexpected_failures(conn, run_id=run_id)
+
+        if len(unexpected_failures) > 0:
+            raise ValueError(
+                f"Unexpected benchmark implementations failed: {unexpected_failures}.",
+            )

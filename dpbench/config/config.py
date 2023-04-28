@@ -18,3 +18,4 @@ class Config:
     frameworks: list[Framework]
     benchmarks: list[Benchmark]
     implementations: list[Implementation]
+    dtypes: dict[str, dict[str, str]]

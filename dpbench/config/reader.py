@@ -34,7 +34,7 @@ def read_configs(
     Returns:
         Configuration object with populated configurations.
     """
-    config: Config = Config([], [], [])
+    config: Config = Config([], [], [], None)
 
     dirname: str = os.path.dirname(__file__)
 
@@ -50,6 +50,9 @@ def read_configs(
             ),
             impl_postfix_path=os.path.join(
                 dirname, "../configs/impl_postfix.toml"
+            ),
+            precision_dtypes_path=os.path.join(
+                dirname, "../configs/precision_dtypes.toml"
             ),
         ),
     ]
@@ -96,6 +99,8 @@ def read_configs(
             read_frameworks(config, mod.framework_configs_path)
         if mod.impl_postfix_path != "":
             read_implementation_postfixes(config, mod.impl_postfix_path)
+        if mod.precision_dtypes_path != "":
+            read_precision_dtypes(config, mod.precision_dtypes_path)
         if mod.path != "":
             sys.path.append(mod.path)
 
@@ -127,8 +132,6 @@ def read_benchmarks(
         recursive: Either to load configs recursively.
         parent_package: Package that contains benchmark packages.
         benchmarks: list of benchmarks to load. None means all.
-
-    Returns: nothing.
     """
     for bench_info_file in os.listdir(bench_info_dir):
         bench_info_file_path = os.path.join(bench_info_dir, bench_info_file)
@@ -172,8 +175,6 @@ def read_frameworks(config: Config, framework_info_dir: str) -> None:
     Args:
         config: Configuration object where settings should be populated.
         framework_info_dir: Path to the directory with configuration files.
-
-    Returns: nothing.
     """
     for framework_info_file in os.listdir(framework_info_dir):
         if not framework_info_file.endswith(".toml"):
@@ -201,8 +202,6 @@ def read_implementation_postfixes(
     Args:
         config: Configuration object where settings should be populated.
         impl_postfix_file: Path to the configuration file.
-
-    Returns: nothing.
     """
     with open(impl_postfix_file) as file:
         file_contents = file.read()
@@ -213,6 +212,19 @@ def read_implementation_postfixes(
         config.implementations.append(implementation)
 
 
+def read_precision_dtypes(config: Config, precision_dtypes_file: str) -> None:
+    """Read and populate dtype_obj data types file.
+
+    Args:
+        config: Configuration object where settings should be populated.
+        precision_dtypes_file: Path to the configuration file.
+    """
+    with open(precision_dtypes_file) as file:
+        file_contents = file.read()
+
+    config.dtypes = tomli.loads(file_contents)
+
+
 def setup_init(config: Benchmark, modules: list[str]) -> None:
     """Read and discover initialization module and function.
 
@@ -220,8 +232,6 @@ def setup_init(config: Benchmark, modules: list[str]) -> None:
         config: Benchmark configuration object where settings should be
             populated.
         modules: List of available modules for the benchmark to find init.
-
-    Returns: nothing.
     """
     if config.init is None:
         return
@@ -291,8 +301,6 @@ def read_benchmark_implementations(
         postfixes: List of postfixes to import. Set it to None to import all
             available implementations. It does not affect initialization import.
         implementations: Prepopulated list of implementations.
-
-    Returns: nothing.
 
     Raises:
         RuntimeError: Implementation file does not match any known postfix.

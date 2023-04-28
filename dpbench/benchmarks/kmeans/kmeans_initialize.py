@@ -3,20 +3,21 @@
 # SPDX-License-Identifier: Apache-2.0
 
 
-def initialize(npoints, niters, seed, ndims, ncentroids):
+def initialize(npoints, niters, seed, ndims, ncentroids, types_dict):
     import numpy as np
     import numpy.random as default_rng
 
-    dtype = np.float64
+    f_dtype = types_dict["float"]
+    i_dtype = types_dict["int"]
     XL = 1.0
     XH = 5.0
 
     default_rng.seed(seed)
 
-    arrayP = default_rng.uniform(XL, XH, (npoints, ndims)).astype(dtype)
-    arrayPclusters = np.ones(npoints, dtype=np.int64)
-    arrayC = np.ones((ncentroids, ndims), dtype=dtype)
-    arrayCsum = np.ones((ncentroids, ndims), dtype=dtype)
-    arrayCnumpoint = np.ones(ncentroids, dtype=np.int64)
+    arrayP = default_rng.uniform(XL, XH, (npoints, ndims)).astype(f_dtype)
+    arrayPclusters = np.ones(npoints, dtype=i_dtype)
+    arrayC = np.ones((ncentroids, ndims), dtype=f_dtype)
+    arrayCsum = np.ones((ncentroids, ndims), dtype=f_dtype)
+    arrayCnumpoint = np.ones(ncentroids, dtype=i_dtype)
 
     return (arrayP, arrayPclusters, arrayC, arrayCsum, arrayCnumpoint)

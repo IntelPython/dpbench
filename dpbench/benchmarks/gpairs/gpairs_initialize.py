@@ -11,11 +11,11 @@ def _generate_rbins(dtype, nbins, rmax, rmin):
     return (rbins**2).astype(dtype)
 
 
-def initialize(nopt, seed, nbins, rmax, rmin):
+def initialize(nopt, seed, nbins, rmax, rmin, types_dict):
     import numpy.random as default_rng
 
     default_rng.seed(seed)
-    dtype = np.float32
+    dtype = types_dict["float"]
     x1 = np.random.randn(nopt).astype(dtype)
     y1 = np.random.randn(nopt).astype(dtype)
     z1 = np.random.randn(nopt).astype(dtype)

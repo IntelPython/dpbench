@@ -7,7 +7,7 @@ SPDX-License-Identifier: Apache-2.0
 [![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
 [![pre-commit](https://github.com/IntelPython/dpbench/actions/workflows/pre-commit.yml/badge.svg)](https://github.com/IntelPython/dpbench/actions/workflows/pre-commit.yml)
 
-# DPBench - Numba/Numba-Dpex/dpnp/DPCPP Benchmarks
+# DPBench - Benchmarks to evaluate Data-parallel Extensions for Python
 
 * __*_numba_*.py__ : This file contains Numba implementations of the benchmarks. There are three modes: nopython-mode, nopython-mode-parallel and nopython-mode-parallel-range.
 * __*_numba_dpex_*.py__ : This file contains Numba-Dpex implementations of the benchmarks. There are three modes: kernel-mode, numpy-mode and prange-mode.

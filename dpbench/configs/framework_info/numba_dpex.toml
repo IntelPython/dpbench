@@ -9,3 +9,15 @@ prefix = "dpex"
 class = "NumbaDpexFramework"
 arch = "cpu"
 sycl_device = "cpu"
+
+[[framework.postfixes]]
+impl_postfix = "numba_dpex_k"
+description = "Numba-dpex kernel"
+
+[[framework.postfixes]]
+impl_postfix = "numba_dpex_p"
+description = "Numba-dpex prange"
+
+[[framework.postfixes]]
+impl_postfix = "numba_dpex_n"
+description = "Numba-dpex NumPy API"

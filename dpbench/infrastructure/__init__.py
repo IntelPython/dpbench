@@ -12,11 +12,13 @@ from .datamodel import (
     create_run,
     store_results,
 )
-from .dpcpp_framework import DpcppFramework
-from .dpnp_framework import DpnpFramework
-from .framework import Framework
-from .numba_dpex_framework import NumbaDpexFramework
-from .numba_framework import NumbaFramework
+from .frameworks import (
+    DpcppFramework,
+    DpnpFramework,
+    Framework,
+    NumbaDpexFramework,
+    NumbaFramework,
+)
 from .reporter import (
     generate_impl_summary_report,
     generate_performance_report,

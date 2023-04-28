@@ -9,3 +9,7 @@ prefix = "python"
 postfix = "python"
 class = "Framework"
 arch = "cpu"
+
+[[framework.postfixes]]
+impl_postfix = "python"
+description = "Python"

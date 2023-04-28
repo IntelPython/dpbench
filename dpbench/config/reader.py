@@ -10,7 +10,6 @@ import os
 import pkgutil
 import re
 import sys
-from typing import Callable
 
 import tomli
 
@@ -34,7 +33,7 @@ def read_configs(  # noqa: C901: TODO: move modules into config
     Returns:
         Configuration object with populated configurations.
     """
-    config: Config = Config([], [], [], None)
+    config: Config = Config()
 
     dirname: str = os.path.dirname(__file__)
 
@@ -47,9 +46,6 @@ def read_configs(  # noqa: C901: TODO: move modules into config
             benchmarks_module="dpbench.benchmarks",
             framework_configs_path=os.path.join(
                 dirname, "../configs/framework_info"
-            ),
-            impl_postfix_path=os.path.join(
-                dirname, "../configs/impl_postfix.toml"
             ),
             precision_dtypes_path=os.path.join(
                 dirname, "../configs/precision_dtypes.toml"
@@ -97,12 +93,13 @@ def read_configs(  # noqa: C901: TODO: move modules into config
             )
         if mod.framework_configs_path != "":
             read_frameworks(config, mod.framework_configs_path)
-        if mod.impl_postfix_path != "":
-            read_implementation_postfixes(config, mod.impl_postfix_path)
         if mod.precision_dtypes_path != "":
             read_precision_dtypes(config, mod.precision_dtypes_path)
         if mod.path != "":
             sys.path.append(mod.path)
+
+    for framework in config.frameworks:
+        config.implementations += framework.postfixes
 
     if implementations is None:
         implementations = [impl.postfix for impl in config.implementations]

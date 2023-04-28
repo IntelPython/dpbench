@@ -9,3 +9,7 @@ prefix = "np"
 postfix = "numpy"
 class = "Framework"
 arch = "cpu"
+
+[[framework.postfixes]]
+impl_postfix = "numpy"
+description = "NumPy"

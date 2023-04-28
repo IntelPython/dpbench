@@ -83,14 +83,4 @@ class DpcppFramework(Framework):
     def version(self) -> str:
         """Returns the framework version."""
         # hack the dpcpp version, need validate dpcpp available first
-        import pathlib
-
-        import tomli
-
-        parent_folder = pathlib.Path(__file__).parent.absolute()
-        version_file = parent_folder.joinpath(
-            "..", "configs", "framework_info", "dpcpp_version.toml"
-        )
-        with open(version_file, "rb") as toml_file:
-            version = tomli.load(toml_file)["dpcpp_version"]
-        return version
+        return self.info.dpcpp_version

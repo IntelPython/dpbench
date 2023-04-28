@@ -62,6 +62,8 @@ k = 5
 
 [benchmark.init]
 func_name = "initialize"
+types_dict_name="types_dict"
+precision="double"
 input_args = [
     "test_size",
     "train_size",
@@ -69,6 +71,7 @@ input_args = [
     "classes_num",
     "seed_test",
     "seed_train",
+    "types_dict",
 ]
 output_args = [
     "x_train",

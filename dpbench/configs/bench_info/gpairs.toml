@@ -63,12 +63,15 @@ rmin = 0.1
 
 [benchmark.init]
 func_name = "initialize"
+types_dict_name="types_dict"
+precision="double"
 input_args = [
     "nopt",
     "seed",
     "nbins",
     "rmax",
     "rmin",
+    "types_dict",
 ]
 output_args = [
     "x1",

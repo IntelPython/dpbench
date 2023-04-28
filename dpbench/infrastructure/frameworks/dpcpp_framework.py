@@ -76,9 +76,15 @@ class DpcppFramework(Framework):
         any array created by the framework possibly on
         a device memory domain."""
 
-        import dpctl.tensor as dpt
+        def _copy_from_func(usm_array):
+            import dpctl.tensor as dpt
 
-        return dpt.asnumpy
+            if isinstance(usm_array, dpt.usm_ndarray):
+                return dpt.asnumpy(usm_array)
+            else:
+                return usm_array
+
+        return _copy_from_func
 
     def version(self) -> str:
         """Returns the framework version."""

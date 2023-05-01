@@ -10,13 +10,3 @@ add_subdirectory(kmeans)
 add_subdirectory(knn)
 add_subdirectory(gpairs)
 add_subdirectory(dbscan)
-
-# generate dpcpp version into json
-file(WRITE
-    ${CMAKE_SOURCE_DIR}/dpbench/configs/framework_info/dpcpp_version.json
-    "{\"dpcpp_version\" :"
-    " \""
-    ${CMAKE_CXX_COMPILER_ID}
-    " "
-    ${CMAKE_CXX_COMPILER_VERSION}
-    "\"}")

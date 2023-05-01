@@ -18,6 +18,7 @@ from .frameworks import (
     Framework,
     NumbaDpexFramework,
     NumbaFramework,
+    NumbaMlirFramework,
 )
 from .reporter import (
     generate_impl_summary_report,
@@ -35,6 +36,7 @@ __all__ = [
     "Framework",
     "NumbaFramework",
     "NumbaDpexFramework",
+    "NumbaMlirFramework",
     "DpnpFramework",
     "DpcppFramework",
     "create_connection",

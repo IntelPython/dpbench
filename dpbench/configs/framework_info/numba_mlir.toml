@@ -1,0 +1,22 @@
+# SPDX-FileCopyrightText: 2022 - 2023 Intel Corporation
+#
+# SPDX-License-Identifier: Apache-2.0
+
+[framework]
+simple_name = "numba_mlir"
+full_name = "numba_mlir"
+prefix = "mlir"
+class = "NumbaMlirFramework"
+sycl_device = "opencl:cpu:0"
+
+[[framework.postfixes]]
+impl_postfix = "numba_mlir_k"
+description = "Numba-mlir kernel"
+
+[[framework.postfixes]]
+impl_postfix = "numba_mlir_p"
+description = "Numba-mlir prange"
+
+[[framework.postfixes]]
+impl_postfix = "numba_mlir_n"
+description = "Numba-mlir NumPy API"

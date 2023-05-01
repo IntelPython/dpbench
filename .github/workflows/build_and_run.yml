@@ -47,7 +47,7 @@ jobs:
           conda install numpy numba cython cmake ninja scikit-build pandas
           conda install scipy scikit-learn pybind11 tomli
           conda install -c pkgs/main libgcc-ng">=11.2.0" libstdcxx-ng">=11.2.0" libgomp">=11.2.0"
-          conda install -c dppy/label/dev -c intel -c main dpctl numba-dpex dpnp
+          conda install -c dppy/label/dev -c intel -c main dpctl numba-dpex dpnp numba-mlir
           pip install alembic
           conda list
 
@@ -60,6 +60,8 @@ jobs:
         shell: bash -l {0}
         run: |
           export OCL_ICD_FILENAMES=libintelocl.so
+
+          export NUMBA_MLIR_GPU_RUNTIME=sycl
 
           # Turn off numba-dpex autofall back
           export NUMBA_DPEX_FALLBACK_ON_CPU=0

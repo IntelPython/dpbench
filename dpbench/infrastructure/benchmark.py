@@ -959,12 +959,6 @@ class Benchmark(object):
         for k, v in parameters.items():
             data[k] = v
 
-        # 4. Store types of selected precision dict in "data" dict.
-        if self.info.init.types_dict_name != "":
-            data[self.info.init.types_dict_name] = self._get_types_dict(
-                framework, global_precision, self.info.init.precision
-            )
-
         if self.info.init:
             self.get_data_init(framework, global_precision, data)
 
@@ -990,9 +984,14 @@ class Benchmark(object):
         Returns: Dictionary with benchmark inputs as key
                  and initialized data as value.
         """
+        # 4. Store types of selected precision dict in "data" dict.
+        if self.info.init.types_dict_name != "":
+            data[self.info.init.types_dict_name] = self._get_types_dict(
+                framework, global_precision, self.info.init.precision
+            )
+
         # 5. Call the initialize_fn with the input args and store the results
         #    in the "data" dict.
-
         init_input_args_list = self.info.init.input_args
         init_input_args_val_list = []
         for arg in init_input_args_list:

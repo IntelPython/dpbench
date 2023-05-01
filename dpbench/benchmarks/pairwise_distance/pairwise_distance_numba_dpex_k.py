@@ -10,11 +10,11 @@ import numba_dpex as dpex
 def _pairwise_distance_kernel(X1, X2, D):
     i = dpex.get_global_id(0)
 
-    N = X2.shape[0]
-    O = X1.shape[1]
-    for j in range(N):
+    X2_rows = X2.shape[0]
+    X1_cols = X1.shape[1]
+    for j in range(X2_rows):
         d = 0.0
-        for k in range(O):
+        for k in range(X1_cols):
             tmp = X1[i, k] - X2[j, k]
             d += tmp * tmp
         D[i, j] = np.sqrt(d)

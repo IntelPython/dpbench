@@ -9,9 +9,9 @@ import numpy as np
 @dpex.kernel
 def l2_norm_kernel(a, d):
     i = dpex.get_global_id(0)
-    O = a.shape[1]
+    a_rows = a.shape[1]
     d[i] = 0.0
-    for k in range(O):
+    for k in range(a_rows):
         d[i] += a[i, k] * a[i, k]
     d[i] = np.sqrt(d[i])
 

@@ -20,7 +20,6 @@ input_args = [
 array_args = [
     "data",
 ]
-expected_failure_implementations = ["sycl"]
 
 [benchmark.parameters.S]
 n_samples = 1024

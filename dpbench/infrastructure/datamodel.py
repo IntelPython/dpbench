@@ -6,6 +6,8 @@ import logging
 import os
 import sqlite3
 
+from alembic import command
+from alembic.config import Config
 from sqlalchemy import (
     Column,
     Computed,
@@ -25,9 +27,6 @@ from sqlalchemy.orm import (
     mapped_column,
     relationship,
 )
-
-from alembic import command
-from alembic.config import Config
 
 
 class Base(DeclarativeBase):
@@ -146,7 +145,7 @@ def create_run(conn: Engine) -> int:
         return run.id
 
 
-def create_results_table():
+def create_results_table(db_file: str):
     """create sqlite database file and runs migrations to create all necessery tables.
     If file exists - it just updates it to the head version.
     :return:
@@ -157,6 +156,8 @@ def create_results_table():
     full_path = os.path.join(absolute_path, relative_path)
 
     alembic_cfg = Config(full_path)
+    alembic_cfg.set_main_option("sqlalchemy.url", "sqlite:///" + db_file)
+
     command.upgrade(alembic_cfg, "head")
 
 

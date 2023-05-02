@@ -15,6 +15,7 @@ jobs:
     runs-on: ubuntu-latest
 
     strategy:
+      fail-fast: false
       matrix:
         python: ["3.9", "3.10"]
 
@@ -56,13 +57,11 @@ jobs:
         run: |
           CC=icx CXX=icpx python setup.py develop -- -Dpybind11_DIR=$(python -m pybind11 --cmakedir) -DDPCTL_MODULE_PATH=$(python -m dpctl --cmakedir)
 
-      - name: Validate dpbench
+      - name: Run benchmarks
         shell: bash -l {0}
         run: |
           export OCL_ICD_FILENAMES=libintelocl.so
-
           export NUMBA_MLIR_GPU_RUNTIME=sycl
-
           # Turn off numba-dpex autofall back
           export NUMBA_DPEX_FALLBACK_ON_CPU=0
           # Make sure numba-dpex is using native atomics in github CI
@@ -70,12 +69,13 @@ jobs:
           ls $(dirname $(dirname `which icx`))/bin-llvm || exit 1
           export NUMBA_DPEX_LLVM_SPIRV_ROOT=$(dirname $(dirname `which icx`))/bin-llvm
 
-          python -c "import dpbench; dpbench.run_benchmarks(repeat=2)" || exit 1
-          # LD_PRELOAD="${CONDA_PREFIX}/lib/libmkl_intel_ilp64.so ${CONDA_PREFIX}/lib/libmkl_tbb_thread.so ${CONDA_PREFIX}/lib/libmkl_core.so" python -c "import dpbench; dpbench.all_benchmarks_passed_validation(\"dpbench.db\");"
-          # res=`                                                                    \
-          #   printf "%s"                                                            \
-          #   "$(python -c "import dpbench;                                          \
-          #       res=int(dpbench.all_benchmarks_passed_validation(\"dpbench.db\")); \
-          #       print(\"Validation:\",res)"                                        \
-          #     )" | grep Validation | cut -f 2 -d ":"` || exit 1
-          # if [ ${res} == 0 ]; then exit 1; fi
+          dpbench \
+          -i python,numpy,dpnp,sycl,numba_n,numba_np,numba_npr,numba_dpex_k,numba_dpex_n,numba_dpex_p \
+          run -r2 --no-print-results
+
+      - name: Generate report
+        shell: bash -l {0}
+        run: |
+          dpbench \
+          -i python,numpy,dpnp,sycl,numba_n,numba_np,numba_npr,numba_dpex_k,numba_dpex_n,numba_dpex_p \
+          report || exit 1

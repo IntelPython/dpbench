@@ -22,7 +22,6 @@ import numpy as np
 import dpbench.config as cfg
 from dpbench.infrastructure import timer
 
-from . import timeout_decorator as tout
 from .datamodel import Result, store_results
 from .enums import ErrorCodes, ValidationStatusCodes
 from .frameworks import Framework, build_framework_map

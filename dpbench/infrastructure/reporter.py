@@ -9,6 +9,7 @@ from a specific benchmark run.
 """
 
 import dataclasses
+import logging
 import pathlib
 from typing import Final, Union
 
@@ -42,9 +43,7 @@ def update_run_id(conn: sqlalchemy.Engine, run_id: Union[int, None]) -> int:
             .scalar()
         )
 
-        print(
-            f"WARNING: run_id was not provided, using the latest one {run_id}"
-        )
+        logging.warn(f"using the latest run_id {run_id}")
 
         return run_id
 
@@ -103,13 +102,11 @@ def generate_summary(data: pd.DataFrame):
 
 
 def generate_impl_summary_report(
-    results_db: Union[str, sqlalchemy.Engine] = "results.db",
-    run_id: int = None,
-    implementations: list[str] = None,
+    conn: sqlalchemy.Engine,
+    run_id: int,
+    implementations: list[str],
 ):
     """generate implementation summary report with status of each benchmark"""
-    conn = update_connection(results_db=results_db)
-    run_id = update_run_id(conn, run_id)
     legends = read_legends()
 
     generate_header(conn, run_id)
@@ -120,9 +117,6 @@ def generate_impl_summary_report(
         dm.Result.benchmark,
         dm.Result.problem_preset,
     ]
-
-    if implementations is None:
-        implementations = [impl.postfix for impl in cfg.GLOBAL.implementations]
 
     for impl in implementations:
         columns.append(
@@ -159,14 +153,12 @@ def generate_impl_summary_report(
 
 
 def generate_performance_report(
-    results_db: Union[str, sqlalchemy.Engine] = "results.db",
-    run_id: int = None,
-    implementations: list[str] = None,
+    conn: sqlalchemy.Engine,
+    run_id: int,
+    implementations: list[str],
     headless=False,
 ):
     """generate performance report with median times for each benchmark"""
-    conn = update_connection(results_db=results_db)
-    run_id = update_run_id(conn, run_id)
     legends = read_legends()
 
     if not headless:
@@ -178,9 +170,6 @@ def generate_performance_report(
         dm.Result.benchmark,
         dm.Result.problem_preset,
     ]
-
-    if implementations is None:
-        implementations = [impl.postfix for impl in cfg.GLOBAL.implementations]
 
     for impl in implementations:
         columns.append(

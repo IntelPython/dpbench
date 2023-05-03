@@ -8,7 +8,10 @@ import logging
 import os
 import pathlib
 import pkgutil
+import sqlite3
 from datetime import datetime
+
+import sqlalchemy
 
 import dpbench.benchmarks as dp_bms
 import dpbench.config as cfg
@@ -141,6 +144,7 @@ def run_benchmark(
 
 
 def run_benchmarks(
+    conn: sqlalchemy.Engine,
     preset="S",
     repeat=10,
     validate=True,
@@ -174,12 +178,7 @@ def run_benchmarks(
     print("")
     print("***Start Running DPBench***")
 
-    dpbi.create_results_table()
-    conn = dpbi.create_connection(db_file="results.db")
-    if run_id is None:
-        run_id = dpbi.create_run(conn)
-
-    if implementations is None:
+    if not implementations:
         implementations = [impl.postfix for impl in cfg.GLOBAL.implementations]
 
     for b in cfg.GLOBAL.benchmarks:
@@ -206,20 +205,34 @@ def run_benchmarks(
     print("")
 
     if print_results:
-        dpbi.generate_impl_summary_report(
-            conn, run_id=run_id, implementations=implementations
+        print_report(conn, run_id=run_id, implementations=implementations)
+
+
+def print_report(
+    conn: sqlalchemy.Engine,
+    run_id: int,
+    implementations: set[str],
+):
+    if not implementations:
+        implementations = {impl.postfix for impl in cfg.GLOBAL.implementations}
+
+    implementations = list(implementations)
+    implementations.sort()
+
+    dpbi.generate_impl_summary_report(
+        conn, run_id=run_id, implementations=implementations
+    )
+
+    dpbi.generate_performance_report(
+        conn,
+        run_id=run_id,
+        implementations=implementations,
+        headless=True,
+    )
+
+    unexpected_failures = dpbi.get_unexpected_failures(conn, run_id=run_id)
+
+    if len(unexpected_failures) > 0:
+        raise ValueError(
+            f"Unexpected benchmark implementations failed: {unexpected_failures}.",
         )
-
-        dpbi.generate_performance_report(
-            conn,
-            run_id=run_id,
-            implementations=implementations,
-            headless=True,
-        )
-
-        unexpected_failures = dpbi.get_unexpected_failures(conn, run_id=run_id)
-
-        if len(unexpected_failures) > 0:
-            raise ValueError(
-                f"Unexpected benchmark implementations failed: {unexpected_failures}.",
-            )

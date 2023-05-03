@@ -17,7 +17,7 @@ from .implementation_postfix import Implementation
 from .reader import read_configs
 
 """Use this variable for reading configurations"""
-GLOBAL: Config = read_configs()
+GLOBAL: Config = Config()
 
 __all__ = [
     "GLOBAL",

@@ -33,4 +33,7 @@ setup(
         "numba",
     ],
     cmake_args=["-DDpctl_INCLUDE_DIRS=" + dpctl_include_dir],
+    entry_points={
+        "console_scripts": ["dpbench=dpbench.console.entry:main"],
+    },
 )

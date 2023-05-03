@@ -35,11 +35,11 @@ SPDX-License-Identifier: Apache-2.0
         ```
     - To run, taking black_scholes for example:
         ```bash
-        $  python -c "import dpbench; dpbench.run_benchmark(\"black_scholes\")" 2> /dev/null
+        $  dpbench -b black_scholes run
         ```
     - Similarly, to run all the cases in DPBench:
         ```bash
-        $  python -c "import dpbench; dpbench.run_benchmarks()" 2> /dev/null
+        $  dpbench -a run
         ```
 
 3. Device Customization
@@ -68,8 +68,10 @@ SPDX-License-Identifier: Apache-2.0
 
     > **_NOTE:_**  The `arch` option is deprecated and not used by dpbench.
 
-   To run with custimized framework JSON file, pass it as an argument to the `run_benchmark` or
+   To run with customized framework JSON file, pass it as an argument to the `run_benchmark` or
    `run_benchmarks` functions.
+
+   TODO: current way not working anymore.
 
     ```bash
     $ python -c "import dpbench; dpbench.run_benchmark(\"black_scholes\", "<absolute path to json file>")"
@@ -78,7 +80,7 @@ SPDX-License-Identifier: Apache-2.0
 ## Running numba-mlir benchmarks
 1. Setting up conda environment and installing dependencies:
 
-    Use same instructions as for usual dpbench setup, but do not install numba-dpex.
+    Use same instructions as for usual dpbench setup.
 
     Install latest `numba-mlir` dev package:
 
@@ -88,12 +90,19 @@ SPDX-License-Identifier: Apache-2.0
 
     Use same commands to setup and run dpbench:
 
-        $ python -c "import dpbench; dpbench.run_benchmark(\"black_scholes\")" 2> /dev/null
+        ```bash
+        $  dpbench -b black_scholes run
+        ```
 
     or, to run specific version:
 
-        $ python -c "import dpbench; dpbench.run_benchmark(\"black_scholes\",implementation_postfix=\"numba_mlir_k\")" 2> /dev/null
+
+        ```bash
+        $  dpbench -b black_scholes -i numba_mlir_k s run
+        ```
 
     to run all `numba-mlir` benchmarks:
 
-        $ python -c "import dpbench; dpbench.run_benchmarks(implementations=[\"numba_mlir_n\",\"numba_mlir_p\",\"numba_mlir_k\"])" 2> /dev/null
+        ```bash
+        $  dpbench -b black_scholes -i numba_mlir_k,numba_mlir_n,numba_mlir_p s run
+        ```

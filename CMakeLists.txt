@@ -10,6 +10,10 @@ project(dpbench
         "Benchmark suite to evaluate Intel Data Parallel Extensions for Python"
 )
 
+# Help conda build find path from both host and build env.
+set(CMAKE_FIND_ROOT_PATH_MODE_INCLUDE BOTH)
+set(CMAKE_FIND_ROOT_PATH_MODE_LIBRARY BOTH)
+
 find_package(pybind11 CONFIG REQUIRED)
 find_package(IntelDPCPP REQUIRED)
 find_package(PythonExtensions REQUIRED)

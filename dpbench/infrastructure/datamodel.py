@@ -163,7 +163,7 @@ def create_results_table(db_file: str):
     """
 
     absolute_path = os.path.dirname(__file__)
-    relative_path = "../../alembic.ini"
+    relative_path = "../migrations/alembic.ini"
     full_path = os.path.join(absolute_path, relative_path)
 
     alembic_cfg = Config(full_path)

@@ -1,0 +1,234 @@
+# SPDX-FileCopyrightText: 2022 - 2023 Intel Corporation
+#
+# SPDX-License-Identifier: Apache-2.0
+
+name: Conda package
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+
+env:
+  PACKAGE_NAME: dpbench
+  MODULE_NAME: dpbench
+  CHANNELS: '-c dppy/label/dev -c conda-forge -c intel -c nodefaults --override-channels'
+  VER_JSON_NAME: 'version.json'
+  VER_SCRIPT1: "import json; f = open('version.json', 'r'); j = json.load(f); f.close(); "
+  VER_SCRIPT2: "d = j['dpbench'][0]; print('='.join((d[s] for s in ('version', 'build'))))"
+
+jobs:
+  build:
+    name: Build ['${{ matrix.os }}', python='${{ matrix.python }}']
+
+    strategy:
+      fail-fast: false
+      matrix:
+        python: ['3.9', '3.10']
+        os: [ubuntu-latest, windows-latest]
+
+    runs-on: ${{ matrix.os }}
+
+    defaults:
+      run:
+        shell: bash -l {0}
+
+    continue-on-error: false
+
+    steps:
+      - name: Cancel Previous Runs
+        uses: styfle/cancel-workflow-action@0.11.0
+        with:
+          access_token: ${{ github.token }}
+
+      - name: Checkout ${{ env.PACKAGE_NAME }} repo
+        uses: actions/checkout@v3.3.0
+        with:
+          fetch-depth: 0
+
+      - name: Setup miniconda
+        uses: conda-incubator/setup-miniconda@v2.2.0
+        with:
+          auto-update-conda: true
+          python-version: ${{ matrix.python }}
+          miniconda-version: 'latest'
+          activate-environment: 'build'
+
+      - name: Store conda paths as envs
+        run: echo "CONDA_BLD=$CONDA_PREFIX/conda-bld/${{ runner.os == 'Linux' && 'linux' || 'win' }}-64/" | tr "\\" '/' >> $GITHUB_ENV
+
+      - name: Install conda-build
+        run: conda install conda-build
+
+      - name: Cache conda packages
+        uses: actions/cache@v3.2.6
+        env:
+          CACHE_NUMBER: 1  # Increase to reset cache
+        with:
+          path: ${{ env.CONDA_PKGS_DIR }}
+          key:
+            ${{ runner.os }}-conda-${{ env.CACHE_NUMBER }}-python-${{ matrix.python }}-${{hashFiles('**/meta.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-conda-${{ env.CACHE_NUMBER }}-python-${{ matrix.python }}-
+            ${{ runner.os }}-conda-${{ env.CACHE_NUMBER }}-
+
+      - name: Build conda package
+        run: conda build --no-test --python ${{ matrix.python }} ${{ env.CHANNELS }} conda-recipe
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v3.1.2
+        with:
+          name: ${{ env.PACKAGE_NAME }} ${{ runner.os }} Python ${{ matrix.python }}
+          path: ${{ env.CONDA_BLD }}${{ env.PACKAGE_NAME }}-*.tar.bz2
+
+  test:
+    name: Test ['${{ matrix.os }}', python='${{ matrix.python }}']
+
+    needs: build
+
+    runs-on: ${{ matrix.os }}
+
+    defaults:
+      run:
+        shell: ${{ matrix.os == 'windows-latest' && 'cmd /C CALL {0}' || 'bash -l {0}' }}
+
+    strategy:
+      fail-fast: false
+      matrix:
+        python: ['3.9', '3.10']
+        os: [ubuntu-20.04, ubuntu-latest, windows-latest]
+        experimental: [false]
+
+    continue-on-error: ${{ matrix.experimental }}
+
+    steps:
+      - name: Setup miniconda
+        uses: conda-incubator/setup-miniconda@v2.2.0
+        with:
+          auto-update-conda: true
+          python-version: ${{ matrix.python }}
+          miniconda-version: 'latest'
+          activate-environment: 'test'
+
+      - name: Store conda paths as envs
+        shell: bash -l {0}
+        run: |
+          echo "CHANNEL_PATH=${{ github.workspace }}/channel/" | tr "\\" "/" >> $GITHUB_ENV
+          echo "EXTRACTED_PKG_PATH=${{ github.workspace }}/pkg/" | tr "\\" "/" >> $GITHUB_ENV
+          echo "VER_JSON_PATH=${{ github.workspace }}/version.json" | tr "\\" "/" >> $GITHUB_ENV
+          echo "PKG_PATH_IN_CHANNEL=${{ github.workspace }}/channel/${{ runner.os == 'Linux' && 'linux' || 'win' }}-64/" | tr "\\" "/" >> $GITHUB_ENV
+
+      - name: Download artifact
+        uses: actions/download-artifact@v3.0.2
+        with:
+          name: ${{ env.PACKAGE_NAME }} ${{ runner.os }} Python ${{ matrix.python }}
+          path: ${{ env.PKG_PATH_IN_CHANNEL }}
+
+      # We need --force-local because on windows path looks like C:/foo/bar
+      # and tar interprits semicolons as remote device.
+      - name: Extract package archive
+        shell: bash -l {0}
+        run: |
+          mkdir -p ${EXTRACTED_PKG_PATH}
+          tar -xvf ${PKG_PATH_IN_CHANNEL}${PACKAGE_NAME}-*.tar.bz2 -C ${EXTRACTED_PKG_PATH} --force-local
+
+      # Needed to be able to run conda index
+      - name: Install conda-build
+        run: conda install conda-build
+
+      - name: Create conda channel
+        run: conda index ${{ env.CHANNEL_PATH }}
+
+      - name: Test conda channel
+        run: |
+          conda search ${{ env.PACKAGE_NAME }} -c ${{ env.CHANNEL_PATH }} --override-channels --info --json > ${{ env.VER_JSON_PATH }}
+          cat ${{ env.VER_JSON_PATH }}
+
+      - name: Collect dependencies
+        shell: bash -l {0}
+        run: |
+          export PACKAGE_VERSION=$(python -c "${{ env.VER_SCRIPT1 }} ${{ env.VER_SCRIPT2 }}")
+
+          echo PACKAGE_VERSION=${PACKAGE_VERSION}
+          echo "PACKAGE_VERSION=$PACKAGE_VERSION" >> $GITHUB_ENV
+
+          conda install ${{ env.PACKAGE_NAME }}=${PACKAGE_VERSION} python=${{ matrix.python }} ${{ env.TEST_CHANNELS }} --only-deps --dry-run > lockfile
+          cat lockfile
+        env:
+          TEST_CHANNELS: '-c ${{ env.CHANNEL_PATH }} ${{ env.CHANNELS }}'
+
+      - name: Cache conda packages
+        uses: actions/cache@v3.2.6
+        env:
+          CACHE_NUMBER: 1 # Increase to reset cache
+        with:
+          path: ${{ env.CONDA_PKGS_DIR }}
+          key:
+            ${{ runner.os }}-conda-${{ env.CACHE_NUMBER }}-python-${{ matrix.python }}-${{hashFiles('lockfile') }}
+          restore-keys: |
+            ${{ runner.os }}-conda-${{ env.CACHE_NUMBER }}-python-${{ matrix.python }}-
+            ${{ runner.os }}-conda-${{ env.CACHE_NUMBER }}-
+
+      - name: Install opencl_rt
+        run: conda install opencl_rt -c intel --override-channels
+
+      - name: Install dpbench
+        run: conda install ${{ env.PACKAGE_NAME }}=${{ env.PACKAGE_VERSION }} pytest python=${{ matrix.python }} ${{ env.TEST_CHANNELS }}
+        env:
+          TEST_CHANNELS: '-c ${{ env.CHANNEL_PATH }} ${{ env.CHANNELS }}'
+
+      - name: List installed packages
+        run: conda list
+
+      - name: Smoke test
+        run: python -c "import dpnp, dpctl, dpbench; dpctl.lsplatform()"
+
+      - name: Run benchmakrs
+        run: |
+          dpbench -i numpy,numba_dpex_p,dpnp,numba_n,sycl run
+          dpbench report
+
+  upload_anaconda:
+    name: Upload dppy/label/dev ['${{ matrix.os }}', python='${{ matrix.python }}']
+
+    needs: [test]
+
+    strategy:
+      matrix:
+        python: ['3.9', '3.10']
+        os: [ubuntu-latest, windows-latest]
+
+    runs-on: ${{ matrix.os }}
+
+    defaults:
+      run:
+        shell: bash -l {0}
+
+    continue-on-error: false
+
+    if: |
+      (github.repository == 'IntelPython/dpbench') &&
+      (github.ref == 'refs/heads/main' || (startsWith(github.ref, 'refs/heads/release') == true) || github.event_name == 'push' && contains(github.ref, 'refs/tags/'))
+
+    steps:
+      - name: Download artifact
+        uses: actions/download-artifact@v3.0.2
+        with:
+          name: ${{ env.PACKAGE_NAME }} ${{ runner.os }} Python ${{ matrix.python }}
+
+      - name: Setup miniconda
+        uses: conda-incubator/setup-miniconda@v2.2.0
+        with:
+          auto-update-conda: true
+          python-version: ${{ matrix.python }}
+          miniconda-version: 'latest'
+          activate-environment: 'upload'
+
+      - name: Install anaconda-client
+        run: conda install anaconda-client
+
+      - name: Upload
+        run: anaconda --token ${{ env.ANACONDA_TOKEN }} upload --user dppy --label dev ${{ env.PACKAGE_NAME }}-*.tar.bz2
+        env:
+          ANACONDA_TOKEN: ${{ secrets.ANACONDA_TOKEN }}

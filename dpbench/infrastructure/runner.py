@@ -17,6 +17,7 @@ import dpbench.benchmarks as dp_bms
 import dpbench.config as cfg
 import dpbench.infrastructure as dpbi
 from dpbench.infrastructure.enums import ErrorCodes
+from dpbench.infrastructure.frameworks.framework import Framework
 
 
 def _format_ns(time_in_ns):
@@ -29,25 +30,25 @@ def _format_ns(time_in_ns):
             return f"{scaled_time}{s} ({time} ns)"
 
 
-def _print_results(result: dpbi.BenchmarkResults):
+def _print_results(result: dpbi.BenchmarkResults, framework: Framework):
     print(
         "================ implementation "
-        + result.benchmark_impl_postfix
+        + result.impl_postfix
         + " ========================\n"
         + "implementation:",
-        result.benchmark_impl_postfix,
+        result.impl_postfix,
     )
 
     if result.error_state == ErrorCodes.SUCCESS:
-        print("framework:", result.framework_name)
-        print("framework version:", result.framework_version)
+        print("framework:", framework.fname)
+        print("framework version:", framework.version())
         print("setup time:", _format_ns(result.setup_time))
         print("warmup time:", _format_ns(result.warmup_time))
         print("teardown time:", _format_ns(result.teardown_time))
         print("max execution times:", _format_ns(result.max_exec_time))
         print("min execution times:", _format_ns(result.min_exec_time))
         print("median execution times:", _format_ns(result.median_exec_time))
-        print("repeats:", result.num_repeats)
+        print("repeats:", result.repeats)
         print("preset:", result.preset)
         print("validated:", result.validation_state)
     else:
@@ -133,8 +134,8 @@ def run_benchmark(
             run_id=run_id,
         )
         if print_results:
-            for result in results:
-                _print_results(result)
+            for result, framework in results:
+                _print_results(result, framework)
 
     except Exception:
         logging.exception(

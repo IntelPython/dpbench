@@ -22,6 +22,7 @@ import numpy as np
 import dpbench.config as cfg
 from dpbench.infrastructure import timer
 
+from .benchmark_results import BenchmarkResults
 from .datamodel import Result, store_results
 from .enums import ErrorCodes, ValidationStatusCodes
 from .frameworks import Framework, build_framework_map
@@ -225,317 +226,6 @@ def convert_to_numpy(value: any, fmwrk: Framework) -> any:
     return value
 
 
-class BenchmarkResults:
-    """A helper class to store the results and timing from running a
-    benchmark.
-    """
-
-    def __init__(self, bench, repeat, impl_postfix, preset):
-        """Initialize defaults."""
-        self._fmwrk = bench.get_framework(impl_postfix)
-        self._setup_time = 0.0
-        self._warmup_time = 0.0
-        self._teardown_time = 0.0
-        self._validation_state = ValidationStatusCodes.NA
-        self._error_state = ErrorCodes.UNIMPLEMENTED
-        self._error_msg = "Not implemented"
-        self._results = dict()
-        self._bench = bench
-        self._repeats = repeat
-        self._impl_postfix = impl_postfix
-        self._preset = preset
-        self._input_size = 0
-
-        self.exec_times = np.zeros(repeat, np.float64)
-
-    @property
-    def benchmark(self):
-        return self._bench
-
-    @benchmark.setter
-    def benchmark(self, bench):
-        self._bench = bench
-
-    @property
-    def benchmark_name(self):
-        """Returns the name of the benchmark.
-
-        Returns:
-            str: Name of the benchmark
-        """
-        return self._bench.bname
-
-    @benchmark_name.setter
-    def benchmark_name(self, bname):
-        """Sets the name of the benchmark."""
-        self._bench.bname = bname
-
-    @property
-    def benchmark_impl_postfix(self):
-        """Returns the implementation type (postfix) of the benchmark.
-
-        Returns:
-            str: The implementation postfix for the benchmark's run
-        """
-        return self._impl_postfix
-
-    @benchmark_impl_postfix.setter
-    def benchmark_impl_postfix(self, impl_postfix: str):
-        self._impl_postfix = impl_postfix
-
-    @property
-    def framework_name(self):
-        """Returns the name of the Framework used to execute the benchmark
-
-        Returns:
-            str: The name of the Framework used for execution
-        """
-        if self._fmwrk:
-            return self._fmwrk.fname
-        else:
-            return "Not available"
-
-    @property
-    def framework(self):
-        return self._fmwrk
-
-    @framework.setter
-    def framework(self, fmwrk=None):
-        self._fmwrk = fmwrk
-
-    @property
-    def framework_version(self):
-        """Returns the version of the Framework used to execute the benchmark
-
-        Returns:
-            str: The version of the Framework used for execution
-        """
-        if self._fmwrk:
-            return self._fmwrk.version()
-        else:
-            return "Not available"
-
-    @property
-    def setup_time(self):
-        """Returns the time in nanoseconds used to setup the benchmark.
-
-        Setting up a benchmark involves copying the data from NumPy to either
-        other NumPy arrays or to a Framework-specific data container.
-
-        Returns:
-            float: Time in nanosecond spent on copying data from NumPy to
-            Framework-specific data container.
-        """
-        return self._setup_time
-
-    @setup_time.setter
-    def setup_time(self, setup_time):
-        self._setup_time = setup_time
-
-    @property
-    def warmup_time(self):
-        return self._warmup_time
-
-    @warmup_time.setter
-    def warmup_time(self, warmup_time):
-        self._warmup_time = warmup_time
-
-    @property
-    def teardown_time(self):
-        """Returns the time in nanoseconds used to teardown the benchmark.
-
-        Tearing down a benchmark involves copying the data from any
-        Framework-specific data container to a NumPy array on the host system.
-
-        Returns:
-            float: Time in nanosecond spent on copying data from any
-            Framework-specific data container to NumPy.
-        """
-        return self._teardown_time
-
-    @teardown_time.setter
-    def teardown_time(self, teardown_time):
-        self._teardown_time = teardown_time
-
-    @property
-    def num_repeats(self):
-        """Returns the number of repetitions of the main execution.
-
-        Returns:
-            int: Number of times the main program was executed.
-        """
-        return self._repeats
-
-    @num_repeats.setter
-    def num_repeats(self, repeats):
-        self._repeats = repeats
-
-    @property
-    def preset(self):
-        return self._preset
-
-    @preset.setter
-    def preset(self, preset):
-        self._preset = preset
-
-    @property
-    def input_size(self):
-        return self._input_size
-
-    @input_size.setter
-    def input_size(self, problem_size):
-        self._input_size = problem_size
-
-    @property
-    def exec_times(self):
-        """Returns an array of execution timings measured in nanoseconds
-
-        Returns:
-            numpy.ndarray: An array of execution times for each repetition of
-            the main execution.
-        """
-        return self._exec_times
-
-    @exec_times.setter
-    def exec_times(self, exec_times):
-        self._exec_times = exec_times
-        self._exec_time_quartiles = np.percentile(exec_times, [25, 50, 75])
-
-    @property
-    def min_exec_time(self):
-        """Minimum execution time for the benchmark out of the set of
-        repetitions.
-
-        Returns:
-            float: Time in nanoseconds showing the fastest run out of all
-            repeats.
-        """
-        return self._exec_times.min()
-
-    @property
-    def max_exec_time(self):
-        """Maximum execution time for the benchmark out of the set of
-        repetitions.
-
-        Returns:
-            float: Time in nanoseconds showing the slowest run out of all
-            repeats.
-        """
-        return self._exec_times.max()
-
-    @property
-    def quartile25_exec_time(self):
-        """25th quartile execution time for the benchmark out of the set of
-        repetitions.
-
-        Returns:
-            float: Time in nanoseconds showing the 25th quartile run out of all
-            repeats.
-        """
-        return self._exec_time_quartiles[0]
-
-    @property
-    def median_exec_time(self):
-        """Median execution time for the benchmark out of the set of
-        repetitions.
-
-        Returns:
-            float: Time in nanoseconds showing the median run out of all
-            repeats.
-        """
-        return self._exec_time_quartiles[1]
-
-    @property
-    def quartile75_exec_time(self):
-        """75th quartile execution time for the benchmark out of the set of
-        repetitions.
-
-        Returns:
-            float: Time in nanoseconds showing the 75th quartile run out of all
-            repeats.
-        """
-        return self._exec_time_quartiles[2]
-
-    @property
-    def results(self):
-        """Returns as a list the output data from the benchmark.
-
-        Returns:
-            list: List of the output arguments generated by the benchmark.
-        """
-        return self._results
-
-    @results.setter
-    def results(self, results=None):
-        self._results = results
-
-    @property
-    def validation_state(self) -> ValidationStatusCodes:
-        return self._validation_state
-
-    @validation_state.setter
-    def validation_state(self, validated):
-        self._validation_state = validated
-
-    @property
-    def error_state(self):
-        return self._error_state
-
-    @error_state.setter
-    def error_state(self, error_state=ErrorCodes.UNIMPLEMENTED):
-        self._error_state = error_state
-
-    @property
-    def error_msg(self):
-        return self._error_msg
-
-    @error_msg.setter
-    def error_msg(self, error_msg="Not implemented"):
-        self._error_msg = error_msg
-
-    def Result(self, run_id: int) -> Result:
-        if self.error_state == ErrorCodes.UNIMPLEMENTED:
-            error_state_str = "Unimplemented"
-        elif self.error_state == ErrorCodes.NO_FRAMEWORK:
-            error_state_str = "Framework unavailable"
-        elif self.error_state == ErrorCodes.FAILED_EXECUTION:
-            error_state_str = "Failed Execution"
-        elif self.error_state == ErrorCodes.FAILED_VALIDATION:
-            error_state_str = "Failed Validation"
-        elif self.error_state == ErrorCodes.EXECUTION_TIMEOUT:
-            error_state_str = "Execution Timeout"
-        elif self.error_state == ErrorCodes.SUCCESS:
-            error_state_str = "Success"
-        else:
-            error_state_str = "N/A"
-
-        return Result(
-            run_id=run_id,
-            benchmark=self.benchmark_name,
-            implementation=self.benchmark_impl_postfix,
-            platform="TODO",
-            framework_version=self.framework_name
-            + " "
-            + self.framework_version,
-            error_state=error_state_str,
-            problem_preset=self.preset,
-            input_size=self.input_size,
-            # todo: platform
-            setup_time=self.setup_time,
-            warmup_time=self.warmup_time,
-            repeats=str(self.num_repeats),
-            min_exec_time=self.min_exec_time,
-            max_exec_time=self.max_exec_time,
-            median_exec_time=self.median_exec_time,
-            quartile25_exec_time=self.quartile25_exec_time,
-            quartile75_exec_time=self.quartile75_exec_time,
-            teardown_time=self.teardown_time,
-            validated="Success"
-            if self.validation_state == ValidationStatusCodes.SUCCESS
-            else "Fail",
-        )
-
-
 # TODO: move Benchmark implementation above for proper linter.
 class BenchmarkRunner:
     def __init__(
@@ -552,18 +242,20 @@ class BenchmarkRunner:
         self.preset = preset
         self.repeat = repeat
         self.timeout = timeout
+        self.fmwrk = None
+        self.results = BenchmarkResults(self.repeat, impl_postfix, self.preset)
+        self.output = {}
         self.impl_fn = self.bench.get_impl(impl_postfix)
-        self.fmwrk = self.bench.get_framework(impl_postfix)
-        self.results = BenchmarkResults(
-            self.bench, self.repeat, impl_postfix, self.preset
-        )
-
         if not self.impl_fn:
             self.results.error_state = ErrorCodes.UNIMPLEMENTED
             self.results.error_msg = "No implementation"
-        elif not self.fmwrk:
+            return
+
+        self.fmwrk = self.bench.get_framework(impl_postfix)
+        if not self.fmwrk:
             self.results.error_state = ErrorCodes.NO_FRAMEWORK
             self.results.error_msg = "No framework"
+            return
         else:
             # Execute the benchmark
             with Manager() as manager:
@@ -604,16 +296,14 @@ class BenchmarkRunner:
                     if self.results.error_state == ErrorCodes.SUCCESS:
                         self.results.setup_time = results_dict["setup_time"]
                         self.results.warmup_time = results_dict["warmup_time"]
-                        self.results.exec_times = np.asarray(
-                            results_dict["exec_times"]
-                        )
+                        self.results.exec_times = results_dict["exec_times"]
 
                         if "outputs" in results_dict:
                             output_npz = results_dict["outputs"]
                             if output_npz:
                                 with np.load(output_npz) as npzfile:
                                     for outarr in npzfile.files:
-                                        self.results.results.update(
+                                        self.output.update(
                                             {outarr: npzfile[outarr]}
                                         )
                                 os.remove(output_npz)
@@ -622,12 +312,9 @@ class BenchmarkRunner:
                             ]
 
                         if "return-value" in results_dict:
-                            self.results.results.update(
+                            self.output.update(
                                 {"return-value": results_dict["return-value"]}
                             )
-
-    def get_results(self) -> BenchmarkResults:
-        return self.results
 
 
 class Benchmark(object):
@@ -717,18 +404,18 @@ class Benchmark(object):
             (len(self.bname) - len(self.ref_impl_fn.name) + 1) :  # noqa: E203
         ]
 
-        ref_results = BenchmarkRunner(
+        ref_runner = BenchmarkRunner(
             bench=self,
             impl_postfix=ref_impl_postfix,
             preset=preset,
             repeat=1,
             precision=precision,
             copy_output=True,
-        ).get_results()
+        )
 
-        if ref_results.error_state == ErrorCodes.SUCCESS:
-            self.refdata.update({preset: ref_results.results})
-            return ref_results.results
+        if ref_runner.results.error_state == ErrorCodes.SUCCESS:
+            self.refdata.update({preset: ref_runner.output})
+            return ref_runner.output
         else:
             logging.error(
                 "Validation data unavailable as reference implementation "
@@ -1067,10 +754,10 @@ class Benchmark(object):
                 precision=precision,
                 copy_output=validate,
             )
-            result = runner.get_results()
+            result = runner.results
             if validate and result.error_state == ErrorCodes.SUCCESS:
                 if self._validate_results(
-                    preset, result.framework, result.results, precision
+                    preset, runner.fmwrk, runner.output, precision
                 ):
                     result.validation_state = ValidationStatusCodes.SUCCESS
                 else:
@@ -1078,7 +765,18 @@ class Benchmark(object):
                     result.error_state = ErrorCodes.FAILED_VALIDATION
                     result.error_msg = "Validation failed"
             if conn:
-                store_results(conn, result.Result(run_id=run_id))
-            results.append(result)
+                store_results(
+                    conn,
+                    result.Result(
+                        run_id=run_id,
+                        benchmark_name=self.bname,
+                        framework_version=runner.fmwrk.fname
+                        + " "
+                        + runner.fmwrk.version()
+                        if runner.fmwrk
+                        else "n/a",
+                    ),
+                )
+            results.append((result, runner.fmwrk))
 
         return results

@@ -363,21 +363,19 @@ class Benchmark(object):
 
         """
 
-        ref_impl = None
-
-        python_impl = [
-            impl for impl in self.impl_fnlist if "python" in impl.name
+        reference_implementations = [
+            impl
+            for impl in self.impl_fnlist
+            if self.info.reference_implementation_postfix in impl.name
         ]
-        numpy_impl = [impl for impl in self.impl_fnlist if "numpy" in impl.name]
 
-        if numpy_impl:
-            ref_impl = numpy_impl[0]
-        elif python_impl:
-            ref_impl = python_impl[0]
-        else:
+        print(self.impl_fnlist)
+        print(reference_implementations)
+
+        if len(reference_implementations) == 0:
             raise RuntimeError("No reference implementation")
 
-        return ref_impl
+        return reference_implementations[0]
 
     def _set_impl_to_framework_map(self) -> dict[str, Framework]:
         """Create a dictionary mapping each implementation function name to a

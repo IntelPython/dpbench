@@ -25,6 +25,7 @@ from . import datamodel as dm
 __all__ = [
     "generate_impl_summary_report",
     "generate_performance_report",
+    "generate_comparison_report",
 ]
 
 
@@ -212,6 +213,74 @@ def generate_performance_report(
                 time = "n/a"
 
             df.at[index, impl] = time
+
+    generate_summary(df)
+
+
+def generate_comparison_report(
+    conn: sqlalchemy.Engine,
+    run_id: int,
+    implementations: list[str],
+    comparison_pairs: list[tuple[str, str]],
+    headless=False,
+):
+    """generate comparison report with median times for each benchmark"""
+    if len(comparison_pairs) == 0:
+        return
+
+    legends = read_legends()
+
+    if not headless:
+        generate_header(conn, run_id)
+        generate_legend(legends)
+
+    columns = [
+        dm.Result.input_size_human.label("input_size"),
+        dm.Result.benchmark,
+        dm.Result.problem_preset,
+    ]
+
+    for impl in implementations:
+        columns.append(
+            func.ifnull(
+                func.max(
+                    case(
+                        (
+                            dm.Result.implementation == impl,
+                            dm.Result.median_exec_time,
+                        ),
+                    )
+                ),
+                None,
+            ).label(impl),
+        )
+
+    sql = (
+        sqlalchemy.select(*columns)
+        .group_by(
+            dm.Result.benchmark,
+            dm.Result.problem_preset,
+        )
+        .where(dm.Result.run_id == run_id)
+    )
+
+    df = pd.read_sql_query(
+        sql=sql,
+        con=conn.connect(),
+    )
+
+    for index, row in df.iterrows():
+        for target, reference in comparison_pairs:
+            if row[reference] == 0 or row[target] == 0:
+                boost = "n/a"
+            else:
+                boost = (
+                    str(round((row[target] / row[reference]) * 100, 2)) + "%"
+                )
+            df.at[index, target + "_to_" + reference] = boost
+
+    for impl in implementations:
+        df = df.drop(impl, axis=1)
 
     generate_summary(df)
 

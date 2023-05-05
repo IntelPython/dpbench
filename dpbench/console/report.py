@@ -8,7 +8,7 @@ import argparse
 
 import sqlalchemy
 
-from ._namespace import Namespace
+from ._namespace import CommaSeparateStringListAction, Namespace
 
 
 def add_report_arguments(parser: argparse.ArgumentParser):
@@ -17,7 +17,16 @@ def add_report_arguments(parser: argparse.ArgumentParser):
     Args:
         parser: argument parser where arguments will be populated.
     """
-    pass
+    parser.add_argument(
+        "-c",
+        "--comparisons",
+        type=str,
+        action=CommaSeparateStringListAction,
+        nargs="?",
+        default=[],
+        help="Comma separated list of implementation pairs that need to be"
+        + " compared.",
+    )
 
 
 def execute_report(args: Namespace, conn: sqlalchemy.Engine):
@@ -29,6 +38,12 @@ def execute_report(args: Namespace, conn: sqlalchemy.Engine):
         args: object with all input arguments.
         conn: database connection.
     """
+    if len(args.comparisons) % 2 != 0:
+        raise ValueError(
+            "--comparisons must contain pairs, but odd number of"
+            + " elements was provided"
+        )
+
     import dpbench.config as cfg
     from dpbench.infrastructure.reporter import update_run_id
     from dpbench.infrastructure.runner import print_report
@@ -39,9 +54,15 @@ def execute_report(args: Namespace, conn: sqlalchemy.Engine):
         load_implementations=False,
     )
 
+    comparison_pairs = [
+        tuple(args.comparisons[i : i + 2])
+        for i in range(0, len(args.comparisons), 2)
+    ]
+
     args.run_id = update_run_id(conn, args.run_id)
     print_report(
         conn=conn,
         run_id=args.run_id,
         implementations=args.implementations,
+        comparison_pairs=comparison_pairs,
     )

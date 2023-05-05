@@ -8,6 +8,7 @@ import argparse
 from importlib.metadata import version
 
 from ._namespace import CommaSeparateStringAction, Namespace
+from .config import add_config_arguments, execute_config
 from .report import add_report_arguments, execute_report
 from .run import add_run_arguments, execute_run
 
@@ -85,6 +86,13 @@ def parse_args() -> Namespace:
 
     add_report_arguments(report_parser)
 
+    config_parser = subparsers.add_parser(
+        "config",
+        description="Subcommand to print config.",
+    )
+
+    add_config_arguments(config_parser)
+
     return parser.parse_args(namespace=Namespace())
 
 
@@ -110,6 +118,8 @@ def main():
         execute_run(args, conn)
     elif args.program == "report":
         execute_report(args, conn)
+    elif args.program == "config":
+        execute_config(args)
 
 
 if __name__ == "__main__":

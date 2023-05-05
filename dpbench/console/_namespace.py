@@ -29,6 +29,7 @@ class Namespace(argparse.Namespace):
     timeout: float
     precision: Union[str, None]
     program: str
+    color: str
     comparisons: list[str]
 
 

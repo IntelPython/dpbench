@@ -88,6 +88,7 @@ class Benchmark:
     array_args: List[str] = field(default_factory=list)
     output_args: List[str] = field(default_factory=list)
     implementations: List[BenchmarkImplementation] = field(default_factory=list)
+    reference_implementation_postfix: str = None
     expected_failure_implementations: List[str] = field(default_factory=list)
 
     @staticmethod
@@ -108,6 +109,9 @@ class Benchmark:
         _array_args = obj.get("array_args") or []
         _output_args = obj.get("output_args") or []
         _implementations = obj.get("implementations") or []
+        _reference_implementation_postfix = obj.get(
+            "reference_implementation_postfix"
+        )
         _expected_failure_implementations = (
             obj.get("expected_failure_implementations") or []
         )
@@ -126,5 +130,6 @@ class Benchmark:
             _array_args,
             _output_args,
             _implementations,
+            _reference_implementation_postfix,
             _expected_failure_implementations,
         )

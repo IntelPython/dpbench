@@ -19,6 +19,8 @@ from .framework import Framework
 from .implementation_postfix import Implementation
 from .module import Module
 
+_REFERENCE_IMPLEMENTATIONS = {"numpy", "python"}
+
 
 def read_configs(  # noqa: C901: TODO: move modules into config
     benchmarks: set[str] = None,
@@ -207,30 +209,13 @@ def read_frameworks(
                 postfix
                 for postfix in framework.postfixes
                 if postfix.postfix in implementations
+                or postfix.postfix in _REFERENCE_IMPLEMENTATIONS
             ]
 
         if len(framework.postfixes) == 0:
             continue
 
         config.frameworks.append(framework)
-
-
-def read_implementation_postfixes(
-    config: Config, impl_postfix_file: str
-) -> None:
-    """Read and populate implementation postfix configuration file.
-
-    Args:
-        config: Configuration object where settings should be populated.
-        impl_postfix_file: Path to the configuration file.
-    """
-    with open(impl_postfix_file) as file:
-        file_contents = file.read()
-
-    implementation_postfixes = tomli.loads(file_contents)
-    for impl in implementation_postfixes["implementations"]:
-        implementation = Implementation.from_dict(impl)
-        config.implementations.append(implementation)
 
 
 def read_precision_dtypes(config: Config, precision_dtypes_file: str) -> None:
@@ -341,6 +326,7 @@ def read_benchmark_implementations(
     ]
 
     setup_init(config, modules)
+    set_default_reference_implementation_postfix(config, modules)
 
     for module in modules:
         module_name, postfix = discover_module_name_and_postfix(module, config)
@@ -348,6 +334,7 @@ def read_benchmark_implementations(
         if (
             implementations
             and (postfix not in implementations)
+            and (postfix != config.reference_implementation_postfix)
             or (config.init and config.init.module_name.endswith(module_name))
         ):
             continue
@@ -380,6 +367,34 @@ def read_benchmark_implementations(
                 package_path=package_path,
             )
         )
+
+
+def set_default_reference_implementation_postfix(
+    config: Benchmark,
+    modules: set[str] = None,
+):
+    """Sets reference implementation postfix if not set.
+
+    It will set it to 'numpy' or 'python' with priority to 'numpy' depending on
+    the available modules.
+
+    Args:
+        config: Benchmark configuration object where settings should be
+            populated.
+        modules: List of modules in benchmark implementation dir.
+    """
+    if config.reference_implementation_postfix:
+        return
+
+    postfixes = {
+        discover_module_name_and_postfix(module, config)[1]
+        for module in modules
+    }
+
+    for postfix in _REFERENCE_IMPLEMENTATIONS:
+        if postfix in postfixes:
+            config.reference_implementation_postfix = postfix
+            break
 
 
 def get_benchmark_index(configs: list[Benchmark], module_name: str) -> int:

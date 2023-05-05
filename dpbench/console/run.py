@@ -87,6 +87,13 @@ def add_run_arguments(parser: argparse.ArgumentParser):
         default=True,
         help="Either to save execution into database.",
     )
+    parser.add_argument(
+        "--sycl-device",
+        type=str,
+        nargs="?",
+        default=None,
+        help="Sycl device to overwrite for framework configurations.",
+    )
 
 
 def execute_run(args: Namespace, conn: sqlalchemy.Engine):
@@ -109,6 +116,10 @@ def execute_run(args: Namespace, conn: sqlalchemy.Engine):
         with_npbench=args.npbench,
         with_polybench=args.polybench,
     )
+
+    if args.sycl_device:
+        for framework in cfg.GLOBAL.frameworks:
+            framework.sycl_device = args.sycl_device
 
     if args.run_id is None:
         args.run_id = dpbi.create_run(conn)

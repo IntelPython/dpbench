@@ -15,6 +15,7 @@ class Namespace(argparse.Namespace):
     implementations: set[str]
     all_implementations: bool
     preset: str
+    sycl_device: str
     dpbench: bool
     npbench: bool
     polybench: bool

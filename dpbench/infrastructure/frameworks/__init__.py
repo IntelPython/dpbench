@@ -4,7 +4,7 @@
 
 from .dpcpp_framework import DpcppFramework
 from .dpnp_framework import DpnpFramework
-from .fabric import build_framework_map
+from .fabric import build_framework, build_framework_map
 from .framework import Framework
 from .numba_dpex_framework import NumbaDpexFramework
 from .numba_framework import NumbaFramework
@@ -17,5 +17,6 @@ __all__ = [
     "DpnpFramework",
     "DpcppFramework",
     "NumbaMlirFramework",
+    "build_framework",
     "build_framework_map",
 ]

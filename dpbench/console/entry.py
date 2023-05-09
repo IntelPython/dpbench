@@ -7,7 +7,11 @@
 import argparse
 from importlib.metadata import version
 
-from ._namespace import CommaSeparateStringAction, Namespace
+from ._namespace import (
+    CommaSeparateStringAction,
+    CommaSeparateStringListAction,
+    Namespace,
+)
 from .config import add_config_arguments, execute_config
 from .report import add_report_arguments, execute_report
 from .run import add_run_arguments, execute_run
@@ -31,7 +35,7 @@ def parse_args() -> Namespace:
         "-i",
         "--implementations",
         type=str,
-        action=CommaSeparateStringAction,
+        action=CommaSeparateStringListAction,
         nargs="?",
         default={"python", "numpy"},
         help="Comma separated list of implementations. Use "
@@ -100,7 +104,8 @@ def main():
     """Main function to run on dpbench console tool."""
     args = parse_args()
 
-    if args.program in {"run", "report"}:
+    conn = None
+    if args.program == "report" or args.program == "run" and args.save:
         import dpbench.infrastructure as dpbi
         from dpbench.infrastructure.reporter import update_run_id
 

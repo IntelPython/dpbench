@@ -31,6 +31,7 @@ class Namespace(argparse.Namespace):
     program: str
     color: str
     comparisons: list[str]
+    log_level: str
     skip_expected_failures: bool
 
 

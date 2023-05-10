@@ -319,4 +319,10 @@ def get_unexpected_failures(
 
     failures = {f for f in get_failures_from_results(results_db, run_id)}
 
+    fixed_failures = expected_failures.difference(failures)
+    if len(fixed_failures):
+        logging.warn(
+            f"these benchmarks does not fail anymore: {fixed_failures}"
+        )
+
     return failures.difference(expected_failures)

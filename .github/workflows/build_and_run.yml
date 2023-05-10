@@ -10,17 +10,24 @@ on:
     branches: [main]
 
 env:
-  WORKLOADS: python,numpy,dpnp,sycl,numba_n,numba_np,numba_npr,numba_dpex_k,numba_dpex_n,numba_dpex_p,numba_mlir_k,numba_mlir_n,numba_mlir_p
+  # sycl is not included. Add it manually if you need
+  WORKLOADS: python,numpy,dpnp,numba_n,numba_np,numba_npr,numba_dpex_k,numba_dpex_n,numba_dpex_p,numba_mlir_k,numba_mlir_n,numba_mlir_p
 
 jobs:
   build_linux:
-    name: Builds dpbench and runs the benchmarks
+    name: Build and run linux
     runs-on: ubuntu-latest
 
     strategy:
       fail-fast: false
       matrix:
         python: ["3.9", "3.10"]
+        sycl: ["sycl","no-sycl"]
+        include:
+          - sycl: sycl
+            environment: conda-linux-sycl.yml
+          - sycl: no-sycl
+            environment: conda.yml
 
     steps:
       - name: Cancel Previous Runs
@@ -40,22 +47,32 @@ jobs:
           python-version: ${{ matrix.python }}
           mamba-version: "*"
           activate-environment: dpbench-dev
-          environment-file: environments/conda-linux-sycl.yml
+          environment-file: environments/${{ matrix.environment }}
 
       - name: Conda info
-        shell: bash -l {0}
+        shell: bash -el {0}
         run: |
           conda info
           conda list
 
-      - name: Build dpbench
-        shell: bash -l {0}
+      - name: Sycl
+        if: matrix.sycl == 'sycl'
+        shell: bash -el {0}
         run: |
-          CC=icx CXX=icpx DPBENCH_SYCL=1 pip install \
+          sycl-ls
+          echo "CC=icx" >> "$GITHUB_ENV"
+          echo "CXX=icpx" >> "$GITHUB_ENV"
+          echo "DPBENCH_SYCL=1" >> "$GITHUB_ENV"
+          echo "WORKLOADS=$WORKLOADS,sycl" >> "$GITHUB_ENV"
+
+      - name: Build dpbench
+        shell: bash -el {0}
+        run: |
+          pip install \
           --no-index --no-deps --no-build-isolation -e . -v
 
       - name: Run benchmarks
-        shell: bash -l {0}
+        shell: bash -el {0}
         run: |
           export OCL_ICD_FILENAMES=libintelocl.so
           export NUMBA_MLIR_GPU_RUNTIME=sycl
@@ -63,12 +80,93 @@ jobs:
           export NUMBA_DPEX_FALLBACK_ON_CPU=0
           # Make sure numba-dpex is using native atomics in github CI
           export NUMBA_DPEX_ACTIVATE_ATOMICS_FP_NATIVE=1
-          ls $(dirname $(dirname `which icx`))/bin-llvm || exit 1
-          export NUMBA_DPEX_LLVM_SPIRV_ROOT=$(dirname $(dirname `which icx`))/bin-llvm
 
           dpbench -i ${WORKLOADS} run -r2 --no-print-results || exit 1
 
       - name: Generate report
-        shell: bash -l {0}
+        shell: bash -el {0}
         run: |
           dpbench -i ${WORKLOADS} report || exit 1
+
+  build-windows:
+    name: Build and run windows
+    runs-on: windows-latest
+
+    strategy:
+      fail-fast: false
+      matrix:
+        python: ["3.9", "3.10"]
+        sycl: ["sycl","no-sycl"]
+        include:
+          - sycl: sycl
+            environment: conda-win-sycl.yml
+          - sycl: no-sycl
+            environment: conda.yml
+
+    steps:
+      - name: Checkout dpbench
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+
+      - name: Setup conda
+        uses: conda-incubator/setup-miniconda@v2
+        with:
+          auto-update-conda: true
+          python-version: ${{ matrix.python }}
+          activate-environment: dpbench-dev
+          environment-file: environments/${{ matrix.environment }}
+
+      - name: Conda info
+        shell: pwsh
+        run: |
+          conda info
+          conda list
+
+      - name: Configure Intel OpenCL CPU RT
+        shell: pwsh
+        run: |
+          $script_path="$env:CONDA_PREFIX\Scripts\set-intel-ocl-icd-registry.ps1"
+          &$script_path
+          echo "OCL_ICD_FILENAMES=$env:CONDA_PREFIX\Library\lib\intelocl64.dll" >> $env:GITHUB_ENV
+          echo "LIB=$env:CONDA_PREFIX\Library\lib;$env:CONDA_PREFIX\compiler\lib;$env:LIB" >> $env:GITHUB_ENV
+          echo "INCLUDE=$env:CONDA_PREFIX\include;$env:INCLUDE" >> $env:GITHUB_ENV
+          # Check the variable assisting OpenCL CPU driver to find TBB DLLs which are not located where it expects them by default
+          $cl_cfg="$env:CONDA_PREFIX\Library\lib\cl.cfg"
+          Get-Content -Tail 5 -Path $cl_cfg
+
+      - name: Sycl
+        if: matrix.sycl == 'sycl'
+        shell: pwsh
+        run: |
+          sycl-ls
+          echo "CC=icx" >> $env:GITHUB_ENV
+          echo "CXX=icx" >> $env:GITHUB_ENV
+          echo "DPBENCH_SYCL=1" >> $env:GITHUB_ENV
+          echo "WORKLOADS=$env:WORKLOADS,sycl" >> $env:GITHUB_ENV
+
+      - name: Build dpbench
+        shell: pwsh
+        run: |
+          python setup.py develop
+          # pip install `
+          # --no-index --no-deps --no-build-isolation -e . -v
+
+      - name: Run benchmarks
+        shell: pwsh
+        run: |
+          $env:NUMBA_MLIR_GPU_RUNTIME="sycl"
+          # Turn off numba-dpex autofall back
+          $env:NUMBA_DPEX_FALLBACK_ON_CPU=0
+          # Make sure numba-dpex is using native atomics in github CI
+          $env:NUMBA_DPEX_ACTIVATE_ATOMICS_FP_NATIVE=1
+
+          $env:PYTHONIOENCODING="utf-8"
+          # $env:PYTHONLEGACYWINDOWSSTDIO=utf-8
+
+          dpbench -i $env:WORKLOADS run -r2 --no-print-results
+
+      - name: Generate report
+        shell: pwsh
+        run: |
+          dpbench -i $env:WORKLOADS report

@@ -5,6 +5,7 @@
 """Entry point for dpbench cli tool."""
 
 import argparse
+import logging
 from importlib.metadata import version
 
 from ._namespace import (
@@ -74,6 +75,14 @@ def parse_args() -> Namespace:
         default="results.db",
         help="Path to a database to store results.",
     )
+    parser.add_argument(
+        "--log-level",
+        type=str,
+        choices=["critical", "fatal", "error", "warning", "info", "debug"],
+        nargs="?",
+        default="warning",
+        help="Log level.",
+    )
 
     subparsers = parser.add_subparsers(dest="program")
 
@@ -103,6 +112,8 @@ def parse_args() -> Namespace:
 def main():
     """Main function to run on dpbench console tool."""
     args = parse_args()
+
+    logging.root.setLevel(args.log_level.upper())
 
     conn = None
     if args.program == "report" or args.program == "run" and args.save:

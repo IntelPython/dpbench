@@ -371,7 +371,8 @@ class Benchmark(object):
         ]
 
         if len(reference_implementations) == 0:
-            raise RuntimeError("No reference implementation")
+            logging.warn("No reference implementation")
+            return None
 
         return reference_implementations[0]
 
@@ -435,7 +436,8 @@ class Benchmark(object):
                         ).format(key, ref_out[key], frmwrk_out[key])
                     )
             return valid
-        except Exception:
+        except Exception as e:
+            logging.error(f"Exception during validation {e.args}")
             return False
 
     def __init__(

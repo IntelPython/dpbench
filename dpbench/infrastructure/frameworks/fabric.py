@@ -28,6 +28,16 @@ def build_framework_map() -> dict[str, Framework]:
 
     result = dict()
 
+    for framework_config in cfg.GLOBAL.frameworks:
+        framework = build_framework(framework_config)
+
+        for postfix in framework_config.postfixes:
+            result[postfix.postfix] = framework
+
+    return result
+
+
+def build_framework(framework_config: cfg.Framework) -> Framework:
     available_classes = [
         Framework,
         DpcppFramework,
@@ -39,18 +49,12 @@ def build_framework_map() -> dict[str, Framework]:
 
     available_classes = {_cls.__name__: _cls for _cls in available_classes}
 
-    for framework_config in cfg.GLOBAL.frameworks:
-        constructor = available_classes.get(framework_config.class_, None)
+    constructor = available_classes.get(framework_config.class_, None)
 
-        if constructor is None:
-            logging.warn(
-                f"Could not find class for {framework_config.simple_name}, using default one."
-            )
-            constructor = Framework
+    if constructor is None:
+        logging.warn(
+            f"Could not find class for {framework_config.simple_name}, using default one."
+        )
+        constructor = Framework
 
-        framework = constructor(config=framework_config)
-
-        for postfix in framework_config.postfixes:
-            result[postfix.postfix] = framework
-
-    return result
+    return constructor(config=framework_config)

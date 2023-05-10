@@ -366,11 +366,9 @@ class Benchmark(object):
         reference_implementations = [
             impl
             for impl in self.impl_fnlist
-            if self.info.reference_implementation_postfix in impl.name
+            if self.info.reference_implementation_postfix
+            and self.info.reference_implementation_postfix in impl.name
         ]
-
-        print(self.impl_fnlist)
-        print(reference_implementations)
 
         if len(reference_implementations) == 0:
             raise RuntimeError("No reference implementation")
@@ -714,67 +712,3 @@ class Benchmark(object):
                         )
                     }
                 )
-
-    def run(
-        self,
-        implementation_postfix: str = None,
-        preset: str = "S",
-        repeat: int = 10,
-        validate: bool = True,
-        timeout: float = 200.0,
-        precision: str = None,
-        conn: sqlite3.Connection = None,
-        run_id: int = None,
-    ) -> list[BenchmarkResults]:
-        results: list[BenchmarkResults] = []
-
-        implementation_postfixes = []
-
-        if implementation_postfix:
-            implementation_postfixes.append(implementation_postfix)
-        else:
-            for impl in self.impl_fnlist:
-                impl_postfix = impl.name[
-                    (len(self.bname) - len(impl.name) + 1) :  # noqa: E203
-                ]
-
-                implementation_postfixes.append(impl_postfix)
-
-        # TODO: do we call ref benchmark function twice?
-        for implementation_postfix in implementation_postfixes:
-            # copy_output is true only if validation is needed.
-            runner = BenchmarkRunner(
-                bench=self,
-                impl_postfix=implementation_postfix,
-                preset=preset,
-                repeat=repeat,
-                timeout=timeout,
-                precision=precision,
-                copy_output=validate,
-            )
-            result = runner.results
-            if validate and result.error_state == ErrorCodes.SUCCESS:
-                if self._validate_results(
-                    preset, runner.fmwrk, runner.output, precision
-                ):
-                    result.validation_state = ValidationStatusCodes.SUCCESS
-                else:
-                    result.validation_state = ValidationStatusCodes.FAILURE
-                    result.error_state = ErrorCodes.FAILED_VALIDATION
-                    result.error_msg = "Validation failed"
-            if conn:
-                store_results(
-                    conn,
-                    result.Result(
-                        run_id=run_id,
-                        benchmark_name=self.bname,
-                        framework_version=runner.fmwrk.fname
-                        + " "
-                        + runner.fmwrk.version()
-                        if runner.fmwrk
-                        else "n/a",
-                    ),
-                )
-            results.append((result, runner.fmwrk))
-
-        return results

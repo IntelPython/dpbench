@@ -2,7 +2,8 @@
 #
 # SPDX-License-Identifier: Apache-2.0
 
-from .benchmark import Benchmark, BenchmarkResults
+from .benchmark import Benchmark
+from .benchmark_results import BenchmarkResults
 from .datamodel import (
     Base,
     Result,
@@ -26,7 +27,6 @@ from .reporter import (
     generate_performance_report,
     get_unexpected_failures,
 )
-from .utilities import validate
 
 __all__ = [
     "Base",
@@ -48,5 +48,4 @@ __all__ = [
     "generate_performance_report",
     "generate_comparison_report",
     "get_unexpected_failures",
-    "validate",
 ]

@@ -71,7 +71,7 @@ jobs:
 
           dpbench \
           -i python,numpy,dpnp,sycl,numba_n,numba_np,numba_npr,numba_dpex_k,numba_dpex_n,numba_dpex_p \
-          run --no-validate -r2 --no-print-results
+          run -r2 --no-print-results
 
       - name: Generate report
         shell: bash -l {0}

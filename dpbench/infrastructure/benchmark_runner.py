@@ -7,15 +7,14 @@ import inspect
 import logging
 import multiprocessing as mp
 import multiprocessing.connection as mpc
-import os
 from dataclasses import dataclass
 
-import numpy as np
 import sqlalchemy
 
 import dpbench.config as cfg
-from dpbench.infrastructure.benchmark import Benchmark, _exec, _setup_func
+from dpbench.infrastructure.benchmark import Benchmark, _exec, _exec_simple
 from dpbench.infrastructure.benchmark_results import BenchmarkResults
+from dpbench.infrastructure.benchmark_validation import validate_results
 from dpbench.infrastructure.datamodel import store_results
 from dpbench.infrastructure.enums import ErrorCodes, ValidationStatusCodes
 from dpbench.infrastructure.frameworks import Framework
@@ -238,12 +237,9 @@ class BenchmarkRunner:
             f"Running {rc.benchmark.module_name} on {framework.fname} ({type(framework)})"
         )
         bench = Benchmark(rc.benchmark)
+        bench.initialize_input_data(rc.preset, rc.precision)
+
         results = BenchmarkResults(rc.repeat, rc.implementation, rc.preset)
-        impl_fn = bench.get_impl(rc.implementation)
-        if not impl_fn:
-            results.error_state = ErrorCodes.UNIMPLEMENTED
-            results.error_msg = "No implementation"
-            return (results, {})
 
         if not framework:
             results.error_state = ErrorCodes.NO_FRAMEWORK
@@ -257,8 +253,6 @@ class BenchmarkRunner:
             rc.implementation,
             rc.preset,
             rc.repeat,
-            rc.precision,
-            _setup_func,
             results_dict,
             # copy output if we want to validate results
             rc.validate,
@@ -272,27 +266,21 @@ class BenchmarkRunner:
         if results.error_state != ErrorCodes.SUCCESS:
             return (results, {})
 
-        output = {}
+        output = results_dict.get("outputs", {})
         results.setup_time = results_dict["setup_time"]
         results.warmup_time = results_dict["warmup_time"]
         results.exec_times = results_dict["exec_times"]
-
-        if "outputs" in results_dict:
-            output_npz = results_dict["outputs"]
-            if output_npz:
-                with np.load(output_npz) as npzfile:
-                    for outarr in npzfile.files:
-                        output.update({outarr: npzfile[outarr]})
-                os.remove(output_npz)
-            results.teardown_time = results_dict["teardown_time"]
-
-        if "return-value" in results_dict:
-            output.update({"return-value": results_dict["return-value"]})
+        results.teardown_time = results_dict["teardown_time"]
 
         if rc.validate and results.error_state == ErrorCodes.SUCCESS:
-            if bench._validate_results(
-                rc.preset, framework, output, rc.precision
-            ):
+            ref_framework = build_framework(rc.ref_framework)
+            ref_output = _exec_simple(
+                bench,
+                ref_framework,
+                rc.benchmark.reference_implementation_postfix,
+                rc.preset,
+            )
+            if validate_results(ref_output, output):
                 results.validation_state = ValidationStatusCodes.SUCCESS
             else:
                 results.validation_state = ValidationStatusCodes.FAILURE
@@ -341,14 +329,12 @@ class BenchmarkRunner:
 
         brc = BaseRunConfig.from_instance(rc)
 
-        brc.ref_framework: cfg.Framework = None
-        if rc.benchmark.reference_implementation_postfix != rc.implementation:
-            brc.ref_framework = [
-                f
-                for f in cfg.GLOBAL.frameworks
-                if rc.benchmark.reference_implementation_postfix
-                in {p.postfix for p in f.postfixes}
-            ][0]
+        brc.ref_framework: cfg.Framework = [
+            f
+            for f in cfg.GLOBAL.frameworks
+            if rc.benchmark.reference_implementation_postfix
+            in {p.postfix for p in f.postfixes}
+        ][0]
 
         conn.send(brc)
 

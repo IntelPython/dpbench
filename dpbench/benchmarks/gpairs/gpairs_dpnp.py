@@ -12,7 +12,8 @@ def _gpairs_impl(x1, y1, z1, w1, x2, y2, z2, w2, rbins):
         + np.square(z2 - z1[:, None])
     )
     return np.array(
-        [np.outer(w1, w2)[dm <= rbins[k]].sum() for k in range(len(rbins))]
+        [np.outer(w1, w2)[dm <= rbins[k]].sum() for k in range(len(rbins))],
+        device=x1.device,
     )
 
 

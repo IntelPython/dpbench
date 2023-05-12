@@ -4,13 +4,15 @@
 
 from math import erf, exp, log, sqrt
 
+import dpnp as np
 import numba_dpex as dpex
 
 
 @dpex.kernel
 def _black_scholes_kernel(nopt, price, strike, t, rate, volatility, call, put):
+    dtype = price.dtype
     mr = -rate
-    sig_sig_two = volatility * volatility * 2
+    sig_sig_two = volatility * volatility * dtype.type(2)
 
     i = dpex.get_global_id(0)
 
@@ -22,14 +24,14 @@ def _black_scholes_kernel(nopt, price, strike, t, rate, volatility, call, put):
     b = T * mr
 
     z = T * sig_sig_two
-    c = 0.25 * z
-    y = 1.0 / sqrt(z)
+    c = dtype.type(0.25) * z
+    y = dtype.type(1.0) / sqrt(z)
 
     w1 = (a - b + c) * y
     w2 = (a - b - c) * y
 
-    d1 = 0.5 + 0.5 * erf(w1)
-    d2 = 0.5 + 0.5 * erf(w2)
+    d1 = dtype.type(0.5) + dtype.type(0.5) * erf(w1)
+    d2 = dtype.type(0.5) + dtype.type(0.5) * erf(w2)
 
     Se = exp(b) * S
 

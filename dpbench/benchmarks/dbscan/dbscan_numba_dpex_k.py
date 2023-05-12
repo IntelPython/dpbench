@@ -63,7 +63,7 @@ def get_neighborhood(n, dim, data, eps, ind_lst, sz_lst, block_size, nblocks):
         i2 = n if ii + 1 == nblocks1 else i1 + block_size1
         for j in range(start, stop):
             for k in range(i1, i2):
-                dist = 0.0
+                dist = data.dtype.type(0.0)
                 for m in range(dim):
                     diff = data[k * dim + m] - data[j * dim + m]
                     dist += diff * diff

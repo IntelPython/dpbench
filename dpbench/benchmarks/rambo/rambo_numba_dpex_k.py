@@ -9,11 +9,12 @@ import numba_dpex as dpex
 
 @dpex.kernel
 def _rambo(C1, F1, Q1, nout, output):
+    dtype = C1.dtype
     i = dpex.get_global_id(0)
     for j in range(nout):
-        C = 2.0 * C1[i, j] - 1.0
-        S = sqrt(1 - C * C)
-        F = 2.0 * pi * F1[i, j]
+        C = dtype.type(2.0) * C1[i, j] - dtype.type(1.0)
+        S = sqrt(dtype.type(1) - C * C)
+        F = dtype.type(2.0 * pi) * F1[i, j]
         Q = -log(Q1[i, j])
 
         output[i, j, 0] = Q

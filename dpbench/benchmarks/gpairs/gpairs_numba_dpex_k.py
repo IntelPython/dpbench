@@ -2,10 +2,7 @@
 #
 # SPDX-License-Identifier: Apache-2.0
 
-import math
-
 import numba_dpex as dpex
-import numpy as np
 
 # This implementation is numba dpex kernel version with atomics.
 
@@ -27,6 +24,7 @@ def count_weighted_pairs_3d_intel_no_slm_ker(
     rbins_squared,
     result,
 ):
+    dtype = x0.dtype
     lid0 = dpex.get_local_id(0)
     gr0 = dpex.get_group_id(0)
 
@@ -38,9 +36,9 @@ def count_weighted_pairs_3d_intel_no_slm_ker(
 
     n_wi = 20
 
-    dsq_mat = dpex.private.array(shape=(20 * 20), dtype=np.float32)
-    w0_vec = dpex.private.array(shape=(20), dtype=np.float32)
-    w1_vec = dpex.private.array(shape=(20), dtype=np.float32)
+    dsq_mat = dpex.private.array(shape=(20 * 20), dtype=dtype)
+    w0_vec = dpex.private.array(shape=(20), dtype=dtype)
+    w1_vec = dpex.private.array(shape=(20), dtype=dtype)
 
     offset0 = gr0 * n_wi * lws0 + lid0
     offset1 = gr1 * n_wi * lws1 + lid1
@@ -80,7 +78,7 @@ def count_weighted_pairs_3d_intel_no_slm_ker(
 
     # update slm_hist. Use work-item private buffer of 16 tfloat elements
     for k in range(0, slm_hist_size, private_hist_size):
-        private_hist = dpex.private.array(shape=(16), dtype=np.float32)
+        private_hist = dpex.private.array(shape=(16), dtype=dtype)
         for p in range(private_hist_size):
             private_hist[p] = 0.0
 
@@ -95,7 +93,9 @@ def count_weighted_pairs_3d_intel_no_slm_ker(
                 pk = k
                 for p in range(private_hist_size):
                     private_hist[p] += (
-                        pw if (pk < nbins and dsq <= rbins_squared[pk]) else 0.0
+                        pw
+                        if (pk < nbins and dsq <= rbins_squared[pk])
+                        else dtype.type(0.0)
                     )
                     pk += 1
 

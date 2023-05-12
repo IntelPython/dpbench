@@ -13,7 +13,7 @@ def _pairwise_distance_kernel(X1, X2, D):
     X2_rows = X2.shape[0]
     X1_cols = X1.shape[1]
     for j in range(X2_rows):
-        d = 0.0
+        d = X1.dtype.type(0.0)
         for k in range(X1_cols):
             tmp = X1[i, k] - X2[j, k]
             d += tmp * tmp

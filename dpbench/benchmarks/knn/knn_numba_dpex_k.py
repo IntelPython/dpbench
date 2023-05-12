@@ -20,15 +20,16 @@ def _knn_kernel(  # noqa: C901: TODO: can we simplify logic?
     votes_to_classes_lst,
     data_dim,
 ):
+    dtype = train.dtype
     i = dpex.get_global_id(0)
     # here k has to be 5 in order to match with numpy
-    queue_neighbors = dpex.private.array(shape=(5, 2), dtype=np.float64)
+    queue_neighbors = dpex.private.array(shape=(5, 2), dtype=dtype)
 
     for j in range(k):
         x1 = train[j]
         x2 = test[i]
 
-        distance = 0.0
+        distance = dtype.type(0.0)
         for jj in range(data_dim):
             diff = x1[jj] - x2[jj]
             distance += diff * diff
@@ -55,7 +56,7 @@ def _knn_kernel(  # noqa: C901: TODO: can we simplify logic?
         x1 = train[j]
         x2 = test[i]
 
-        distance = 0.0
+        distance = dtype.type(0.0)
         for jj in range(data_dim):
             diff = x1[jj] - x2[jj]
             distance += diff * diff
@@ -83,7 +84,7 @@ def _knn_kernel(  # noqa: C901: TODO: can we simplify logic?
         votes_to_classes[int(queue_neighbors[j, 1])] += 1
 
     max_ind = 0
-    max_value = 0
+    max_value = dtype.type(0)
 
     for j in range(classes_num):
         if votes_to_classes[j] > max_value:

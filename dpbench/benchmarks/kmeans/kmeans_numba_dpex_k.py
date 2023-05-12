@@ -11,7 +11,8 @@ import numba_dpex as dpex
 def groupByCluster(arrayP, arrayPcluster, arrayC, num_points, num_centroids):
     idx = dpex.get_global_id(0)
     # if idx < num_points: # why it was removed??
-    minor_distance = -1
+    dtype = arrayC.dtype
+    minor_distance = dtype.type(-1)
     for i in range(num_centroids):
         dx = arrayP[idx, 0] - arrayC[i, 0]
         dy = arrayP[idx, 1] - arrayC[i, 1]
@@ -41,8 +42,9 @@ def calCentroidsSum2(arrayP, arrayPcluster, arrayCsum, arrayCnumpoint):
 @dpex.kernel
 def updateCentroids(arrayC, arrayCsum, arrayCnumpoint, num_centroids):
     i = dpex.get_global_id(0)
-    arrayC[i, 0] = arrayCsum[i, 0] / arrayCnumpoint[i]
-    arrayC[i, 1] = arrayCsum[i, 1] / arrayCnumpoint[i]
+    dtype = arrayC.dtype
+    arrayC[i, 0] = arrayCsum[i, 0] / dtype.type(arrayCnumpoint[i])
+    arrayC[i, 1] = arrayCsum[i, 1] / dtype.type(arrayCnumpoint[i])
 
 
 @dpex.kernel

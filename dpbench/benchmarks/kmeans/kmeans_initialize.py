@@ -7,10 +7,10 @@ def initialize(npoints, niters, seed, ndims, ncentroids, types_dict):
     import numpy as np
     import numpy.random as default_rng
 
-    f_dtype = types_dict["float"]
-    i_dtype = types_dict["int"]
-    XL = 1.0
-    XH = 5.0
+    f_dtype: np.dtype = types_dict["float"]
+    i_dtype: np.dtype = types_dict["int"]
+    XL = f_dtype.type(1.0)
+    XH = f_dtype.type(5.0)
 
     default_rng.seed(seed)
 

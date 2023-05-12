@@ -41,6 +41,6 @@ def initialize(
     )
     x_test = _gen_test_data(test_size, data_dim, seed_test, dtype)
     predictions = np.empty(test_size, types_dict["int"])
-    votes_to_classes = np.zeros((test_size, classes_num))
+    votes_to_classes = np.zeros((test_size, classes_num), dtype)
 
     return (x_train, y_train, x_test, predictions, votes_to_classes)

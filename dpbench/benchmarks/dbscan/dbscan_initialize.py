@@ -64,8 +64,10 @@ def initialize(n_samples, n_features, centers, seed, types_dict):
         data_size, Params(eps=DEFAULT_EPS, minpts=DEFAULT_MINPTS)
     )
 
+    dtype: np.dtype = types_dict["float"]
+
     return (
-        X.flatten().astype(types_dict["float"]),
-        params.eps,
+        X.flatten().astype(dtype),
+        dtype.type(params.eps),
         params.minpts,
     )

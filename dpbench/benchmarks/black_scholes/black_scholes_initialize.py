@@ -7,15 +7,15 @@ def initialize(nopt, seed, types_dict):
     import numpy as np
     import numpy.random as default_rng
 
-    dtype = types_dict["float"]
-    S0L = 10.0
-    S0H = 50.0
-    XL = 10.0
-    XH = 50.0
-    TL = 1.0
-    TH = 2.0
-    RISK_FREE = 0.1
-    VOLATILITY = 0.2
+    dtype: np.dtype = types_dict["float"]
+    S0L = dtype.type(10.0)
+    S0H = dtype.type(50.0)
+    XL = dtype.type(10.0)
+    XH = dtype.type(50.0)
+    TL = dtype.type(1.0)
+    TH = dtype.type(2.0)
+    RISK_FREE = dtype.type(0.1)
+    VOLATILITY = dtype.type(0.2)
 
     default_rng.seed(seed)
     price = default_rng.uniform(S0L, S0H, nopt).astype(dtype)

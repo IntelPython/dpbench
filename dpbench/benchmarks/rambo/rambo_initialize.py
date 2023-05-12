@@ -19,4 +19,4 @@ def initialize(nevts, nout, types_dict):
             F1[i, j] = np.random.rand()
             Q1[i, j] = np.random.rand() * np.random.rand()
 
-    return (C1, F1, Q1, np.empty((nevts, nout, 4)))
+    return (C1, F1, Q1, np.empty((nevts, nout, 4), dtype))

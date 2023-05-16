@@ -9,7 +9,7 @@ import numba_mlir as nb
 
 
 # blackscholes implemented as a parallel loop using numba.prange
-@nb.njit(parallel=True, fastmath=True)
+@nb.njit(parallel=True, fastmath=True, gpu_fp64_truncate="auto")
 def _black_scholes(nopt, price, strike, t, rate, volatility, call, put):
     mr = -rate
     sig_sig_two = volatility * volatility * 2

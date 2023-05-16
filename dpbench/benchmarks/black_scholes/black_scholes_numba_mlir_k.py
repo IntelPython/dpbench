@@ -7,7 +7,7 @@ from math import erf, exp, log, sqrt
 import numba_mlir.kernel as nb
 
 
-@nb.kernel
+@nb.kernel(gpu_fp64_truncate="auto")
 def _black_scholes_kernel(nopt, price, strike, t, rate, volatility, call, put):
     mr = -rate
     sig_sig_two = volatility * volatility * 2

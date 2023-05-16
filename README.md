@@ -98,11 +98,11 @@ SPDX-License-Identifier: Apache-2.0
 
 
         ```bash
-        $  dpbench -b black_scholes -i numba_mlir_k s run
+        $  dpbench -b black_scholes -i numba_mlir_k run
         ```
 
     to run all `numba-mlir` benchmarks:
 
         ```bash
-        $  dpbench -b black_scholes -i numba_mlir_k,numba_mlir_n,numba_mlir_p s run
+        $  dpbench -b black_scholes -i numba_mlir_k,numba_mlir_n,numba_mlir_p run
         ```

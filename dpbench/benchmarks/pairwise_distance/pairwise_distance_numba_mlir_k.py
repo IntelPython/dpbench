@@ -6,7 +6,7 @@ import numba_mlir.kernel as nb
 import numpy as np
 
 
-@nb.kernel
+@nb.kernel(gpu_fp64_truncate="auto")
 def _pairwise_distance_kernel(X1, X2, D):
     i = nb.get_global_id(0)
 

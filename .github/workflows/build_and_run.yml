@@ -71,3 +71,13 @@ jobs:
         shell: bash -l {0}
         run: |
           dpbench -i ${WORKLOADS} report || exit 1
+
+      - name: Run numba-mlir host benchmarks
+        shell: bash -l {0}
+        run: |
+          dpbench -i numba_mlir_n,numba_mlir_p run -r2 --sycl-device "none" -p S || exit 1
+
+      - name: Numba-mlir host benchmarks report
+        shell: bash -l {0}
+        run: |
+          dpbench -i numba_mlir_n,numba_mlir_p report || exit 1

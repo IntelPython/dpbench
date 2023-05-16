@@ -6,7 +6,7 @@ import numba_mlir as nb
 import numpy as np
 
 
-@nb.njit(parallel=True, fastmath=True)
+@nb.njit(parallel=True, fastmath=True, gpu_fp64_truncate="auto")
 def _pairwise_distance(X1, X2, D):
     x1 = np.sum(np.square(X1), axis=1)
     x2 = np.sum(np.square(X2), axis=1)

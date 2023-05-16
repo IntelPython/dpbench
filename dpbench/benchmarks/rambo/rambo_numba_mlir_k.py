@@ -7,7 +7,7 @@ from math import cos, log, pi, sin, sqrt
 import numba_mlir.kernel as nb
 
 
-@nb.kernel
+@nb.kernel(gpu_fp64_truncate="auto")
 def _rambo(C1, F1, Q1, nout, output):
     i = nb.get_global_id(0)
     for j in range(nout):

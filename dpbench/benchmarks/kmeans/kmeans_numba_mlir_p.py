@@ -11,7 +11,7 @@ atomic_add = nbk.atomic.add
 
 
 # determine the euclidean distance from the cluster center to each point
-@nb.njit
+@nb.njit(parallel=True, fastmath=True, gpu_fp64_truncate="auto")
 def groupByCluster(arrayP, arrayPcluster, arrayC, num_points, num_centroids):
     # parallel for loop
     for i0 in numba.prange(num_points):
@@ -27,7 +27,7 @@ def groupByCluster(arrayP, arrayPcluster, arrayC, num_points, num_centroids):
 
 
 # assign points to cluster
-@nb.njit
+@nb.njit(parallel=True, fastmath=True, gpu_fp64_truncate="auto")
 def calCentroidsSum(
     arrayP, arrayPcluster, arrayCsum, arrayCnumpoint, num_points, num_centroids
 ):
@@ -38,7 +38,7 @@ def calCentroidsSum(
         arrayCnumpoint[i] = 0
 
 
-@nbk.kernel
+@nbk.kernel(gpu_fp64_truncate="auto")
 def calCentroidsSum2(arrayP, arrayPcluster, arrayCsum, arrayCnumpoint):
     i = nbk.get_global_id(0)
     ci = arrayPcluster[i]
@@ -48,14 +48,14 @@ def calCentroidsSum2(arrayP, arrayPcluster, arrayCsum, arrayCnumpoint):
 
 
 # update the centriods array after computation
-@nb.njit
+@nb.njit(parallel=True, fastmath=True, gpu_fp64_truncate="auto")
 def updateCentroids(arrayC, arrayCsum, arrayCnumpoint, num_centroids):
     for i in numba.prange(num_centroids):
         arrayC[i, 0] = arrayCsum[i, 0] / arrayCnumpoint[i]
         arrayC[i, 1] = arrayCsum[i, 1] / arrayCnumpoint[i]
 
 
-@nb.njit
+@nb.njit(parallel=True, fastmath=True, gpu_fp64_truncate="auto")
 def copy_arrayC(arrayC, arrayP, num_centroids):
     for i in numba.prange(num_centroids):
         arrayC[i, 0] = arrayP[i, 0]

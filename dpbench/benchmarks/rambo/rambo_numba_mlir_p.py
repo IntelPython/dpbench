@@ -7,7 +7,7 @@ import numba_mlir as nb
 import numpy as np
 
 
-@nb.njit
+@nb.njit(parallel=True, fastmath=True, gpu_fp64_truncate="auto")
 def rambo(nevts, nout, C1, F1, Q1, output):
     for i in numba.prange(nevts):
         for j in numba.prange(nout):

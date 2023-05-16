@@ -13,7 +13,7 @@ def _nberf(x):
     return erf(x)
 
 
-@nb.njit(parallel=True, fastmath=True)
+@nb.njit(parallel=True, fastmath=True, gpu_fp64_truncate="auto")
 def _black_scholes(price, strike, t, rate, volatility, call, put):
     mr = -rate
     sig_sig_two = volatility * volatility * 2

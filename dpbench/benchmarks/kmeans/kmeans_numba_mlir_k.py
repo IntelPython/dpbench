@@ -9,7 +9,7 @@ import numba_mlir.kernel as nb
 atomic_add = nb.atomic.add
 
 
-@nb.kernel
+@nb.kernel(gpu_fp64_truncate="auto")
 def groupByCluster(arrayP, arrayPcluster, arrayC, num_points, num_centroids):
     idx = nb.get_global_id(0)
     # if idx < num_points: # why it was removed??
@@ -23,7 +23,7 @@ def groupByCluster(arrayP, arrayPcluster, arrayC, num_points, num_centroids):
             arrayPcluster[idx] = i
 
 
-@nb.kernel
+@nb.kernel(gpu_fp64_truncate="auto")
 def calCentroidsSum1(arrayCsum, arrayCnumpoint):
     i = nb.get_global_id(0)
     arrayCsum[i, 0] = 0
@@ -31,7 +31,7 @@ def calCentroidsSum1(arrayCsum, arrayCnumpoint):
     arrayCnumpoint[i] = 0
 
 
-@nb.kernel
+@nb.kernel(gpu_fp64_truncate="auto")
 def calCentroidsSum2(arrayP, arrayPcluster, arrayCsum, arrayCnumpoint):
     i = nb.get_global_id(0)
     ci = arrayPcluster[i]
@@ -40,14 +40,14 @@ def calCentroidsSum2(arrayP, arrayPcluster, arrayCsum, arrayCnumpoint):
     atomic_add(arrayCnumpoint, ci, 1)
 
 
-@nb.kernel
+@nb.kernel(gpu_fp64_truncate="auto")
 def updateCentroids(arrayC, arrayCsum, arrayCnumpoint, num_centroids):
     i = nb.get_global_id(0)
     arrayC[i, 0] = arrayCsum[i, 0] / arrayCnumpoint[i]
     arrayC[i, 1] = arrayCsum[i, 1] / arrayCnumpoint[i]
 
 
-@nb.kernel
+@nb.kernel(gpu_fp64_truncate="auto")
 def copy_arrayC(arrayC, arrayP):
     i = nb.get_global_id(0)
     arrayC[i, 0] = arrayP[i, 0]

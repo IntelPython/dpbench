@@ -34,14 +34,14 @@ def calCentroidsSum(
         arrayCsum[i, 1] = 0
         arrayCnumpoint[i] = 0
 
-
-@dpex.kernel
-def calCentroidsSum2(arrayP, arrayPcluster, arrayCsum, arrayCnumpoint):
-    i = dpex.get_global_id(0)
-    ci = arrayPcluster[i]
-    dpex.atomic.add(arrayCsum, (ci, 0), arrayP[i, 0])
-    dpex.atomic.add(arrayCsum, (ci, 1), arrayP[i, 1])
-    dpex.atomic.add(arrayCnumpoint, ci, 1)
+    # spawing single work item kernel since
+    # execution is completely serial
+    for j in nb.prange(1):
+        for i in range(num_points):
+            ci = arrayPcluster[i]
+            arrayCsum[ci, 0] += arrayP[i, 0]
+            arrayCsum[ci, 1] += arrayP[i, 1]
+            arrayCnumpoint[ci] += 1
 
 
 # update the centriods array after computation
@@ -79,10 +79,6 @@ def kmeans_numba(
             arrayCnumpoint,
             num_points,
             num_centroids,
-        )
-
-        calCentroidsSum2[num_points,](
-            arrayP, arrayPcluster, arrayCsum, arrayCnumpoint
         )
 
         updateCentroids(arrayC, arrayCsum, arrayCnumpoint, num_centroids)

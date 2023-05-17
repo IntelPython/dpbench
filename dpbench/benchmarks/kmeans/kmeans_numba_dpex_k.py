@@ -31,12 +31,14 @@ def calCentroidsSum1(arrayCsum, arrayCnumpoint):
 
 
 @dpex.kernel
-def calCentroidsSum2(arrayP, arrayPcluster, arrayCsum, arrayCnumpoint):
-    i = dpex.get_global_id(0)
-    ci = arrayPcluster[i]
-    dpex.atomic.add(arrayCsum, (ci, 0), arrayP[i, 0])
-    dpex.atomic.add(arrayCsum, (ci, 1), arrayP[i, 1])
-    dpex.atomic.add(arrayCnumpoint, ci, 1)
+def calCentroidsSum2(
+    arrayP, arrayPcluster, arrayCsum, arrayCnumpoint, num_points
+):
+    for i in range(num_points):
+        ci = arrayPcluster[i]
+        arrayCsum[ci, 0] += arrayP[i, 0]
+        arrayCsum[ci, 1] += arrayP[i, 1]
+        arrayCnumpoint[ci] += 1
 
 
 @dpex.kernel
@@ -73,8 +75,8 @@ def kmeans_kernel(
 
         calCentroidsSum1[num_centroids,](arrayCsum, arrayCnumpoint)
 
-        calCentroidsSum2[num_points,](
-            arrayP, arrayPcluster, arrayCsum, arrayCnumpoint
+        calCentroidsSum2[1,](
+            arrayP, arrayPcluster, arrayCsum, arrayCnumpoint, num_points
         )
 
         updateCentroids[num_centroids,](

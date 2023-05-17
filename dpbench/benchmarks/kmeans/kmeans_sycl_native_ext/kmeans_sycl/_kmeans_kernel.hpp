@@ -68,24 +68,15 @@ void kmeans_impl(sycl::queue q,
         // Compute centroid sum
         q.submit([&](sycl::handler &h) {
              h.parallel_for<class theKernel_2>(
-                 sycl::range<1>{npoints}, [=](sycl::id<1> myID) {
-                     size_t i0 = myID[0];
-                     size_t ci = arrayPclusters[i0];
-
-                     for (size_t j = 0; j < ndims; j++) {
-                         sycl::atomic_ref<
-                             FpTy, sycl::memory_order::relaxed,
-                             sycl::memory_scope::system,
-                             sycl::access::address_space::global_space>
-                             centroid_sum(arrayCsum[ci * ndims + j]);
-                         centroid_sum += arrayP[i0 * ndims + j];
+                 sycl::range<1>{1}, [=](sycl::id<1> myID) {
+                     for (size_t i0 = 0; i0 < npoints; i0++) {
+                         size_t ci = arrayPclusters[i0];
+                         for (size_t j = 0; j < ndims; j++) {
+                             arrayCsum[ci * ndims + j] +=
+                                 arrayP[i0 * ndims + j];
+                         }
+                         arrayCnumpoint[ci] += 1;
                      }
-
-                     sycl::atomic_ref<size_t, sycl::memory_order::relaxed,
-                                      sycl::memory_scope::system,
-                                      sycl::access::address_space::global_space>
-                         centroid_num_points(arrayCnumpoint[ci]);
-                     centroid_num_points += 1;
                  });
          }).wait();
 

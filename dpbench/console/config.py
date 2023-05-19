@@ -5,6 +5,7 @@
 """Report subcommand package."""
 
 import argparse
+import logging
 
 from ._namespace import Namespace
 
@@ -33,6 +34,8 @@ def execute_config(args: Namespace):
         args: object with all input arguments.
         conn: database connection.
     """
+    import importlib
+
     import dpbench.config as cfg
 
     cfg.GLOBAL = cfg.read_configs(
@@ -42,7 +45,15 @@ def execute_config(args: Namespace):
         with_polybench=True,
     )
 
-    if args.color:
+    color_output = args.color
+
+    if color_output and not importlib.util.find_spec("textwrap"):
+        logging.warn(
+            "pygments not found. If you want color output - install it using pip/conda etc"
+        )
+        color_output = False
+
+    if color_output:
         from pprint import pformat
 
         from pygments import highlight

@@ -136,9 +136,9 @@ def execute_run(args: Namespace, conn: sqlalchemy.Engine):
     )
 
     if args.all_implementations:
-        args.implementations = {
+        args.implementations = [
             impl.postfix for impl in cfg.GLOBAL.implementations
-        }
+        ]
 
     if args.sycl_device:
         for framework in cfg.GLOBAL.frameworks:

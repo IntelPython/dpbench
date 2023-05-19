@@ -40,7 +40,7 @@ jobs:
           python-version: ${{ matrix.python }}
           mamba-version: "*"
           activate-environment: dpbench-dev
-          environment-file: dpbench-env-linux.yml
+          environment-file: environments/conda-linux-sycl.yml
 
       - name: Conda info
         shell: bash -l {0}
@@ -51,7 +51,8 @@ jobs:
       - name: Build dpbench
         shell: bash -l {0}
         run: |
-          CC=icx CXX=icpx python setup.py develop -- -Dpybind11_DIR=$(python -m pybind11 --cmakedir) -DDPCTL_MODULE_PATH=$(python -m dpctl --cmakedir)
+          CC=icx CXX=icpx DPBENCH_SYCL=1 pip install \
+          --no-index --no-deps --no-build-isolation -e . -v
 
       - name: Run benchmarks
         shell: bash -l {0}

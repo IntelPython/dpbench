@@ -356,7 +356,11 @@ def read_benchmark_implementations(
                 if hasattr(impl_mod, func):
                     func_name = func
                     break
-        except Exception:
+        except Exception as e:
+            logging.warn(f"Could not import module: {e}")
+            import traceback
+
+            traceback.print_exc()
             continue
 
         config.implementations.append(

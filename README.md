@@ -9,43 +9,76 @@ SPDX-License-Identifier: Apache-2.0
 
 # DPBench - Benchmarks to evaluate Data-Parallel Extensions for Python
 
-* __*_numba_*.py__ : This file contains Numba implementations of the benchmarks. There are three modes: nopython-mode, nopython-mode-parallel and nopython-mode-parallel-range.
-* __*_numba_dpex_*.py__ : This file contains Numba-Dpex implementations of the benchmarks. There are three modes: kernel-mode, numpy-mode and prange-mode.
-* __*_dpnp_*.py__ : This file contains dpnp implementations of the benchmarks.
-* __*_native_ext/_sycl/__kernel_*.hpp__ : This file contains native dpcpp implementations of the benchmarks.
+* **\<benchmark\>\_numba\_\<mode\>.py** : This file contains Numba implementations of the benchmarks. There are three modes: nopython-mode, nopython-mode-parallel and nopython-mode-parallel-range.
+* **\<benchmark\>\_numba_dpex\_\<mode\>.py** : This file contains Numba-Dpex implementations of the benchmarks. There are three modes: kernel-mode, numpy-mode and prange-mode.
+* **\<benchmark\>\_dpnp\_\<mode\>.py** : This file contains dpnp implementations of the benchmarks.
+* **\<benchmark\>\_native_ext/\<benchmark\>\_sycl/_\<benchmark\>_kernel.hpp** : This file contains native dpcpp implementations of the benchmarks.
+* **\<benchmark\>\_numpy.py** : This file contains numpy implementations of the benchmarks. It should take benefits of numpy arrays and should avoid loops over arrays.
+* **\<benchmark\>\_python.py** : This file contains naive python implementations of the benchmarks. Should be run only for small presets, otherwise it will take long execution time.
+* **\<benchmark\>\_numba_mlir\_\<mode\>.py** : This file contains Numba-MLIR implementations of the benchmarks. There are three modes: kernel-mode, numpy-mode and prange-mode. Experimental.
 
 ## Examples of setting up and running the benchmarks
-1. Setting up conda environment and installing dependencies:
+1. Clone the repository
 
-        $ conda create -n dpbench-dev
-        $ conda activate dpbench-dev
-        $ conda install python
-        $ conda install -c intel tbb dpcpp_linux-64
-        $ conda install numpy numba cython cmake ninja scikit-build pandas
-        $ conda install scipy scikit-learn pybind11 tomli
-        # do not miss the quotes!
-        $ conda install -c pkgs/main libgcc-ng">=11.2.0" libstdcxx-ng">=11.2.0" libgomp">=11.2.0"
-        $ conda install -c dppy/label/dev -c intel -c main dpctl numba-dpex dpnp
-        $ pip install alembic
+    ```bash
+    git clone https://github.com/IntelPython/dpbench
+    cd dpbench
+    ```
 
-2. Build and run DPBench
-    - To build:
+2. Setting up conda environment and installing dependencies:
+
+    ```bash
+    conda env create -n dpbench -f ./environments/conda.yml
+    ```
+
+    - SYCL
+
+        If you want to build sycl benchmarks as well:
         ```bash
-        $  CC=icx CXX=icpx python setup.py develop -- -Dpybind11_DIR=$(python -m pybind11 --cmakedir) -DDPCTL_MODULE_PATH=$(python -m dpctl --cmakedir)
-        ```
-    - To run, taking black_scholes for example:
-        ```bash
-        $  dpbench -b black_scholes run
-        ```
-    - Similarly, to run all the cases in DPBench:
-        ```bash
-        $  dpbench -a run
+        conda env create -n dpbench -f ./environments/conda-linux-sycl.yml
+        CC=icx CXX=icpx DPBENCH_SYCL=1 pip install --no-index --no-deps --no-build-isolation -e . -v
         ```
 
-3. Device Customization
+3. Build DPBench
+
+    ```bash
+    pip install --no-index --no-deps --no-build-isolation -e . -v
+    ```
+
+    Alternatively you can build it with `setup.py`, but pip version is preferable:
+
+    ```bash
+    python setup.py develop
+    ```
+
+    - SYCL
+
+        For sycl build use:
+        ```bash
+        CC=icx CXX=icpx DPBENCH_SYCL=1 pip install --no-index --no-deps --no-build-isolation -e . -v
+        ```
+
+        or
+
+        ```bash
+        CC=icx CXX=icpx DPBENCH_SYCL=1 python setup.py develop
+        ```
+
+4. Run specific benchmark, e.g. black_scholes
+
+    ```bash
+    dpbench -b black_scholes run
+    ```
+5. Run all benchmarks
+
+    ```bash
+    dpbench -a run
+    ```
+
+6. Device Customization
 
    If a framework is SYCL based, an extra configuration option `sycl_device` may be set in the
-   framework JSON file to control what device the framework uses for execution. The `sycl_device`
+   framework config file or by passing `--sycl-device` argument to `dpbench run` to control what device the framework uses for execution. The `sycl_device`
    value should be a legal
    [SYCL device filter ](https://intel.github.io/llvm-docs/EnvironmentVariables.html#sycl_device_filter)
    string. The dpcpp, dpnp, and numba_dpex frameworks support the sycl_device option.
@@ -53,56 +86,68 @@ SPDX-License-Identifier: Apache-2.0
    Here is an example:
 
     ```json
-        {
-            "framework": {
-                "simple_name": "dpcpp",
-                "full_name": "dpcpp",
-                "prefix": "dp",
-                "postfix": "dpcpp",
-                "class": "DpcppFramework",
-                "arch": "gpu",
-                "sycl_device": "level_zero:gpu:0"
-            }
-        }
+        dpbench -b black_scholes -i dpnp run --sycl-device=level_zero:gpu:0
     ```
 
-    > **_NOTE:_**  The `arch` option is deprecated and not used by dpbench.
+7. All available options are available using `dpbench --help` and `dpbench <command> --help`:
 
-   To run with customized framework JSON file, pass it as an argument to the `run_benchmark` or
-   `run_benchmarks` functions.
+    ```
+    usage: dpbench [-h] [-b [BENCHMARKS]] [-i [IMPLEMENTATIONS]] [-a | --all-implementations | --no-all-implementations] [--version] [-r [RUN_ID]] [--last-run | --no-last-run]
+                [-d [RESULTS_DB]] [--log-level [{critical,fatal,error,warning,info,debug}]]
+                {run,report,config} ...
 
-   TODO: current way not working anymore.
+    positional arguments:
+    {run,report,config}
 
-    ```bash
-    $ python -c "import dpbench; dpbench.run_benchmark(\"black_scholes\", "<absolute path to json file>")"
+    options:
+    -h, --help            show this help message and exit
+    -b [BENCHMARKS], --benchmarks [BENCHMARKS]
+                            Comma separated list of benchmarks. Leave empty to load all benchmarks.
+    -i [IMPLEMENTATIONS], --implementations [IMPLEMENTATIONS]
+                            Comma separated list of implementations. Use --all-implementations to load all available implementations.
+    -a, --all-implementations, --no-all-implementations
+                            If set, all available implementations will be loaded. (default: False)
+    --version             show program's version number and exit
+    -r [RUN_ID], --run-id [RUN_ID]
+                            run_id to perform actions on. Use --last-run to use latest available run, or leave empty to create new one.
+    --last-run, --no-last-run
+                            Sets run_id to the latest run_id from the database. (default: False)
+    -d [RESULTS_DB], --results-db [RESULTS_DB]
+                            Path to a database to store results.
+    --log-level [{critical,fatal,error,warning,info,debug}]
+                            Log level.
     ```
 
-## Running numba-mlir benchmarks
-1. Setting up conda environment and installing dependencies:
+    ```
+    usage: dpbench run [-h] [-p [{S,M,L}]] [-s | --validate | --no-validate] [--dpbench | --no-dpbench] [--npbench | --no-npbench] [--polybench | --no-polybench] [-r [REPEAT]] [-t [TIMEOUT]]
+                    [--precision [{single,double}]] [--print-results | --no-print-results] [--save | --no-save] [--sycl-device [SYCL_DEVICE]]
+                    [--skip-expected-failures | --no-skip-expected-failures]
 
-    Use same instructions as for usual dpbench setup.
+    Subcommand to run benchmark executions.
 
-    Install latest `numba-mlir` dev package:
-
-        $ conda install numba-mlir -c dppy/label/dev -c intel
-
-2. Build and run DPBench
-
-    Use same commands to setup and run dpbench:
-
-        ```bash
-        $  dpbench -b black_scholes run
-        ```
-
-    or, to run specific version:
-
-
-        ```bash
-        $  dpbench -b black_scholes -i numba_mlir_k run
-        ```
-
-    to run all `numba-mlir` benchmarks:
-
-        ```bash
-        $  dpbench -b black_scholes -i numba_mlir_k,numba_mlir_n,numba_mlir_p run
-        ```
+    options:
+    -h, --help            show this help message and exit
+    -p [{S,M,L}], --preset [{S,M,L}]
+                            Preset to use for benchmark execution.
+    -s, --validate, --no-validate
+                            Set if the validation will be run for each benchmark. (default: True)
+    --dpbench, --no-dpbench
+                            Set if run dpbench benchmarks. (default: True)
+    --npbench, --no-npbench
+                            Set if run npbench benchmarks. (default: False)
+    --polybench, --no-polybench
+                            Set if run polybench benchmarks. (default: False)
+    -r [REPEAT], --repeat [REPEAT]
+                            Number of repeats for each benchmark.
+    -t [TIMEOUT], --timeout [TIMEOUT]
+                            Timeout time in seconds for each benchmark execution.
+    --precision [{single,double}]
+                            Data precision to use for array initialization.
+    --print-results, --no-print-results
+                            Show the result summary or not (default: True)
+    --save, --no-save     Either to save execution into database. (default: True)
+    --sycl-device [SYCL_DEVICE]
+                            Sycl device to overwrite for framework configurations.
+    --skip-expected-failures, --no-skip-expected-failures
+                            Either to save execution into database. (default: True)
+    ```

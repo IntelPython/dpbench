@@ -14,3 +14,51 @@ use_parentheses = true
 ensure_newline_before_comments = true
 line_length = 80
 skip = ["versioneer.py", "dpbench/_version.py"]
+
+[project]
+name = "dpbench"
+version = "0.0.1"
+authors = [{ name = "Intel Corp." }, { email = "diptorup.deb@intel.com" }]
+description = "dpBench"
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "License :: OSI Approved :: Apache 2.0 License",
+    "Operating System :: Linux",
+]
+# https://github.com/pypa/pip/issues/6677
+license = { text = "Apache-2.0" }
+requires-python = ">=3.9" # TODO: lower it to 3.8
+dependencies = [
+    "tomli",
+    "alembic>=1.10.0",
+    "sqlalchemy>=2.0.0",
+    "scipy",
+    "scikit_learn",
+    "pandas",
+    "numpy",
+    "dpctl",
+    "dpnp",
+    "numba",
+    "numba_dpex",
+]
+
+[project.optional-dependencies]
+numba-mlir = ["numba_mlir"]
+color-config = ["pygments"]
+sycl-build = ["scikit-build>=0.13", "cmake>=3.18", "ninja"]
+npbench = ["dace","dask","legate"]
+json-to-toml = ["tomli_w"]
+expected-failure = ["tomlkit"]
+
+# https://github.com/pypa/packaging-problems/issues/606
+[project.urls]
+"Homepage" = "https://https://github.com/IntelPython/dpbench"
+
+[project.scripts]
+dpbench = "dpbench.console.entry:main"
+
+[build-system]
+# TODO: make it optional for no sycl build. Workaround: `--no-deps`.
+# https://github.com/scikit-build/scikit-build/issues/981
+requires = ["setuptools>=42,<64"]
+build-backend = "setuptools.build_meta"

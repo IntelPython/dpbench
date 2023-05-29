@@ -33,20 +33,16 @@ def initialize(
         default_rng.random((batch, in_channels, in_height, in_width)).astype(
             dtype
         ),
-        # np.ones((batch, in_channels, in_height, in_width)).astype(dtype),
         np.zeros((batch, out_channels, out_height, out_width)).astype(dtype),
-        # np.zeros((kernel_height, kernel_width, 2, out_height, out_width)).astype(dtype),
         2
         * default_rng.random(
             (kernel_height, kernel_width, 2, out_height, out_width)
         ).astype(dtype)
         - 1,
-        # default_rng.random((out_channels, in_channels, kernel_height, kernel_width)).astype(dtype),
         np.ones(
             (out_channels, in_channels, kernel_height, kernel_width)
         ).astype(dtype),
         default_rng.random(out_channels).astype(dtype),
-        # np.ones((out_channels,)).astype(dtype),
         np.zeros(
             (in_channels, kernel_height, kernel_width, out_height, out_width)
         ).astype(dtype),

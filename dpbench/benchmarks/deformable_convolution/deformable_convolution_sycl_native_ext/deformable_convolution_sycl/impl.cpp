@@ -119,15 +119,11 @@ inline auto deform_input(cl::sycl::queue &queue,
                                     out_width, kh, kw, 0, h, w) +
                         w * stride_x + (kw - k_w_m) * dilation_x -
                         (pad_x - k_w_m);
-        // auto offset_y = h*stride_y + (kh - k_h_m)*dilation_y - (pad_y -
-        // k_h_m); auto offset_x = w*stride_x + (kw - k_w_m)*dilation_x - (pad_x
-        // - k_w_m);
 
         auto _input =
             get_ptr_3d(input, in_channels, in_height, in_width, c, 0, 0);
 
         _output[w] = bilinear(_input, in_height, in_width, offset_y, offset_x);
-        // _output[w] = offset_y;
     });
 }
 
@@ -197,11 +193,11 @@ void deformable_convolution_b1_impl(cl::sycl::queue &queue,
     auto efill = output_fill_with_bias(queue, output, out_shape, bias);
     auto egemm = gemm(queue, transpose::N, transpose::N, /*transpose a, b*/
                       out_c, out_h * out_w, in_c * ker_h * ker_w, /*m, n, k*/
-                      1,                                          /*alpha*/
-                      weights, in_c * ker_h * ker_w,              /*a, lda*/
-                      tmp, out_h * out_w,                         /*b, ldb*/
-                      1,                                          /*beta*/
-                      output, out_h * out_w,                      /*c, ldc*/
+                      1, /*alpha*/
+                      weights, in_c * ker_h * ker_w, /*a, lda*/
+                      tmp, out_h * out_w, /*b, ldb*/
+                      1, /*beta*/
+                      output, out_h * out_w, /*c, ldc*/
                       {edeform, efill} /*events*/);
     egemm.wait();
 }

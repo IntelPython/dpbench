@@ -20,7 +20,6 @@ class Framework:
     class_: str
     arch: str
     sycl_device: str
-    dpcpp_version: str
     postfixes: List[Implementation] = field(default_factory=list)
 
     @staticmethod
@@ -32,7 +31,6 @@ class Framework:
         _class = str(obj.get("class") or "")
         _arch = str(obj.get("arch") or "")
         _sycl_device = str(obj.get("sycl_device") or "")
-        _dpcpp_version = str(obj.get("dpcpp_version") or "")
         _postfixes = obj.get("postfixes") or []
         for i, _postfix in enumerate(_postfixes):
             _postfixes[i] = Implementation.from_dict(_postfix)
@@ -44,6 +42,5 @@ class Framework:
             _class,
             _arch,
             _sycl_device,
-            _dpcpp_version,
             _postfixes,
         )

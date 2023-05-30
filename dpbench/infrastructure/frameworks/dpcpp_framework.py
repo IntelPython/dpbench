@@ -88,5 +88,13 @@ class DpcppFramework(Framework):
 
     def version(self) -> str:
         """Returns the framework version."""
-        # hack the dpcpp version, need validate dpcpp available first
-        return self.info.dpcpp_version
+        import os
+        import re
+
+        version = os.popen("icpx --version").read().split("\n", 1)[0]
+
+        version = re.sub(
+            r"Intel.* ([0-9\.]+)( \([0-9\.]+\))?", r"IntelLLVM \g<1>", version
+        )
+
+        return version

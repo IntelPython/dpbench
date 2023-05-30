@@ -15,19 +15,30 @@ env:
 
 jobs:
   build_linux:
-    name: Build and run linux
-    runs-on: ubuntu-latest
+    name: Build and run
 
     strategy:
       fail-fast: false
       matrix:
+        os: ["ubuntu-latest", "windows-latest"]
         python: ["3.9", "3.10"]
         sycl: ["sycl","no-sycl"]
+        install: ["pip", "setup.py"]
         include:
           - sycl: sycl
+            os: ubuntu-latest
+            cc: icx
+            cxx: icpx
             environment: conda-linux-sycl.yml
+          - sycl: sycl
+            os: windows-latest
+            cc: icx
+            cxx: icx
+            environment: conda-win-sycl.yml
           - sycl: no-sycl
             environment: conda.yml
+
+    runs-on: ${{matrix.os}}
 
     steps:
       - name: Cancel Previous Runs
@@ -55,26 +66,61 @@ jobs:
           conda info
           conda list
 
-      - name: Sycl
+      - name: Configure Intel OpenCL CPU RT
+        if: matrix.os == 'windows-latest'
+        shell: pwsh
+        run: |
+          $script_path="$env:CONDA_PREFIX\Scripts\set-intel-ocl-icd-registry.ps1"
+          &$script_path
+          echo "OCL_ICD_FILENAMES=$env:CONDA_PREFIX\Library\lib\intelocl64.dll" >> $env:GITHUB_ENV
+          echo "LIB=$env:CONDA_PREFIX\Library\lib;$env:CONDA_PREFIX\compiler\lib;$env:LIB" >> $env:GITHUB_ENV
+          echo "INCLUDE=$env:CONDA_PREFIX\include;$env:INCLUDE" >> $env:GITHUB_ENV
+          # Check the variable assisting OpenCL CPU driver to find TBB DLLs which are not located where it expects them by default
+          $cl_cfg="$env:CONDA_PREFIX\Library\lib\cl.cfg"
+          Get-Content -Tail 5 -Path $cl_cfg
+
+      - name: Configure Python
+        if: matrix.os == 'windows-latest'
+        shell: pwsh
+        run: |
+          # Set python encoding to support utf-8 symblos like ms.
+          echo "PYTHONIOENCODING=utf-8" >> $env:GITHUB_ENV
+
+      - name: Patch IntelLLVM cmake
+        if: matrix.os == 'windows-latest' && matrix.sycl == 'sycl'
+        shell: pwsh
+        run: |
+          $env:PATCHED_CMAKE_VERSION="3.26"
+          $env:PLATFORM_DIR="${env:CONDA_PREFIX}\Library\share\cmake-${env:PATCHED_CMAKE_VERSION}\Modules\Platform"
+          $env:FN="Windows-IntelLLVM.cmake"
+          Copy-Item ".github\workflows\Windows-IntelLLVM_${env:PATCHED_CMAKE_VERSION}.cmake" "${env:PLATFORM_DIR}\${env:FN}"
+
+      - name: Configure Sycl
         if: matrix.sycl == 'sycl'
         shell: bash -el {0}
         run: |
           sycl-ls
-          echo "CC=icx" >> "$GITHUB_ENV"
-          echo "CXX=icpx" >> "$GITHUB_ENV"
+          echo "CC=${{matrix.cc}}" >> "$GITHUB_ENV"
+          echo "CXX=${{matrix.cxx}}" >> "$GITHUB_ENV"
           echo "DPBENCH_SYCL=1" >> "$GITHUB_ENV"
           echo "WORKLOADS=$WORKLOADS,sycl" >> "$GITHUB_ENV"
 
       - name: Build dpbench
+        if: matrix.install == 'pip'
         shell: bash -el {0}
         run: |
           pip install \
           --no-index --no-deps --no-build-isolation -e . -v
 
+      - name: Build dpbench
+        if: matrix.install == 'setup.py'
+        shell: bash -el {0}
+        run: |
+          python setup.py develop
+
       - name: Run benchmarks
         shell: bash -el {0}
         run: |
-          export OCL_ICD_FILENAMES=libintelocl.so
           export NUMBA_MLIR_GPU_RUNTIME=sycl
           # Turn off numba-dpex autofall back
           export NUMBA_DPEX_FALLBACK_ON_CPU=0
@@ -87,86 +133,3 @@ jobs:
         shell: bash -el {0}
         run: |
           dpbench -i ${WORKLOADS} report || exit 1
-
-  build-windows:
-    name: Build and run windows
-    runs-on: windows-latest
-
-    strategy:
-      fail-fast: false
-      matrix:
-        python: ["3.9", "3.10"]
-        sycl: ["sycl","no-sycl"]
-        include:
-          - sycl: sycl
-            environment: conda-win-sycl.yml
-          - sycl: no-sycl
-            environment: conda.yml
-
-    steps:
-      - name: Checkout dpbench
-        uses: actions/checkout@v3
-        with:
-          fetch-depth: 0
-
-      - name: Setup conda
-        uses: conda-incubator/setup-miniconda@v2
-        with:
-          auto-update-conda: true
-          python-version: ${{ matrix.python }}
-          activate-environment: dpbench-dev
-          environment-file: environments/${{ matrix.environment }}
-
-      - name: Conda info
-        shell: pwsh
-        run: |
-          conda info
-          conda list
-
-      - name: Configure Intel OpenCL CPU RT
-        shell: pwsh
-        run: |
-          $script_path="$env:CONDA_PREFIX\Scripts\set-intel-ocl-icd-registry.ps1"
-          &$script_path
-          echo "OCL_ICD_FILENAMES=$env:CONDA_PREFIX\Library\lib\intelocl64.dll" >> $env:GITHUB_ENV
-          echo "LIB=$env:CONDA_PREFIX\Library\lib;$env:CONDA_PREFIX\compiler\lib;$env:LIB" >> $env:GITHUB_ENV
-          echo "INCLUDE=$env:CONDA_PREFIX\include;$env:INCLUDE" >> $env:GITHUB_ENV
-          # Check the variable assisting OpenCL CPU driver to find TBB DLLs which are not located where it expects them by default
-          $cl_cfg="$env:CONDA_PREFIX\Library\lib\cl.cfg"
-          Get-Content -Tail 5 -Path $cl_cfg
-
-      - name: Sycl
-        if: matrix.sycl == 'sycl'
-        shell: pwsh
-        run: |
-          sycl-ls
-          echo "CC=icx" >> $env:GITHUB_ENV
-          echo "CXX=icx" >> $env:GITHUB_ENV
-          echo "DPBENCH_SYCL=1" >> $env:GITHUB_ENV
-          echo "WORKLOADS=$env:WORKLOADS,sycl" >> $env:GITHUB_ENV
-
-      - name: Build dpbench
-        shell: pwsh
-        run: |
-          python setup.py develop
-          # pip install `
-          # --no-index --no-deps --no-build-isolation -e . -v
-
-      - name: Run benchmarks
-        shell: pwsh
-        run: |
-          $env:NUMBA_MLIR_GPU_RUNTIME="sycl"
-          # Turn off numba-dpex autofall back
-          $env:NUMBA_DPEX_FALLBACK_ON_CPU=0
-          # Make sure numba-dpex is using native atomics in github CI
-          $env:NUMBA_DPEX_ACTIVATE_ATOMICS_FP_NATIVE=1
-
-          $env:PYTHONIOENCODING="utf-8"
-          # $env:PYTHONLEGACYWINDOWSSTDIO=utf-8
-
-          dpbench -i $env:WORKLOADS run -r2 --no-print-results
-
-      - name: Generate report
-        shell: pwsh
-        run: |
-          dpbench -i $env:WORKLOADS report

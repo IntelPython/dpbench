@@ -5,18 +5,18 @@
 name: dpbench-dev
 channels:
   - dppy/label/dev
-  - intel
   - conda-forge
+  - intel
   - nodefaults
 dependencies:
-  - conda-forge::pip
-  - conda-forge::tomli
-  - conda-forge::alembic>=1.11.0
-  - conda-forge::sqlalchemy>=2.0.0
-  - conda-forge::scipy
-  - conda-forge::scikit-learn
-  - conda-forge::pandas
-  - numpy
+  - pip
+  - tomli
+  - alembic
+  - sqlalchemy
+  - scipy
+  - scikit-learn
+  - pandas
+  - intel::numpy
   - numba
   - dpctl
   - dpnp

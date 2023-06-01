@@ -11,12 +11,12 @@ add_subdirectory(knn)
 add_subdirectory(gpairs)
 add_subdirectory(dbscan)
 
-# generate dpcpp version into json
-file(WRITE
-    ${CMAKE_SOURCE_DIR}/dpbench/configs/framework_info/dpcpp_version.json
-    "{\"dpcpp_version\" :"
-    " \""
-    ${CMAKE_CXX_COMPILER_ID}
-    " "
-    ${CMAKE_CXX_COMPILER_VERSION}
-    "\"}")
+# generate dpcpp version into config
+set(FILE ${CMAKE_SOURCE_DIR}/dpbench/configs/framework_info/dpcpp.toml)
+set(WRITE_VERSION "${CMAKE_CXX_COMPILER_ID} ${CMAKE_CXX_COMPILER_VERSION}")
+
+file(READ ${FILE} FILE_CONTENTS)
+string(REGEX REPLACE "dpcpp_version = \"[^\"]*\""
+"dpcpp_version = \"${WRITE_VERSION}\"" FILE_CONTENTS "${FILE_CONTENTS}")
+
+file(WRITE ${FILE} "${FILE_CONTENTS}")

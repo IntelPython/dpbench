@@ -19,7 +19,7 @@ from .framework import Framework
 from .implementation_postfix import Implementation
 from .module import Module
 
-_REFERENCE_IMPLEMENTATIONS = {"numpy", "python"}
+_REFERENCE_IMPLEMENTATIONS = {"numpy", "python", "sycl"}
 
 
 def read_configs(  # noqa: C901: TODO: move modules into config

@@ -8,11 +8,12 @@ import logging
 import multiprocessing as mp
 import multiprocessing.connection as mpc
 from dataclasses import dataclass
+from typing import Any
 
 import sqlalchemy
 
 import dpbench.config as cfg
-from dpbench.infrastructure.benchmark import Benchmark, _exec, _exec_simple
+from dpbench.infrastructure.benchmark import Benchmark
 from dpbench.infrastructure.benchmark_results import BenchmarkResults
 from dpbench.infrastructure.benchmark_validation import validate_results
 from dpbench.infrastructure.datamodel import store_results
@@ -20,6 +21,7 @@ from dpbench.infrastructure.enums import ErrorCodes, ValidationStatusCodes
 from dpbench.infrastructure.frameworks import Framework
 from dpbench.infrastructure.frameworks.fabric import build_framework
 from dpbench.infrastructure.runner import _print_results
+from dpbench.infrastructure.timer import timer
 
 """
 Send on process creation:
@@ -387,3 +389,175 @@ class BenchmarkRunner:
                     else "n/a",
                 ),
             )
+
+
+def _set_input_args(
+    bench: Benchmark, framework: Framework, np_input_data: dict
+):
+    inputs = dict()
+
+    for arg in bench.info.input_args:
+        if arg in bench.info.array_args:
+            inputs[arg] = framework.copy_to_func()(np_input_data[arg])
+        else:
+            inputs[arg] = np_input_data[arg]
+
+    return inputs
+
+
+def _reset_output_args(
+    bench: Benchmark, framework: Framework, inputs: dict, np_input_data: dict
+):
+    for arg in bench.info.output_args:
+        overwritten_data = inputs.get(arg, None)
+        if overwritten_data is None or arg not in bench.info.array_args:
+            continue
+        inputs[arg] = framework.copy_to_func()(np_input_data[arg])
+
+
+def _array_size(array: Any) -> int:
+    try:
+        return array.nbytes
+    except AttributeError:
+        return array.size * array.itemsize
+
+
+def _exec_simple(
+    bench: Benchmark,
+    framework: Framework,
+    impl_postfix: str,
+    preset: str,
+):
+    np_input_data = bench.get_input_data(preset=preset)
+    inputs = _set_input_args(bench, framework, np_input_data)
+    impl_fn = bench.get_implementation(impl_postfix)
+
+    try:
+        retval = framework.execute(impl_fn, inputs)
+        results_dict = {}
+
+        _exec_copy_output(bench, framework, retval, inputs, results_dict)
+
+        return results_dict["outputs"]
+    except Exception:
+        logging.exception("Benchmark execution failed at the warmup step.")
+        return None
+
+
+def _exec(
+    bench: Benchmark,
+    framework: Framework,
+    impl_postfix: str,
+    preset: str,
+    repeat: int,
+    results_dict: dict,
+    copy_output: bool,
+):
+    """Executes a benchmark for a given implementation.
+
+    A helper function to execute a benchmark. The function is called in a
+    separate sub-process by a BenchmarkRunner instance. The ``_exec`` function
+    first runs the benchmark implementation function once as a warmup and then
+    performs the specified number of repetitions. The output results are reset
+    before each repetition and the final output is serialized into a npz
+    (compressed NumPy data file) file.
+
+    All timing results and the path to the serialized results are written to
+    the results_dict input argument that is managed by the calling process.
+
+    Args:
+        bench : A Benchmark object representing the benchmark to be executed.
+        framework : A Framework for which the benchmark is to be executed.
+        impl_postfix : The identifier for the benchmark implementation.
+        preset : A problem size entry defined in the bench_info JSON.
+        timeout : Number of seconds after which the execution is killed.
+        repeat : Number of repetitions of the benchmark execution.
+        precision: The precision to use for benchmark input data.
+        args : Input arguments to benchmark implementation function.
+        results_dict : A dictionary where timing and other results are stored.
+        copy_output : A flag that controls copying output.
+    """
+    np_input_data = bench.get_input_data(preset=preset)
+
+    with timer() as t:
+        inputs = _set_input_args(bench, framework, np_input_data)
+    results_dict["setup_time"] = t.get_elapsed_time()
+
+    input_size = 0
+    for arg in bench.info.array_args:
+        input_size += _array_size(bench.bdata[preset][arg])
+
+    results_dict["input_size"] = input_size
+
+    impl_fn = bench.get_implementation(impl_postfix)
+
+    # Warmup
+    with timer() as t:
+        try:
+            framework.execute(impl_fn, inputs)
+        except Exception:
+            logging.exception("Benchmark execution failed at the warmup step.")
+            results_dict["error_state"] = ErrorCodes.FAILED_EXECUTION
+            results_dict["error_msg"] = "Execution failed"
+            return
+
+    results_dict["warmup_time"] = t.get_elapsed_time()
+
+    _reset_output_args(bench, framework, inputs, np_input_data)
+
+    exec_times = [0] * repeat
+
+    retval = None
+    for i in range(repeat):
+        with timer() as t:
+            retval = framework.execute(impl_fn, inputs)
+        exec_times[i] = t.get_elapsed_time()
+
+        # Do not reset the output from the last repeat
+        if i < repeat - 1:
+            _reset_output_args(bench, framework, inputs, np_input_data)
+
+    results_dict["exec_times"] = exec_times
+
+    # Get the output data
+    results_dict["teardown_time"] = 0.0
+    if copy_output:
+        _exec_copy_output(bench, framework, retval, inputs, results_dict)
+
+    results_dict["error_state"] = ErrorCodes.SUCCESS
+    results_dict["error_msg"] = ""
+
+
+def _exec_copy_output(
+    bench: Benchmark,
+    fmwrk: Framework,
+    retval,
+    inputs: dict,
+    results_dict: dict,
+):
+    output_arrays = dict()
+    with timer() as t:
+        for out_arg in bench.info.output_args:
+            if out_arg in bench.info.array_args:
+                output_arrays[out_arg] = fmwrk.copy_from_func()(inputs[out_arg])
+
+    # Special case: if the benchmark implementation returns anything, then
+    # add that to the results dict
+    if retval is not None:
+        output_arrays["return-value"] = convert_to_numpy(retval, fmwrk)
+
+    results_dict["outputs"] = output_arrays
+    results_dict["teardown_time"] = t.get_elapsed_time()
+
+
+def convert_to_numpy(value: any, fmwrk: Framework) -> any:
+    """Calls copy_from_func on all array values."""
+    if isinstance(value, tuple):
+        retval_list = list(value)
+        for i, _ in enumerate(retval_list):
+            retval_list[i] = fmwrk.copy_from_func()(retval_list[i])
+        value = tuple(retval_list)
+    else:
+        value = fmwrk.copy_from_func()(value)
+
+    return value

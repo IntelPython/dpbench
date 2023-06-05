@@ -20,7 +20,6 @@ from dpbench.infrastructure.datamodel import store_results
 from dpbench.infrastructure.enums import ErrorCodes, ValidationStatusCodes
 from dpbench.infrastructure.frameworks import Framework
 from dpbench.infrastructure.frameworks.fabric import build_framework
-from dpbench.infrastructure.runner import _print_results
 from dpbench.infrastructure.timer import timer
 
 """
@@ -219,7 +218,7 @@ class BenchmarkRunner:
                 framework,
             )
 
-            _print_results(benchmark_results, framework)
+            benchmark_results.print(framework.fname, framework.version())
 
             c.send(benchmark_results)
 
@@ -312,7 +311,7 @@ class BenchmarkRunner:
             results.error_state = ErrorCodes.FAILED_EXECUTION
             results.error_msg = "Expected failure"
 
-            _print_results(results, None)
+            results.print()
 
             return results
 
@@ -323,7 +322,7 @@ class BenchmarkRunner:
             results.error_state = ErrorCodes.UNIMPLEMENTED
             results.error_msg = "Unimplemented"
 
-            _print_results(results, None)
+            results.print()
 
             return results
 
@@ -348,14 +347,14 @@ class BenchmarkRunner:
                 results.error_state = ErrorCodes.FAILED_EXECUTION
                 results.error_msg = "Core dump"
 
-                _print_results(results, None)
+                results.print()
                 self.kill_process(rc.framework)
         else:
             results = BenchmarkResults(0, rc.implementation, rc.preset)
             results.error_state = ErrorCodes.EXECUTION_TIMEOUT
             results.error_msg = "Execution timed out"
 
-            _print_results(results, None)
+            results.print()
             self.kill_process(rc.framework)
 
         return results

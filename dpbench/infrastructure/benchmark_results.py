@@ -95,3 +95,45 @@ class BenchmarkResults:
             if self.validation_state == ValidationStatusCodes.SUCCESS
             else "Fail",
         )
+
+    def _format_ns(self, time_in_ns: int):
+        time = int(time_in_ns)
+        assert time >= 0
+        suff = [
+            ("s", 1000_000_000),
+            ("ms", 1000_000),
+            ("\u03BCs", 1000),
+            ("ns", 0),
+        ]
+        for s, scale in suff:
+            if time >= scale:
+                scaled_time = float(time) / scale if scale > 0 else time
+                return f"{scaled_time}{s} ({time} ns)"
+
+    def print(self, framework_name: str = "", framework_version: str = ""):
+        print(
+            "================ implementation "
+            + self.impl_postfix
+            + " ========================\n"
+            + "implementation:",
+            self.impl_postfix,
+        )
+
+        if self.error_state == ErrorCodes.SUCCESS:
+            print("framework:", framework_name)
+            print("framework version:", framework_version)
+            print("setup time:", self._format_ns(self.setup_time))
+            print("warmup time:", self._format_ns(self.warmup_time))
+            print("teardown time:", self._format_ns(self.teardown_time))
+            print("max execution times:", self._format_ns(self.max_exec_time))
+            print("min execution times:", self._format_ns(self.min_exec_time))
+            print(
+                "median execution times:",
+                self._format_ns(self.median_exec_time),
+            )
+            print("repeats:", self.repeats)
+            print("preset:", self.preset)
+            print("validated:", self.validation_state)
+        else:
+            print("error states:", self.error_state)
+            print("error msg:", self.error_msg)

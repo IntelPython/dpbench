@@ -326,3 +326,42 @@ def get_unexpected_failures(
         )
 
     return failures.difference(expected_failures)
+
+
+def print_report(
+    conn: sqlalchemy.Engine,
+    run_id: int,
+    implementations: set[str],
+    comparison_pairs: list[tuple[str, str]] = [],
+):
+    if not implementations:
+        implementations = {impl.postfix for impl in cfg.GLOBAL.implementations}
+
+    implementations = list(implementations)
+    implementations.sort()
+
+    generate_impl_summary_report(
+        conn, run_id=run_id, implementations=implementations
+    )
+
+    generate_performance_report(
+        conn,
+        run_id=run_id,
+        implementations=implementations,
+        headless=True,
+    )
+
+    generate_comparison_report(
+        conn,
+        run_id=run_id,
+        implementations=implementations,
+        comparison_pairs=comparison_pairs,
+        headless=True,
+    )
+
+    unexpected_failures = get_unexpected_failures(conn, run_id=run_id)
+
+    if len(unexpected_failures) > 0:
+        raise ValueError(
+            f"Unexpected benchmark implementations failed: {unexpected_failures}.",
+        )

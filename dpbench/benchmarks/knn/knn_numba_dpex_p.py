@@ -20,6 +20,10 @@ def knn(  # noqa: C901: TODO: can we simplify logic?
     votes_to_classes,
     data_dim,
 ):
+    # TODO: get rid of it once prange supports dtype
+    # https://github.com/IntelPython/numba-dpex/issues/1063
+    float0 = x_train.dtype.type(0.0)
+
     for i in nb.prange(test_size):
         queue_neighbors = np.empty(shape=(k, 2))
 
@@ -27,7 +31,7 @@ def knn(  # noqa: C901: TODO: can we simplify logic?
             x1 = x_train[j]
             x2 = x_test[i]
 
-            distance = 0.0
+            distance = float0
             for jj in range(data_dim):
                 diff = x1[jj] - x2[jj]
                 distance += diff * diff
@@ -54,7 +58,7 @@ def knn(  # noqa: C901: TODO: can we simplify logic?
             x1 = x_train[j]
             x2 = x_test[i]
 
-            distance = 0.0
+            distance = float0
             for jj in range(data_dim):
                 diff = x1[jj] - x2[jj]
                 distance += diff * diff
@@ -84,7 +88,7 @@ def knn(  # noqa: C901: TODO: can we simplify logic?
             v_to_c_i[int(queue_neighbors[j, 1])] += 1
 
         max_ind = 0
-        max_value = 0
+        max_value = float0
 
         for j in range(classes_num):
             if v_to_c_i[j] > max_value:

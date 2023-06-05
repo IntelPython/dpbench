@@ -9,11 +9,17 @@ from numba_dpex import dpjit
 
 @dpjit
 def rambo(nevts, nout, C1, F1, Q1, output):
+    # TODO: get rid of it once prange supports dtype
+    # https://github.com/IntelPython/numba-dpex/issues/1063
+    float1 = C1.dtype.type(1.0)
+    float2 = C1.dtype.type(2.0)
+    floatPi = C1.dtype.type(np.pi)
+
     for i in nb.prange(nevts):
         for j in range(nout):
-            C = 2.0 * C1[i, j] - 1.0
-            S = np.sqrt(1 - np.square(C))
-            F = 2.0 * np.pi * F1[i, j]
+            C = float2 * C1[i, j] - float1
+            S = np.sqrt(float1 - np.square(C))
+            F = float2 * floatPi * F1[i, j]
             Q = -np.log(Q1[i, j])
 
             output[i, j, 0] = Q

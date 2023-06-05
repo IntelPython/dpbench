@@ -53,6 +53,11 @@ def _queue_empty(head, tail):
 def get_neighborhood(n, dim, data, eps, ind_lst, sz_lst):
     block_size = 1
     nblocks = n // block_size + int(n % block_size > 0)
+
+    # TODO: get rid of it once prange supports dtype
+    # https://github.com/IntelPython/numba-dpex/issues/1063
+    float0 = data.dtype.type(0.0)
+
     for i in nb.prange(nblocks):
         start = i * block_size
         stop = n if i + 1 == nblocks else start + block_size
@@ -64,7 +69,7 @@ def get_neighborhood(n, dim, data, eps, ind_lst, sz_lst):
             i2 = n if ii + 1 == nblocks1 else i1 + block_size1
             for j in range(start, stop):
                 for k in range(i1, i2):
-                    dist = 0.0
+                    dist = float0
                     for m in range(dim):
                         diff = data[k * dim + m] - data[j * dim + m]
                         dist += diff * diff

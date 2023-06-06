@@ -22,11 +22,15 @@ def pairwise_distance(X1, X2, D):
     X2_rows = X2.shape[0]
     X1_cols = X1.shape[1]
 
+    # TODO: get rid of it once prange supports dtype
+    # https://github.com/IntelPython/numba-dpex/issues/1063
+    float0 = X1.dtype.type(0.0)
+
     # Outermost parallel loop over the matrix X1
     for i in nb.prange(X1_rows):
         # Loop over the matrix X2
         for j in range(X2_rows):
-            d = 0.0
+            d = float0
             # Compute exclidean distance
             for k in range(X1_cols):
                 tmp = X1[i, k] - X2[j, k]

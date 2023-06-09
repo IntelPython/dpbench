@@ -193,11 +193,11 @@ void deformable_convolution_b1_impl(cl::sycl::queue &queue,
     auto efill = output_fill_with_bias(queue, output, out_shape, bias);
     auto egemm = gemm(queue, transpose::N, transpose::N, /*transpose a, b*/
                       out_c, out_h * out_w, in_c * ker_h * ker_w, /*m, n, k*/
-                      1, /*alpha*/
-                      weights, in_c * ker_h * ker_w, /*a, lda*/
-                      tmp, out_h * out_w, /*b, ldb*/
-                      1, /*beta*/
-                      output, out_h * out_w, /*c, ldc*/
+                      1,                                          /*alpha*/
+                      weights, in_c * ker_h * ker_w,              /*a, lda*/
+                      tmp, out_h * out_w,                         /*b, ldb*/
+                      1,                                          /*beta*/
+                      output, out_h * out_w,                      /*c, ldc*/
                       {edeform, efill} /*events*/);
     egemm.wait();
 }

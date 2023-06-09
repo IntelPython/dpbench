@@ -1,0 +1,136 @@
+# SPDX-FileCopyrightText: 2022 - 2023 Intel Corporation
+#
+# SPDX-License-Identifier: Apache-2.0
+
+[benchmark]
+name = "Deformable convolution"
+short_name = "deformable-convolution"
+relative_path = "deformable_convolution"
+module_name = "deformable_convolution"
+func_name = "deformable_convolution"
+kind = "microbenchmark"
+domain = "Deep learning"
+input_args = [
+    "input",
+    "output",
+    "offset",
+    "weights",
+    "bias",
+    "tmp",
+    "stride_y",
+    "stride_x",
+    "dilation_y",
+    "dilation_x",
+    "pad_y",
+    "pad_x",
+    "groups",
+    "deformable_groups"
+]
+array_args = [
+    "input",
+    "output",
+    "offset",
+    "weights",
+    "bias",
+    "tmp"
+]
+output_args = [
+    "output"
+]
+
+[benchmark.parameters.S]
+batch = 1
+in_channels = 16
+in_height = 32
+in_width = 32
+out_channels = 16
+out_height = 32
+out_width = 32
+kernel_height = 3
+kernel_width = 3
+stride_y = 1
+stride_x = 1
+dilation_y = 1
+dilation_x = 1
+pad_y = 1
+pad_x = 1
+groups = 1
+deformable_groups = 1
+dtype = "float32"
+seed =  7777777
+
+[benchmark.parameters.M]
+batch = 1
+in_channels = 64
+in_height = 64
+in_width = 64
+out_channels = 64
+out_height = 64
+out_width = 64
+kernel_height = 3
+kernel_width = 3
+stride_y = 1
+stride_x = 1
+dilation_y = 1
+dilation_x = 1
+pad_y = 1
+pad_x = 1
+groups = 1
+deformable_groups = 1
+dtype = "float32"
+seed =  7777777
+
+[benchmark.parameters.L]
+batch = 2
+in_channels = 64
+in_height = 128
+in_width = 128
+out_channels = 128
+out_height = 128
+out_width = 128
+kernel_height = 3
+kernel_width = 3
+stride_y = 1
+stride_x = 1
+dilation_y = 1
+dilation_x = 1
+pad_y = 1
+pad_x = 1
+groups = 1
+deformable_groups = 1
+dtype = "float32"
+seed =  7777777
+
+[benchmark.init]
+func_name = "initialize"
+types_dict_name="types_dict"
+precision="single"
+input_args =  [
+    "batch",
+    "in_channels",
+    "in_height",
+    "in_width",
+    "out_channels",
+    "out_height",
+    "out_width",
+    "kernel_height",
+    "kernel_width",
+    "stride_y",
+    "stride_x",
+    "dilation_y",
+    "dilation_x",
+    "pad_y",
+    "pad_x",
+    "groups",
+    "deformable_groups",
+    "dtype",
+    "seed"
+]
+output_args = [
+    "input",
+    "output",
+    "offset",
+    "weights",
+    "bias",
+    "tmp"
+]

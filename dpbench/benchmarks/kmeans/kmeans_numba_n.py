@@ -46,29 +46,25 @@ def _updateCentroids(arrayC, arrayCsum, arrayCnumpoint, num_centroids):
 
 
 @nb.njit(parallel=False, fastmath=True)
-def _kmeans_impl(
-    arrayP,
-    arrayPcluster,
-    arrayC,
-    arrayCsum,
-    arrayCnumpoint,
-    niters,
-    npoints,
-    ncentroids,
-):
+def _kmeans_impl(arrayP, arrayPcluster, arrayC, arrayCnumpoint, niters):
+    num_points = arrayP.shape[0]
+    num_centroids = arrayC.shape[0]
+    arrayCsum = np.zeros_like(arrayC)
     for i in range(niters):
-        _groupByCluster(arrayP, arrayPcluster, arrayC, npoints, ncentroids)
+        _groupByCluster(
+            arrayP, arrayPcluster, arrayC, num_points, num_centroids
+        )
 
         _calCentroidsSum(
             arrayP,
             arrayPcluster,
             arrayCsum,
             arrayCnumpoint,
-            npoints,
-            ncentroids,
+            num_points,
+            num_centroids,
         )
 
-        _updateCentroids(arrayC, arrayCsum, arrayCnumpoint, ncentroids)
+        _updateCentroids(arrayC, arrayCsum, arrayCnumpoint, num_centroids)
 
     return arrayC, arrayCsum, arrayCnumpoint
 
@@ -78,24 +74,9 @@ def kmeans(
     arrayP,
     arrayPclusters,
     arrayC,
-    arrayCsum,
     arrayCnumpoint,
     niters,
-    npoints,
-    ndims,
-    ncentroids,
 ):
-    for i1 in range(ncentroids):
-        arrayC[i1, 0] = arrayP[i1, 0]
-        arrayC[i1, 1] = arrayP[i1, 1]
-
     arrayC, arrayCsum, arrayCnumpoint = _kmeans_impl(
-        arrayP,
-        arrayPclusters,
-        arrayC,
-        arrayCsum,
-        arrayCnumpoint,
-        niters,
-        npoints,
-        ncentroids,
+        arrayP, arrayPclusters, arrayC, arrayCnumpoint, niters
     )

@@ -32,7 +32,9 @@ array_args = [
 output_args = [
     "predictions",
 ]
-expected_failure_implementations = ["numba_dpex_p"]
+
+# `sycl` fails just on Windows
+expected_failure_implementations = ["numba_dpex_p", "sycl"]
 
 [benchmark.parameters.S]
 test_size = 1024

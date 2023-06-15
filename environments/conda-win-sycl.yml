@@ -1,0 +1,31 @@
+# SPDX-FileCopyrightText: 2022 - 2023 Intel Corporation
+#
+# SPDX-License-Identifier: Apache-2.0
+
+name: dpbench-dev
+channels:
+  - dppy/label/dev
+  - conda-forge
+  - intel
+  - nodefaults
+dependencies:
+  - pip
+  - tomli
+  - alembic
+  - sqlalchemy
+  - scipy
+  - scikit-learn
+  - pandas
+  - intel::numpy
+  - numba
+  - dpctl
+  - dpnp
+  - numba-dpex
+  - numba-mlir
+  - dpcpp_win-64
+  - cmake
+  - cython
+  - scikit-build
+  # https://github.com/scikit-build/scikit-build/issues/981
+  - setuptools>=42,<64
+  - pybind11

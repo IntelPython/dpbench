@@ -21,7 +21,7 @@ array_args = [
 output_args = [
     "d",
 ]
-expected_failure_implementations = ["dpnp", "numba_dpex_n"]
+expected_failure_implementations = ["numba_dpex_n"]
 
 [benchmark.parameters.S]
 npoints = 32768

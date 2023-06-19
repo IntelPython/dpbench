@@ -9,7 +9,7 @@ from numba import prange
 from numba_mlir import njit
 
 
-@njit(parallel=True, inline="always", fastmath=True)
+@njit(parallel=True, inline="always", fastmath=True, gpu_fp64_truncate="auto")
 def bilinear(input, offset_y, offset_x):
     height, width = input.shape
     start_x = int(math.floor(offset_x))
@@ -42,10 +42,10 @@ def bilinear(input, offset_y, offset_x):
         w = (1 - start_x_weight) * (1 - start_y_weight)
         output += w * input[start_y + 1, start_x + 1]
 
-    return output
+    return output/2
 
 
-@njit(parallel=True, fastmath=True)
+@njit(parallel=True, fastmath=True, gpu_fp64_truncate="auto")
 def deform(
     input, offset, output, stride, pad, dilation, groups, deformable_groups
 ):
@@ -54,7 +54,6 @@ def deform(
 
     k_h_m = (k_height - 1) // 2
     k_w_m = (k_width - 1) // 2
-
     for ckhkw in prange(channels * k_height * k_width):
         for h in prange(out_height):
             for w in prange(out_width):
@@ -79,7 +78,7 @@ def deform(
                 output[c, kh, kw, h, w] = bilinear(input[c], offset_y, offset_x)
 
 
-@njit(parallel=True, fastmath=True)
+@njit(parallel=True, fastmath=True, gpu_fp64_truncate="auto")
 def deformable_convolution_b1(
     input,
     output,
@@ -108,7 +107,7 @@ def deformable_convolution_b1(
     _output[:] = _output + _bias
 
 
-@njit(parallel=True)
+@njit(parallel=True, gpu_fp64_truncate="auto")
 def deformable_convolution(
     input,
     output,

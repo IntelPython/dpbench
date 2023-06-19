@@ -62,7 +62,7 @@ __attribute__((always_inline)) DataType bilinear(const DataType *input,
         result += w3 * v3;
     }
 
-    return result;
+    return result/2;
 }
 
 class deform;

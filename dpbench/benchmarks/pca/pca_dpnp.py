@@ -10,7 +10,7 @@ def pca(data, dims_rescaled_data=2):
     data -= data.mean(axis=0)
 
     # calculate the covariance matrix
-    v = np.cov(data, rowvar=False)
+    v = np.cov(data, rowvar=False, dtype=data.dtype)
 
     # calculate eigenvectors & eigenvalues of the covariance matrix
     evalues, evectors = np.linalg.eigh(v)

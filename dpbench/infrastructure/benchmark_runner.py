@@ -8,7 +8,7 @@ import logging
 import multiprocessing as mp
 import multiprocessing.connection as mpc
 from dataclasses import dataclass
-from typing import Any
+from typing import Any, Union
 
 import sqlalchemy
 
@@ -247,31 +247,19 @@ class BenchmarkRunner:
             results.error_msg = "No framework"
             return (results, {})
 
-        results_dict = dict()
-        _exec(
+        output = _exec(
             bench,
             framework,
             rc.implementation,
             rc.preset,
             rc.repeat,
-            results_dict,
+            results,
             # copy output if we want to validate results
             rc.validate,
         )
 
-        results.error_state = results_dict.get(
-            "error_state", ErrorCodes.FAILED_EXECUTION
-        )
-        results.error_msg = results_dict.get("error_msg", "Unexpected crash")
-        results.input_size = results_dict.get("input_size")
         if results.error_state != ErrorCodes.SUCCESS:
             return (results, {})
-
-        output = results_dict.get("outputs", {})
-        results.setup_time = results_dict["setup_time"]
-        results.warmup_time = results_dict["warmup_time"]
-        results.exec_times = results_dict["exec_times"]
-        results.teardown_time = results_dict["teardown_time"]
 
         if rc.validate and results.error_state == ErrorCodes.SUCCESS:
             ref_framework = build_framework(rc.ref_framework)
@@ -433,11 +421,8 @@ def _exec_simple(
 
     try:
         retval = framework.execute(impl_fn, inputs)
-        results_dict = {}
 
-        _exec_copy_output(bench, framework, retval, inputs, results_dict)
-
-        return results_dict["outputs"]
+        return _exec_copy_output(bench, framework, retval, inputs, None)
     except Exception:
         logging.exception("Benchmark execution failed at the warmup step.")
         return None
@@ -449,9 +434,9 @@ def _exec(
     impl_postfix: str,
     preset: str,
     repeat: int,
-    results_dict: dict,
+    results: BenchmarkResults,
     copy_output: bool,
-):
+) -> Union[dict, None]:
     """Executes a benchmark for a given implementation.
 
     A helper function to execute a benchmark. The function is called in a
@@ -473,20 +458,18 @@ def _exec(
         repeat : Number of repetitions of the benchmark execution.
         precision: The precision to use for benchmark input data.
         args : Input arguments to benchmark implementation function.
-        results_dict : A dictionary where timing and other results are stored.
+        results : A benchmark results where timing and other results are stored.
         copy_output : A flag that controls copying output.
     """
     np_input_data = bench.get_input_data(preset=preset)
 
     with timer() as t:
         inputs = _set_input_args(bench, framework, np_input_data)
-    results_dict["setup_time"] = t.get_elapsed_time()
+    results.setup_time = t.get_elapsed_time()
 
-    input_size = 0
+    results.input_size = 0
     for arg in bench.info.array_args:
-        input_size += _array_size(bench.bdata[preset][arg])
-
-    results_dict["input_size"] = input_size
+        results.input_size += _array_size(bench.bdata[preset][arg])
 
     impl_fn = bench.get_implementation(impl_postfix)
 
@@ -496,11 +479,11 @@ def _exec(
             framework.execute(impl_fn, inputs)
         except Exception:
             logging.exception("Benchmark execution failed at the warmup step.")
-            results_dict["error_state"] = ErrorCodes.FAILED_EXECUTION
-            results_dict["error_msg"] = "Execution failed"
+            results.error_state = ErrorCodes.FAILED_EXECUTION
+            results.error_msg = "Execution failed"
             return
 
-    results_dict["warmup_time"] = t.get_elapsed_time()
+    results.warmup_time = t.get_elapsed_time()
 
     _reset_output_args(bench, framework, inputs, np_input_data)
 
@@ -516,15 +499,17 @@ def _exec(
         if i < repeat - 1:
             _reset_output_args(bench, framework, inputs, np_input_data)
 
-    results_dict["exec_times"] = exec_times
+    results.exec_times = exec_times
 
     # Get the output data
-    results_dict["teardown_time"] = 0.0
-    if copy_output:
-        _exec_copy_output(bench, framework, retval, inputs, results_dict)
+    results.teardown_time = 0.0
+    results.error_state = ErrorCodes.SUCCESS
+    results.error_msg = ""
 
-    results_dict["error_state"] = ErrorCodes.SUCCESS
-    results_dict["error_msg"] = ""
+    if copy_output:
+        return _exec_copy_output(bench, framework, retval, inputs, results)
+
+    return None
 
 
 def _exec_copy_output(
@@ -532,8 +517,8 @@ def _exec_copy_output(
     fmwrk: Framework,
     retval,
     inputs: dict,
-    results_dict: dict,
-):
+    results: BenchmarkResults,
+) -> dict:
     output_arrays = dict()
     with timer() as t:
         for out_arg in bench.info.output_args:
@@ -545,8 +530,10 @@ def _exec_copy_output(
     if retval is not None:
         output_arrays["return-value"] = convert_to_numpy(retval, fmwrk)
 
-    results_dict["outputs"] = output_arrays
-    results_dict["teardown_time"] = t.get_elapsed_time()
+    if results:
+        results.teardown_time = t.get_elapsed_time()
+
+    return output_arrays
 
 
 def convert_to_numpy(value: any, fmwrk: Framework) -> any:

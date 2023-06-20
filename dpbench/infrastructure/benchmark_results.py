@@ -122,6 +122,7 @@ class BenchmarkResults:
         if self.error_state == ErrorCodes.SUCCESS:
             print("framework:", framework_name)
             print("framework version:", framework_version)
+            print("input size:", self.input_size)
             print("setup time:", self._format_ns(self.setup_time))
             print("warmup time:", self._format_ns(self.warmup_time))
             print("teardown time:", self._format_ns(self.teardown_time))

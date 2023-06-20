@@ -114,7 +114,7 @@ def generate_impl_summary_report(
     generate_legend(legends)
 
     columns = [
-        dm.Result.input_size_human.label("input_size"),
+        func.max(dm.Result.input_size_human).label("input_size"),
         dm.Result.benchmark,
         dm.Result.problem_preset,
     ]
@@ -167,7 +167,7 @@ def generate_performance_report(
         generate_legend(legends)
 
     columns = [
-        dm.Result.input_size_human.label("input_size"),
+        func.max(dm.Result.input_size_human).label("input_size"),
         dm.Result.benchmark,
         dm.Result.problem_preset,
     ]
@@ -235,7 +235,7 @@ def generate_comparison_report(
         generate_legend(legends)
 
     columns = [
-        dm.Result.input_size_human.label("input_size"),
+        func.max(dm.Result.input_size_human).label("input_size"),
         dm.Result.benchmark,
         dm.Result.problem_preset,
     ]

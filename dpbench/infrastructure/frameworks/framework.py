@@ -41,6 +41,10 @@ class Framework(object):
         self.info = config
         self.fname = self.info.simple_name
 
+        import cpuinfo
+
+        self.device_info = cpuinfo.get_cpu_info().get("brand_raw")
+
     def device_filter_string(self) -> str:
         """Returns the sycl device's filter string if the framework has an
         associated sycl device."""

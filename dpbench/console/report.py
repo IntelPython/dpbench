@@ -62,6 +62,5 @@ def execute_report(args: Namespace, conn: sqlalchemy.Engine):
     print_report(
         conn=conn,
         run_id=args.run_id,
-        implementations=args.implementations,
         comparison_pairs=comparison_pairs,
     )

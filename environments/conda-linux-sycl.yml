@@ -13,6 +13,7 @@ dependencies:
   - tomli
   - alembic
   - sqlalchemy
+  - py-cpuinfo
   - scipy
   - scikit-learn
   - pandas

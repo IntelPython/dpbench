@@ -1,7 +1,6 @@
 # Copyright 2022 Intel Corp.
 # SPDX-FileCopyrightText: 2022 Intel Corporation
 #
-# SPDX-License-Identifier: Apache 2.0
 # SPDX-License-Identifier: Apache-2.0
 
 """The module generates reports for implementation summary and timing summary
@@ -10,7 +9,6 @@ from a specific benchmark run.
 
 import dataclasses
 import logging
-import pathlib
 from typing import Final, Union
 
 import pandas as pd
@@ -82,8 +80,23 @@ def generate_header(conn: sqlalchemy.Engine, run_id: int):
         print("==================================")
 
 
-def generate_legend(legends: pd.DataFrame):
-    """prints legend section"""
+def generate_legend(conn: sqlalchemy.Engine, run_id: int) -> list[str]:
+    """prints legend section and returns implementation list"""
+    sql = (
+        sqlalchemy.select(
+            dm.Postfix.postfix,
+            dm.Postfix.description,
+            dm.Postfix.device,
+        )
+        .order_by(dm.Postfix.postfix)
+        .where(dm.Postfix.run_id == run_id)
+    )
+
+    legends = pd.read_sql_query(
+        sql=sql,
+        con=conn.connect(),
+    )
+
     formatters = {}
     for col in legends.select_dtypes("object"):
         len_max = legends[col].str.len().max()
@@ -93,6 +106,8 @@ def generate_legend(legends: pd.DataFrame):
     print("======")
     print(legends.to_string(formatters=formatters))
     print("")
+
+    return legends["postfix"].values.tolist()
 
 
 def generate_summary(data: pd.DataFrame):
@@ -108,11 +123,6 @@ def generate_impl_summary_report(
     implementations: list[str],
 ):
     """generate implementation summary report with status of each benchmark"""
-    legends = read_legends()
-
-    generate_header(conn, run_id)
-    generate_legend(legends)
-
     columns = [
         func.max(dm.Result.input_size_human).label("input_size"),
         dm.Result.benchmark,
@@ -157,15 +167,8 @@ def generate_performance_report(
     conn: sqlalchemy.Engine,
     run_id: int,
     implementations: list[str],
-    headless=False,
 ):
     """generate performance report with median times for each benchmark"""
-    legends = read_legends()
-
-    if not headless:
-        generate_header(conn, run_id)
-        generate_legend(legends)
-
     columns = [
         func.max(dm.Result.input_size_human).label("input_size"),
         dm.Result.benchmark,
@@ -222,17 +225,10 @@ def generate_comparison_report(
     run_id: int,
     implementations: list[str],
     comparison_pairs: list[tuple[str, str]],
-    headless=False,
 ):
     """generate comparison report with median times for each benchmark"""
     if len(comparison_pairs) == 0:
         return
-
-    legends = read_legends()
-
-    if not headless:
-        generate_header(conn, run_id)
-        generate_legend(legends)
 
     columns = [
         func.max(dm.Result.input_size_human).label("input_size"),
@@ -331,14 +327,10 @@ def get_unexpected_failures(
 def print_report(
     conn: sqlalchemy.Engine,
     run_id: int,
-    implementations: set[str],
     comparison_pairs: list[tuple[str, str]] = [],
 ):
-    if not implementations:
-        implementations = {impl.postfix for impl in cfg.GLOBAL.implementations}
-
-    implementations = list(implementations)
-    implementations.sort()
+    generate_header(conn, run_id)
+    implementations = generate_legend(conn, run_id)
 
     generate_impl_summary_report(
         conn, run_id=run_id, implementations=implementations
@@ -348,7 +340,6 @@ def print_report(
         conn,
         run_id=run_id,
         implementations=implementations,
-        headless=True,
     )
 
     generate_comparison_report(
@@ -356,7 +347,6 @@ def print_report(
         run_id=run_id,
         implementations=implementations,
         comparison_pairs=comparison_pairs,
-        headless=True,
     )
 
     unexpected_failures = get_unexpected_failures(conn, run_id=run_id)

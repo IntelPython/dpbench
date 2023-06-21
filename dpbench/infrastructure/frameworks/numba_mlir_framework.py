@@ -23,6 +23,10 @@ class NumbaMlirFramework(Framework):
         super().__init__(fname, config)
 
         self.sycl_device = self.info.sycl_device
+        if self.sycl_device:
+            import dpctl
+
+            self.device_info = dpctl.SyclDevice(self.sycl_device).name
 
     def copy_to_func(self) -> Callable:
         """Returns the copy-method that should be used

@@ -24,7 +24,7 @@ class NumbaDpexFramework(Framework):
 
         try:
             self.sycl_device = self.info.sycl_device
-            dpctl.SyclDevice(self.sycl_device)
+            self.device_info = dpctl.SyclDevice(self.sycl_device).name
         except dpctl.SyclDeviceCreationError as sdce:
             logging.exception(
                 "Could not create a Sycl device using filter {} string".format(

@@ -24,7 +24,7 @@ class DpnpFramework(Framework):
 
         try:
             self.sycl_device = self.info.sycl_device
-            dpctl.SyclDevice(self.sycl_device)
+            self.device_info = dpctl.SyclDevice(self.sycl_device).name
         except KeyError:
             pass
         except dpctl.SyclDeviceCreationError as sdce:

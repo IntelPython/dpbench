@@ -32,6 +32,7 @@ dependencies = [
     "tomli",
     "alembic>=1.10.0",
     "sqlalchemy>=2.0.0",
+    "py-cpuinfo",
     "scipy",
     "scikit_learn",
     "pandas",

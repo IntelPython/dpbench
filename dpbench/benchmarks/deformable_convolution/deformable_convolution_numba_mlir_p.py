@@ -42,7 +42,7 @@ def bilinear(input, offset_y, offset_x):
         w = (1 - start_x_weight) * (1 - start_y_weight)
         output += w * input[start_y + 1, start_x + 1]
 
-    return output/2
+    return output / 2
 
 
 @njit(parallel=True, fastmath=True, gpu_fp64_truncate="auto")

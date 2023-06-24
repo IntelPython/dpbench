@@ -3,6 +3,7 @@
 # SPDX-License-Identifier: Apache-2.0
 
 [benchmark]
+reference_implementation_postfix = "sycl"
 name = "Deformable convolution"
 short_name = "deformable-convolution"
 relative_path = "deformable_convolution"

@@ -12,7 +12,7 @@ pybind11_add_module(${py_module_name}
 
 message(${CMAKE_CURRENT_SOURCE_DIR})
 find_package(TBB REQUIRED PATHS ${CMAKE_CURRENT_SOURCE_DIR}/cmake NO_DEFAULT_PATH)
-find_package(MKL CONFIG REQUIRED)
+find_package(MKL CONFIG REQUIRED PATHS ${CMAKE_CURRENT_SOURCE_DIR}/cmake NO_DEFAULT_PATH)
 
 target_compile_options(${py_module_name} PUBLIC $<TARGET_PROPERTY:MKL::MKL,INTERFACE_COMPILE_OPTIONS>)
 target_include_directories(${py_module_name} PUBLIC ${Dpctl_INCLUDE_DIRS} $<TARGET_PROPERTY:MKL::MKL,INTERFACE_INCLUDE_DIRECTORIES>)

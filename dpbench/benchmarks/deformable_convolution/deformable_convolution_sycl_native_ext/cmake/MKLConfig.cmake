@@ -635,7 +635,8 @@ foreach(lib ${MKL_LIBRARIES})
     file(GLOB MKL_DLL_FILE "${MKL_ROOT}/redist/${MKL_ARCH}/${MKL_DLL_GLOB}"
         "${MKL_ROOT}/../redist/${MKL_ARCH}/${MKL_DLL_GLOB}"
         "${MKL_ROOT}/../redist/${MKL_ARCH}/mkl/${MKL_DLL_GLOB}"
-	"${MKL_ROOT}/bin/${MKL_DLL_GLOB}")
+        "${MKL_ROOT}/bin/${MKL_DLL_GLOB}"
+        "${MKL_ROOT}/lib")
     if(NOT ${lib} STREQUAL ${MKL_IFACE_LIB} AND NOT ${lib} STREQUAL ${MKL_BLAS95} AND NOT ${lib} STREQUAL ${MKL_LAPACK95})  # Windows IFACE libs are static only
       list(LENGTH MKL_DLL_FILE MKL_DLL_FILE_LEN)
       if(MKL_DLL_FILE_LEN)

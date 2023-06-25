@@ -10,8 +10,12 @@ pybind11_add_module(${py_module_name}
     deformable_convolution_sycl/impl.cpp
 )
 
-message(${CMAKE_CURRENT_SOURCE_DIR})
 find_package(TBB REQUIRED PATHS ${CMAKE_CURRENT_SOURCE_DIR}/cmake NO_DEFAULT_PATH)
+
+if (DEFINED ENV{CONDA_PREFIX})
+  set(MKL_ROOT $ENV{CONDA_PREFIX})
+endif()
+
 find_package(MKL CONFIG REQUIRED PATHS ${CMAKE_CURRENT_SOURCE_DIR}/cmake NO_DEFAULT_PATH)
 
 target_compile_options(${py_module_name} PUBLIC $<TARGET_PROPERTY:MKL::MKL,INTERFACE_COMPILE_OPTIONS>)

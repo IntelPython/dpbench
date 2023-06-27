@@ -6,6 +6,7 @@ import numba
 import numba_mlir as nb
 import numba_mlir.kernel as nbk
 import numpy as np
+from dpctl import tensor as dpt
 
 atomic_add = nbk.atomic.add
 
@@ -55,23 +56,11 @@ def updateCentroids(arrayC, arrayCsum, arrayCnumpoint, num_centroids):
         arrayC[i, 1] = arrayCsum[i, 1] / arrayCnumpoint[i]
 
 
-@nb.njit(parallel=True, fastmath=True, gpu_fp64_truncate="auto")
-def copy_arrayC(arrayC, arrayP, num_centroids):
-    for i in numba.prange(num_centroids):
-        arrayC[i, 0] = arrayP[i, 0]
-        arrayC[i, 1] = arrayP[i, 1]
+def kmeans_numba(arrayP, arrayPcluster, arrayC, arrayCnumpoint, niters):
+    num_points = arrayP.shape[0]
+    num_centroids = arrayC.shape[0]
+    arrayCsum = dpt.zeros_like(arrayC)
 
-
-def kmeans_numba(
-    arrayP,
-    arrayPcluster,
-    arrayC,
-    arrayCsum,
-    arrayCnumpoint,
-    niters,
-    num_points,
-    num_centroids,
-):
     for i in range(niters):
         groupByCluster(arrayP, arrayPcluster, arrayC, num_points, num_centroids)
 
@@ -93,26 +82,7 @@ def kmeans_numba(
     return arrayC, arrayCsum, arrayCnumpoint
 
 
-def kmeans(
-    arrayP,
-    arrayPclusters,
-    arrayC,
-    arrayCsum,
-    arrayCnumpoint,
-    niters,
-    npoints,
-    ndims,
-    ncentroids,
-):
-    copy_arrayC(arrayC, arrayP, ncentroids)
-
+def kmeans(arrayP, arrayPclusters, arrayC, arrayCnumpoint, niters):
     arrayC, arrayCsum, arrayCnumpoint = kmeans_numba(
-        arrayP,
-        arrayPclusters,
-        arrayC,
-        arrayCsum,
-        arrayCnumpoint,
-        niters,
-        npoints,
-        ncentroids,
+        arrayP, arrayPclusters, arrayC, arrayCnumpoint, niters
     )

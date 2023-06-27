@@ -6,6 +6,9 @@
 #include <CL/sycl.hpp>
 #include <dpctl4pybind11.hpp>
 
+#include <iostream>
+#include <stdio.h>
+
 template <typename... Args> bool ensure_compatibility(const Args &...args)
 {
     std::vector<dpctl::tensor::usm_ndarray> arrays = {args...};
@@ -24,28 +27,77 @@ template <typename... Args> bool ensure_compatibility(const Args &...args)
 void kmeans_sync(dpctl::tensor::usm_ndarray arrayP,
                  dpctl::tensor::usm_ndarray arrayPclusters,
                  dpctl::tensor::usm_ndarray arrayC,
-                 dpctl::tensor::usm_ndarray arrayCsum,
                  dpctl::tensor::usm_ndarray arrayCnumpoint,
-                 size_t niters,
-                 size_t npoints,
-                 size_t ndims,
-                 size_t ncentroids)
+                 size_t niters)
 {
-    if (!ensure_compatibility(arrayP, arrayPclusters, arrayC, arrayCsum,
-                              arrayCnumpoint))
+    if (!ensure_compatibility(arrayP, arrayPclusters, arrayC, arrayCnumpoint))
         throw std::runtime_error("Input arrays are not acceptable.");
 
-    if (arrayP.get_typenum() != UAR_DOUBLE ||
-        arrayC.get_typenum() != UAR_DOUBLE ||
-        arrayCsum.get_typenum() != UAR_DOUBLE)
-    {
-        throw std::runtime_error("Expected a double precision FP array.");
+    if (arrayP.get_typenum() != arrayC.get_typenum()) {
+        throw std::runtime_error("All arrays must have the same precision");
     }
 
-    kmeans_impl(arrayP.get_queue(), arrayP.get_data<double>(),
-                arrayPclusters.get_data<size_t>(), arrayC.get_data<double>(),
-                arrayCsum.get_data<double>(), arrayCnumpoint.get_data<size_t>(),
-                niters, npoints, ndims, ncentroids);
+    if (arrayPclusters.get_typenum() != arrayCnumpoint.get_typenum()) {
+        throw std::runtime_error("All arrays must have the same precision");
+    }
+
+    auto npoints = arrayP.get_shape(0);
+    auto ncentroids = arrayC.get_shape(0);
+    auto ndims = arrayC.get_shape(1);
+
+#define call_kmeans(dims, ftyp, ityp)                                          \
+    kmeans_impl<ftyp, ityp, dims>(                                             \
+        arrayP.get_queue(), arrayP.get_data<ftyp>(),                           \
+        arrayPclusters.get_data<ityp>(), arrayC.get_data<ftyp>(),              \
+        arrayCnumpoint.get_data<ityp>(), niters, npoints, ncentroids, 0);
+
+#define dispatch_kmeans_ftype_itype(ftyp, ityp)                                \
+    {                                                                          \
+        if (ndims == 2) {                                                      \
+            call_kmeans(2, ftyp, ityp);                                        \
+        }                                                                      \
+        else if (ndims == 3) {                                                 \
+            call_kmeans(3, ftyp, ityp);                                        \
+        }                                                                      \
+        else if (ndims == 4) {                                                 \
+            call_kmeans(4, ftyp, ityp);                                        \
+        }                                                                      \
+        else {                                                                 \
+            throw std::runtime_error("Unsupported ndims");                     \
+        }                                                                      \
+    }
+
+#define dispatch_kmeans(ityp)                                                  \
+    {                                                                          \
+        if (arrayP.get_typenum() == UAR_DOUBLE) {                              \
+            dispatch_kmeans_ftype_itype(double, ityp);                         \
+        }                                                                      \
+        else if (arrayP.get_typenum() == UAR_FLOAT) {                          \
+            dispatch_kmeans_ftype_itype(float, ityp);                          \
+        }                                                                      \
+        else {                                                                 \
+            throw std::runtime_error("Unsupported type");                      \
+        }                                                                      \
+    }
+
+    if (arrayCnumpoint.get_elemsize() == 4 and
+        (arrayCnumpoint.get_typenum() == UAR_INT or
+         arrayCnumpoint.get_typenum() == UAR_LONG))
+    {
+        dispatch_kmeans(int32_t);
+    }
+    else if (arrayCnumpoint.get_elemsize() == 8 and
+             (arrayCnumpoint.get_typenum() == UAR_LONG or
+              arrayCnumpoint.get_typenum() == UAR_LONGLONG))
+    {
+        dispatch_kmeans(int64_t);
+    }
+    else {
+        throw std::runtime_error("Unsupported type");
+    }
+
+#undef dispatch_kmeans
+#undef call_kmeans
 }
 
 PYBIND11_MODULE(_kmeans_sycl, m)
@@ -55,6 +107,5 @@ PYBIND11_MODULE(_kmeans_sycl, m)
 
     m.def("kmeans", &kmeans_sync, "DPC++ implementation of Kmeans",
           py::arg("arrayP"), py::arg("arrayPclusters"), py::arg("arrayC"),
-          py::arg("arrayCsum"), py::arg("arrayCnumpoint"), py::arg("niters"),
-          py::arg("npoints"), py::arg("ndims"), py::arg("ncentroids"));
+          py::arg("arrayCnumpoint"), py::arg("niters"));
 }

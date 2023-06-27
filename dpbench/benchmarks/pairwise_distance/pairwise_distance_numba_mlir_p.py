@@ -25,7 +25,7 @@ def _pairwise_distance(X1, X2, D):
     # Outermost parallel loop over the matrix X1
     for i in numba.prange(X1_rows):
         # Loop over the matrix X2
-        for j in range(X2_rows):
+        for j in numba.prange(X2_rows):
             d = 0.0
             # Compute exclidean distance
             for k in range(X1_cols):

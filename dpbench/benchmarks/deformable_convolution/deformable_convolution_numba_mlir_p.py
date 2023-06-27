@@ -108,19 +108,16 @@ def deformable_convolution_b1(
 
 
 @njit(parallel=True, gpu_fp64_truncate="auto")
-def deformable_convolution(
+def jdeformable_convolution(
     input,
     output,
     offset,
     weights,
     bias,
     tmp,
-    stride_y,
-    stride_x,
-    pad_y,
-    pad_x,
-    dilation_y,
-    dilation_x,
+    stride,
+    pad,
+    dilation,
     groups,
     deformable_groups,
 ):
@@ -133,9 +130,37 @@ def deformable_convolution(
             weights,
             bias,
             tmp,
-            (stride_y, stride_x),
-            (pad_y, pad_x),
-            (dilation_y, dilation_x),
+            stride,
+            pad,
+            dilation,
             groups,
             deformable_groups,
         )
+
+
+def deformable_convolution(
+    input,
+    output,
+    offset,
+    weights,
+    bias,
+    tmp,
+    stride_hw,
+    pad_hw,
+    dilation_hw,
+    groups,
+    deformable_groups,
+):
+    jdeformable_convolution(
+        input,
+        output,
+        offset,
+        weights,
+        bias,
+        tmp,
+        tuple(stride_hw),
+        tuple(pad_hw),
+        tuple(dilation_hw),
+        groups,
+        deformable_groups,
+    )

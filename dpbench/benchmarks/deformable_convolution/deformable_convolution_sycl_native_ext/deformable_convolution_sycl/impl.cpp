@@ -14,6 +14,8 @@
 #include "oneapi/mkl.hpp"
 #include "utils.hpp"
 
+#include <pybind11/stl.h>
+
 using namespace sycl;
 namespace py = pybind11;
 
@@ -65,7 +67,7 @@ __attribute__((always_inline)) DataType bilinear(const DataType *input,
     return result / 2;
 }
 
-class deform;
+template <class DataType> class deform;
 
 template <class DataType>
 inline auto deform_input(cl::sycl::queue &queue,
@@ -73,7 +75,7 @@ inline auto deform_input(cl::sycl::queue &queue,
                          const Shape3D in_shape,
                          DataType *output,
                          const Shape5D out_shape,
-                         const DataType *offset,
+                         const float *offset,
                          int stride_y,
                          int stride_x,
                          int pad_y,
@@ -94,7 +96,7 @@ inline auto deform_input(cl::sycl::queue &queue,
 
     auto wsize =
         sycl::range<3>(in_channels * k_height * k_width, out_height, out_width);
-    return queue.parallel_for<deform>(wsize, [=](sycl::id<3> idx) {
+    return queue.parallel_for<deform<DataType>>(wsize, [=](sycl::id<3> idx) {
         auto ckhkw = static_cast<int>(idx[0]);
         auto h = static_cast<int>(idx[1]);
         auto w = static_cast<int>(idx[2]);
@@ -127,19 +129,19 @@ inline auto deform_input(cl::sycl::queue &queue,
     });
 }
 
-class fill_output;
+template <class DataType> class fill_output;
 
 template <class DataType>
 auto output_fill_with_bias(cl::sycl::queue &queue,
                            DataType *output,
                            const Shape3D out_shape,
-                           DataType *bias)
+                           const DataType *bias)
 {
     auto out_c = out_shape[CHW::C];
     auto out_h = out_shape[CHW::H];
     auto out_w = out_shape[CHW::W];
 
-    return queue.parallel_for<fill_output>(
+    return queue.parallel_for<fill_output<DataType>>(
         sycl::range<3>(out_c, out_h, out_w), [=](sycl::id<3> idx) {
             auto c = static_cast<int>(idx[0]);
             auto h = static_cast<int>(idx[1]);
@@ -158,9 +160,9 @@ void deformable_convolution_b1_impl(cl::sycl::queue &queue,
                                     const Shape3D out_shape,
                                     DataType *tmp,
                                     const float *offset,
-                                    DataType *weights,
+                                    const DataType *weights,
                                     const Shape4D weights_shape,
-                                    DataType *bias,
+                                    const DataType *bias,
                                     int stride_y,
                                     int stride_x,
                                     int pad_y,
@@ -210,9 +212,9 @@ void deformable_convolution_impl(cl::sycl::queue &queue,
                                  const Shape4D out_shape,
                                  DataType *tmp,
                                  const float *offset,
-                                 DataType *weights,
+                                 const DataType *weights,
                                  const Shape4D weights_shape,
-                                 DataType *bias,
+                                 const DataType *bias,
                                  int stride_y,
                                  int stride_x,
                                  int pad_y,
@@ -247,25 +249,45 @@ void deformable_convolution_impl(cl::sycl::queue &queue,
     }
 }
 
+template <typename... Args> bool ensure_compatibility(const Args &...args)
+{
+    std::vector<dpctl::tensor::usm_ndarray> arrays = {args...};
+
+    auto arr = arrays.at(0);
+
+    for (auto &arr : arrays) {
+        if (!(arr.get_flags() & (USM_ARRAY_C_CONTIGUOUS))) {
+            std::cerr << "All arrays need to be C contiguous.\n";
+            return false;
+        }
+    }
+    return true;
+}
+
 void deformable_convolution(dpctl::tensor::usm_ndarray input,
                             dpctl::tensor::usm_ndarray output,
                             dpctl::tensor::usm_ndarray offset,
                             dpctl::tensor::usm_ndarray weights,
                             dpctl::tensor::usm_ndarray bias,
                             dpctl::tensor::usm_ndarray tmp,
-                            int stride_y,
-                            int stride_x,
-                            int pad_y,
-                            int pad_x,
-                            int dilation_y,
-                            int dilation_x,
+                            std::vector<int> stride_hw,
+                            std::vector<int> pad_hw,
+                            std::vector<int> dilation_hw,
                             int groups,
                             int deformable_groups)
 {
     auto queue = input.get_queue();
 
-    if (input.get_typenum() != UAR_FLOAT) {
-        throw std::runtime_error("Expected a single precision FP array.");
+    if (!ensure_compatibility(input, output, offset, weights, bias, tmp))
+        throw std::runtime_error("Input arrays are not acceptable.");
+
+    if (input.get_typenum() != output.get_typenum() or
+        input.get_typenum() != offset.get_typenum() or
+        input.get_typenum() != weights.get_typenum() or
+        input.get_typenum() != bias.get_typenum() or
+        input.get_typenum() != tmp.get_typenum())
+    {
+        throw std::runtime_error("All arrays must have the same precision");
     }
 
     int batch = input.get_shape(0);
@@ -281,17 +303,39 @@ void deformable_convolution(dpctl::tensor::usm_ndarray input,
     int kernel_height = weights.get_shape(2);
     int kernel_width = weights.get_shape(3);
 
+    auto stride_y = stride_hw[0];
+    auto stride_x = stride_hw[1];
+
+    auto pad_y = pad_hw[0];
+    auto pad_x = pad_hw[1];
+
+    auto dilation_y = pad_hw[0];
+    auto dilation_x = pad_hw[1];
+
     auto input_shape = Shape4D({batch, in_channels, in_height, in_width});
     auto output_shape = Shape4D({batch, out_channels, out_height, out_width});
     auto weights_shape =
         Shape4D({out_channels, in_channels, kernel_height, kernel_width});
 
-    deformable_convolution_impl(
-        queue, input.get_data<float>(), input_shape, output.get_data<float>(),
-        output_shape, tmp.get_data<float>(), offset.get_data<float>(),
-        weights.get_data<float>(), weights_shape, bias.get_data<float>(),
-        stride_y, stride_x, pad_y, pad_x, dilation_y, dilation_x, groups,
-        deformable_groups);
+#define dispatch_dc(typ)                                                       \
+    deformable_convolution_impl<typ>(                                          \
+        queue, input.get_data<typ>(), input_shape, output.get_data<typ>(),     \
+        output_shape, tmp.get_data<typ>(), offset.get_data<float>(),           \
+        weights.get_data<typ>(), weights_shape, bias.get_data<typ>(),          \
+        stride_y, stride_x, pad_y, pad_x, dilation_y, dilation_x, groups,      \
+        deformable_groups)
+
+    if (input.get_typenum() == UAR_FLOAT) {
+        dispatch_dc(float);
+    }
+    else if (input.get_typenum() == UAR_DOUBLE) {
+        dispatch_dc(double);
+    }
+    else {
+        throw std::runtime_error("Unsupported type");
+    }
+
+#undef dispatch_dc
 }
 
 PYBIND11_MODULE(_deformable_convolution_sycl, m)
@@ -301,8 +345,7 @@ PYBIND11_MODULE(_deformable_convolution_sycl, m)
     m.def("deformable_convolution", &deformable_convolution,
           "Defromable convolution", py::arg("input"), py::arg("output"),
           py::arg("offset"), py::arg("weights"), py::arg("bias"),
-          py::arg("tmp"), py::arg("stride_y"), py::arg("stride_x"),
-          py::arg("pad_y"), py::arg("pad_x"), py::arg("dilation_y"),
-          py::arg("dilation_x"), py::arg("groups"),
+          py::arg("tmp"), py::arg("stride_hw"), py::arg("pad_hw"),
+          py::arg("dilation_hw"), py::arg("groups"),
           py::arg("deformable_groups"));
 }

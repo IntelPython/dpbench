@@ -14,8 +14,6 @@
 #include "oneapi/mkl.hpp"
 #include "utils.hpp"
 
-#include <pybind11/stl.h>
-
 using namespace sycl;
 namespace py = pybind11;
 
@@ -270,9 +268,9 @@ void deformable_convolution(dpctl::tensor::usm_ndarray input,
                             dpctl::tensor::usm_ndarray weights,
                             dpctl::tensor::usm_ndarray bias,
                             dpctl::tensor::usm_ndarray tmp,
-                            std::vector<int> stride_hw,
-                            std::vector<int> pad_hw,
-                            std::vector<int> dilation_hw,
+                            py::list stride_hw,
+                            py::list pad_hw,
+                            py::list dilation_hw,
                             int groups,
                             int deformable_groups)
 {
@@ -303,14 +301,14 @@ void deformable_convolution(dpctl::tensor::usm_ndarray input,
     int kernel_height = weights.get_shape(2);
     int kernel_width = weights.get_shape(3);
 
-    auto stride_y = stride_hw[0];
-    auto stride_x = stride_hw[1];
+    auto stride_y = stride_hw[0].cast<int>();
+    auto stride_x = stride_hw[1].cast<int>();
 
-    auto pad_y = pad_hw[0];
-    auto pad_x = pad_hw[1];
+    auto pad_y = pad_hw[0].cast<int>();
+    auto pad_x = pad_hw[1].cast<int>();
 
-    auto dilation_y = pad_hw[0];
-    auto dilation_x = pad_hw[1];
+    auto dilation_y = pad_hw[0].cast<int>();
+    auto dilation_x = pad_hw[1].cast<int>();
 
     auto input_shape = Shape4D({batch, in_channels, in_height, in_width});
     auto output_shape = Shape4D({batch, out_channels, out_height, out_width});

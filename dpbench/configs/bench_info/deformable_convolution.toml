@@ -1,0 +1,99 @@
+# SPDX-FileCopyrightText: 2022 - 2023 Intel Corporation
+#
+# SPDX-License-Identifier: Apache-2.0
+
+[benchmark]
+reference_implementation_postfix = "sycl"
+name = "Deformable convolution"
+short_name = "deformable-convolution"
+relative_path = "deformable_convolution"
+module_name = "deformable_convolution"
+func_name = "deformable_convolution"
+kind = "microbenchmark"
+domain = "Deep learning"
+input_args = [
+    "input",
+    "output",
+    "offset",
+    "weights",
+    "bias",
+    "tmp",
+    "stride_hw",
+    "dilation_hw",
+    "pad_hw",
+    "groups",
+    "deformable_groups"
+]
+array_args = [
+    "input",
+    "output",
+    "offset",
+    "weights",
+    "bias",
+    "tmp"
+]
+output_args = [
+    "output"
+]
+
+[benchmark.parameters.S]
+batch = 1
+in_chw = [16, 32, 32]
+out_chw = [16, 32, 32]
+kernel_hw = [3, 3]
+stride_hw = [1, 1]
+dilation_hw = [1, 1]
+pad_hw = [1, 1]
+groups = 1
+deformable_groups = 1
+seed =  7777777
+
+[benchmark.parameters.M]
+batch = 1
+in_chw = [64, 64, 64]
+out_chw = [64, 64, 64]
+kernel_hw = [3, 3]
+stride_hw = [1, 1]
+dilation_hw = [1, 1]
+pad_hw = [1, 1]
+groups = 1
+deformable_groups = 1
+seed =  7777777
+
+[benchmark.parameters.L]
+batch = 2
+in_chw = [64, 128, 128]
+out_chw = [128, 128, 128]
+kernel_hw = [3, 3]
+stride_hw = [1, 1]
+dilation_hw = [1, 1]
+pad_hw = [1, 1]
+groups = 1
+deformable_groups = 1
+seed =  7777777
+
+[benchmark.init]
+func_name = "initialize"
+types_dict_name="types_dict"
+precision="single"
+input_args =  [
+    "batch",
+    "in_chw",
+    "out_chw",
+    "kernel_hw",
+    "stride_hw",
+    "dilation_hw",
+    "pad_hw",
+    "groups",
+    "deformable_groups",
+    "seed",
+    "types_dict",
+]
+output_args = [
+    "input",
+    "output",
+    "offset",
+    "weights",
+    "bias",
+    "tmp"
+]

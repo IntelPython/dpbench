@@ -9,6 +9,7 @@ add_subdirectory(rambo)
 add_subdirectory(kmeans)
 add_subdirectory(knn)
 add_subdirectory(gpairs)
+add_subdirectory(deformable_convolution)
 add_subdirectory(dbscan)
 
 # generate dpcpp version into config

@@ -30,3 +30,5 @@ dependencies:
   # https://github.com/scikit-build/scikit-build/issues/981
   - setuptools>=42,<64
   - pybind11
+  - tbb-devel >= 2021.6.0
+  - mkl-devel-dpcpp>=2023.0.0

@@ -34,3 +34,5 @@ dependencies:
   - libgcc-ng
   - libstdcxx-ng
   - libgomp
+  - tbb-devel >= 2021.6.0
+  - mkl-devel-dpcpp>=2023.0.0

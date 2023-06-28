@@ -318,12 +318,13 @@ class BenchmarkRunner:
 
         brc = BaseRunConfig.from_instance(rc)
 
-        brc.ref_framework: cfg.Framework = [
-            f
-            for f in cfg.GLOBAL.frameworks
-            if rc.benchmark.reference_implementation_postfix
-            in {p.postfix for p in f.postfixes}
-        ][0]
+        if rc.validate:
+            brc.ref_framework: cfg.Framework = [
+                f
+                for f in cfg.GLOBAL.frameworks
+                if rc.benchmark.reference_implementation_postfix
+                in {p.postfix for p in f.postfixes}
+            ][0]
 
         conn.send(brc)
 

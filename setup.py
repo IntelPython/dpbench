@@ -36,5 +36,10 @@ setup(
         find_packages(include=["*"])
         + find_packages(where="./dpbench/benchmarks/*/*")
     ),
+    include_package_data=True,
+    package_data={
+        "dpbench.migrations": ["alembic.ini"],
+        "dpbench.configs": ["*/*.toml", "*.toml"],
+    },
     cmake_args=cmake_args,
 )

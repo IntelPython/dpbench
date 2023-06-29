@@ -1,0 +1,83 @@
+# SPDX-FileCopyrightText: 2022 - 2023 Intel Corporation
+#
+# SPDX-License-Identifier: Apache-2.0
+
+package:
+  name: dpbench
+  version: 0.1
+source:
+  path: ..
+
+requirements:
+  build:
+    - {{ compiler('cxx') }}
+    - {{ compiler('dpcpp') }} >=2023.1  # [not osx]
+    - sysroot_linux-64 >=2.28  # [linux]
+  host:
+    - python
+    - setuptools
+    - cmake
+    - ninja
+    - wheel
+    - scikit-build
+    - cython
+    - pybind11
+    # runtime requirements, cause conda tries to install after build
+    # - tomli
+    # - alembic
+    # - sqlalchemy
+    # - py-cpuinfo
+    # - scipy
+    # - scikit-learn
+    # - pandas
+    - intel::numpy
+    - numba
+    - dpctl
+    - dpnp
+    - numba-dpex
+  run:
+    - python
+    - tomli
+    - alembic
+    - sqlalchemy
+    # - py-cpuinfo
+    - scipy
+    - scikit-learn
+    - pandas
+    - numpy
+    - numba
+    - dpctl
+    - dpnp
+    - numba-dpex
+
+build:
+  number: 0
+
+test:
+  requires:
+    - dpctl
+    - dpnp
+    - numba-dpex
+    - numba
+    - numpy
+  imports:
+    - dpbench
+  commands:
+    - python -c "import dpbench"
+
+about:
+  home: https://github.com/IntelPython/dpbench
+  license: Apache 2.0
+  license_file: LICENSE
+  description: |
+      <strong>LEGAL NOTICE: Use of this software package is subject to the
+      software license agreement (as set forth above, in the license section of
+      the installed Conda package and/or the README file) and all notices,
+      disclaimers or license terms for third party or open source software
+      included in or with the software.</strong>
+      <br/><br/>
+      EULA: <a href="https://opensource.org/licenses/Apache-2.0" target="_blank">Apache-2.0</a>
+      <br/><br/>
+extra:
+  recipe-maintainers:
+    - Intel Python

@@ -18,6 +18,24 @@ SPDX-License-Identifier: Apache-2.0
 * **\<benchmark\>\_numba_mlir\_\<mode\>.py** : This file contains Numba-MLIR implementations of the benchmarks. There are three modes: kernel-mode, numpy-mode and prange-mode. Experimental.
 
 ## Examples of setting up and running the benchmarks
+
+### Using prebuilt version
+
+1. Create conda environment
+
+    ```bash
+    conda create -n dpbench dpbench -c dppy/label/dev -c conda-forge -c intel -c nodefaults --override-channels
+    conda activate dpbench
+    ```
+
+2. Run specific benchmark, e.g. black_scholes
+
+    ```bash
+    dpbench -b black_scholes run
+    ```
+
+### Build from source (for development)
+
 1. Clone the repository
 
     ```bash
@@ -69,13 +87,22 @@ SPDX-License-Identifier: Apache-2.0
     ```bash
     dpbench -b black_scholes run
     ```
-5. Run all benchmarks
+
+### Usage
+
+1. Run all benchmarks
 
     ```bash
     dpbench -a run
     ```
 
-6. Device Customization
+2. Generate report
+
+    ```bash
+    dpbench report
+    ```
+
+3. Device Customization
 
    If a framework is SYCL based, an extra configuration option `sycl_device` may be set in the
    framework config file or by passing `--sycl-device` argument to `dpbench run` to control what device the framework uses for execution. The `sycl_device`
@@ -85,11 +112,11 @@ SPDX-License-Identifier: Apache-2.0
 
    Here is an example:
 
-    ```json
-        dpbench -b black_scholes -i dpnp run --sycl-device=level_zero:gpu:0
+    ```shell
+    dpbench -b black_scholes -i dpnp run --sycl-device=level_zero:gpu:0
     ```
 
-7. All available options are available using `dpbench --help` and `dpbench <command> --help`:
+4. All available options are available using `dpbench --help` and `dpbench <command> --help`:
 
     ```
     usage: dpbench [-h] [-b [BENCHMARKS]] [-i [IMPLEMENTATIONS]] [-a | --all-implementations | --no-all-implementations] [--version] [-r [RUN_ID]] [--last-run | --no-last-run]

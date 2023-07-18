@@ -27,7 +27,7 @@ def add_run_arguments(parser: argparse.ArgumentParser):
     parser.add_argument(
         "-p",
         "--preset",
-        choices=["S", "M", "L"],
+        choices=["S", "M16Gb", "M", "L"],
         type=str,
         nargs="?",
         default="S",

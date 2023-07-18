@@ -48,6 +48,13 @@ nbins = 20
 rmax = 50
 rmin = 0.1
 
+[benchmark.parameters.M16Gb]
+nopt = 4096
+seed = 1234
+nbins = 20
+rmax = 50
+rmin = 0.1
+
 [benchmark.parameters.M]
 nopt = 8192
 seed = 1234

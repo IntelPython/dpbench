@@ -37,6 +37,13 @@ seed = 7777777
 ndims = 2
 ncentroids = 10
 
+[benchmark.parameters.M16Gb]
+npoints = 1048576
+niters = 30
+seed = 7777777
+ndims = 2
+ncentroids = 10
+
 [benchmark.parameters.M]
 npoints = 1048576
 niters = 30

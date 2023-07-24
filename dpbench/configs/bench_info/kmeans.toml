@@ -28,7 +28,6 @@ output_args = [
     "arrayC",
     "arrayCnumpoint",
 ]
-expected_failure_implementations = ["numba_dpex_k"]
 
 [benchmark.parameters.S]
 npoints = 4096

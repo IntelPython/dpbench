@@ -27,6 +27,10 @@ expected_failure_implementations = ["numba_dpex_n"]
 npoints = 1024
 dims = 128
 
+[benchmark.parameters.M16Gb]
+npoints = 1048576
+dims = 128
+
 [benchmark.parameters.M]
 npoints = 1048576
 dims = 128

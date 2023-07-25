@@ -30,6 +30,11 @@ npoints = 1024
 dims = 3
 seed = 7777777
 
+[benchmark.parameters.M16Gb]
+npoints = 21846
+dims = 3
+seed = 7777777
+
 [benchmark.parameters.M]
 npoints = 32768
 dims = 3

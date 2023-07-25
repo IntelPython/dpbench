@@ -32,6 +32,10 @@ output_args = [
 nevts = 32768
 nout = 4
 
+[benchmark.parameters.M16Gb]
+nevts = 16777216
+nout = 4
+
 [benchmark.parameters.M]
 nevts = 8388608
 nout = 4

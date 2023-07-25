@@ -45,6 +45,15 @@ seed_test = 777777
 seed_train = 0
 k = 5
 
+[benchmark.parameters.M16Gb]
+test_size = 8388608
+train_size = 1024
+data_dim = 16
+classes_num = 3
+seed_test = 777777
+seed_train = 0
+k = 5
+
 [benchmark.parameters.M]
 test_size = 8388608
 train_size = 1024

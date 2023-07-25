@@ -27,6 +27,7 @@ dependencies:
   - cmake
   - cython
   - scikit-build
+  - intel::intel-opencl-rt # need for set-intel-ocl-icd-registry.ps1
   # https://github.com/scikit-build/scikit-build/issues/981
   - setuptools>=42,<64
   - pybind11

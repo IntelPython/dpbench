@@ -17,6 +17,7 @@ dependencies:
   - scipy
   - scikit-learn
   - pandas
+  - intel::intel-opencl-rt # need for set-intel-ocl-icd-registry.ps1
   - intel::numpy
   - numba
   - dpctl

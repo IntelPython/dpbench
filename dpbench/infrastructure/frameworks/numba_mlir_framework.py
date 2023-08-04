@@ -12,6 +12,10 @@ import dpbench.config as cfg
 from .framework import Framework
 
 
+def _has_device(device):
+    return device and device != "none"
+
+
 class NumbaMlirFramework(Framework):
     """A class for reading and processing framework information."""
 
@@ -32,7 +36,7 @@ class NumbaMlirFramework(Framework):
         """Returns the copy-method that should be used
         for copying the benchmark arguments to device."""
 
-        if self.sycl_device:
+        if _has_device(self.sycl_device):
             import dpctl.tensor as dpt
 
             def _copy_to_func_impl(ref_array):
@@ -62,7 +66,7 @@ class NumbaMlirFramework(Framework):
         any array created by the framework possibly on
         a device memory domain."""
 
-        if self.sycl_device:
+        if _has_device(self.sycl_device):
             import dpctl.tensor as dpt
 
             return dpt.asnumpy

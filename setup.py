@@ -13,21 +13,15 @@ if not os.getenv("DPBENCH_SYCL"):
 
     cmake_args = None
 else:
-    import dpctl
-    import pybind11
     from skbuild import setup
+    from skbuild.platform_specifics import windows
 
-    pybind11_cmake_dir = pybind11.get_cmake_dir()
-    dpctl_include_dir = dpctl.get_include()
-    dpctl_cmake_dir = (
-        dpctl_include_dir.removesuffix("/include") + "/resource/cmake"
-    )
-    cmake_args = [
-        "-Dpybind11_DIR=" + pybind11_cmake_dir,
-        "-DDpctl_INCLUDE_DIRS=" + dpctl_include_dir,
-        "-DDPCTL_MODULE_PATH=" + dpctl_cmake_dir,
-    ]
+    cmake_args = ["-DCMAKE_VERBOSE_MAKEFILE:BOOL=ON"]
 
+    # Monkey patch msvc compiler environment, so scikit-build does not overwrite
+    # it. Make sure to set desired environment using:
+    # > vcvars64.bat -vcvars_ver=<vcvars_ver>
+    windows._get_msvc_compiler_env = lambda v, t: windows.CachedEnv()
 
 setup(
     # https://github.com/pypa/packaging-problems/issues/606

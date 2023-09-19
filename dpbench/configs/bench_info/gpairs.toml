@@ -39,7 +39,6 @@ array_args = [
 output_args = [
     "results",
 ]
-expected_failure_implementations = ["numba_dpex_k"]
 
 [benchmark.parameters.S]
 nopt = 128

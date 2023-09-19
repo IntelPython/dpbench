@@ -2,14 +2,13 @@
 #
 # SPDX-License-Identifier: Apache-2.0
 
-set(py_module_name _pairwise_distance_sycl)
-pybind11_add_module(${py_module_name}
-    MODULE
-    pairwise_distance_sycl/_pairwise_distance_sycl.cpp
-)
-target_include_directories(${py_module_name} PUBLIC ${Dpctl_INCLUDE_DIRS})
+set(module_name pairwise_distance_sycl)
+set(py_module_name _${module_name})
+python_add_library(${py_module_name} MODULE ${module_name}/${py_module_name}.cpp)
+add_sycl_to_target(TARGET ${py_module_name} SOURCES ${module_name}/${py_module_name}.cpp)
+target_include_directories(${py_module_name} PRIVATE ${Dpctl_INCLUDE_DIRS})
 
 file(RELATIVE_PATH py_module_dest ${CMAKE_SOURCE_DIR} ${CMAKE_CURRENT_SOURCE_DIR})
 install(TARGETS ${py_module_name}
-  DESTINATION ${py_module_dest}/pairwise_distance_sycl
+  DESTINATION ${py_module_dest}/${module_name}
 )

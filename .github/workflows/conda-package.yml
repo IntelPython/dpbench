@@ -14,7 +14,7 @@ env:
   PACKAGE_NAME: dpbench
   MODULE_NAME: dpbench
   # There is a separate action that removes defaults.
-  CHANNELS: 'dppy/label/dev,conda-forge,intel'
+  CHANNELS: 'dppy/label/dev,conda-forge,intel,nodefaults'
   VER_JSON_NAME: 'version.json'
   VER_SCRIPT1: "import json; f = open('version.json', 'r'); j = json.load(f); f.close(); "
   VER_SCRIPT2: "d = j['dpbench'][0]; print('='.join((d[s] for s in ('version', 'build'))))"
@@ -26,14 +26,14 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        python: ['3.9', '3.10']
+        python: ['3.9', '3.10', '3.11']
         os: [ubuntu-latest, windows-latest]
 
     runs-on: ${{ matrix.os }}
 
     defaults:
       run:
-        shell: bash -l {0}
+        shell: ${{ matrix.os == 'windows-latest' && 'cmd /C CALL {0}' || 'bash -l {0}' }}
 
     continue-on-error: false
 
@@ -63,11 +63,18 @@ jobs:
         run: conda config --remove channels defaults
 
       - name: Store conda paths as envs
+        shell: bash -l {0}
         run: echo "CONDA_BLD=$CONDA_PREFIX/conda-bld/${{ runner.os == 'Linux' && 'linux' || 'win' }}-64/" | tr "\\" '/' >> $GITHUB_ENV
 
       # boa is an extention to conda so we can use mamba resolver in conda build
       - name: Install conda-build
         run: mamba install boa
+
+      - name: Configure MSBuild
+        if: runner.os == 'Windows'
+        uses: microsoft/setup-msbuild@v1.1
+        with:
+          vs-version: '14.35'
 
       - name: Build conda package
         run: conda mambabuild --no-test --python ${{ matrix.python }} conda-recipe
@@ -92,7 +99,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        python: ['3.9', '3.10']
+        python: ['3.9', '3.10', '3.11']
         os: [ubuntu-20.04, ubuntu-latest, windows-latest]
         experimental: [false]
 
@@ -168,7 +175,7 @@ jobs:
 
     strategy:
       matrix:
-        python: ['3.9', '3.10']
+        python: ['3.9', '3.10', '3.11']
         os: [ubuntu-latest, windows-latest]
 
     runs-on: ${{ matrix.os }}

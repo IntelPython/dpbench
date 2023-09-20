@@ -13,12 +13,12 @@ REM @TODO: remove the setting, once transition to build backend on Windows
 REM to cmake is complete.
 SET "SETUPTOOLS_USE_DISTUTILS=stdlib"
 
-SET "DPBENCH_SYCL=1"
+set "DPBENCH_SYCL=1"
+set "CMAKE_GENERATOR=Ninja"
+set "CC=icx"
+set "CXX=icx"
 
 "%PYTHON%" setup.py clean --all
-
-set "SKBUILD_ARGS=-G Ninja -- -DCMAKE_C_COMPILER:PATH=icx -DCMAKE_CXX_COMPILER:PATH=icx"
-set "SKBUILD_ARGS=%SKBUILD_ARGS% -DCMAKE_VERBOSE_MAKEFILE:BOOL=ON"
 
 FOR %%V IN (14.0.0 14 15.0.0 15 16.0.0 16 17.0.0 17) DO @(
   REM set DIR_HINT if directory exists
@@ -41,15 +41,17 @@ if EXIST "%PLATFORM_DIR%" (
   if errorlevel 1 exit 1
 )
 
+@REM TODO: switch to pip build. Currently results in broken binary
+@REM %PYTHON% -m pip install --no-index --no-deps --no-build-isolation . -v
 if NOT "%WHEELS_OUTPUT_FOLDER%"=="" (
     rem Install and assemble wheel package from the build bits
-    "%PYTHON%" setup.py install bdist_wheel %SKBUILD_ARGS%
+    "%PYTHON%" setup.py install bdist_wheel --single-version-externally-managed --record=record.txt
     if errorlevel 1 exit 1
     copy dist\dpbench*.whl %WHEELS_OUTPUT_FOLDER%
     if errorlevel 1 exit 1
 ) ELSE (
     rem Only install
-    "%PYTHON%" setup.py install %SKBUILD_ARGS%
+    "%PYTHON%" setup.py install --single-version-externally-managed --record=record.txt
     if errorlevel 1 exit 1
 )
 

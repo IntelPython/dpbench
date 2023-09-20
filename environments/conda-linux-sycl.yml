@@ -23,7 +23,9 @@ dependencies:
   - dpnp
   - numba-dpex
   - numba-mlir
-  - dpcpp_linux-64
+  # TODO: fix issues on conda-forge build
+  - intel::dpcpp_linux-64
+  - intel::dpcpp-cpp-rt
   - cython
   - cmake
   - ninja

@@ -12,6 +12,7 @@ on:
 env:
   # sycl is not included. Add it manually if you need
   WORKLOADS: python,numpy,dpnp,numba_n,numba_np,numba_npr,numba_dpex_k,numba_dpex_n,numba_dpex_p
+  PYTHONIOENCODING: 'utf-8'
 
 jobs:
   build:
@@ -49,7 +50,7 @@ jobs:
 
     defaults:
       run:
-        shell: ${{ matrix.os == 'windows-latest' && 'cmd /C CALL {0}' || 'bash -el {0}' }}
+        shell: ${{ matrix.os == 'windows-latest' && 'cmd  /U /C CALL {0}' || 'bash -el {0}' }}
 
     steps:
       - name: Cancel Previous Runs
@@ -93,13 +94,6 @@ jobs:
         run: |
           conda info
           conda list
-
-      - name: Configure Python
-        if: runner.os == 'Windows'
-        shell: pwsh
-        run: |
-          # Set python encoding to support utf-8 symblos like ms.
-          echo "PYTHONIOENCODING=utf-8" >> $env:GITHUB_ENV
 
       - name: Patch IntelLLVM cmake
         if: runner.os == 'Windows' && matrix.sycl == 'sycl'

@@ -6,8 +6,6 @@ name: build and run
 
 on:
   pull_request:
-  push:
-    branches: [main]
 
 env:
   # sycl is not included. Add it manually if you need

@@ -16,6 +16,7 @@ dependencies:
   - py-cpuinfo
   - scipy
   - scikit-learn
+  - versioneer
   - pandas
   - intel::intel-opencl-rt # need for set-intel-ocl-icd-registry.ps1
   - intel::numpy

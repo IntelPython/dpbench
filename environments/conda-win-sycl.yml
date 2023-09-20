@@ -16,6 +16,7 @@ dependencies:
   - py-cpuinfo
   - scipy
   - scikit-learn
+  - versioneer
   - pandas
   - intel::numpy
   - numba

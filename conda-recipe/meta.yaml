@@ -4,7 +4,8 @@
 
 package:
   name: dpbench
-  version: 0.1
+  version: {{ GIT_DESCRIBE_TAG }}
+
 source:
   path: ..
 
@@ -27,6 +28,7 @@ requirements:
     - scikit-build
     - cython
     - pybind11
+    - versioneer
     - intel::numpy
     - numba
     - dpctl
@@ -46,9 +48,6 @@ requirements:
     - dpctl
     - dpnp
     - numba-dpex
-
-build:
-  number: 0
 
 test:
   requires:

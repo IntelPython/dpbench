@@ -8,4 +8,5 @@ exclude =
     __pycache__
     ./dist
     ./setup.py
+    ./dpbench/_version.py
 max-complexity = 10

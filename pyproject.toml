@@ -17,7 +17,6 @@ skip = ["versioneer.py", "dpbench/_version.py"]
 
 [project]
 name = "dpbench"
-version = "0.0.1"
 authors = [{ name = "Intel Corp." }, { email = "diptorup.deb@intel.com" }]
 description = "dpBench"
 classifiers = [
@@ -42,6 +41,7 @@ dependencies = [
     "numba",
     "numba_dpex",
 ]
+dynamic =["version"]
 
 [project.optional-dependencies]
 numba-mlir = ["numba_mlir"]
@@ -61,5 +61,14 @@ dpbench = "dpbench.console.entry:main"
 [build-system]
 # TODO: make it optional for no sycl build. Workaround: `--no-deps`.
 # https://github.com/scikit-build/scikit-build/issues/981
-requires = ["setuptools>=42,<64"]
+requires = [
+    "setuptools>=42,<64",
+    "versioneer[toml]",
+]
 build-backend = "setuptools.build_meta"
+
+[tool.versioneer]
+VCS = "git"
+style = "pep440"
+versionfile_source = "dpbench/_version.py"
+parentdir_prefix = ""

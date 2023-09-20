@@ -6,6 +6,7 @@
 
 import os
 
+import versioneer
 from setuptools import find_packages
 
 if not os.getenv("DPBENCH_SYCL"):
@@ -30,6 +31,8 @@ setup(
         find_packages(include=["*"])
         + find_packages(where="./dpbench/benchmarks/*/*")
     ),
+    version=versioneer.get_version(),
+    cmdclass=versioneer.get_cmdclass(),
     include_package_data=True,
     package_data={
         "dpbench.migrations": ["alembic.ini"],

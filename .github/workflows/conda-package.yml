@@ -18,6 +18,7 @@ env:
   VER_JSON_NAME: 'version.json'
   VER_SCRIPT1: "import json; f = open('version.json', 'r'); j = json.load(f); f.close(); "
   VER_SCRIPT2: "d = j['dpbench'][0]; print('='.join((d[s] for s in ('version', 'build'))))"
+  PYTHONIOENCODING: 'utf-8'
 
 jobs:
   build:
@@ -33,7 +34,7 @@ jobs:
 
     defaults:
       run:
-        shell: ${{ matrix.os == 'windows-latest' && 'cmd /C CALL {0}' || 'bash -l {0}' }}
+        shell: ${{ matrix.os == 'windows-latest' && 'cmd /U /C CALL {0}' || 'bash -el {0}' }}
 
     continue-on-error: false
 
@@ -94,7 +95,7 @@ jobs:
 
     defaults:
       run:
-        shell: ${{ matrix.os == 'windows-latest' && 'cmd /C CALL {0}' || 'bash -l {0}' }}
+        shell: ${{ matrix.os == 'windows-latest' && 'cmd /U /C CALL {0}' || 'bash -el {0}' }}
 
     strategy:
       fail-fast: false
@@ -155,7 +156,15 @@ jobs:
           cat ${{ env.VER_JSON_PATH }}
 
       - name: Install dpbench
-        run: mamba install ${{ env.PACKAGE_NAME }}=${{ env.PACKAGE_VERSION }} pytest opencl_rt python=${{ matrix.python }} -c ${{ env.CHANNEL_PATH }}
+        run: mamba install ${{ env.PACKAGE_NAME }}=${{ env.PACKAGE_VERSION }} pytest intel::intel-opencl-rt python=${{ matrix.python }} -c ${{ env.CHANNEL_PATH }}
+
+      - name: Setup OpenCL CPU device
+        if: runner.os == 'Windows'
+        shell: pwsh
+        run: |
+          $script_path="$env:CONDA_PREFIX\Scripts\set-intel-ocl-icd-registry.ps1"
+          &$script_path
+          echo "OCL_ICD_FILENAMES=$env:CONDA_PREFIX\Library\lib\intelocl64.dll" >> $env:GITHUB_ENV
 
       - name: List installed packages
         run: conda list
@@ -163,10 +172,18 @@ jobs:
       - name: Smoke test
         run: python -c "import dpnp, dpctl, dpbench; dpctl.lsplatform()"
 
-      - name: Run benchmakrs
+      - name: Run benchmarks
         run: |
           dpbench -i numpy,numba_dpex_p,dpnp,numba_n,sycl run
+
+      - name: Generate report
+        run: |
           dpbench report
+
+      # we want to make sure that configuration files are geting populated
+      - name: Run npbench benchmark
+        run: |
+          dpbench -i numpy -b azimint_hist run --npbench
 
   upload_anaconda:
     name: Upload dppy/label/dev ['${{ matrix.os }}', python='${{ matrix.python }}']
@@ -182,7 +199,7 @@ jobs:
 
     defaults:
       run:
-        shell: bash -l {0}
+        shell: bash -el {0}
 
     continue-on-error: false
 

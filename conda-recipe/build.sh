@@ -24,14 +24,10 @@ fi
 # $PYTHON -m pip install --no-index --no-deps --no-build-isolation . -v
 
 # Build wheel package
-if [ "$CONDA_PY" == "36" ]; then
-    WHEELS_BUILD_ARGS="-p manylinux1_x86_64"
-else
-    WHEELS_BUILD_ARGS="-p manylinux2014_x86_64"
-fi
 if [ -n "${WHEELS_OUTPUT_FOLDER}" ]; then
-    $PYTHON setup.py install bdist_wheel ${WHEELS_BUILD_ARGS} --single-version-externally-managed --record=record.txt
-    cp dist/dpnp*.whl ${WHEELS_OUTPUT_FOLDER}
+    $PYTHON setup.py install --single-version-externally-managed --record=record.txt bdist_wheel -p manylinux2014_x86_64
+    mkdir -p ${WHEELS_OUTPUT_FOLDER}
+    cp dist/dpbench*.whl ${WHEELS_OUTPUT_FOLDER}
 else
     $PYTHON setup.py install --single-version-externally-managed --record=record.txt
 fi

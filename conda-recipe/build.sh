@@ -25,7 +25,7 @@ fi
 
 # Build wheel package
 if [ -n "${WHEELS_OUTPUT_FOLDER}" ]; then
-    $PYTHON setup.py install --single-version-externally-managed --record=record.txt bdist_wheel -p manylinux2014_x86_64
+    $PYTHON setup.py install --single-version-externally-managed --record=record.txt bdist_wheel -p manylinux2014_x86_64 --build-number $GIT_DESCRIBE_NUMBER
     mkdir -p ${WHEELS_OUTPUT_FOLDER}
     cp dist/dpbench*.whl ${WHEELS_OUTPUT_FOLDER}
 else

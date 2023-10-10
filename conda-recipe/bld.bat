@@ -45,7 +45,7 @@ if EXIST "%PLATFORM_DIR%" (
 @REM %PYTHON% -m pip install --no-index --no-deps --no-build-isolation . -v
 if NOT "%WHEELS_OUTPUT_FOLDER%"=="" (
     rem Install and assemble wheel package from the build bits
-    "%PYTHON%" setup.py install --single-version-externally-managed --record=record.txt bdist_wheel
+    "%PYTHON%" setup.py install --single-version-externally-managed --record=record.txt bdist_wheel --build-number %GIT_DESCRIBE_NUMBER%
     if errorlevel 1 exit 1
     copy dist\dpbench*.whl %WHEELS_OUTPUT_FOLDER%
     if errorlevel 1 exit 1

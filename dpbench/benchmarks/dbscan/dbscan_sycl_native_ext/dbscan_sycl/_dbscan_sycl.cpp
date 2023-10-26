@@ -38,16 +38,21 @@ size_t dbscan_sync(size_t n_samples,
                    size_t min_pts)
 {
     auto queue = data.get_queue();
+    auto typenum = data.get_typenum();
 
     if (!ensure_compatibility(data))
         throw std::runtime_error("Input arrays are not acceptable.");
 
-    if (data.get_typenum() != UAR_DOUBLE) {
-        throw std::runtime_error("Expected a double precision FP array.");
+    if (typenum == UAR_FLOAT) {
+        return dbscan_impl<float>(queue, n_samples, n_features,
+                                  data.get_data<float>(), eps, min_pts);
+    }
+    else if (typenum == UAR_DOUBLE) {
+        return dbscan_impl<double>(queue, n_samples, n_features,
+                                   data.get_data<double>(), eps, min_pts);
     }
 
-    return dbscan_impl<double>(queue, n_samples, n_features,
-                               data.get_data<double>(), eps, min_pts);
+    throw std::runtime_error("Expected a double or single precision FP array.");
 }
 
 PYBIND11_MODULE(_dbscan_sycl, m)

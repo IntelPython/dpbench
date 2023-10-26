@@ -106,6 +106,8 @@ void getNeighborhood(size_t n,
     }
 }
 
+template <typename FpTy> class DBScanKernel;
+
 template <typename FpTy>
 size_t dbscan_impl(queue q,
                    size_t n_samples,
@@ -126,14 +128,13 @@ size_t dbscan_impl(queue q,
     q.wait();
 
     auto e = q.submit([&](handler &h) {
-        h.parallel_for<class DBScanKernel>(
+        h.parallel_for<DBScanKernel<FpTy>>(
             range<1>{n_samples}, [=](id<1> myID) {
                 size_t i1 = myID[0];
                 size_t i2 = (i1 + 1 == n_samples ? n_samples : i1 + 1);
-                getNeighborhood<double>(n_samples, n_features, data, i2 - i1,
-                                        data + i1 * n_features, eps,
-                                        d_indices + i1 * n_samples,
-                                        d_sizes + i1);
+                getNeighborhood<FpTy>(n_samples, n_features, data, i2 - i1,
+                                      data + i1 * n_features, eps,
+                                      d_indices + i1 * n_samples, d_sizes + i1);
             });
     });
 

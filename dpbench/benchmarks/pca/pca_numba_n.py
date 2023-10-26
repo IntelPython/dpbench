@@ -39,7 +39,7 @@ def pca(data, dims_rescaled_data=2):
     evectors = evectors[:, :dims_rescaled_data]
 
     # carry out the transformation on the data using eigenvectors
-    tdata = np.dot(evectors.T, data.T).T
+    tdata = np.dot(evectors.T.astype(data.dtype), data.T).T
 
     # return the transformed data, eigenvalues, and eigenvectors
     return tdata, evalues, evectors

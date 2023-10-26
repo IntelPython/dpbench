@@ -64,14 +64,22 @@ void black_scholes_sync(size_t /**/,
     if (!ensure_compatibility(price, strike, t, call, put))
         throw std::runtime_error("Input arrays are not acceptable.");
 
-    if (typenum != UAR_DOUBLE) {
-        throw std::runtime_error("Expected a double precision FP array.");
+    if (typenum == UAR_FLOAT) {
+        black_scholes_impl<float>(Queue, nopt, price.get_data<float>(),
+                                  strike.get_data<float>(), t.get_data<float>(),
+                                  rate, volatility, call.get_data<float>(),
+                                  put.get_data<float>());
     }
-
-    black_scholes_impl(Queue, nopt, price.get_data<double>(),
-                       strike.get_data<double>(), t.get_data<double>(), rate,
-                       volatility, call.get_data<double>(),
-                       put.get_data<double>());
+    else if (typenum == UAR_DOUBLE) {
+        black_scholes_impl<double>(
+            Queue, nopt, price.get_data<double>(), strike.get_data<double>(),
+            t.get_data<double>(), rate, volatility, call.get_data<double>(),
+            put.get_data<double>());
+    }
+    else {
+        throw std::runtime_error(
+            "Expected a double or single precision FP array.");
+    }
 }
 
 PYBIND11_MODULE(_black_scholes_sycl, m)

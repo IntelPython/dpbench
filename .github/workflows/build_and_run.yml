@@ -168,5 +168,8 @@ jobs:
       - name: Run benchmarks
         run: dpbench -i ${{env.WORKLOADS}} run -r2 --no-print-results || exit 1
 
+      - name: Run rodinia benchmarks
+        run: dpbench -i ${{env.WORKLOADS}} run -r2 --no-print-results --rodinia --no-dpbench|| exit 1
+
       - name: Generate report
         run: dpbench -i ${{env.WORKLOADS}} report || exit 1

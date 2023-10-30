@@ -19,6 +19,7 @@ class Namespace(argparse.Namespace):
     dpbench: bool
     npbench: bool
     polybench: bool
+    rodinia: bool
     print_results: bool
     validate: bool
     run_id: Union[int, None]

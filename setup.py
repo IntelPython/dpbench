@@ -49,7 +49,7 @@ setup(
             "bench_info/polybench/linear-algebra/blas/*.toml",
             "bench_info/polybench/medley/*.toml",
             "bench_info/npbench/*.toml",
-            "framework_info/*.toml",
+            "bench_info/rodinia/*.toml" "framework_info/*.toml",
         ],
     },
     cmake_args=cmake_args,

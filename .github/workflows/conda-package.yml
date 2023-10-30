@@ -195,6 +195,10 @@ jobs:
         run: |
           dpbench -i numpy -b azimint_hist run --npbench
 
+      - name: Run rodinia benchmark
+        run: |
+          dpbench run --rodinia --no-dpbench --no-validate -r 1
+
   upload_anaconda:
     name: Upload dppy/label/dev ['${{ matrix.os }}', python='${{ matrix.python }}']
 

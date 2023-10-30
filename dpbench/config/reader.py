@@ -28,6 +28,7 @@ def read_configs(  # noqa: C901: TODO: move modules into config
     no_dpbench: bool = False,
     with_npbench: bool = False,
     with_polybench: bool = False,
+    with_rodinia: bool = False,
     load_implementations: bool = True,
 ) -> Config:
     """Read all configuration files and populate those settings into Config.
@@ -82,6 +83,18 @@ def read_configs(  # noqa: C901: TODO: move modules into config
                 benchmark_configs_recursive=True,
                 benchmarks_module="dpbench.benchmarks.polybench",
                 path=os.path.join(dirname, "../benchmarks/polybench"),
+            )
+        )
+
+    if with_rodinia:
+        modules.append(
+            Module(
+                benchmark_configs_path=os.path.join(
+                    dirname, "../configs/bench_info/rodinia"
+                ),
+                benchmark_configs_recursive=True,
+                benchmarks_module="dpbench.benchmarks.rodinia",
+                path=os.path.join(dirname, "../benchmarks/rodinia"),
             )
         )
 

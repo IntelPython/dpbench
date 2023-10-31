@@ -49,18 +49,27 @@ void pairwise_distance_sync(dpctl::tensor::usm_ndarray X1,
 {
     sycl::event res_ev;
     auto Queue = X1.get_queue();
-    auto ndims = 3;
-    auto npoints = X1.get_size() / ndims;
+    auto ndims = X1.get_shape(1);
+    auto x1_npoints = X1.get_shape(0);
+    auto x2_npoints = X2.get_shape(0);
 
     if (!ensure_compatibility(X1, X2, D))
         throw std::runtime_error("Input arrays are not acceptable.");
 
-    if (X1.get_typenum() != UAR_DOUBLE || X2.get_typenum() != UAR_DOUBLE) {
-        throw std::runtime_error("Expected a double precision FP array.");
+    if (X1.get_typenum() == UAR_FLOAT) {
+        pairwise_distance_impl(Queue, x1_npoints, x2_npoints, ndims,
+                               X1.get_data<float>(), X2.get_data<float>(),
+                               D.get_data<float>());
     }
-
-    pairwise_distance_impl(Queue, npoints, ndims, X1.get_data<double>(),
-                           X2.get_data<double>(), D.get_data<double>());
+    else if (X1.get_typenum() == UAR_DOUBLE) {
+        pairwise_distance_impl(Queue, x1_npoints, x2_npoints, ndims,
+                               X1.get_data<double>(), X2.get_data<double>(),
+                               D.get_data<double>());
+    }
+    else {
+        throw std::runtime_error(
+            "Expected a double or single precision FP array.");
+    }
 }
 
 PYBIND11_MODULE(_pairwise_distance_sycl, m)

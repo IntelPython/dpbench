@@ -22,6 +22,10 @@ else:
     # Monkey patch msvc compiler environment, so scikit-build does not overwrite
     # it. Make sure to set desired environment using:
     # > vcvars64.bat -vcvars_ver=<vcvars_ver>
+    # TODO: monkey patch abstract.CMakePlatform.compile_test_cmakelist or
+    #  abstract.CMakePlatform.get_best_generator instead to chose right
+    #  complier. It will produce more stable output. We may avoid setting up
+    #  MSVC environment manually this way.
     windows._get_msvc_compiler_env = lambda v, t: windows.CachedEnv()
 
 setup(

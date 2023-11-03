@@ -110,11 +110,18 @@ jobs:
         run: |
           conda remove --force vs2017_win-64
 
+      # Github pre-installed versions:
+      # https://github.com/actions/runner-images/blob/main/images/win/Windows2022-Readme.md
+      # Intel's compatible versions:
+      # https://www.intel.com/content/www/us/en/developer/articles/reference-implementation/intel-compilers-compatibility-with-microsoft-visual-studio-and-xcode.html
+      # TODO: do we want to enforce installing version that we want?
+      #   Is it as easy as `choco install msvc==14.35`?
       - name: Configure MSBuild
         if: runner.os == 'Windows' && matrix.sycl == 'sycl'
+        # TODO: uses: microsoft/setup-msbuild ?
         uses: ilammy/msvc-dev-cmd@v1
         with:
-          toolset: 14.35
+          toolset: 14.2
 
       - name: Configure Sycl
         if: matrix.sycl == 'sycl'
@@ -127,6 +134,7 @@ jobs:
           echo "WORKLOADS=$WORKLOADS,sycl" >> "$GITHUB_ENV"
 
       - name: Configure compiler
+        shell: bash -el {0}
         run: |
           echo "CMAKE_GENERATOR=Ninja" >> "$GITHUB_ENV"
 

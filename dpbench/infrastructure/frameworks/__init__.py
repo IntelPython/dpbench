@@ -2,6 +2,7 @@
 #
 # SPDX-License-Identifier: Apache-2.0
 
+from .cupy_framework import CupyFramework
 from .dpcpp_framework import DpcppFramework
 from .dpnp_framework import DpnpFramework
 from .fabric import build_framework, build_framework_map
@@ -15,6 +16,7 @@ __all__ = [
     "NumbaFramework",
     "NumbaDpexFramework",
     "DpnpFramework",
+    "CupyFramework",
     "DpcppFramework",
     "NumbaMlirFramework",
     "build_framework",

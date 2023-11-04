@@ -6,6 +6,7 @@ import logging
 
 import dpbench.config as cfg
 
+from .cupy_framework import CupyFramework
 from .dpcpp_framework import DpcppFramework
 from .dpnp_framework import DpnpFramework
 from .framework import Framework
@@ -42,6 +43,7 @@ def build_framework(framework_config: cfg.Framework) -> Framework:
         Framework,
         DpcppFramework,
         DpnpFramework,
+        CupyFramework,
         NumbaFramework,
         NumbaDpexFramework,
         NumbaMlirFramework,

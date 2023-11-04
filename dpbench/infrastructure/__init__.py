@@ -14,6 +14,7 @@ from .datamodel import (
     store_results,
 )
 from .frameworks import (
+    CupyFramework,
     DpcppFramework,
     DpnpFramework,
     Framework,
@@ -39,6 +40,7 @@ __all__ = [
     "NumbaDpexFramework",
     "NumbaMlirFramework",
     "DpnpFramework",
+    "CupyFramework",
     "DpcppFramework",
     "create_connection",
     "create_results_table",

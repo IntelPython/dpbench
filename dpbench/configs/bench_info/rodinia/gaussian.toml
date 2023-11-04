@@ -1,0 +1,65 @@
+# SPDX-FileCopyrightText: 2022 - 2023 Intel Corporation
+#
+# SPDX-License-Identifier: Apache-2.0
+
+[benchmark]
+name = "Gaussian Elimination"
+short_name = "gaussian"
+relative_path = "gaussian"
+module_name = "gaussian"
+func_name = "gaussian"
+kind = "microbenchmark"
+domain = "Matrix manipulation"
+input_args = [
+    "a",
+    "b",
+    "m",
+    "size",
+    "block_sizeXY",
+    "result"
+]
+array_args = [
+    "a",
+    "b",
+    "m",
+    "result"
+]
+output_args = [
+    "result",
+]
+
+[benchmark.parameters.S]
+size = 10
+Lambda = -0.01
+block_sizeXY = 4
+
+[benchmark.parameters.M16Gb]
+size = 4096
+Lambda = -0.01
+block_sizeXY = 4
+
+[benchmark.parameters.M]
+size = 4096
+Lambda = -0.01
+block_sizeXY = 4
+
+[benchmark.parameters.L]
+size = 8192
+Lambda = -0.01
+block_sizeXY = 4
+
+[benchmark.init]
+func_name = "initialize"
+types_dict_name="types_dict"
+precision="double"
+input_args = [
+    "size",
+    "Lambda",
+    "types_dict",
+]
+output_args = [
+    "a",
+    "b",
+    "m",
+    "result"
+]

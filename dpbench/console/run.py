@@ -59,6 +59,12 @@ def add_run_arguments(parser: argparse.ArgumentParser):
         help="Set if run polybench benchmarks.",
     )
     parser.add_argument(
+        "--rodinia",
+        action=argparse.BooleanOptionalAction,
+        default=False,
+        help="Set if run rodinia benchmarks.",
+    )
+    parser.add_argument(
         "-r",
         "--repeat",
         type=int,
@@ -135,6 +141,7 @@ def execute_run(args: Namespace, conn: sqlalchemy.Engine):
         no_dpbench=not args.dpbench,
         with_npbench=args.npbench,
         with_polybench=args.polybench,
+        with_rodinia=args.rodinia,
     )
 
     if args.all_implementations:

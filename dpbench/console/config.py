@@ -43,6 +43,7 @@ def execute_config(args: Namespace):
         implementations=args.implementations,
         with_npbench=True,
         with_polybench=True,
+        with_rodinia=True,
     )
 
     color_output = args.color

@@ -53,6 +53,7 @@ setup(
             "bench_info/polybench/linear-algebra/blas/*.toml",
             "bench_info/polybench/medley/*.toml",
             "bench_info/npbench/*.toml",
+            "bench_info/rodinia/*.toml",
             "framework_info/*.toml",
         ],
     },

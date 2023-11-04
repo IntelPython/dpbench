@@ -10,6 +10,7 @@ add_subdirectory(kmeans)
 add_subdirectory(knn)
 add_subdirectory(gpairs)
 add_subdirectory(dbscan)
+add_subdirectory(rodinia)
 
 # generate dpcpp version into config
 set(FILE ${CMAKE_SOURCE_DIR}/dpbench/configs/framework_info/dpcpp.toml)

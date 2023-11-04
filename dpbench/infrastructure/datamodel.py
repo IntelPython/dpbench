@@ -190,5 +190,11 @@ def store_postfix(conn: Engine, postfix: Postfix):
     :return:
     """
     with Session(conn) as session:
-        session.add(postfix)
-        session.commit()
+        existing_postfix = (
+            session.query(Postfix)
+            .filter_by(run_id=postfix.run_id, postfix=postfix.postfix)
+            .first()
+        )
+        if existing_postfix is None:
+            session.add(postfix)
+            session.commit()

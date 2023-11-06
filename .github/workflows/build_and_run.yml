@@ -23,6 +23,7 @@ jobs:
         python: ["3.9", "3.10", "3.11"]
         sycl: ["sycl","no-sycl"]
         install: ["pip", "setup.py"]
+        precision: ["single", "double"]
         exclude:
           # setuptools<64 + scikit-build produce 'UNKOWN' package name for
           # python 3.11. Could not find exact reference for that issue.
@@ -174,10 +175,12 @@ jobs:
           echo "OCL_ICD_FILENAMES=$env:CONDA_PREFIX\Library\lib\intelocl64.dll" >> $env:GITHUB_ENV
 
       - name: Run benchmarks
-        run: dpbench -i ${{env.WORKLOADS}} run -r2 --no-print-results || exit 1
+        run: dpbench -i ${{env.WORKLOADS}} run -r2 --no-print-results --precision=${{matrix.precision}} || exit 1
 
       - name: Run rodinia benchmarks
-        run: dpbench -i ${{env.WORKLOADS}} --last-run run -r2 --no-print-results --rodinia --no-dpbench|| exit 1
+        # TODO: fix rodinia benchmark: https://github.com/IntelPython/dpbench/issues/316
+        if: matrix.precision != 'single'
+        run: dpbench -i ${{env.WORKLOADS}} --last-run run -r2 --no-print-results --rodinia --no-dpbench --precision=${{matrix.precision}} || exit 1
 
       - name: Generate report
         run: dpbench -i ${{env.WORKLOADS}} report || exit 1

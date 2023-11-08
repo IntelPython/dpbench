@@ -55,16 +55,27 @@ void rambo_sync(size_t nevts,
     if (!ensure_compatibility(C1, F1, Q1))
         throw std::runtime_error("Input arrays are not acceptable.");
 
-    if (C1.get_typenum() != UAR_DOUBLE || F1.get_typenum() != UAR_DOUBLE ||
-        Q1.get_typenum() != UAR_DOUBLE || output.get_typenum() != UAR_DOUBLE)
-    {
-        throw std::runtime_error("Expected a double precision FP array.");
-    }
+    if (output.get_typenum() != C1.get_typenum())
+        throw std::runtime_error("Input arrays are not acceptable.");
 
-    auto e = rambo_impl(Queue, nevts, nout, C1.get_data<double>(),
-                        F1.get_data<double>(), Q1.get_data<double>(),
-                        output.get_data<double>());
-    e.wait();
+    auto typenum = C1.get_typenum();
+
+    if (typenum == UAR_FLOAT) {
+        auto e = rambo_impl(Queue, nevts, nout, C1.get_data<float>(),
+                            F1.get_data<float>(), Q1.get_data<float>(),
+                            output.get_data<float>());
+        e.wait();
+    }
+    else if (typenum == UAR_DOUBLE) {
+        auto e = rambo_impl(Queue, nevts, nout, C1.get_data<double>(),
+                            F1.get_data<double>(), Q1.get_data<double>(),
+                            output.get_data<double>());
+        e.wait();
+    }
+    else {
+        throw std::runtime_error(
+            "Expected a double or single precision FP array.");
+    }
 }
 
 PYBIND11_MODULE(_rambo_sycl, m)

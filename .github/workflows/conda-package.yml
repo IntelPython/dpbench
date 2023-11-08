@@ -112,6 +112,7 @@ jobs:
       matrix:
         python: ['3.9', '3.10', '3.11']
         os: [ubuntu-20.04, ubuntu-latest, windows-latest]
+        precision: ["single", "double"]
         experimental: [false]
 
     continue-on-error: ${{ matrix.experimental }}
@@ -193,11 +194,13 @@ jobs:
       # we want to make sure that configuration files are geting populated
       - name: Run npbench benchmark
         run: |
-          dpbench -i numpy -b azimint_hist run --npbench
+          dpbench -i numpy -b azimint_hist run --npbench --precision=${{matrix.precision}}
 
       - name: Run rodinia benchmark
+        # TODO: fix rodinia benchmark: https://github.com/IntelPython/dpbench/issues/316
+        if: matrix.precision != 'single'
         run: |
-          dpbench run --rodinia --no-dpbench --no-validate -r 1
+          dpbench run --rodinia --no-dpbench --no-validate -r 1 --precision=${{matrix.precision}}
 
   upload_anaconda:
     name: Upload dppy/label/dev ['${{ matrix.os }}', python='${{ matrix.python }}']

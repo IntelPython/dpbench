@@ -3,7 +3,6 @@
 // SPDX-License-Identifier: Apache-2.0
 
 #include "_gaussian_kernel.hpp"
-#include <CL/sycl.hpp>
 #include <dpctl4pybind11.hpp>
 
 template <typename... Args> bool ensure_compatibility(const Args &...args)
@@ -32,18 +31,14 @@ template <typename... Args> bool ensure_compatibility(const Args &...args)
     return true;
 }
 
-void gaussian_sync(dpctl::tensor::usm_ndarray a,
-                   dpctl::tensor::usm_ndarray b,
-                   dpctl::tensor::usm_ndarray m,
-                   int size,
-                   int block_sizeXY,
-                   dpctl::tensor::usm_ndarray result)
+template <typename FpTy>
+void gaussian_handler(FpTy *m_device,
+                      FpTy *a_device,
+                      FpTy *b_device,
+                      FpTy *result,
+                      int size,
+                      int block_sizeXY)
 {
-    if (!ensure_compatibility(a, m, b, result))
-        throw std::runtime_error("Input arrays are not acceptable.");
-
-    int t;
-
     sycl::queue q_ct1;
 
     int block_size, grid_size;
@@ -60,12 +55,7 @@ void gaussian_sync(dpctl::tensor::usm_ndarray a,
 
     sycl::range<3> dimBlockXY(1, blocksize2d, blocksize2d);
     sycl::range<3> dimGridXY(1, gridsize2d, gridsize2d);
-
-    auto a_value = a.get_data<double>();
-    auto b_value = b.get_data<double>();
-    auto m_value = m.get_data<double>();
-
-    for (t = 0; t < (size - 1); t++) {
+    for (int t = 0; t < (size - 1); t++) {
         /*
         DPCT1049:7: The workgroup size passed to the SYCL kernel may
         exceed the limit. To get the device limit, query
@@ -76,7 +66,7 @@ void gaussian_sync(dpctl::tensor::usm_ndarray a,
             auto size_ct2 = size;
             cgh.parallel_for(sycl::nd_range<3>(dimGrid * dimBlock, dimBlock),
                              [=](sycl::nd_item<3> item_ct1) {
-                                 gaussian_kernel_1(m_value, a_value, size_ct2,
+                                 gaussian_kernel_1(m_device, a_device, size_ct2,
                                                    t, item_ct1);
                              });
         });
@@ -94,28 +84,52 @@ void gaussian_sync(dpctl::tensor::usm_ndarray a,
             cgh.parallel_for(
                 sycl::nd_range<3>(dimGridXY * dimBlockXY, dimBlockXY),
                 [=](sycl::nd_item<3> item_ct1) {
-                    gaussian_kernel_2(m_value, a_value, b_value, size_ct3,
+                    gaussian_kernel_2(m_device, a_device, b_device, size_ct3,
                                       size_t_ct4, t, item_ct1);
                 });
         });
         q_ct1.wait_and_throw();
     }
-    // Copying the final answer
-    auto result_value = result.get_data<double>();
 
     for (int i = 0; i < size; i++) {
 
-        result_value[size - i - 1] = b_value[size - i - 1];
+        result[size - i - 1] = b_device[size - i - 1];
 
         for (int j = 0; j < i; j++) {
-            result_value[size - i - 1] -=
-                *(a_value + size * (size - i - 1) + (size - j - 1)) *
-                result_value[size - j - 1];
+            result[size - i - 1] -=
+                *(a_device + size * (size - i - 1) + (size - j - 1)) *
+                result[size - j - 1];
         }
 
-        result_value[size - i - 1] =
-            result_value[size - i - 1] /
-            *(a_value + size * (size - i - 1) + (size - i - 1));
+        result[size - i - 1] =
+            result[size - i - 1] /
+            *(a_device + size * (size - i - 1) + (size - i - 1));
+    }
+}
+
+void gaussian_sync(dpctl::tensor::usm_ndarray a,
+                   dpctl::tensor::usm_ndarray b,
+                   dpctl::tensor::usm_ndarray m,
+                   int size,
+                   int block_sizeXY,
+                   dpctl::tensor::usm_ndarray result)
+{
+    if (!ensure_compatibility(a, m, b, result))
+        throw std::runtime_error("Input arrays are not acceptable.");
+
+    if (a.get_typenum() == UAR_DOUBLE) {
+        gaussian_handler(m.get_data<double>(), a.get_data<double>(),
+                         b.get_data<double>(), result.get_data<double>(), size,
+                         block_sizeXY);
+    }
+    else if (a.get_typenum() == UAR_FLOAT) {
+        gaussian_handler(m.get_data<float>(), a.get_data<float>(),
+                         b.get_data<float>(), result.get_data<float>(), size,
+                         block_sizeXY);
+    }
+    else {
+        throw std::runtime_error(
+            "Expected a double or single precision FP array.");
     }
 }
 

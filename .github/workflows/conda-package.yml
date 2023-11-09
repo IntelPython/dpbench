@@ -197,8 +197,6 @@ jobs:
           dpbench -i numpy -b azimint_hist run --npbench --precision=${{matrix.precision}}
 
       - name: Run rodinia benchmark
-        # TODO: fix rodinia benchmark: https://github.com/IntelPython/dpbench/issues/316
-        if: matrix.precision != 'single'
         run: |
           dpbench run --rodinia --no-dpbench --no-validate -r 1 --precision=${{matrix.precision}}
 

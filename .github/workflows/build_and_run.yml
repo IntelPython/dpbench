@@ -178,8 +178,6 @@ jobs:
         run: dpbench -i ${{env.WORKLOADS}} run -r2 --no-print-results --precision=${{matrix.precision}} || exit 1
 
       - name: Run rodinia benchmarks
-        # TODO: fix rodinia benchmark: https://github.com/IntelPython/dpbench/issues/316
-        if: matrix.precision != 'single'
         run: dpbench -i ${{env.WORKLOADS}} --last-run run -r2 --no-print-results --rodinia --no-dpbench --precision=${{matrix.precision}} || exit 1
 
       - name: Generate report

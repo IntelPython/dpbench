@@ -14,7 +14,7 @@ def gaussian_kernel_1(m, a, size, t):
     Args:
         m: multiplier matrix.
         a: input matrix.
-        size: sizew of matrix.
+        size: size of matrix.
         t: current iteration.
     """
     if (

@@ -106,10 +106,10 @@ jobs:
       # TODO: remove it once it is removed from hard dependency. Not presented
       # in conda-forge version, but there are some blockers before we could use
       # it.
-      - name: Remove vs env
-        if: runner.os == 'Windows' && matrix.sycl == 'sycl'
-        run: |
-          conda remove --force vs2017_win-64
+      # - name: Remove vs env
+      #   if: runner.os == 'Windows' && matrix.sycl == 'sycl'
+      #   run: |
+      #     conda remove --force vs2017_win-64
 
       # Github pre-installed versions:
       # https://github.com/actions/runner-images/blob/main/images/win/Windows2022-Readme.md
@@ -139,9 +139,9 @@ jobs:
         run: |
           echo "CMAKE_GENERATOR=Ninja" >> "$GITHUB_ENV"
 
-      - name: Configure OneAPI
-        run: |
-          echo "ONEAPI_DEVICE_SELECTOR=opencl:cpu" >> "$GITHUB_ENV"
+      # - name: Configure OneAPI
+      #   run: |
+      #     echo "ONEAPI_DEVICE_SELECTOR=opencl:cpu" >> "$GITHUB_ENV"
 
       - name: Populate conda environment paths
         shell: pwsh
@@ -166,13 +166,22 @@ jobs:
           # Turn off numba-dpex autofall back
           echo "NUMBA_DPEX_FALLBACK_ON_CPU=0" >> "GITHUB_ENV"
 
+      # $script_path="$env:CONDA_PREFIX\Scripts\set-intel-ocl-icd-registry.ps1"
+      # &$script_path
       - name: Setup OpenCL CPU device
         if: runner.os == 'Windows'
         shell: pwsh
         run: |
-          $script_path="$env:CONDA_PREFIX\Scripts\set-intel-ocl-icd-registry.ps1"
-          &$script_path
           echo "OCL_ICD_FILENAMES=$env:CONDA_PREFIX\Library\lib\intelocl64.dll" >> $env:GITHUB_ENV
+
+      - name: Check DPCTL
+        run: |
+          python -c "import dpctl; dpctl.lsplatform()"
+
+      - name: Check SYCL
+        if: matrix.sycl == 'sycl'
+        run: |
+          sycl-ls
 
       - name: Run benchmarks
         run: dpbench -i ${{env.WORKLOADS}} run -r2 --no-print-results --precision=${{matrix.precision}} || exit 1

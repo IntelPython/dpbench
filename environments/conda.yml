@@ -18,7 +18,8 @@ dependencies:
   - scikit-learn
   - versioneer
   - pandas
-  - intel::intel-opencl-rt # need for set-intel-ocl-icd-registry.ps1
+  # - intel::intel-opencl-rt # need for set-intel-ocl-icd-registry.ps1
+  # - khronos-opencl-icd-loader
   - intel::numpy
   - numba
   - dpctl

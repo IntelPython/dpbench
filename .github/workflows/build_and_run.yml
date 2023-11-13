@@ -9,7 +9,7 @@ on:
 
 env:
   # sycl is not included. Add it manually if you need
-  WORKLOADS: python,numpy,dpnp,numba_n,numba_np,numba_npr,numba_dpex_k,numba_dpex_n,numba_dpex_p
+  WORKLOADS: python,numpy,dpnp,numba_n,numba_np,numba_npr,numba_dpex_k,numba_dpex_n,numba_dpex_p,numba_mlir_k,numba_mlir_n,numba_mlir_p
   PYTHONIOENCODING: 'utf-8'
 
 jobs:
@@ -70,13 +70,6 @@ jobs:
           find ./environments -type f | xargs sed -i 's/intel::numpy/numpy/'
           find ./environments -type f | xargs sed -i '/numba-mlir/d'
           find ./environments -type f | xargs sed -i 's/setuptools>=42,<64/setuptools/'
-
-      # TODO: remove once numba_mlir support python 3.11
-      - name: Patch numpy dependency for Python 3.11
-        if: matrix.python != '3.11'
-        shell: bash -l {0}
-        run: |
-          echo "WORKLOADS=$WORKLOADS,numba_mlir_k,numba_mlir_n,numba_mlir_p" >> "$GITHUB_ENV"
 
       - name: Setup miniconda
         uses: conda-incubator/setup-miniconda@v2
@@ -161,8 +154,6 @@ jobs:
       - name: Configure dpbench
         shell: bash -el {0}
         run: |
-          # TODO: do we need GPU in github acions?
-          echo "NUMBA_MLIR_GPU_RUNTIME=sycl" >> "GITHUB_ENV"
           # Turn off numba-dpex autofall back
           echo "NUMBA_DPEX_FALLBACK_ON_CPU=0" >> "GITHUB_ENV"
 

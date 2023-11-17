@@ -199,18 +199,21 @@ def generate_performance_report(
         .where(dm.Result.run_id == run_id)
     )
 
+    NA = "n/a"
+
     df = (
         pd.read_sql_query(sql=sql, con=conn.connect())
         .astype({impl: "string" for impl in implementations})
-        .fillna("n/a")
+        .replace("0.0", NA)
+        .fillna(NA)
     )
 
     for index, row in df.iterrows():
         for impl in implementations:
             time = row[impl]
 
-            if time == "n/a":
-                pass
+            if time == NA:
+                continue
 
             NANOSECONDS_IN_MILISECONDS: Final[float] = 1000 * 1000.0
             time = float(time)

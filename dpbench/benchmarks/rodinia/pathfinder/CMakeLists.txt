@@ -2,5 +2,4 @@
 #
 # SPDX-License-Identifier: Apache-2.0
 
-add_subdirectory(gaussian)
-add_subdirectory(pathfinder)
+add_subdirectory(pathfinder_sycl_native_ext)

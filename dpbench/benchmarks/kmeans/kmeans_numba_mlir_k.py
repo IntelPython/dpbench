@@ -56,7 +56,7 @@ def getGroupByCluster(  # noqa: C901
             for lc in range(local_copies):
                 localNewCount[lc, c] = 0
 
-        nb.barrier(nb.CLK_LOCAL_MEM_FENCE)
+        nb.barrier(nb.LOCAL_MEM_FENCE)
 
         for i in range(WorkPI):
             point_id = grid * WorkPI * local_size + i * local_size + lid
@@ -87,7 +87,7 @@ def getGroupByCluster(  # noqa: C901
                 if last:
                     arrayPcluster[point_id] = nearest_centroid
 
-        nb.barrier(nb.CLK_LOCAL_MEM_FENCE)
+        nb.barrier(nb.LOCAL_MEM_FENCE)
 
         for i in range(lid, num_centroids * dims, local_size):
             local_centroid_d = dtyp.type(0)
@@ -139,7 +139,7 @@ def getUpdateCentroids(dims, num_centroids, dtyp, local_size_):
             max_distance = max(max_distance, distance)
             local_distance[c] = max_distance
 
-        nb.barrier(nb.CLK_LOCAL_MEM_FENCE)
+        nb.barrier(nb.LOCAL_MEM_FENCE)
 
         if lid == 0:
             max_distance = group_reduce_max(local_distance[c])
@@ -163,7 +163,7 @@ def getUpdateLabels(dims, num_centroids, dtyp, WorkPI):
         for i in range(lid, num_centroids * dims, local_size):
             localCentroids[i % dims, i // dims] = arrayC[i // dims, i % dims]
 
-        nb.barrier(nb.CLK_LOCAL_MEM_FENCE)
+        nb.barrier(nb.LOCAL_MEM_FENCE)
 
         for i in range(WorkPI):
             point_id = grid * WorkPI * local_size + i * local_size + lid

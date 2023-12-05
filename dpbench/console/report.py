@@ -28,6 +28,13 @@ def add_report_arguments(parser: argparse.ArgumentParser):
         + " compared.",
     )
 
+    parser.add_argument(
+        "--csv",
+        action="store_true",
+        default=False,
+        help="Sets the summary reports to output in CSV format",
+    )
+
 
 def execute_report(args: Namespace, conn: sqlalchemy.Engine):
     """Execute report sub command.
@@ -63,4 +70,5 @@ def execute_report(args: Namespace, conn: sqlalchemy.Engine):
         conn=conn,
         run_id=args.run_id,
         comparison_pairs=comparison_pairs,
+        csv=args.csv,
     )

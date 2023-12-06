@@ -178,3 +178,15 @@ SPDX-License-Identifier: Apache-2.0
     --skip-expected-failures, --no-skip-expected-failures
                             Either to save execution into database. (default: True)
     ```
+
+    ```
+    usage: dpbench report [--comparisons [COMPARISON_PAIRS]] [--csv]
+
+    Subcommand to generate a summary report from the local DB
+
+    options:
+    -c, --comparisons [COMPARISON_PAIRS]
+                            Comma separated list of implementation pairs to be compared
+    --csv
+                            Sets the general summary report to output in CSV format (default: False)
+    ```

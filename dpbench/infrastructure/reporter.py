@@ -110,17 +110,22 @@ def generate_legend(conn: sqlalchemy.Engine, run_id: int) -> list[str]:
     return legends["postfix"].values.tolist()
 
 
-def generate_summary(data: pd.DataFrame):
+def generate_summary(data: pd.DataFrame, report_csv: bool):
     """prints summary section"""
     print("Summary of current implementation")
     print("=================================")
-    print(data.to_string())
+
+    if report_csv:
+        print(data.to_csv(index=False))
+    else:
+        print(data.to_string())
 
 
 def generate_impl_summary_report(
     conn: sqlalchemy.Engine,
     run_id: int,
     implementations: list[str],
+    report_csv: bool,
 ):
     """generate implementation summary report with status of each benchmark"""
     columns = [
@@ -160,13 +165,14 @@ def generate_impl_summary_report(
         con=conn.connect(),
     )
 
-    generate_summary(df)
+    generate_summary(df, report_csv)
 
 
 def generate_performance_report(
     conn: sqlalchemy.Engine,
     run_id: int,
     implementations: list[str],
+    report_csv: bool,
 ):
     """generate performance report with median times for each benchmark"""
     columns = [
@@ -223,7 +229,7 @@ def generate_performance_report(
 
             df.at[index, impl] = time
 
-    generate_summary(df)
+    generate_summary(df, report_csv)
 
 
 def generate_comparison_report(
@@ -231,6 +237,7 @@ def generate_comparison_report(
     run_id: int,
     implementations: list[str],
     comparison_pairs: list[tuple[str, str]],
+    report_csv: bool,
 ):
     """generate comparison report with median times for each benchmark"""
     if len(comparison_pairs) == 0:
@@ -284,7 +291,7 @@ def generate_comparison_report(
     for impl in implementations:
         df = df.drop(impl, axis=1)
 
-    generate_summary(df)
+    generate_summary(df, report_csv)
 
 
 def get_failures_from_results(
@@ -333,19 +340,24 @@ def get_unexpected_failures(
 def print_report(
     conn: sqlalchemy.Engine,
     run_id: int,
+    csv: bool,
     comparison_pairs: list[tuple[str, str]] = [],
 ):
     generate_header(conn, run_id)
     implementations = generate_legend(conn, run_id)
 
     generate_impl_summary_report(
-        conn, run_id=run_id, implementations=implementations
+        conn,
+        run_id=run_id,
+        implementations=implementations,
+        report_csv=csv,
     )
 
     generate_performance_report(
         conn,
         run_id=run_id,
         implementations=implementations,
+        report_csv=csv,
     )
 
     generate_comparison_report(
@@ -353,6 +365,7 @@ def print_report(
         run_id=run_id,
         implementations=implementations,
         comparison_pairs=comparison_pairs,
+        report_csv=csv,
     )
 
     unexpected_failures = get_unexpected_failures(conn, run_id=run_id)

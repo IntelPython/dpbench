@@ -10,7 +10,7 @@ postfix = "dpcpp"
 class = "DpcppFramework"
 arch = "cpu"
 sycl_device = "cpu"
-dpcpp_version = "IntelLLVM 2023.2.0"
+dpcpp_version = "IntelLLVM 2024.0.0"
 
 [[framework.postfixes]]
 impl_postfix = "sycl"

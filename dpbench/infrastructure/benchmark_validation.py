@@ -11,10 +11,12 @@ from typing import Union
 import numpy as np
 
 
-def validate_results(
-    expected: dict[str, any], actual: dict[str, any], rel_error=1e-05
-) -> bool:
-    """Checks if expected equals actual with certain precision.
+def validate(
+    expected: dict[str, any],
+    actual: dict[str, any],
+    rel_error=1e-05,
+):
+    """Default validation function.
 
     Args:
         expected: expected values.
@@ -23,25 +25,20 @@ def validate_results(
 
     Returns: true, if provided data is equal.
     """
-    if not expected:
-        return False
-
-    try:
-        for key in expected.keys():
-            valid = validate_two_lists_of_array(
-                expected[key], actual[key], rel_error=rel_error
+    valid = True
+    for key in expected.keys():
+        valid = valid and validate_two_lists_of_array(
+            expected[key], actual[key], rel_error=rel_error
+        )
+        if not valid:
+            logging.error(
+                (
+                    "Output did not match for {0}. "
+                    + "Expected: {1} Actual: {2}"
+                ).format(key, expected[key], actual[key])
             )
-            if not valid:
-                logging.error(
-                    (
-                        "Output did not match for {0}. "
-                        + "Expected: {1} Actual: {2}"
-                    ).format(key, expected[key], actual[key])
-                )
-        return valid
-    except Exception as e:
-        logging.error(f"Exception during validation {e.args}")
-        return False
+
+    return valid
 
 
 def validate_two_lists_of_array(
@@ -93,6 +90,11 @@ def relative_error(
 
     Returns: relative error.
     """
-    if np.linalg.norm(ref) == 0.0:
-        return 0.0
-    return np.linalg.norm(ref - val) / np.linalg.norm(ref)
+    ref_norm = np.linalg.norm(ref)
+    if ref_norm:
+        val_norm = np.linalg.norm(val)
+        if val_norm == 0:
+            return 0.0
+        ref_norm = val_norm
+
+    return np.linalg.norm(ref - val) / ref_norm

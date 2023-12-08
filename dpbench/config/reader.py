@@ -340,6 +340,7 @@ def read_benchmark_implementations(
 
     setup_init(config, modules)
     set_default_reference_implementation_postfix(config, modules)
+    set_validate_func(config, modules)
 
     for module in modules:
         module_name, postfix = discover_module_name_and_postfix(module, config)
@@ -383,6 +384,49 @@ def read_benchmark_implementations(
                 module_name=module_name,
                 package_path=package_path,
             )
+        )
+
+
+def set_validate_func(
+    config: Benchmark,
+    modules: set[str] = None,
+):
+    """Read, discover and populate config with validation module and function.
+
+    Validation package priority, if found/set:
+    1. package specified in config
+    2. validation package at <benchmark>/<benchmark>_validate.py
+    3. default validation package
+
+    Args:
+        config: Benchmark configuration object where settings should be
+            populated.
+        modules: List of available modules for the benchmark to find init.
+    """
+    if config.validate_package_path != "":
+        if importlib.util.find_spec(config.validate_package_path) is None:
+            logging.fatal(
+                f"validation package path is specified but not found for {config.module_name}"
+            )
+    else:
+        validate_package_path = "dpbench.infrastructure.benchmark_validation"
+
+        for module_name in [
+            config.short_name + "_validate",
+            config.module_name + "_validate",
+        ]:
+            if module_name in modules:
+                validate_package_path = config.package_path + "." + module_name
+                break
+
+        config.validate_package_path = validate_package_path
+
+    val_mod = importlib.import_module(config.validate_package_path)
+
+    if not hasattr(val_mod, config.validate_func_name):
+        logging.fatal(
+            f"validation function '{config.validate_func_name}' not found for "
+            + f"{config.module_name} at '{validate_package_path}'"
         )
 
 

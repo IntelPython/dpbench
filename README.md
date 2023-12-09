@@ -49,13 +49,10 @@ SPDX-License-Identifier: Apache-2.0
     conda env create -n dpbench -f ./environments/conda.yml
     ```
 
-    - SYCL
-
-        If you want to build sycl benchmarks as well:
-        ```bash
-        conda env create -n dpbench -f ./environments/conda-linux-sycl.yml
-        CC=icx CXX=icpx DPBENCH_SYCL=1 pip install --no-index --no-deps --no-build-isolation -e . -v
-        ```
+    If you want to build sycl benchmarks as well:
+    ```bash
+    conda env create -n dpbench -f ./environments/conda-linux-sycl.yml
+    ```
 
 3. Build DPBench
 
@@ -69,18 +66,16 @@ SPDX-License-Identifier: Apache-2.0
     python setup.py develop
     ```
 
-    - SYCL
+    For sycl build use:
+    ```bash
+    CC=icx CXX=icpx DPBENCH_SYCL=1 pip install --no-index --no-deps --no-build-isolation -e . -v
+    ```
 
-        For sycl build use:
-        ```bash
-        CC=icx CXX=icpx DPBENCH_SYCL=1 pip install --no-index --no-deps --no-build-isolation -e . -v
-        ```
+    or
 
-        or
-
-        ```bash
-        CC=icx CXX=icpx DPBENCH_SYCL=1 python setup.py develop
-        ```
+    ```bash
+    CC=icx CXX=icpx DPBENCH_SYCL=1 python setup.py develop
+    ```
 
 4. Run specific benchmark, e.g. black_scholes
 
@@ -104,11 +99,14 @@ SPDX-License-Identifier: Apache-2.0
 
 3. Device Customization
 
-   If a framework is SYCL based, an extra configuration option `sycl_device` may be set in the
-   framework config file or by passing `--sycl-device` argument to `dpbench run` to control what device the framework uses for execution. The `sycl_device`
-   value should be a legal
-   [SYCL device filter ](https://intel.github.io/llvm-docs/EnvironmentVariables.html#sycl_device_filter)
-   string. The dpcpp, dpnp, and numba_dpex frameworks support the sycl_device option.
+   If a framework is SYCL based, an extra configuration option
+   `sycl_device` may be set in the framework config file or by passing
+   `--sycl-device` argument to `dpbench run` to control what device
+   the framework uses for execution. The `sycl_device` value should be
+   a legal [SYCL device filter
+   ](https://intel.github.io/llvm-docs/EnvironmentVariables.html#sycl_device_filter)
+   string. The dpcpp, dpnp, and numba_dpex frameworks support the
+   sycl_device option.
 
    Here is an example:
 
@@ -190,3 +188,20 @@ SPDX-License-Identifier: Apache-2.0
     --csv
                             Sets the general summary report to output in CSV format (default: False)
     ```
+
+### Performance Measurement
+
+For each benchmark, we measure the execution time of the
+computationally intesive part, but not the intialization or
+shutdown. We provide three inputs (a.k.a presets) for each benchmark.
+
+* **S** - Minimal input to verify that programs are executable
+* **M** - Medium-sized input for performance measurements on client devices
+* **L** - Large-sized input for performance measurements on servers
+
+As a rough guideline for selecting input sizes, **S** inputs need to
+be small enough for python and numpy implementations to execute in
+<100ms. **M** and **L** inputs need to be large enough to obtain
+useful performance insights on client and servers devices,
+respectively. Also, note that the python and numpy implementations are
+not expected to work with **M** and **L** inputs.

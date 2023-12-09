@@ -58,8 +58,14 @@ class Framework(object):
             import platform
 
             return platform.python_version()
+
+        pkg_name = self.fname
+
+        if self.fname == "numba_cuda":
+            pkg_name = "numba"
+
         try:
-            return pkg_resources.get_distribution(self.fname).version
+            return pkg_resources.get_distribution(pkg_name).version
         except pkg_resources.DistributionNotFound:
             logging.exception("No version information exists for framework")
             return "unknown"

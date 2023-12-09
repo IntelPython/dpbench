@@ -10,6 +10,7 @@ from .cupy_framework import CupyFramework
 from .dpcpp_framework import DpcppFramework
 from .dpnp_framework import DpnpFramework
 from .framework import Framework
+from .numba_cuda_framework import NumbaCudaFramework
 from .numba_dpex_framework import NumbaDpexFramework
 from .numba_framework import NumbaFramework
 from .numba_mlir_framework import NumbaMlirFramework
@@ -44,6 +45,7 @@ def build_framework(framework_config: cfg.Framework) -> Framework:
         DpcppFramework,
         DpnpFramework,
         CupyFramework,
+        NumbaCudaFramework,
         NumbaFramework,
         NumbaDpexFramework,
         NumbaMlirFramework,

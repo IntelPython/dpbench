@@ -106,7 +106,7 @@ def knn(
     votes_to_classes,
     data_dim,
 ):
-    _knn_kernel[test_size,](
+    _knn_kernel[dpex.Range(test_size)](
         x_train,
         y_train,
         x_test,

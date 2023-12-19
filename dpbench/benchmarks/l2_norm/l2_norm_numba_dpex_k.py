@@ -17,4 +17,4 @@ def l2_norm_kernel(a, d):
 
 
 def l2_norm(a, d):
-    l2_norm_kernel[a.shape[0],](a, d)
+    l2_norm_kernel[dpex.Range(a.shape[0])](a, d)

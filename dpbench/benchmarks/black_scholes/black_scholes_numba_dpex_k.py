@@ -4,7 +4,6 @@
 
 from math import erf, exp, log, sqrt
 
-import dpnp as np
 import numba_dpex as dpex
 
 
@@ -41,6 +40,6 @@ def _black_scholes_kernel(nopt, price, strike, t, rate, volatility, call, put):
 
 
 def black_scholes(nopt, price, strike, t, rate, volatility, call, put):
-    _black_scholes_kernel[nopt,](
+    _black_scholes_kernel[dpex.Range(nopt)](
         nopt, price, strike, t, rate, volatility, call, put
     )

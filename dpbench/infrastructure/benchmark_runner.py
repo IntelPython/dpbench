@@ -15,7 +15,6 @@ import sqlalchemy
 import dpbench.config as cfg
 from dpbench.infrastructure.benchmark import Benchmark
 from dpbench.infrastructure.benchmark_results import BenchmarkResults
-from dpbench.infrastructure.benchmark_validation import validate_results
 from dpbench.infrastructure.datamodel import store_results
 from dpbench.infrastructure.enums import ErrorCodes, ValidationStatusCodes
 from dpbench.infrastructure.frameworks import Framework
@@ -263,15 +262,24 @@ class BenchmarkRunner:
 
         if rc.validate and results.error_state == ErrorCodes.SUCCESS:
             ref_framework = build_framework(rc.ref_framework)
+            # TODO: don't run it for every framework, but run it only once.
             ref_output = _exec_simple(
                 bench,
                 ref_framework,
                 rc.benchmark.reference_implementation_postfix,
                 rc.preset,
             )
-            if validate_results(ref_output, output):
-                results.validation_state = ValidationStatusCodes.SUCCESS
-            else:
+
+            if ref_output:
+                try:
+                    results.validation_state = ValidationStatusCodes.SUCCESS
+                    validate = bench.get_validation_func()
+                    validated = validate(ref_output, output)
+                except Exception as e:
+                    logging.error(f"Exception during validation {e.args}")
+                    validated = False
+
+            if not ref_output or not validated:
                 results.validation_state = ValidationStatusCodes.FAILURE
                 results.error_state = ErrorCodes.FAILED_VALIDATION
                 results.error_msg = "Validation failed"

@@ -80,6 +80,8 @@ class Benchmark:
     module_name: str = ""
     package_path: str = ""
     func_name: str = ""
+    validate_package_path: str = ""
+    validate_func_name: str = ""
     kind: str = ""
     domain: str = ""
     parameters: Presets = field(default_factory=Presets)
@@ -100,6 +102,8 @@ class Benchmark:
         _module_name = str(obj.get("module_name") or "")
         _package_path = str(obj.get("package_path") or "")
         _func_name = str(obj.get("func_name") or "")
+        _validate_package_path = str(obj.get("validate_package_path") or "")
+        _validate_func_name = str(obj.get("validate_func_name") or "validate")
         _kind = str(obj.get("kind") or "")
         _domain = str(obj.get("domain") or "")
         _parameters = Presets(obj.get("parameters"))
@@ -122,6 +126,8 @@ class Benchmark:
             _module_name,
             _package_path,
             _func_name,
+            _validate_package_path,
+            _validate_func_name,
             _kind,
             _domain,
             _parameters,

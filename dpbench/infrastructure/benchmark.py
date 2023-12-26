@@ -52,6 +52,12 @@ class Benchmark(object):
     def init_fn_name(self):
         return self.info.init.func_name if self.info.init else None
 
+    def get_validation_func(self):
+        mod = importlib.import_module(self.info.validate_package_path)
+        validate_function = getattr(mod, self.info.validate_func_name)
+
+        return validate_function
+
     def get_implementation(self, implementation_postfix: str):
         implementation = None
 

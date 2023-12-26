@@ -86,7 +86,7 @@ def kmeans_numba(arrayP, arrayPcluster, arrayC, arrayCnumpoint, niters):
             num_centroids,
         )
 
-        calCentroidsSum2[num_points,](
+        calCentroidsSum2[dpex.Range(num_points)](
             arrayP, arrayPcluster, arrayCsum, arrayCnumpoint
         )
 

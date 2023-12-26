@@ -130,7 +130,7 @@ def dbscan(n_samples, n_features, data, eps, min_pts):
     )
     sizes = np.zeros_like(data, shape=n_samples, dtype=np.int64)
 
-    get_neighborhood[n_samples,](
+    get_neighborhood[dpex.Range(n_samples)](
         n_samples,
         n_features,
         data,

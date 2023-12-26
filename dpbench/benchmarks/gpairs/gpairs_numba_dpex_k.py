@@ -147,7 +147,7 @@ def gpairs(
         ceiling_quotient(nbins, private_hist_size) * private_hist_size
     )
 
-    count_weighted_pairs_3d_intel_no_slm_ker[gwsRange, lwsRange](
+    count_weighted_pairs_3d_intel_no_slm_ker[dpex.NdRange(gwsRange, lwsRange)](
         nopt,
         nbins,
         slm_hist_size,

@@ -17,7 +17,7 @@ build:
 requirements:
   build:
     - {{ compiler('cxx') }}
-    - {{ compiler('dpcpp') }} >=2023.1  # [not osx]
+    - {{ compiler('dpcpp') }} ==2024.0.0  # [not osx]
     - sysroot_linux-64 >=2.28  # [linux]
   host:
     - python

@@ -24,7 +24,7 @@ def _rambo(C1, F1, Q1, nout, output):
 
 
 def rambo(nevts, nout, C1, F1, Q1, output):
-    _rambo[nevts,](
+    _rambo[dpex.Range(nevts)](
         C1,
         F1,
         Q1,

@@ -1,0 +1,14 @@
+# SPDX-FileCopyrightText: 2022 - 2023 Intel Corporation
+#
+# SPDX-License-Identifier: Apache-2.0
+
+[framework]
+simple_name = "numba_cuda"
+full_name = "Numba for CUDA GPUs"
+prefix = "nbcd"
+class = "NumbaCudaFramework"
+arch = "gpu"
+
+[[framework.postfixes]]
+impl_postfix = "numba_cuda"
+description = "numba cuda jit"

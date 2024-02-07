@@ -2,8 +2,9 @@
 #
 # SPDX-License-Identifier: Apache-2.0
 
+import math
+
 import numba_dpex as dpex
-import numpy as np
 
 
 @dpex.kernel
@@ -13,7 +14,7 @@ def l2_norm_kernel(a, d):
     d[i] = 0.0
     for k in range(a_rows):
         d[i] += a[i, k] * a[i, k]
-    d[i] = np.sqrt(d[i])
+    d[i] = math.sqrt(d[i])
 
 
 def l2_norm(a, d):

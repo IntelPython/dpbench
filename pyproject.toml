@@ -72,3 +72,9 @@ VCS = "git"
 style = "pep440"
 versionfile_source = "dpbench/_version.py"
 parentdir_prefix = ""
+
+[tool.pylint]
+disable = [
+    "fixme",
+    "duplicate-code"
+]

@@ -37,3 +37,4 @@ dependencies:
   - libgcc-ng
   - libstdcxx-ng
   - libgomp
+  - pylint

@@ -62,9 +62,9 @@ def _knn_kernel(  # noqa: C901: TODO: can we simplify logic?
             distance += diff * diff
         dist = sqrt(distance)
 
-        if dist < queue_neighbors[k - 1][0]:
-            queue_neighbors[k - 1][0] = dist
-            queue_neighbors[k - 1][1] = train_labels[j]
+        if dist < queue_neighbors[k - 1, 0]:
+            queue_neighbors[k - 1, 0] = dist
+            queue_neighbors[k - 1, 1] = train_labels[j]
             new_distance = queue_neighbors[k - 1, 0]
             new_neighbor_label = queue_neighbors[k - 1, 1]
             index = k - 1

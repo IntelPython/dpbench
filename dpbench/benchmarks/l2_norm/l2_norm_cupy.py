@@ -2,10 +2,12 @@
 #
 # SPDX-License-Identifier: Apache-2.0
 
-import cupy as np
+import cupy as cp
 
 
 def l2_norm(a, d):
-    sq = np.square(a)
+    sq = cp.square(a)
     sum = sq.sum(axis=1)
-    d[:] = np.sqrt(sum)
+    d[:] = cp.sqrt(sum)
+
+    cp.cuda.stream.get_current_stream().synchronize()

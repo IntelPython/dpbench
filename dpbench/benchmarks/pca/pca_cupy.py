@@ -2,7 +2,7 @@
 #
 # SPDX-License-Identifier: Apache-2.0
 
-import cupy as np
+import cupy as cp
 
 
 def pca(data, dims_rescaled_data=2):
@@ -10,13 +10,13 @@ def pca(data, dims_rescaled_data=2):
     data -= data.mean(axis=0)
 
     # calculate the covariance matrix
-    v = np.cov(data, rowvar=False, dtype=data.dtype)
+    v = cp.cov(data, rowvar=False, dtype=data.dtype)
 
     # calculate eigenvectors & eigenvalues of the covariance matrix
-    evalues, evectors = np.linalg.eigh(v)
+    evalues, evectors = cp.linalg.eigh(v)
 
     # sort eigenvalues and eigenvectors in decreasing order
-    idx = np.argsort(evalues)[::-1]
+    idx = cp.argsort(evalues)[::-1]
     evectors = evectors[:, idx]
     evalues = evalues[idx]
 
@@ -25,7 +25,10 @@ def pca(data, dims_rescaled_data=2):
     evectors = evectors[:, :dims_rescaled_data]
 
     # carry out the transformation on the data using eigenvectors
-    tdata = np.dot(evectors.T, data.T).T
+    tdata = cp.dot(evectors.T, data.T).T
+
+    cp.cuda.stream.get_current_stream().synchronize()
 
     # return the transformed data, eigenvalues, and eigenvectors
+
     return tdata, evalues, evectors

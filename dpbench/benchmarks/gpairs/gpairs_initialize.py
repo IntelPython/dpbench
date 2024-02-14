@@ -16,15 +16,15 @@ def initialize(nopt, seed, nbins, rmax, rmin, types_dict):
 
     default_rng.seed(seed)
     dtype = types_dict["float"]
-    x1 = np.random.randn(nopt).astype(dtype)
-    y1 = np.random.randn(nopt).astype(dtype)
-    z1 = np.random.randn(nopt).astype(dtype)
+    x1 = (rmax / (6 * (3) ** 0.5)) * np.random.randn(nopt).astype(dtype)
+    y1 = (rmax / (6 * (3) ** 0.5)) * np.random.randn(nopt).astype(dtype)
+    z1 = (rmax / (6 * (3) ** 0.5)) * np.random.randn(nopt).astype(dtype)
     w1 = np.random.rand(nopt).astype(dtype)
     w1 = w1 / np.sum(w1)
 
-    x2 = np.random.randn(nopt).astype(dtype)
-    y2 = np.random.randn(nopt).astype(dtype)
-    z2 = np.random.randn(nopt).astype(dtype)
+    x2 = (rmax / (6 * (3) ** 0.5)) * np.random.randn(nopt).astype(dtype)
+    y2 = (rmax / (6 * (3) ** 0.5)) * np.random.randn(nopt).astype(dtype)
+    z2 = (rmax / (6 * (3) ** 0.5)) * np.random.randn(nopt).astype(dtype)
     w2 = np.random.rand(nopt).astype(dtype)
     w2 = w2 / np.sum(w2)
 

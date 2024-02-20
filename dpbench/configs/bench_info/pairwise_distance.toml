@@ -41,7 +41,7 @@ dims = 3
 seed = 7777777
 
 [benchmark.parameters.L]
-npoints = 65536
+npoints = 44032
 dims = 3
 seed = 7777777
 

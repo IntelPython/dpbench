@@ -3,12 +3,15 @@
 # SPDX-License-Identifier: Apache-2.0
 
 import numba_dpex as dpex
+import numba_dpex.experimental as dpexexp
+from numba_dpex import kernel_api as kapi
 
 # This implementation is numba dpex kernel version with atomics.
 
 
-@dpex.kernel
+@dpexexp.kernel
 def count_weighted_pairs_3d_intel_no_slm_ker(
+    nd_item: kapi.NdItem,
     n,
     nbins,
     slm_hist_size,
@@ -25,14 +28,14 @@ def count_weighted_pairs_3d_intel_no_slm_ker(
     result,
 ):
     dtype = x0.dtype
-    lid0 = dpex.get_local_id(0)
-    gr0 = dpex.get_group_id(0)
+    lid0 = nd_item.get_local_id(0)
+    gr0 = nd_item.get_group().get_group_id(0)
 
-    lid1 = dpex.get_local_id(1)
-    gr1 = dpex.get_group_id(1)
+    lid1 = nd_item.get_local_id(1)
+    gr1 = nd_item.get_group().get_group_id(1)
 
-    lws0 = dpex.get_local_size(0)
-    lws1 = dpex.get_local_size(1)
+    lws0 = nd_item.get_local_range(0)
+    lws1 = nd_item.get_local_range(1)
 
     n_wi = 20
 
@@ -107,7 +110,8 @@ def count_weighted_pairs_3d_intel_no_slm_ker(
 
         pk = k
         for p in range(private_hist_size):
-            dpex.atomic.add(result, pk, private_hist[p])
+            result_aref = kapi.AtomicRef(result, index=pk)
+            result_aref.fetch_add(private_hist[p])
             pk += 1
 
 
@@ -147,7 +151,9 @@ def gpairs(
         ceiling_quotient(nbins, private_hist_size) * private_hist_size
     )
 
-    count_weighted_pairs_3d_intel_no_slm_ker[dpex.NdRange(gwsRange, lwsRange)](
+    dpexexp.call_kernel(
+        count_weighted_pairs_3d_intel_no_slm_ker,
+        kapi.NdRange(dpex.Range(*gwsRange), dpex.Range(*lwsRange)),
         nopt,
         nbins,
         slm_hist_size,

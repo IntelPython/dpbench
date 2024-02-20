@@ -4,16 +4,19 @@
 
 from math import erf, exp, log, sqrt
 
-import numba_dpex as dpex
+import numba_dpex.experimental as dpex
+from numba_dpex import kernel_api as kapi
 
 
 @dpex.kernel
-def _black_scholes_kernel(nopt, price, strike, t, rate, volatility, call, put):
+def _black_scholes_kernel(
+    item: kapi.Item, nopt, price, strike, t, rate, volatility, call, put
+):
     dtype = price.dtype
     mr = -rate
     sig_sig_two = volatility * volatility * dtype.type(2)
 
-    i = dpex.get_global_id(0)
+    i = item.get_id(0)
 
     P = price[i]
     S = strike[i]
@@ -40,6 +43,15 @@ def _black_scholes_kernel(nopt, price, strike, t, rate, volatility, call, put):
 
 
 def black_scholes(nopt, price, strike, t, rate, volatility, call, put):
-    _black_scholes_kernel[dpex.Range(nopt)](
-        nopt, price, strike, t, rate, volatility, call, put
+    dpex.call_kernel(
+        _black_scholes_kernel,
+        kapi.Range(nopt),
+        nopt,
+        price,
+        strike,
+        t,
+        rate,
+        volatility,
+        call,
+        put,
     )

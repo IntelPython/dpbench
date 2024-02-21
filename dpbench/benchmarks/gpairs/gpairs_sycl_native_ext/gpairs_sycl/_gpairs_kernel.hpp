@@ -25,7 +25,7 @@ sycl::event gpairs_impl(sycl::queue q,
                         FpTy *hist)
 {
 
-    const unsigned int n_wi = 20, private_hist_size = 16, lws0 = 16, lws1 = 16;
+    const unsigned int n_wi = 32, private_hist_size = 32, lws0 = 16, lws1 = 16;
     const size_t m0 = static_cast<size_t>(n_wi) * static_cast<size_t>(lws0);
     const size_t m1 = static_cast<size_t>(n_wi) * static_cast<size_t>(lws1);
     const size_t n_groups0 = ceiling_quotient(n, m0);

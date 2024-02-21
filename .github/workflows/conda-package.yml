@@ -156,10 +156,10 @@ jobs:
 
       # Needed to be able to run conda index
       - name: Install conda-build
-        run: mamba install conda-build
+        run: mamba install conda-build conda-index
 
       - name: Create conda channel
-        run: conda index ${{ env.CHANNEL_PATH }}
+        python -m conda_index ${{ env.CHANNEL_PATH }}
 
       - name: Test conda channel
         run: |

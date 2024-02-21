@@ -68,7 +68,6 @@ jobs:
         shell: bash -l {0}
         run: |
           find ./environments -type f | xargs sed -i 's/intel::numpy/numpy/'
-          find ./environments -type f | xargs sed -i '/numba-mlir/d'
           find ./environments -type f | xargs sed -i 's/setuptools>=42,<64/setuptools/'
 
       - name: Setup miniconda

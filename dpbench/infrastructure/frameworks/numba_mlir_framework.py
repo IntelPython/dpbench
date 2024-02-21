@@ -65,6 +65,12 @@ class NumbaMlirFramework(Framework):
         if self.sycl_device:
             import dpctl.tensor as dpt
 
-            return dpt.asnumpy
+            def cpy(val):
+                if isinstance(val, dpt.usm_ndarray):
+                    return dpt.asnumpy(val)
+                else:
+                    return np.asarray(val)
+
+            return cpy
         else:
             return np.copy

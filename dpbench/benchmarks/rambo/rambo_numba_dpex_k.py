@@ -4,13 +4,14 @@
 
 from math import cos, log, pi, sin, sqrt
 
-import numba_dpex as dpex
+import numba_dpex.experimental as dpex
+from numba_dpex import kernel_api as kapi
 
 
 @dpex.kernel
-def _rambo(C1, F1, Q1, nout, output):
+def _rambo(item: kapi.Item, C1, F1, Q1, nout, output):
     dtype = C1.dtype
-    i = dpex.get_global_id(0)
+    i = item.get_id(0)
     for j in range(nout):
         C = dtype.type(2.0) * C1[i, j] - dtype.type(1.0)
         S = sqrt(dtype.type(1) - C * C)
@@ -24,10 +25,4 @@ def _rambo(C1, F1, Q1, nout, output):
 
 
 def rambo(nevts, nout, C1, F1, Q1, output):
-    _rambo[dpex.Range(nevts)](
-        C1,
-        F1,
-        Q1,
-        nout,
-        output,
-    )
+    dpex.call_kernel(_rambo, kapi.Range(nevts), C1, F1, Q1, nout, output)

@@ -29,7 +29,8 @@ output_args = [
     "arrayCnumpoint",
 ]
 # TODO: remove once fixed. Fails randomly
-expected_failure_implementations = ["numba_mlir_k"]
+# remove numba_dpex_k once atomics on SLM is implemented
+expected_failure_implementations = ["numba_mlir_k", "numba_dpex_k"]
 
 [benchmark.parameters.S]
 npoints = 4096

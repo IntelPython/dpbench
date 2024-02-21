@@ -6,9 +6,9 @@ from functools import lru_cache
 from math import sqrt
 
 import numba_dpex as dpex
-import numpy
+import numba_dpex.experimental as dpexexp
 from dpctl import tensor as dpt
-from numba_dpex import NdRange
+from numba_dpex import kernel_api as kapi
 
 
 def DivUp(numerator, denominator):
@@ -25,9 +25,15 @@ def getGroupByCluster(  # noqa: C901
 ):
     local_copies = min(4, max(1, DivUp(local_size_, num_centroids)))
 
-    @dpex.kernel
+    @dpexexp.kernel
     def groupByCluster(
-        arrayP, arrayPcluster, arrayC, NewCentroids, NewCount, last
+        nd_item: kapi.NdItem,
+        arrayP,
+        arrayPcluster,
+        arrayC,
+        NewCentroids,
+        NewCount,
+        last,
     ):
         numpoints = arrayP.shape[0]
         localCentroids = dpex.local.array((dims, num_centroids), dtype=dtyp)
@@ -38,9 +44,9 @@ def getGroupByCluster(  # noqa: C901
             (local_copies, num_centroids), dtype=dpt.int32
         )
 
-        grid = dpex.get_group_id(0)
-        lid = dpex.get_local_id(0)
-        local_size = dpex.get_local_size(0)
+        grid = nd_item.get_group().get_group_id(0)
+        lid = nd_item.get_local_id(0)
+        local_size = nd_item.get_local_range(0)
 
         for i in range(lid, num_centroids * dims, local_size):
             localCentroids[i % dims, i // dims] = arrayC[i // dims, i % dims]
@@ -51,7 +57,7 @@ def getGroupByCluster(  # noqa: C901
             for lc in range(local_copies):
                 localNewCount[lc, c] = 0
 
-        dpex.barrier(dpex.LOCAL_MEM_FENCE)
+        kapi.group_barrier(nd_item.get_group())
 
         for i in range(WorkPI):
             point_id = grid * WorkPI * local_size + i * local_size + lid
@@ -73,44 +79,59 @@ def getGroupByCluster(  # noqa: C901
 
                 lc = lid % local_copies
                 for d in range(dims):
-                    dpex.atomic.add(
-                        localNewCentroids, (lc, d, nearest_centroid), localP[d]
+                    localNewCentroids_aref = kapi.AtomicRef(
+                        localNewCentroids,
+                        index=(lc, d, nearest_centroid),
+                        address_space=kapi.AddressSpace.LOCAL,
                     )
+                    localNewCentroids_aref.fetch_add(localP[d])
 
-                dpex.atomic.add(localNewCount, (lc, nearest_centroid), 1)
+                localNewCount_aref = kapi.AtomicRef(
+                    localNewCount,
+                    index=(lc, nearest_centroid),
+                    address_space=kapi.AddressSpace.LOCAL,
+                )
+                localNewCount_aref.fetch_add(1)
 
                 if last:
                     arrayPcluster[point_id] = nearest_centroid
 
-        dpex.barrier(dpex.LOCAL_MEM_FENCE)
+        kapi.group_barrier(nd_item.get_group())
 
         for i in range(lid, num_centroids * dims, local_size):
             local_centroid_d = dtyp.type(0)
             for lc in range(local_copies):
                 local_centroid_d += localNewCentroids[lc, i % dims, i // dims]
 
-            dpex.atomic.add(
-                NewCentroids,
-                (i // dims, i % dims),
-                local_centroid_d,
+            NewCentroids_aref = kapi.AtomicRef(
+                NewCentroids, index=(i // dims, i % dims)
             )
+            NewCentroids_aref.fetch_add(local_centroid_d)
 
         for c in range(lid, num_centroids, local_size):
             local_centroid_npoints = dpt.int32.type(0)
             for lc in range(local_copies):
                 local_centroid_npoints += localNewCount[lc, c]
 
-            dpex.atomic.add(NewCount, c, local_centroid_npoints)
+            NewCount_aref = kapi.AtomicRef(NewCount, index=c)
+            NewCount_aref.fetch_add(local_centroid_npoints)
 
     return groupByCluster
 
 
 @lru_cache(maxsize=1)
 def getUpdateCentroids(dims, num_centroids, dtyp, local_size_):
-    @dpex.kernel
-    def updateCentroids(diff, arrayC, arrayCnumpoint, NewCentroids, NewCount):
-        lid = dpex.get_local_id(0)
-        local_size = dpex.get_local_size(0)
+    @dpexexp.kernel
+    def updateCentroids(
+        nd_item: kapi.NdItem,
+        diff,
+        arrayC,
+        arrayCnumpoint,
+        NewCentroids,
+        NewCount,
+    ):
+        lid = nd_item.get_local_id(0)
+        local_size = nd_item.get_local_range(0)
 
         local_distance = dpex.local.array(local_size_, dtype=dtyp)
 
@@ -134,7 +155,7 @@ def getUpdateCentroids(dims, num_centroids, dtyp, local_size_):
             max_distance = max(max_distance, distance)
             local_distance[c] = max_distance
 
-        dpex.barrier(dpex.LOCAL_MEM_FENCE)
+        kapi.group_barrier(nd_item.get_group())
 
         if lid == 0:
             for c in range(local_size):
@@ -147,19 +168,19 @@ def getUpdateCentroids(dims, num_centroids, dtyp, local_size_):
 
 @lru_cache(maxsize=1)
 def getUpdateLabels(dims, num_centroids, dtyp, WorkPI):
-    @dpex.kernel
-    def updateLabels(arrayP, arrayPcluster, arrayC):
+    @dpexexp.kernel
+    def updateLabels(nd_item: kapi.NdItem, arrayP, arrayPcluster, arrayC):
         numpoints = arrayP.shape[0]
         localCentroids = dpex.local.array((dims, num_centroids), dtype=dtyp)
 
-        grid = dpex.get_group_id(0)
-        lid = dpex.get_local_id(0)
-        local_size = dpex.get_local_size(0)
+        grid = nd_item.get_group().get_group_id(0)
+        lid = nd_item.get_local_id(0)
+        local_size = nd_item.get_local_range(0)
 
         for i in range(lid, num_centroids * dims, local_size):
             localCentroids[i % dims, i // dims] = arrayC[i // dims, i % dims]
 
-        dpex.barrier(dpex.LOCAL_MEM_FENCE)
+        kapi.group_barrier(nd_item.get_group())
 
         for i in range(WorkPI):
             point_id = grid * WorkPI * local_size + i * local_size + lid
@@ -224,19 +245,36 @@ def kmeans_kernel(
     for i in range(niters):
         last = i == (niters - 1)
         if diff_host < tolerance:
-            updateLabels[NdRange((global_size,), (local_size,))](
-                arrayP, arrayPcluster, arrayC
+            dpexexp.call_kernel(
+                updateLabels,
+                kapi.NdRange((global_size,), (local_size,)),
+                arrayP,
+                arrayPcluster,
+                arrayC,
             )
             break
 
-        groupByCluster[NdRange((global_size,), (local_size,))](
-            arrayP, arrayPcluster, arrayC, NewCentroids, NewCount, last
+        dpexexp.call_kernel(
+            groupByCluster,
+            kapi.NdRange((global_size,), (local_size,)),
+            arrayP,
+            arrayPcluster,
+            arrayC,
+            NewCentroids,
+            NewCount,
+            last,
         )
 
         update_centroid_size = min(num_centroids, local_size)
-        updateCentroids[
-            NdRange((update_centroid_size,), (update_centroid_size,))
-        ](diff, arrayC, arrayCnumpoint, NewCentroids, NewCount)
+        dpexexp.call_kernel(
+            updateCentroids,
+            kapi.NdRange((update_centroid_size,), (update_centroid_size,)),
+            diff,
+            arrayC,
+            arrayCnumpoint,
+            NewCentroids,
+            NewCount,
+        )
         diff_host = dpt.asnumpy(diff)[0]
 
 

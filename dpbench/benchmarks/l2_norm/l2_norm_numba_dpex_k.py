@@ -4,12 +4,13 @@
 
 import math
 
-import numba_dpex as dpex
+import numba_dpex.experimental as dpex
+from numba_dpex import kernel_api as kapi
 
 
 @dpex.kernel
-def l2_norm_kernel(a, d):
-    i = dpex.get_global_id(0)
+def l2_norm_kernel(item: kapi.Item, a, d):
+    i = item.get_id(0)
     a_rows = a.shape[1]
     d[i] = 0.0
     for k in range(a_rows):
@@ -18,4 +19,4 @@ def l2_norm_kernel(a, d):
 
 
 def l2_norm(a, d):
-    l2_norm_kernel[dpex.Range(a.shape[0])](a, d)
+    dpex.call_kernel(l2_norm_kernel, kapi.Range(a.shape[0]), a, d)

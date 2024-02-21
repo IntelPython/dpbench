@@ -4,8 +4,9 @@
 
 import dpnp as np
 import numba as nb
-import numba_dpex as dpex
+import numba_dpex.experimental as dpex
 import numpy
+from numba_dpex import kernel_api as kapi
 
 NOISE = -1
 UNDEFINED = -2
@@ -50,8 +51,10 @@ def _queue_empty(head, tail):
 
 
 @dpex.kernel
-def get_neighborhood(n, dim, data, eps, ind_lst, sz_lst, block_size, nblocks):
-    i = dpex.get_global_id(0)
+def get_neighborhood(
+    item: kapi.Item, n, dim, data, eps, ind_lst, sz_lst, block_size, nblocks
+):
+    i = item.get_id(0)
 
     start = i * block_size
     stop = n if i + 1 == nblocks else start + block_size
@@ -130,7 +133,9 @@ def dbscan(n_samples, n_features, data, eps, min_pts):
     )
     sizes = np.zeros_like(data, shape=n_samples, dtype=np.int64)
 
-    get_neighborhood[dpex.Range(n_samples)](
+    dpex.call_kernel(
+        get_neighborhood,
+        kapi.Range(n_samples),
         n_samples,
         n_features,
         data,

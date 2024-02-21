@@ -5,11 +5,14 @@
 from math import sqrt
 
 import numba_dpex as dpex
+import numba_dpex.experimental as dpexexp
 import numpy as np
+from numba_dpex import kernel_api as kapi
 
 
-@dpex.kernel
+@dpexexp.kernel
 def _knn_kernel(  # noqa: C901: TODO: can we simplify logic?
+    item: kapi.Item,
     train,
     train_labels,
     test,
@@ -21,7 +24,7 @@ def _knn_kernel(  # noqa: C901: TODO: can we simplify logic?
     data_dim,
 ):
     dtype = train.dtype
-    i = dpex.get_global_id(0)
+    i = item.get_id(0)
     # here k has to be 5 in order to match with numpy
     queue_neighbors = dpex.private.array(shape=(5, 2), dtype=dtype)
 
@@ -106,7 +109,9 @@ def knn(
     votes_to_classes,
     data_dim,
 ):
-    _knn_kernel[dpex.Range(test_size)](
+    dpexexp.call_kernel(
+        _knn_kernel,
+        kapi.Range(test_size),
         x_train,
         y_train,
         x_test,

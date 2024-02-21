@@ -91,7 +91,7 @@ def relative_error(
     Returns: relative error.
     """
     ref_norm = np.linalg.norm(ref)
-    if ref_norm:
+    if ref_norm == 0:
         val_norm = np.linalg.norm(val)
         if val_norm == 0:
             return 0.0

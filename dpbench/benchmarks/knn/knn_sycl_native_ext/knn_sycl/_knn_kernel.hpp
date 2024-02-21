@@ -5,13 +5,15 @@
 #include <CL/sycl.hpp>
 #include <cmath>
 
-struct neighbors
+template <typename FpTy, typename IntTy> class theKernel;
+
+template <typename FpTy> struct neighbors
 {
-    double dist;
+    FpTy dist;
     size_t label;
 };
 
-template <typename FpTy>
+template <typename FpTy, typename IntTy>
 sycl::event knn_impl(sycl::queue q,
                      FpTy *d_train,
                      size_t *d_train_labels,
@@ -20,18 +22,18 @@ sycl::event knn_impl(sycl::queue q,
                      size_t classes_num,
                      size_t train_size,
                      size_t test_size,
-                     size_t *d_predictions,
+                     IntTy *d_predictions,
                      FpTy *d_votes_to_classes,
                      size_t data_dim)
 {
     sycl::event partial_hists_ev = q.submit([&](sycl::handler &h) {
-        h.parallel_for<class theKernel>(
+        h.parallel_for<theKernel<FpTy, IntTy>>(
             sycl::range<1>{test_size}, [=](sycl::id<1> myID) {
                 size_t i = myID[0];
 
                 // here k has to be 5 in order to match with numpy no. of
                 // neighbors
-                struct neighbors queue_neighbors[5];
+                struct neighbors<FpTy> queue_neighbors[5];
 
                 // count distances
                 for (size_t j = 0; j < k; ++j) {
@@ -102,10 +104,10 @@ sycl::event knn_impl(sycl::queue q,
                                        queue_neighbors[j].label]++;
                 }
 
-                size_t max_ind = 0;
+                IntTy max_ind = 0;
                 FpTy max_value = 0.0;
 
-                for (size_t j = 0; j < classes_num; ++j) {
+                for (IntTy j = 0; j < (IntTy)classes_num; ++j) {
                     if (d_votes_to_classes[i * classes_num + j] > max_value) {
                         max_value = d_votes_to_classes[i * classes_num + j];
                         max_ind = j;

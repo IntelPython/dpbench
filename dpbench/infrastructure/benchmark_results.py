@@ -132,6 +132,15 @@ class BenchmarkResults:
                 "median execution times:",
                 self._format_ns(self.median_exec_time),
             )
+            warmup_ovhd_time = int(self.warmup_time) - int(
+                self.median_exec_time
+            )
+            print(
+                "warmup overhead time (warmup time - median execution time):",
+                self._format_ns(warmup_ovhd_time)
+                if warmup_ovhd_time > 0
+                else "N/A",
+            )
             print("repeats:", self.repeats)
             print("preset:", self.preset)
             print("validated:", self.validation_state)

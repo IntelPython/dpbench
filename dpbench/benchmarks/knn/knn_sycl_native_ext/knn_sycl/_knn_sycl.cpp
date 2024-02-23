@@ -5,8 +5,6 @@
 #include "_knn_kernel.hpp"
 #include <dpctl4pybind11.hpp>
 
-#include <iostream>
-
 template <typename... Args> bool ensure_compatibility(const Args &...args)
 {
     std::vector<dpctl::tensor::usm_ndarray> arrays = {args...};
@@ -41,16 +39,28 @@ void knn_sync(dpctl::tensor::usm_ndarray x_train,
                               votes_to_classes))
         throw std::runtime_error("Input arrays are not acceptable.");
 
-    if (x_train.get_typenum() != UAR_DOUBLE) {
-        throw std::runtime_error("Expected a double precision FP array.");
+    auto typenum = x_train.get_typenum();
+    if (typenum == UAR_FLOAT) {
+        sycl::event res_ev = knn_impl<float, unsigned int>(
+            x_train.get_queue(), x_train.get_data<float>(),
+            y_train.get_data<size_t>(), x_test.get_data<float>(), k,
+            classes_num, train_size, test_size,
+            predictions.get_data<unsigned int>(),
+            votes_to_classes.get_data<float>(), data_dim);
+        res_ev.wait();
     }
-
-    sycl::event res_ev = knn_impl(
-        x_train.get_queue(), x_train.get_data<double>(),
-        y_train.get_data<size_t>(), x_test.get_data<double>(), k, classes_num,
-        train_size, test_size, predictions.get_data<size_t>(),
-        votes_to_classes.get_data<double>(), data_dim);
-    res_ev.wait();
+    else if (typenum == UAR_DOUBLE) {
+        sycl::event res_ev = knn_impl<double, size_t>(
+            x_train.get_queue(), x_train.get_data<double>(),
+            y_train.get_data<size_t>(), x_test.get_data<double>(), k,
+            classes_num, train_size, test_size, predictions.get_data<size_t>(),
+            votes_to_classes.get_data<double>(), data_dim);
+        res_ev.wait();
+    }
+    else {
+        throw std::runtime_error(
+            "Expected a double or single precision FP array.");
+    }
 }
 
 PYBIND11_MODULE(_knn_sycl, m)

@@ -63,7 +63,7 @@ repos:
     - id: pylint
       name: pylint
       entry: pylint
-      files: ^dpbench/benchmarks
+      files: ^dpbench/benchmarks/default
       language: system
       types: [python]
       require_serial: true

@@ -37,11 +37,11 @@ def count_weighted_pairs_3d_intel_no_slm_ker(
     lws0 = nd_item.get_local_range(0)
     lws1 = nd_item.get_local_range(1)
 
-    n_wi = 20
+    n_wi = 32
 
-    dsq_mat = dpex.private.array(shape=(20 * 20), dtype=dtype)
-    w0_vec = dpex.private.array(shape=(20), dtype=dtype)
-    w1_vec = dpex.private.array(shape=(20), dtype=dtype)
+    dsq_mat = dpex.private.array(shape=(32 * 32), dtype=dtype)
+    w0_vec = dpex.private.array(shape=(32), dtype=dtype)
+    w1_vec = dpex.private.array(shape=(32), dtype=dtype)
 
     offset0 = gr0 * n_wi * lws0 + lid0
     offset1 = gr1 * n_wi * lws1 + lid1
@@ -81,7 +81,7 @@ def count_weighted_pairs_3d_intel_no_slm_ker(
 
     # update slm_hist. Use work-item private buffer of 16 tfloat elements
     for k in range(0, slm_hist_size, private_hist_size):
-        private_hist = dpex.private.array(shape=(16), dtype=dtype)
+        private_hist = dpex.private.array(shape=(32), dtype=dtype)
         for p in range(private_hist_size):
             private_hist[p] = 0.0
 
@@ -133,8 +133,8 @@ def gpairs(
     rbins,
     results,
 ):
-    n_wi = 20
-    private_hist_size = 16
+    n_wi = 32
+    private_hist_size = 32
     lws0 = 16
     lws1 = 16
 

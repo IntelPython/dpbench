@@ -50,7 +50,7 @@ def read_configs(  # noqa: C901: TODO: move modules into config
             benchmark_configs_path=os.path.join(
                 dirname, "../configs/bench_info"
             ),
-            benchmarks_module="dpbench.benchmarks",
+            benchmarks_module="dpbench.benchmarks.default",
             framework_configs_path=os.path.join(
                 dirname, "../configs/framework_info"
             ),

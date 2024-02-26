@@ -159,7 +159,7 @@ jobs:
         run: mamba install conda-build conda-index
 
       - name: Create conda channel
-        python -m conda_index ${{ env.CHANNEL_PATH }}
+        run: python -m conda_index ${{ env.CHANNEL_PATH }}
 
       - name: Test conda channel
         run: |

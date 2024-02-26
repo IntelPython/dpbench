@@ -25,3 +25,4 @@ dependencies:
   - dpnp
   - numba-dpex
   - numba-mlir
+  - pylint

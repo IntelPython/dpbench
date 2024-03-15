@@ -1,0 +1,65 @@
+# SPDX-FileCopyrightText: 2022 - 2023 Intel Corporation
+#
+# SPDX-License-Identifier: Apache-2.0
+
+[benchmark]
+name = "Pathfinder"
+short_name = "pathfinder"
+relative_path = "pathfinder"
+module_name = "pathfinder"
+func_name = "pathfinder"
+kind = "microbenchmark"
+domain = "Minimum Distance"
+input_args = [
+    "data",
+    "rows",
+    "cols",
+    "pyramid_height",
+    "block_size",
+    "result"
+]
+array_args = [
+    "data",
+    "result"
+]
+output_args = [
+    "result",
+]
+
+[benchmark.parameters.S]
+rows = 10
+cols = 10
+pyramid_height = 1
+block_size = 128
+
+[benchmark.parameters.M16Gb]
+rows = 4096
+cols = 4096
+pyramid_height = 1
+block_size = 128
+
+[benchmark.parameters.M]
+rows = 4096
+cols = 4096
+pyramid_height = 1
+block_size = 128
+
+[benchmark.parameters.L]
+rows = 8192
+cols = 8192
+pyramid_height = 1
+block_size = 128
+
+[benchmark.init]
+func_name = "initialize"
+types_dict_name="types_dict"
+precision="double"
+input_args = [
+    "rows",
+    "cols",
+    "types_dict",
+]
+output_args = [
+    "data",
+    "result"
+]

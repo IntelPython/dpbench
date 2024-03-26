@@ -37,10 +37,6 @@ void kmeans_sync(dpctl::tensor::usm_ndarray arrayP,
         throw std::runtime_error("All arrays must have the same precision");
     }
 
-    if (arrayPclusters.get_typenum() != arrayCnumpoint.get_typenum()) {
-        throw std::runtime_error("All arrays must have the same precision");
-    }
-
     auto npoints = arrayP.get_shape(0);
     auto ncentroids = arrayC.get_shape(0);
     auto ndims = arrayC.get_shape(1);

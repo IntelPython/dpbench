@@ -23,7 +23,6 @@ dependencies:
   - dpctl
   - dpnp
   - numba-dpex
-  - numba-mlir
   # TODO: switch to conda-forge, but it results in broken OpenCL rt (see below)
   # - conda-forge::dpcpp_win-64
   - intel::dpcpp_win-64==2024.0.0

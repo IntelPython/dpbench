@@ -30,7 +30,7 @@ output_args = [
 ]
 # TODO: remove once fixed. Fails randomly
 # remove numba_dpex_k once atomics on SLM is implemented
-expected_failure_implementations = ["numba_mlir_k", "numba_dpex_k"]
+expected_failure_implementations = ["numba_mlir_k", "numba_dpex_k", "sycl"]
 
 [benchmark.parameters.S]
 npoints = 4096

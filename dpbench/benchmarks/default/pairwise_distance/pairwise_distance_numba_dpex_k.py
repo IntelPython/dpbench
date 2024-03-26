@@ -3,7 +3,7 @@
 # SPDX-License-Identifier: Apache-2.0
 
 import dpnp as np
-import numba_dpex.experimental as dpex
+import numba_dpex as dpex
 from numba_dpex import kernel_api as kapi
 
 

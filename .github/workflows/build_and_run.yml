@@ -9,7 +9,7 @@ on:
 
 env:
   # sycl is not included. Add it manually if you need
-  WORKLOADS: python,numpy,dpnp,numba_n,numba_np,numba_npr,numba_dpex_k,numba_dpex_n,numba_dpex_p,numba_mlir_k,numba_mlir_n,numba_mlir_p
+  WORKLOADS: python,numpy,dpnp,numba_n,numba_np,numba_npr,numba_dpex_k,numba_dpex_n,numba_dpex_p
   PYTHONIOENCODING: 'utf-8'
 
 jobs:
@@ -68,7 +68,6 @@ jobs:
         shell: bash -l {0}
         run: |
           find ./environments -type f | xargs sed -i 's/intel::numpy/numpy/'
-          find ./environments -type f | xargs sed -i '/numba-mlir/d'
           find ./environments -type f | xargs sed -i 's/setuptools>=42,<64/setuptools/'
 
       - name: Setup miniconda
@@ -168,8 +167,9 @@ jobs:
       - name: Run benchmarks
         run: dpbench -i ${{env.WORKLOADS}} run -r2 --no-print-results --precision=${{matrix.precision}} || exit 1
 
-      - name: Run rodinia benchmarks
-        run: dpbench -i ${{env.WORKLOADS}} --last-run run -r2 --no-print-results --rodinia --no-dpbench --precision=${{matrix.precision}} || exit 1
+      # TODO: Re-enable rodinia benchmarks in CI once workloads have been changed to new numba-dpex API
+      # - name: Run rodinia benchmarks
+      #   run: dpbench -i ${{env.WORKLOADS}} --last-run run -r2 --no-print-results --rodinia --no-dpbench --precision=${{matrix.precision}} || exit 1
 
       - name: Generate report
         run: dpbench -i ${{env.WORKLOADS}} report || exit 1

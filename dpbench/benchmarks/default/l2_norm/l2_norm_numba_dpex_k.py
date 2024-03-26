@@ -4,7 +4,7 @@
 
 import math
 
-import numba_dpex.experimental as dpex
+import numba_dpex as dpex
 from numba_dpex import kernel_api as kapi
 
 

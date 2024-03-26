@@ -5,6 +5,7 @@
 import dpnp as np
 import numba as nb
 import numba_dpex as dpex
+from numba_dpex import kernel_api as kapi
 
 
 # determine the euclidean distance from the cluster center to each point
@@ -40,12 +41,17 @@ def calCentroidsSum(
 
 
 @dpex.kernel
-def calCentroidsSum2(arrayP, arrayPcluster, arrayCsum, arrayCnumpoint):
-    i = dpex.get_global_id(0)
+def calCentroidsSum2(
+    item: kapi.Item, arrayP, arrayPcluster, arrayCsum, arrayCnumpoint
+):
+    i = item.get_id(0)
     ci = arrayPcluster[i]
-    dpex.atomic.add(arrayCsum, (ci, 0), arrayP[i, 0])
-    dpex.atomic.add(arrayCsum, (ci, 1), arrayP[i, 1])
-    dpex.atomic.add(arrayCnumpoint, ci, 1)
+    arrayCsum_aref = kapi.AtomicRef(arrayCsum, index=(ci, 0))
+    arrayCsum_aref.fetch_add(arrayP[i, 0])
+    arrayCsum_aref = kapi.AtomicRef(arrayCsum, index=(ci, 1))
+    arrayCsum_aref.fetch_add(arrayP[i, 1])
+    arrayCnumpoint_aref = kapi.AtomicRef(arrayCnumpoint, index=ci)
+    arrayCnumpoint_aref.fetch_add(1)
 
 
 # update the centriods array after computation
@@ -86,8 +92,13 @@ def kmeans_numba(arrayP, arrayPcluster, arrayC, arrayCnumpoint, niters):
             num_centroids,
         )
 
-        calCentroidsSum2[dpex.Range(num_points)](
-            arrayP, arrayPcluster, arrayCsum, arrayCnumpoint
+        dpex.call_kernel(
+            calCentroidsSum2,
+            kapi.Range(num_points),
+            arrayP,
+            arrayPcluster,
+            arrayCsum,
+            arrayCnumpoint,
         )
 
         # TODO: get rid of it once prange supports dtype

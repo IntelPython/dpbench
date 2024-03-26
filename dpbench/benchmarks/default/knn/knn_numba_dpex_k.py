@@ -5,12 +5,11 @@
 from math import sqrt
 
 import numba_dpex as dpex
-import numba_dpex.experimental as dpexexp
 import numpy as np
 from numba_dpex import kernel_api as kapi
 
 
-@dpexexp.kernel
+@dpex.kernel
 def _knn_kernel(  # noqa: C901: TODO: can we simplify logic?
     item: kapi.Item,
     train,
@@ -109,7 +108,7 @@ def knn(
     votes_to_classes,
     data_dim,
 ):
-    dpexexp.call_kernel(
+    dpex.call_kernel(
         _knn_kernel,
         kapi.Range(test_size),
         x_train,

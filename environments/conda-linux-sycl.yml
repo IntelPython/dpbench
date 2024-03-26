@@ -23,7 +23,6 @@ dependencies:
   - dpctl
   - dpnp
   - numba-dpex
-  - numba-mlir
   # TODO: fix issues on conda-forge build
   - intel::dpcpp_linux-64==2024.0.0
   - intel::dpcpp-cpp-rt==2024.0.0

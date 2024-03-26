@@ -17,7 +17,7 @@ def initialize(npoints, niters, seed, ndims, ncentroids, types_dict):
     arrayP = default_rng.uniform(XL, XH, (npoints, ndims)).astype(f_dtype)
     arrayPclusters = np.ones(npoints, dtype=i_dtype)
     arrayC = np.empty((ncentroids, ndims), dtype=f_dtype)
-    arrayCnumpoint = np.ones(ncentroids, dtype=i_dtype)
+    arrayCnumpoint = np.ones(ncentroids, dtype=np.int64)
 
     arrayC[:] = arrayP[:ncentroids]
 

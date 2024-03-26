@@ -3,13 +3,12 @@
 # SPDX-License-Identifier: Apache-2.0
 
 import numba_dpex as dpex
-import numba_dpex.experimental as dpexexp
 from numba_dpex import kernel_api as kapi
 
 # This implementation is numba dpex kernel version with atomics.
 
 
-@dpexexp.kernel
+@dpex.kernel
 def count_weighted_pairs_3d_intel_no_slm_ker(
     nd_item: kapi.NdItem,
     n,
@@ -151,7 +150,7 @@ def gpairs(
         ceiling_quotient(nbins, private_hist_size) * private_hist_size
     )
 
-    dpexexp.call_kernel(
+    dpex.call_kernel(
         count_weighted_pairs_3d_intel_no_slm_ker,
         kapi.NdRange(dpex.Range(*gwsRange), dpex.Range(*lwsRange)),
         nopt,

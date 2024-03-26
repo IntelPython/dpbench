@@ -4,7 +4,7 @@
 
 import dpnp as np
 import numba as nb
-import numba_dpex.experimental as dpex
+import numba_dpex as dpex
 import numpy
 from numba_dpex import kernel_api as kapi
 

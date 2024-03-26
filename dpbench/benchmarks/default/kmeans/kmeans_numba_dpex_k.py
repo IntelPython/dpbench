@@ -6,7 +6,6 @@ from functools import lru_cache
 from math import sqrt
 
 import numba_dpex as dpex
-import numba_dpex.experimental as dpexexp
 from dpctl import tensor as dpt
 from numba_dpex import kernel_api as kapi
 
@@ -23,9 +22,7 @@ def Align(value, base):
 def getGroupByCluster(  # noqa: C901
     dims, num_centroids, dtyp, WorkPI, local_size_
 ):
-    local_copies = min(4, max(1, DivUp(local_size_, num_centroids)))
-
-    @dpexexp.kernel
+    @dpex.kernel
     def groupByCluster(
         nd_item: kapi.NdItem,
         arrayP,
@@ -34,15 +31,12 @@ def getGroupByCluster(  # noqa: C901
         NewCentroids,
         NewCount,
         last,
+        local_copies,
+        localCentroids,
+        localNewCentroids,
+        localNewCount,
     ):
         numpoints = arrayP.shape[0]
-        localCentroids = dpex.local.array((dims, num_centroids), dtype=dtyp)
-        localNewCentroids = dpex.local.array(
-            (local_copies, dims, num_centroids), dtype=dtyp
-        )
-        localNewCount = dpex.local.array(
-            (local_copies, num_centroids), dtype=dpt.int32
-        )
 
         grid = nd_item.get_group().get_group_id(0)
         lid = nd_item.get_local_id(0)
@@ -121,7 +115,7 @@ def getGroupByCluster(  # noqa: C901
 
 @lru_cache(maxsize=1)
 def getUpdateCentroids(dims, num_centroids, dtyp, local_size_):
-    @dpexexp.kernel
+    @dpex.kernel
     def updateCentroids(
         nd_item: kapi.NdItem,
         diff,
@@ -129,11 +123,10 @@ def getUpdateCentroids(dims, num_centroids, dtyp, local_size_):
         arrayCnumpoint,
         NewCentroids,
         NewCount,
+        local_distance,
     ):
         lid = nd_item.get_local_id(0)
         local_size = nd_item.get_local_range(0)
-
-        local_distance = dpex.local.array(local_size_, dtype=dtyp)
 
         max_distance = dtyp.type(0)
         for c in range(lid, num_centroids, local_size):
@@ -168,10 +161,11 @@ def getUpdateCentroids(dims, num_centroids, dtyp, local_size_):
 
 @lru_cache(maxsize=1)
 def getUpdateLabels(dims, num_centroids, dtyp, WorkPI):
-    @dpexexp.kernel
-    def updateLabels(nd_item: kapi.NdItem, arrayP, arrayPcluster, arrayC):
+    @dpex.kernel
+    def updateLabels(
+        nd_item: kapi.NdItem, arrayP, arrayPcluster, arrayC, localCentroids
+    ):
         numpoints = arrayP.shape[0]
-        localCentroids = dpex.local.array((dims, num_centroids), dtype=dtyp)
 
         grid = nd_item.get_group().get_group_id(0)
         lid = nd_item.get_local_id(0)
@@ -245,16 +239,31 @@ def kmeans_kernel(
     for i in range(niters):
         last = i == (niters - 1)
         if diff_host < tolerance:
-            dpexexp.call_kernel(
+            localCentroids = kapi.LocalAccessor(
+                (dims, num_centroids), dtype=arrayP.dtype
+            )
+
+            dpex.call_kernel(
                 updateLabels,
                 kapi.NdRange((global_size,), (local_size,)),
                 arrayP,
                 arrayPcluster,
                 arrayC,
+                localCentroids,
             )
             break
 
-        dpexexp.call_kernel(
+        local_copies = min(4, max(1, DivUp(local_size, num_centroids)))
+        localCentroids = kapi.LocalAccessor(
+            (dims, num_centroids), dtype=arrayP.dtype
+        )
+        localNewCentroids = kapi.LocalAccessor(
+            (local_copies, dims, num_centroids), dtype=arrayP.dtype
+        )
+        localNewCount = kapi.LocalAccessor(
+            (local_copies, num_centroids), dtype=dpt.int64
+        )
+        dpex.call_kernel(
             groupByCluster,
             kapi.NdRange((global_size,), (local_size,)),
             arrayP,
@@ -263,10 +272,15 @@ def kmeans_kernel(
             NewCentroids,
             NewCount,
             last,
+            local_copies,
+            localCentroids,
+            localNewCentroids,
+            localNewCount,
         )
 
+        local_distance = kapi.LocalAccessor(local_size, dtype=arrayP.dtype)
         update_centroid_size = min(num_centroids, local_size)
-        dpexexp.call_kernel(
+        dpex.call_kernel(
             updateCentroids,
             kapi.NdRange((update_centroid_size,), (update_centroid_size,)),
             diff,
@@ -274,6 +288,7 @@ def kmeans_kernel(
             arrayCnumpoint,
             NewCentroids,
             NewCount,
+            local_distance,
         )
         diff_host = dpt.asnumpy(diff)[0]
 

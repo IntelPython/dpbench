@@ -24,4 +24,3 @@ dependencies:
   - dpctl
   - dpnp
   - numba-dpex
-  - numba-mlir

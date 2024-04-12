@@ -4,6 +4,9 @@
 
 name: pre-commit
 
+# Declare default permissions as read only.
+permissions: read-all
+
 on:
   pull_request:
 

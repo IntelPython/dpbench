@@ -7,16 +7,16 @@
 
 template <typename FpTy, typename IntTy> class theKernel;
 
-template <typename FpTy> struct neighbors
+template <typename FpTy, typename IntTy> struct neighbors
 {
     FpTy dist;
-    size_t label;
+    IntTy label;
 };
 
 template <typename FpTy, typename IntTy>
 sycl::event knn_impl(sycl::queue q,
                      FpTy *d_train,
-                     size_t *d_train_labels,
+                     IntTy *d_train_labels,
                      FpTy *d_test,
                      size_t k,
                      size_t classes_num,
@@ -33,7 +33,7 @@ sycl::event knn_impl(sycl::queue q,
 
                 // here k has to be 5 in order to match with numpy no. of
                 // neighbors
-                struct neighbors<FpTy> queue_neighbors[5];
+                struct neighbors<FpTy, IntTy> queue_neighbors[5];
 
                 // count distances
                 for (size_t j = 0; j < k; ++j) {
@@ -54,7 +54,7 @@ sycl::event knn_impl(sycl::queue q,
                 for (size_t j = 0; j < k; ++j) {
                     // push queue
                     FpTy new_distance = queue_neighbors[j].dist;
-                    FpTy new_neighbor_label = queue_neighbors[j].label;
+                    IntTy new_neighbor_label = queue_neighbors[j].label;
                     size_t index = j;
                     while (index > 0 &&
                            new_distance < queue_neighbors[index - 1].dist)
@@ -83,7 +83,7 @@ sycl::event knn_impl(sycl::queue q,
 
                         // push queue
                         FpTy new_distance = queue_neighbors[k - 1].dist;
-                        FpTy new_neighbor_label = queue_neighbors[k - 1].label;
+                        IntTy new_neighbor_label = queue_neighbors[k - 1].label;
                         size_t index = k - 1;
 
                         while (index > 0 &&

@@ -43,7 +43,7 @@ void knn_sync(dpctl::tensor::usm_ndarray x_train,
     if (typenum == UAR_FLOAT) {
         sycl::event res_ev = knn_impl<float, unsigned int>(
             x_train.get_queue(), x_train.get_data<float>(),
-            y_train.get_data<size_t>(), x_test.get_data<float>(), k,
+            y_train.get_data<unsigned int>(), x_test.get_data<float>(), k,
             classes_num, train_size, test_size,
             predictions.get_data<unsigned int>(),
             votes_to_classes.get_data<float>(), data_dim);

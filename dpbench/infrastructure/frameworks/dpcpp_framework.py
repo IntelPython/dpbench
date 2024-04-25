@@ -59,7 +59,7 @@ class DpcppFramework(Framework):
             else:
                 order = "K"
             return dpt.asarray(
-                obj=ref_array,
+                ref_array,
                 dtype=ref_array.dtype,
                 device=self.sycl_device,
                 copy=None,

@@ -24,7 +24,9 @@ def initialize(
 
     def _gen_data_y(ip_size, classes_num, seed):
         default_rng.seed(seed)
-        data = default_rng.randint(classes_num, size=ip_size)
+        data = default_rng.randint(
+            classes_num, size=ip_size, dtype=types_dict["int"]
+        )
         return data
 
     def _gen_train_data(train_size, data_dim, classes_num, seed_train, dtype):

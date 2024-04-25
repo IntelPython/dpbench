@@ -56,7 +56,7 @@ def getGroupByCluster(  # noqa: C901
         for i in range(WorkPI):
             point_id = grid * WorkPI * local_size + i * local_size + lid
             if point_id < numpoints:
-                localP = dpex.private.array(dims, dtyp)
+                localP = kapi.PrivateArray(dims, dtyp)
                 for d in range(dims):
                     localP[d] = arrayP[point_id, d]
 
@@ -179,7 +179,7 @@ def getUpdateLabels(dims, num_centroids, dtyp, WorkPI):
         for i in range(WorkPI):
             point_id = grid * WorkPI * local_size + i * local_size + lid
             if point_id < numpoints:
-                localP = dpex.private.array(dims, dtyp)
+                localP = kapi.PrivateArray(dims, dtyp)
                 for d in range(dims):
                     localP[d] = arrayP[point_id, d]
 

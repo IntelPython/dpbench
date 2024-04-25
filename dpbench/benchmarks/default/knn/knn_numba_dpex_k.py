@@ -25,7 +25,7 @@ def _knn_kernel(  # noqa: C901: TODO: can we simplify logic?
     dtype = train.dtype
     i = item.get_id(0)
     # here k has to be 5 in order to match with numpy
-    queue_neighbors = dpex.private.array(shape=(5, 2), dtype=dtype)
+    queue_neighbors = kapi.PrivateArray(shape=(5, 2), dtype=dtype)
 
     for j in range(k):
         x1 = train[j]

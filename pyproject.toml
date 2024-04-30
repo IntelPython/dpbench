@@ -55,12 +55,15 @@ expected-failure = ["tomlkit"]
 "Homepage" = "https://https://github.com/IntelPython/dpbench"
 
 [project.scripts]
+# Keep consistent with conda build scripts
 dpbench = "dpbench.console.entry:main"
 
 [build-system]
 # TODO: make it optional for no sycl build. Workaround: `--no-deps`.
 # https://github.com/scikit-build/scikit-build/issues/981
 requires = [
+    "wheel>=0.43",
+    "build>=1.1",
     "setuptools>=63.0.0",
     "scikit-build>=0.17.0",                      # sycl build dep
     "ninja>=1.11.1; platform_system!='Windows'", # sycl build dep

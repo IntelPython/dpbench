@@ -2,6 +2,10 @@
 #
 # SPDX-License-Identifier: Apache-2.0
 
+{% set pyproject = load_file_data('pyproject.toml') %}
+{% set py_deps = pyproject.get('project', {}).get('dependencies', []) %}
+{% set py_build_deps = pyproject.get('build-system', {}).get('requires', []) %}
+
 package:
   name: dpbench
   version: {{ GIT_DESCRIBE_TAG }}
@@ -18,36 +22,21 @@ requirements:
   build:
     - {{ compiler('cxx') }}
     - {{ compiler('dpcpp') }}
+    # This is required to get compatible headers with the system installed glibc
     - sysroot_linux-64 >=2.28  # [linux]
   host:
     - python
-    - setuptools
-    - cmake==3.26* # [win]
-    - cmake # [not win]
-    - ninja # [not win]
-    - scikit-build
-    - cython
-    - pybind11
-    - versioneer
-    - intel::numpy
-    - numba
-    - dpctl
-    - dpnp
-    - numba-dpex
+    {% for dep in py_build_deps %}
+      {% if dep.startswith('ninja') %}
+    - {{ dep.split(';')[0] }} # [not win]
+      {% else %}
+    - {{ dep|replace('_','-') }}
+      {% endif %}
+    {% endfor %}
   run:
-    - python
-    - tomli
-    - alembic
-    - sqlalchemy
-    - py-cpuinfo
-    - scipy
-    - scikit-learn
-    - pandas
-    - intel::numpy
-    - numba
-    - dpctl
-    - dpnp
-    - numba-dpex
+    {% for dep in py_deps %}
+    - {{ dep|replace('_','-') }}
+    {% endfor %}
 
 test:
   requires:

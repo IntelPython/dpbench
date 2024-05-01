@@ -55,15 +55,13 @@ jobs:
           fetch-depth: 0
 
       - name: Setup miniconda
-        uses: conda-incubator/setup-miniconda@v2
+        uses: conda-incubator/setup-miniconda@v3
         with:
-          python-version: ${{ matrix.python }}
-          miniforge-variant: Mambaforge
-          miniforge-version: latest
-          activate-environment: "build"
+          auto-activate-base: true
+          activate-environment: ""
           channels: ${{ env.CHANNELS }}
           channel-priority: "disabled"
-          run-post: false
+          miniforge-version: latest
 
       - name: Disable defautls
         run: conda config --remove channels defaults
@@ -74,9 +72,8 @@ jobs:
           echo "CONDA_BLD=$CONDA_PREFIX/conda-bld/${{ runner.os == 'Linux' && 'linux' || 'win' }}-64/" | tr "\\" '/' >> $GITHUB_ENV
           echo "WHEELS_OUTPUT_FOLDER=$GITHUB_WORKSPACE${{ runner.os == 'Linux' && '/' || '\\' }}" >> $GITHUB_ENV
 
-      # boa is an extention to conda so we can use mamba resolver in conda build
       - name: Install conda-build
-        run: mamba install boa
+        run: conda install conda-build
 
       - name: Configure MSBuild
         if: runner.os == 'Windows'
@@ -84,8 +81,12 @@ jobs:
         with:
           vs-version: '14.35'
 
+      - name: Show conda-rc
+        shell: bash -el {0}
+        run: cat ~/.condarc
+
       - name: Build conda package
-        run: conda mambabuild --no-test --python ${{ matrix.python }} conda-recipe
+        run: conda build --python ${{ matrix.python }} conda-recipe
 
       - name: Upload artifact
         uses: actions/upload-artifact@v3.1.2
@@ -122,15 +123,13 @@ jobs:
 
     steps:
       - name: Setup miniconda
-        uses: conda-incubator/setup-miniconda@v2
+        uses: conda-incubator/setup-miniconda@v3
         with:
           python-version: ${{ matrix.python }}
-          miniforge-variant: Mambaforge
-          miniforge-version: latest
           activate-environment: "build"
           channels: ${{ env.CHANNELS }}
           channel-priority: "disabled"
-          run-post: false
+          miniforge-version: latest
 
       - name: Disable defautls
         run: conda config --remove channels defaults
@@ -159,7 +158,7 @@ jobs:
 
       # Needed to be able to run conda index
       - name: Install conda-build
-        run: mamba install conda-build conda-index
+        run: conda install conda-build conda-index
 
       - name: Create conda channel
         run: python -m conda_index ${{ env.CHANNEL_PATH }}
@@ -170,7 +169,7 @@ jobs:
           cat ${{ env.VER_JSON_PATH }}
 
       - name: Install dpbench
-        run: mamba install ${{ env.PACKAGE_NAME }}=${{ env.PACKAGE_VERSION }} pytest intel::intel-opencl-rt python=${{ matrix.python }} -c ${{ env.CHANNEL_PATH }}
+        run: conda install ${{ env.PACKAGE_NAME }}=${{ env.PACKAGE_VERSION }} pytest intel::intel-opencl-rt python=${{ matrix.python }} -c ${{ env.CHANNEL_PATH }}
 
       - name: Setup OpenCL CPU device
         if: runner.os == 'Windows'

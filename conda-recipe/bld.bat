@@ -17,8 +17,8 @@ set "DPBENCH_SYCL=1"
 set "CMAKE_GENERATOR=Ninja"
 set "CC=icx"
 set "CXX=icx"
-
-"%PYTHON%" setup.py clean --all
+:: Make CMake verbose
+set "VERBOSE=1"
 
 FOR %%V IN (14.0.0 14 15.0.0 15 16.0.0 16 17.0.0 17) DO @(
   REM set DIR_HINT if directory exists
@@ -41,17 +41,40 @@ if EXIST "%PLATFORM_DIR%" (
   if errorlevel 1 exit 1
 )
 
-@REM TODO: switch to pip build. Currently results in broken binary
-@REM %PYTHON% -m pip install --no-index --no-deps --no-build-isolation . -v
+:: -wnx flags mean: --wheel --no-isolation --skip-dependency-check
+%PYTHON% -m build -w -n -x
+if %ERRORLEVEL% neq 0 exit 1
+
+:: `pip install dist\dpbench*.whl` does not work on windows,
+:: so use a loop; there's only one wheel in dist/ anyway
+for /f %%f in ('dir /b /S .\dist') do (
+    %PYTHON% -m wheel tags --remove --build %GIT_DESCRIBE_NUMBER% %%f
+    if %ERRORLEVEL% neq 0 exit 1
+)
+
+:: wheel file was renamed
+for /f %%f in ('dir /b /S .\dist') do (
+    %PYTHON% -m pip install %%f ^
+      --no-build-isolation ^
+      --no-deps ^
+      --only-binary :all: ^
+      --no-index ^
+      --prefix %PREFIX% ^
+      -vv
+    if %ERRORLEVEL% neq 0 exit 1
+)
+
+:: Must be consistent with pyproject.toml project.scritps. Currently pip does
+:: not allow to ignore scripts installation, so we have to remove them manually.
+:: https://github.com/pypa/pip/issues/3980
+:: We have to let conda-build manage it for use in order to set proper python
+:: path.
+:: https://docs.conda.io/projects/conda-build/en/stable/resources/define-metadata.html#python-entry-points
+rm %PREFIX%\Scripts\dpbench.exe
+
+:: Copy wheel package
 if NOT "%WHEELS_OUTPUT_FOLDER%"=="" (
-    rem Install and assemble wheel package from the build bits
-    "%PYTHON%" setup.py install --single-version-externally-managed --record=record.txt bdist_wheel --build-number %GIT_DESCRIBE_NUMBER%
-    if errorlevel 1 exit 1
     copy dist\dpbench*.whl %WHEELS_OUTPUT_FOLDER%
-    if errorlevel 1 exit 1
-) ELSE (
-    rem Only install
-    "%PYTHON%" setup.py install --single-version-externally-managed --record=record.txt
     if errorlevel 1 exit 1
 )
 

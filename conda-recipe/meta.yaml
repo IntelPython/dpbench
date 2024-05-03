@@ -45,6 +45,7 @@ requirements:
       {% endif %}
     {% endfor %}
   run:
+    - python
     {% for dep in py_deps %}
     - {{ dep|replace('_','-') }}
     {% endfor %}

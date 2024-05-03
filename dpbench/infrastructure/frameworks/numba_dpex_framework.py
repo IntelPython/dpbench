@@ -33,6 +33,10 @@ class NumbaDpexFramework(Framework):
             )
             raise sdce
 
+    @staticmethod
+    def required_packages() -> list[str]:
+        return ["numba_dpex"]
+
     def device_filter_string(self) -> str:
         """Returns the sycl device's filter string if the framework has an
         associated sycl device."""

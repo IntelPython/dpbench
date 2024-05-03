@@ -27,3 +27,7 @@ class NumbaFramework(Framework):
         """
 
         super().__init__(fname, config)
+
+    @staticmethod
+    def required_packages() -> list[str]:
+        return ["numba"]

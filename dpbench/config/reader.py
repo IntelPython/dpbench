@@ -13,6 +13,8 @@ import sys
 
 import tomli
 
+from dpbench.infrastructure.frameworks.fabric import get_framework_class
+
 from .benchmark import Benchmark, BenchmarkImplementation, Presets
 from .config import Config
 from .framework import Framework
@@ -117,7 +119,7 @@ def read_configs(  # noqa: C901: TODO: move modules into config
     for framework in config.frameworks:
         config.implementations += framework.postfixes
 
-    if implementations is None:
+    if implementations is None or len(implementations) == 0:
         implementations = {impl.postfix for impl in config.implementations}
 
     if load_implementations:
@@ -226,6 +228,15 @@ def read_frameworks(
             ]
 
         if len(framework.postfixes) == 0:
+            continue
+
+        cls = get_framework_class(framework)
+        unavailable_pkgs = cls.get_missing_required_packages()
+        if len(unavailable_pkgs) > 0:
+            logging.warning(
+                f"Framework {framework.simple_name} unavailable "
+                + f"due to missing packages {unavailable_pkgs}"
+            )
             continue
 
         config.frameworks.append(framework)

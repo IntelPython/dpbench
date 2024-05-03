@@ -19,6 +19,10 @@ class CupyFramework(Framework):
 
         super().__init__(fname, config)
 
+    @staticmethod
+    def required_packages() -> list[str]:
+        return ["cupy"]
+
     def copy_to_func(self) -> Callable:
         """Returns the copy-method that should be used
         for copying the benchmark arguments."""

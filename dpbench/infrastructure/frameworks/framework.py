@@ -5,6 +5,7 @@
 # SPDX-License-Identifier: BSD-3-Clause
 
 import logging
+from importlib.util import find_spec
 from typing import Any, Callable, Dict, final
 
 import pkg_resources
@@ -44,6 +45,20 @@ class Framework(object):
         import cpuinfo
 
         self.device_info = cpuinfo.get_cpu_info().get("brand_raw")
+
+    @staticmethod
+    def required_packages() -> list[str]:
+        return []
+
+    @classmethod
+    def get_missing_required_packages(cls) -> None:
+        unavailable_packages = []
+        for pkg in cls.required_packages():
+            spec = find_spec(pkg)
+            if spec is None:
+                unavailable_packages.append(pkg)
+
+        return unavailable_packages
 
     def device_filter_string(self) -> str:
         """Returns the sycl device's filter string if the framework has an

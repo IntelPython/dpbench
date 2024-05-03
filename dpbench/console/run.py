@@ -47,19 +47,22 @@ def add_run_arguments(parser: argparse.ArgumentParser):
         help="Set if run dpbench benchmarks.",
     )
     parser.add_argument(
-        "--npbench",
+        "--experimental-npbench",
+        dest="npbench",
         action=argparse.BooleanOptionalAction,
         default=False,
         help="Set if run npbench benchmarks.",
     )
     parser.add_argument(
-        "--polybench",
+        "--experimental-polybench",
+        dest="polybench",
         action=argparse.BooleanOptionalAction,
         default=False,
         help="Set if run polybench benchmarks.",
     )
     parser.add_argument(
-        "--rodinia",
+        "--experimental-rodinia",
+        dest="rodinia",
         action=argparse.BooleanOptionalAction,
         default=False,
         help="Set if run rodinia benchmarks.",

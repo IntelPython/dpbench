@@ -196,11 +196,11 @@ jobs:
       # we want to make sure that configuration files are geting populated
       - name: Run npbench benchmark
         run: |
-          dpbench -i numpy -b azimint_hist run --npbench --precision=${{matrix.precision}}
+          dpbench -i numpy -b azimint_hist run --experimental-npbench --precision=${{matrix.precision}}
 
       - name: Run rodinia benchmark
         run: |
-          dpbench run --rodinia --no-dpbench --no-validate -r 1 --precision=${{matrix.precision}}
+          dpbench run --experimental-rodinia --no-dpbench --no-validate -r 1 --precision=${{matrix.precision}}
 
   upload_anaconda:
     name: Upload dppy/label/dev ['${{ matrix.os }}', python='${{ matrix.python }}']

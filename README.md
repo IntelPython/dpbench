@@ -117,9 +117,9 @@ SPDX-License-Identifier: Apache-2.0
 4. All available options are available using `dpbench --help` and `dpbench <command> --help`:
 
     ```
-    usage: dpbench [-h] [-b [BENCHMARKS]] [-i [IMPLEMENTATIONS]] [-a | --all-implementations | --no-all-implementations] [--version] [-r [RUN_ID]] [--last-run | --no-last-run]
-                [-d [RESULTS_DB]] [--log-level [{critical,fatal,error,warning,info,debug}]]
-                {run,report,config} ...
+    usage: dpbench [-h] [-b [BENCHMARKS]] [-i [IMPLEMENTATIONS]] [-a | --all-implementations | --no-all-implementations] [--version] [-r [RUN_ID]] [--last-run | --no-last-run] [-d [RESULTS_DB]]
+               [--log-level [{critical,fatal,error,warning,info,debug}]]
+               {run,report,config} ...
 
     positional arguments:
     {run,report,config}
@@ -131,12 +131,12 @@ SPDX-License-Identifier: Apache-2.0
     -i [IMPLEMENTATIONS], --implementations [IMPLEMENTATIONS]
                             Comma separated list of implementations. Use --all-implementations to load all available implementations.
     -a, --all-implementations, --no-all-implementations
-                            If set, all available implementations will be loaded. (default: False)
+                            If set, all available implementations will be loaded.
     --version             show program's version number and exit
     -r [RUN_ID], --run-id [RUN_ID]
                             run_id to perform actions on. Use --last-run to use latest available run, or leave empty to create new one.
     --last-run, --no-last-run
-                            Sets run_id to the latest run_id from the database. (default: False)
+                            Sets run_id to the latest run_id from the database.
     -d [RESULTS_DB], --results-db [RESULTS_DB]
                             Path to a database to store results.
     --log-level [{critical,fatal,error,warning,info,debug}]
@@ -144,24 +144,26 @@ SPDX-License-Identifier: Apache-2.0
     ```
 
     ```
-    usage: dpbench run [-h] [-p [{S,M,L}]] [-s | --validate | --no-validate] [--dpbench | --no-dpbench] [--npbench | --no-npbench] [--polybench | --no-polybench] [-r [REPEAT]] [-t [TIMEOUT]]
-                    [--precision [{single,double}]] [--print-results | --no-print-results] [--save | --no-save] [--sycl-device [SYCL_DEVICE]]
-                    [--skip-expected-failures | --no-skip-expected-failures]
+    usage: dpbench run [-h] [-p [{S,M16Gb,M,L}]] [-s | --validate | --no-validate] [--dpbench | --no-dpbench] [--experimental-npbench | --no-experimental-npbench] [--experimental-polybench | --no-experimental-polybench]
+                   [--experimental-rodinia | --no-experimental-rodinia] [-r [REPEAT]] [-t [TIMEOUT]] [--precision [{single,double}]] [--print-results | --no-print-results] [--save | --no-save] [--sycl-device [SYCL_DEVICE]]
+                   [--skip-expected-failures | --no-skip-expected-failures]
 
     Subcommand to run benchmark executions.
 
     options:
     -h, --help            show this help message and exit
-    -p [{S,M,L}], --preset [{S,M,L}]
+    -p [{S,M16Gb,M,L}], --preset [{S,M16Gb,M,L}]
                             Preset to use for benchmark execution.
     -s, --validate, --no-validate
-                            Set if the validation will be run for each benchmark. (default: True)
+                            Set if the validation will be run for each benchmark.
     --dpbench, --no-dpbench
-                            Set if run dpbench benchmarks. (default: True)
-    --npbench, --no-npbench
-                            Set if run npbench benchmarks. (default: False)
-    --polybench, --no-polybench
-                            Set if run polybench benchmarks. (default: False)
+                            Set if run dpbench benchmarks.
+    --experimental-npbench, --no-experimental-npbench
+                            Set if run npbench benchmarks.
+    --experimental-polybench, --no-experimental-polybench
+                            Set if run polybench benchmarks.
+    --experimental-rodinia, --no-experimental-rodinia
+                            Set if run rodinia benchmarks.
     -r [REPEAT], --repeat [REPEAT]
                             Number of repeats for each benchmark.
     -t [TIMEOUT], --timeout [TIMEOUT]
@@ -169,12 +171,12 @@ SPDX-License-Identifier: Apache-2.0
     --precision [{single,double}]
                             Data precision to use for array initialization.
     --print-results, --no-print-results
-                            Show the result summary or not (default: True)
-    --save, --no-save     Either to save execution into database. (default: True)
+                            Show the result summary or not
+    --save, --no-save     Either to save execution into database.
     --sycl-device [SYCL_DEVICE]
                             Sycl device to overwrite for framework configurations.
     --skip-expected-failures, --no-skip-expected-failures
-                            Either to save execution into database. (default: True)
+                            Either to save execution into database.
     ```
 
     ```

@@ -28,6 +28,10 @@ class NumbaMlirFramework(Framework):
 
             self.device_info = dpctl.SyclDevice(self.sycl_device).name
 
+    @staticmethod
+    def required_packages() -> list[str]:
+        return ["numba_mlir"]
+
     def copy_to_func(self) -> Callable:
         """Returns the copy-method that should be used
         for copying the benchmark arguments to device."""

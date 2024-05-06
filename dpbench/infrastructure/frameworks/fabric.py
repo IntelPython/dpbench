@@ -39,7 +39,7 @@ def build_framework_map() -> dict[str, Framework]:
     return result
 
 
-def build_framework(framework_config: cfg.Framework) -> Framework:
+def get_framework_class(framework_config: cfg.Framework) -> Framework:
     available_classes = [
         Framework,
         DpcppFramework,
@@ -61,4 +61,9 @@ def build_framework(framework_config: cfg.Framework) -> Framework:
         )
         constructor = Framework
 
+    return constructor
+
+
+def build_framework(framework_config: cfg.Framework) -> Framework:
+    constructor = get_framework_class(framework_config)
     return constructor(config=framework_config)

@@ -35,6 +35,10 @@ class DpnpFramework(Framework):
             )
             raise sdce
 
+    @staticmethod
+    def required_packages() -> list[str]:
+        return ["dpnp"]
+
     def device_filter_string(self) -> str:
         """Returns the sycl device's filter string if the framework has an
         associated sycl device."""

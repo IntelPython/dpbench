@@ -10,6 +10,7 @@ from numba_dpex import dpjit
 @dpjit
 def l2_norm(a, d):
     for i in nb.prange(a.shape[0]):
+        d[i] = 0.0
         for k in range(a.shape[1]):
             d[i] += np.square(a[i, k])
         d[i] = np.sqrt(d[i])

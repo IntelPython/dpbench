@@ -22,6 +22,7 @@ void l2_norm_impl(queue Queue,
         .submit([&](handler &h) {
             h.parallel_for<theKernel<FpTy>>(range<1>{npoints}, [=](id<1> myID) {
                 size_t i = myID[0];
+                d[i] = 0.0;
                 for (size_t k = 0; k < dims; k++) {
                     d[i] += a[i * dims + k] * a[i * dims + k];
                 }

@@ -1,0 +1,21 @@
+Run numba-dpex implementation
+-----------------------------
+To execute numba_dpex impelemntation on GPU run,
+   > ONEAPI_DEVICE_SELECTOR=level_zero:gpu python rambo_numba_dpex_k.py
+
+TO execute on CPU,
+   > ONEAPI_DEVICE_SELECTOR=opencl:cpu python rambo_numba_dpex_k.py
+
+Run DPC++ implementation
+------------------------
+Generate input data,
+   > python generate_data_random.py
+
+Compile,
+   > make
+
+Run on GPU,
+   > ONEAPI_DEVICE_SELECTOR=level_zero:gpu ./rambo
+
+Run on CPU,
+   > ONEAPI_DEVICE_SELECTOR=opencl:cpu ./rambo

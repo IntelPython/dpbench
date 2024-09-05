@@ -5,8 +5,8 @@
 name: dpbench-dev
 channels:
   - dppy/label/dev
+  - https://software.repos.intel.com/python/conda
   - conda-forge
-  - intel
   - nodefaults
 dependencies:
   - pip
@@ -18,14 +18,14 @@ dependencies:
   - scikit-learn
   - versioneer
   - pandas
-  - intel::numpy
+  - numpy
   - numba
   - dpctl
   - dpnp
   - numba-dpex
   # TODO: switch to conda-forge, but it results in broken OpenCL rt (see below)
   # - conda-forge::dpcpp_win-64
-  - intel::dpcpp_win-64
+  - dpcpp_win-64
   # fixing cmake version here, because we need to apply patch for IntelLLVM
   - cmake==3.26*
   - cython
@@ -33,7 +33,7 @@ dependencies:
   # TODO: switch to khronos, sycl-ls works fine, but dpctl can't select device.
   # set's OpenCL runtime (better version of intel-opencl-rt)
   # - khronos-opencl-icd-loader
-  - intel::intel-opencl-rt # need for set-intel-ocl-icd-registry.ps1
+  - intel-opencl-rt # need for set-intel-ocl-icd-registry.ps1
   # https://github.com/scikit-build/scikit-build/issues/981
   - setuptools>=42,<64
   - pybind11

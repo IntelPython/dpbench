@@ -65,12 +65,12 @@ jobs:
         with:
           fetch-depth: 0
 
-      # intel:numpy for python 3.11 is not upstreamed yet
+      # numpy for python 3.11 is not upstreamed yet
       - name: Patch numpy dependency for Python 3.11
         if: matrix.python == '3.11'
         shell: bash -l {0}
         run: |
-          find ./environments -type f | xargs sed -i 's/intel::numpy/numpy/'
+          find ./environments -type f | xargs sed -i 's/numpy/numpy/'
           find ./environments -type f | xargs sed -i 's/setuptools>=42,<64/setuptools/'
 
       - name: Setup miniconda

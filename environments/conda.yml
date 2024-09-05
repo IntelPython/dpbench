@@ -5,8 +5,8 @@
 name: dpbench-dev
 channels:
   - dppy/label/dev
+  - https://software.repos.intel.com/python/conda
   - conda-forge
-  - intel
   - nodefaults
 dependencies:
   - pip
@@ -18,9 +18,9 @@ dependencies:
   - scikit-learn
   - versioneer
   - pandas
-  - intel::intel-opencl-rt # need for set-intel-ocl-icd-registry.ps1
-  - intel::numpy
+  - intel-opencl-rt # need for set-intel-ocl-icd-registry.ps1
+  - numpy
   - numba
   - dpctl
   - dpnp
-  - numba-dpex
+  - numba-dpex>=0.23.0*

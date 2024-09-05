@@ -5,8 +5,8 @@
 name: dpbench-dev
 channels:
   - dppy/label/dev
+  - https://software.repos.intel.com/python/conda
   - conda-forge
-  - intel
   - nodefaults
 dependencies:
   - pip
@@ -18,13 +18,13 @@ dependencies:
   - scikit-learn
   - versioneer
   - pandas
-  - intel::numpy
+  - numpy
   - numba
   - dpctl
   - dpnp
-  - numba-dpex
-  - intel::dpcpp_linux-64
-  - intel::dpcpp-cpp-rt
+  - numba-dpex>=0.23.0*
+  - dpcpp_linux-64
+  - dpcpp-cpp-rt
   - cython
   - cmake
   - ninja

@@ -24,7 +24,7 @@ SPDX-License-Identifier: Apache-2.0
 1. Create conda environment
 
     ```bash
-    conda create -n dpbench dpbench -c dppy/label/dev -c conda-forge -c intel -c nodefaults --override-channels
+    conda create -n dpbench dpbench -c dppy/label/dev -c conda-forge -c https://software.repos.intel.com/python/conda -c nodefaults --override-channels
     conda activate dpbench
     ```
 

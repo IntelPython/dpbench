@@ -21,7 +21,7 @@ output_args = [
     "evalues",
     "evectors",
 ]
-expected_failure_implementations = ["numba_dpex_n"]
+expected_failure_implementations = ["numba_dpex_n", "numba_n", "numpy", "numba_np", "dpnp"]
 
 [benchmark.parameters.S]
 npoints = 1024

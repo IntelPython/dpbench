@@ -15,3 +15,5 @@ def rambo(nevts, nout, C1, F1, Q1, output):
     output[:, :, 1] = Q * S * np.sin(F)
     output[:, :, 2] = Q * S * np.cos(F)
     output[:, :, 3] = Q * C
+
+    np.synchronize_array_data(output)

@@ -22,3 +22,5 @@ def _gpairs_impl(x1, y1, z1, w1, x2, y2, z2, w2, rbins):
 
 def gpairs(nopt, nbins, x1, y1, z1, w1, x2, y2, z2, w2, rbins, results):
     results[:] = _gpairs_impl(x1, y1, z1, w1, x2, y2, z2, w2, rbins)
+
+    np.synchronize_array_data(results)

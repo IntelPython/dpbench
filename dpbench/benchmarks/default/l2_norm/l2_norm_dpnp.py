@@ -9,3 +9,5 @@ def l2_norm(a, d):
     sq = np.square(a)
     sum = sq.sum(axis=1, dtype=sq.dtype)
     d[:] = np.sqrt(sum)
+
+    np.synchronize_array_data(d)

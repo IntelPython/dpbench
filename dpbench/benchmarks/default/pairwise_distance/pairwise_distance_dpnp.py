@@ -14,3 +14,5 @@ def pairwise_distance(X1, X2, D):
     np.add(D, x3, D)
     np.add(D, x2, D)
     np.sqrt(D, D)
+
+    np.synchronize_array_data(D)
